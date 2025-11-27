@@ -1,0 +1,276 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-08-05 13:56:26.851872",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "customer",
+  "customer_branch_name",
+  "mobile",
+  "email",
+  "address",
+  "customer_address",
+  "incharge",
+  "incharge_name",
+  "incharge_email",
+  "incharge_phone_no",
+  "is_quotation_created",
+  "sts",
+  "column_break_3",
+  "company",
+  "branch",
+  "repair_warehouse",
+  "received_date",
+  "unit_type",
+  "sales_person",
+  "sales_person_name",
+  "suggested_price",
+  "customer_reference_number",
+  "plant",
+  "is_returned_unit",
+  "job_order_data",
+  "section_break_9",
+  "received_equipment",
+  "previously_quoted_item_in_repair_section",
+  "previously_quoted",
+  "attach_image_section",
+  "images"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "UAE-"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_branch_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Customer Branch Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.mobile_no",
+   "fieldname": "mobile",
+   "fieldtype": "Data",
+   "label": "Mobile",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.email_id",
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Link",
+   "label": "Address",
+   "options": "Address"
+  },
+  {
+   "depends_on": "eval:(doc.address);",
+   "fieldname": "customer_address",
+   "fieldtype": "HTML",
+   "label": "Customer Address"
+  },
+  {
+   "fieldname": "incharge",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer Representative",
+   "options": "Contact",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "incharge.first_name",
+   "fieldname": "incharge_name",
+   "fieldtype": "Data",
+   "label": "Customer Representative Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "incharge.email_id",
+   "fieldname": "incharge_email",
+   "fieldtype": "Data",
+   "label": "Customer Representative Email",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "incharge.mobile_no",
+   "fieldname": "incharge_phone_no",
+   "fieldtype": "Data",
+   "label": "Customer Representative Phone No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_quotation_created",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Quotation Created"
+  },
+  {
+   "fieldname": "sts",
+   "fieldtype": "Select",
+   "label": "Priority Status",
+   "options": "Normal\nUrgent"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "repair_warehouse",
+   "fieldtype": "Link",
+   "label": "Repair Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "Today",
+   "fieldname": "received_date",
+   "fieldtype": "Date",
+   "label": "Received Date"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "fetch_if_empty": 1,
+   "fieldname": "sales_person_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Person Name"
+  },
+  {
+   "fieldname": "suggested_price",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Suggested Price",
+   "options": "currency"
+  },
+  {
+   "fieldname": "customer_reference_number",
+   "fieldtype": "Data",
+   "label": "Customer REF No"
+  },
+  {
+   "fieldname": "plant",
+   "fieldtype": "Data",
+   "label": "Plant"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_returned_unit",
+   "fieldtype": "Check",
+   "label": "Is Returned Unit"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "received_equipment",
+   "fieldtype": "Table",
+   "label": "Received Equipment",
+   "options": "Received Equipment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "previously_quoted_item_in_repair_section",
+   "fieldtype": "Section Break",
+   "label": "Previously Quoted Item in Repair",
+   "read_only": 1
+  },
+  {
+   "fieldname": "previously_quoted",
+   "fieldtype": "Table",
+   "label": "Previously Quoted",
+   "options": "Similar Item Repair",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attach_image_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Attach Image"
+  },
+  {
+   "fieldname": "images",
+   "fieldtype": "Table",
+   "label": "Images",
+   "options": "Recieved Equipment Image"
+  },
+  {
+   "depends_on": "eval:(doc.is_returned_unit == 1);",
+   "fieldname": "job_order_data",
+   "fieldtype": "Link",
+   "label": "Returned JO",
+   "options": "Job Order Data"
+  },
+  {
+   "default": "Service Level Unit",
+   "fieldname": "unit_type",
+   "fieldtype": "Select",
+   "label": "Unit Type",
+   "options": "Service Level Unit\nBoard Level Unit"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-09-01 09:54:18.224594",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Create Job Order",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

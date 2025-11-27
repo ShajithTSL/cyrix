@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-04 13:36:22.403157",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "sku",
+  "model",
+  "mfg",
+  "column_break_4",
+  "type",
+  "quoted_price",
+  "quotation_no",
+  "so_no",
+  "wo_no",
+  "wo_status",
+  "job_order_data"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "columns": 1,
+   "fieldname": "sku",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "SKU",
+   "options": "Item"
+  },
+  {
+   "columns": 1,
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Model",
+   "options": "Item Model"
+  },
+  {
+   "columns": 1,
+   "fieldname": "mfg",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mfg",
+   "options": "Item Mfg"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "type",
+   "fieldtype": "Link",
+   "label": "Type",
+   "options": "Item Type"
+  },
+  {
+   "columns": 1,
+   "fieldname": "quoted_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Quoted Price"
+  },
+  {
+   "columns": 2,
+   "fieldname": "quotation_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Quotation No",
+   "options": "Quotation"
+  },
+  {
+   "fieldname": "so_no",
+   "fieldtype": "Data",
+   "label": "So No"
+  },
+  {
+   "fieldname": "wo_no",
+   "fieldtype": "Data",
+   "label": "Wo No"
+  },
+  {
+   "columns": 1,
+   "fieldname": "wo_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Wo status"
+  },
+  {
+   "fieldname": "job_order_data",
+   "fieldtype": "Link",
+   "label": "Job Order Data",
+   "options": "Job Order Data"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-05 14:04:21.229779",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Similar Item Repair",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,108 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-29 14:00:53.697308",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tsl_ref_no",
+  "item",
+  "model",
+  "item_name",
+  "column_break_4",
+  "manufacturer",
+  "serial_no",
+  "description",
+  "category"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "tsl_ref_no",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "TSL Ref No"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "SKU",
+   "options": "Item"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fetch_from": "item.model",
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Model/Part Number",
+   "options": "Item Model"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Item Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fetch_from": "item.mfg",
+   "fieldname": "manufacturer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Manufacturer",
+   "options": "Item Mfg"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Serial No",
+   "options": "Serial No"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fetch_from": "item.description",
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Description and Specification"
+  },
+  {
+   "fetch_from": "item.category",
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Type/Category",
+   "options": "Category"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-13 17:04:27.027594",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Evaluation Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

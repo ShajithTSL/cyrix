@@ -1,0 +1,170 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "BQ-.YY.-.#####",
+ "creation": "2025-09-29 10:29:24.513462",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "customer_representative",
+  "mobile",
+  "column_break_fccdv",
+  "company",
+  "branch",
+  "sales_person",
+  "status",
+  "department",
+  "section_break_fzysh",
+  "items",
+  "section_break_w7tk",
+  "quantity",
+  "column_break_ibnk",
+  "received_quantity",
+  "status_track_tab",
+  "section_break_tvsc",
+  "status_duration_details",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "customer_representative",
+   "fieldtype": "Data",
+   "label": "Customer Representative"
+  },
+  {
+   "fieldname": "mobile",
+   "fieldtype": "Data",
+   "label": "Mobile"
+  },
+  {
+   "fieldname": "column_break_fccdv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Data",
+   "label": "Branch"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Inquiry\nIn Custom\nClosed\nInvoiced\nOrdered\nPartially Received\nReceived\nPartially Delivered\nDelivered\nInitiated\nParts Priced\nPending Internal Approval\nIQ-Internally Quoted\nQ-Quoted\nA-Approved"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "section_break_fzysh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "BQ Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status_track_tab",
+   "fieldtype": "Tab Break",
+   "label": "Status Track"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "section_break_tvsc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budgetary Quotation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_w7tk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "label": "Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ibnk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "received_quantity",
+   "fieldtype": "Int",
+   "label": "Received Quantity",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status_duration_details",
+   "fieldtype": "Table",
+   "label": "Status Summary",
+   "options": "Status Duration Details"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-30 11:03:47.247770",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Budgetary Quotation",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,526 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-08-30 18:06:30.969772",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "sales_rep",
+  "customer",
+  "customer_name",
+  "incharge",
+  "address",
+  "quoted_date",
+  "received_date",
+  "warranty",
+  "delivery",
+  "quotation_approved_date",
+  "priority_status",
+  "customer_reference_number",
+  "supplier_name",
+  "tender_issue_date",
+  "remarks",
+  "st",
+  "old_sod_no",
+  "so_old_quoted_amt",
+  "so_old_vat",
+  "so_old_total_amt",
+  "so_currency_old",
+  "column_break_7",
+  "image",
+  "company",
+  "branch",
+  "warehouse",
+  "posting_date",
+  "department",
+  "project",
+  "status",
+  "reason",
+  "payment_terms",
+  "payment_date",
+  "return_date",
+  "tender_closing",
+  "supplier_closing_date",
+  "notified",
+  "plant",
+  "section_break_14",
+  "material_list",
+  "quantity",
+  "received_quantity",
+  "section_break_23",
+  "previously_quoted",
+  "links_tab",
+  "purchase_order_no",
+  "invoice_no",
+  "invoiced_value",
+  "invoice_date",
+  "payment_entry",
+  "column_break_mhco",
+  "po_number",
+  "po_no",
+  "dn_no",
+  "dn_date",
+  "advance_payment_amount",
+  "advance_paid_date",
+  "track_tab",
+  "section_break_30",
+  "status_duration_details",
+  "attach_image",
+  "is_quotation_created",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Supply Order Data",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_global_search": 1,
+   "label": "Naming Series",
+   "options": "SOD-.YY.-\nST-K.YY.-\nSOD-R.YY.-\nSOD-D.YY.-\nSOD-J.YY.-\nSOD-K.YY.-\nSOD-DU.YY.-\nSOD-DU-O-.YY.-\nSOD-DU.YY.-P."
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_rep",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Sales Rep",
+   "options": "Sales Person"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "incharge",
+   "fieldtype": "Link",
+   "label": "Incharge",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "quoted_date",
+   "fieldtype": "Date",
+   "label": "Quoted Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_date",
+   "fieldtype": "Date",
+   "label": "Received Date/Tender Issue Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "warranty",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Warranty"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivery",
+   "fieldtype": "Date",
+   "label": "Delivery"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation_approved_date",
+   "fieldtype": "Date",
+   "label": "Quotation Approved Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Not Urgent",
+   "fieldname": "priority_status",
+   "fieldtype": "Select",
+   "label": "Priority Status",
+   "options": "Urgent\nNot Urgent"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer_reference_number",
+   "fieldtype": "Data",
+   "label": "Customer Reference Number"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "po_number",
+   "fieldtype": "Data",
+   "label": "PO Number"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tender_issue_date",
+   "fieldtype": "Date",
+   "label": "Tender Issue Date"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "st",
+   "fieldtype": "Check",
+   "label": "ST"
+  },
+  {
+   "fieldname": "old_sod_no",
+   "fieldtype": "Int",
+   "in_standard_filter": 1,
+   "label": "Old Sod No"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "so_old_quoted_amt",
+   "fieldtype": "Float",
+   "label": "SO Old Quoted Amt"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "so_old_vat",
+   "fieldtype": "Data",
+   "label": "SO Old Vat"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "so_old_total_amt",
+   "fieldtype": "Float",
+   "label": "SO Old Total Amt"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "so_currency_old",
+   "fieldtype": "Data",
+   "label": "SO Currency Old"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "HTML",
+   "label": "Image",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Cost Center"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Inquiry",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nPartially Received\nReceived\nIn Custom\nDelivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nPartially Delivered\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:(doc.status == \"Not Found\" );",
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason",
+   "mandatory_depends_on": "eval:(doc.status == \"Not Found\" );"
+  },
+  {
+   "fieldname": "payment_terms",
+   "fieldtype": "Data",
+   "label": "Payment Terms",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "po_no",
+   "fieldtype": "Data",
+   "label": "Po No"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "purchase_order_no",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dn_no",
+   "fieldtype": "Link",
+   "label": "Delivery Note",
+   "options": "Delivery Note"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "dn_no.posting_date",
+   "fieldname": "dn_date",
+   "fieldtype": "Date",
+   "label": "Delivery Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoice_no",
+   "fieldtype": "Data",
+   "label": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "invoice_no.posting_date",
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date"
+  },
+  {
+   "fieldname": "payment_date",
+   "fieldtype": "Date",
+   "label": "Payment Date"
+  },
+  {
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Return Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "advance_payment_amount",
+   "fieldtype": "Currency",
+   "label": "Advance Payment Amount",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "advance_paid_date",
+   "fieldtype": "Date",
+   "label": "Paid Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tender_closing",
+   "fieldtype": "Date",
+   "label": "Tender Closing Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "supplier_closing_date",
+   "fieldtype": "Date",
+   "label": "Supplier Closing Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "notified",
+   "fieldtype": "Check",
+   "label": "Notified"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "plant",
+   "fieldtype": "Data",
+   "label": "Plant"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break",
+   "label": "Material List"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "material_list",
+   "fieldtype": "Table",
+   "label": "TSL Non Inventory(Equipments)",
+   "options": "Supply Order Table"
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break",
+   "label": "Similar Unit Quoted Before",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "previously_quoted",
+   "fieldtype": "Table",
+   "label": "Previously Quoted",
+   "options": "Similar Item Repair"
+  },
+  {
+   "fieldname": "section_break_30",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status_duration_details",
+   "fieldtype": "Table",
+   "label": "Status Duration Details",
+   "options": "Status Duration Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "attach_image",
+   "fieldtype": "Attach",
+   "label": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_quotation_created",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Quotation Created"
+  },
+  {
+   "fieldname": "track_tab",
+   "fieldtype": "Tab Break",
+   "label": "Track"
+  },
+  {
+   "fieldname": "links_tab",
+   "fieldtype": "Tab Break",
+   "label": "Links"
+  },
+  {
+   "fieldname": "column_break_mhco",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "label": "Quantity",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "received_quantity",
+   "fieldtype": "Int",
+   "label": "Received Quantity",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoiced_value",
+   "fieldtype": "Float",
+   "label": "Invoiced Value",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry Reference",
+   "options": "Payment Entry",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-18 16:20:42.335937",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Supply Order Data",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

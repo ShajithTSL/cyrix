@@ -1,0 +1,239 @@
+{
+ "actions": [],
+ "creation": "2025-07-29 14:32:08.023444",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "part",
+  "model",
+  "manufacturer",
+  "part_number",
+  "marking_code",
+  "serial_no",
+  "category",
+  "sub_category",
+  "qty",
+  "released",
+  "column_break_8",
+  "part_name",
+  "websitelink",
+  "part_description",
+  "price_ea",
+  "total",
+  "parts_availability",
+  "part_sheet_no",
+  "from_scrap",
+  "bin_no",
+  "spare_part_image_section",
+  "add_image",
+  "image_18",
+  "is_not_edit",
+  "is_read_only"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "fieldname": "part",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "SKU",
+   "options": "Item"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fetch_from": "part.model",
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Model/Part Number",
+   "options": "Item Model"
+  },
+  {
+   "fetch_from": "part.mfg",
+   "fieldname": "manufacturer",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Manufacturer",
+   "options": "Item Mfg"
+  },
+  {
+   "fetch_from": "part.financial_code",
+   "fieldname": "part_number",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Part Number"
+  },
+  {
+   "fetch_from": "part.marking_code",
+   "fieldname": "marking_code",
+   "fieldtype": "Data",
+   "label": "Marking Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Serial No",
+   "options": "Serial No"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "fetch_from": "part.category",
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Category",
+   "options": "Category"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "fetch_from": "part.sub_category",
+   "fieldname": "sub_category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sub Category",
+   "options": "Sub Category"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "read_only_depends_on": "eval:(doc.is_read_only == 1);",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "released",
+   "fieldtype": "Check",
+   "label": "Released"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "part.description",
+   "fieldname": "part_name",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "websitelink",
+   "fieldtype": "Data",
+   "label": "Website/Link"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "part.package",
+   "fieldname": "part_description",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Package Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "price_ea",
+   "fieldtype": "Currency",
+   "label": "Price EA"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "default": "No",
+   "fieldname": "parts_availability",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Parts Availability",
+   "options": "\nYes\nNo",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "part_sheet_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Part Sheet No",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "from_scrap",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Scrap "
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "part.bin",
+   "fieldname": "bin_no",
+   "fieldtype": "Data",
+   "label": "Bin No"
+  },
+  {
+   "fieldname": "spare_part_image_section",
+   "fieldtype": "Section Break",
+   "label": "Spare Part Image"
+  },
+  {
+   "fieldname": "add_image",
+   "fieldtype": "Attach Image",
+   "label": "Add Image"
+  },
+  {
+   "default": "add_image",
+   "fieldname": "image_18",
+   "fieldtype": "Image",
+   "options": "add_image"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_not_edit",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Not Edit"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_read_only",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Read Only"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-16 11:07:08.536175",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Part Sheet Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

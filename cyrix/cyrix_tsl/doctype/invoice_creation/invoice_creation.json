@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-09 08:13:30.469991",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "quotation",
+  "job_order_data",
+  "commensts",
+  "go_to_quotation",
+  "po_details",
+  "attach_invoice"
+ ],
+ "fields": [
+  {
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Quotation",
+   "options": "Quotation"
+  },
+  {
+   "fieldname": "commensts",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Comments"
+  },
+  {
+   "fieldname": "go_to_quotation",
+   "fieldtype": "Button",
+   "hidden": 1,
+   "label": "Go To Quotation"
+  },
+  {
+   "description": "Please Merge if you have Multiple",
+   "fieldname": "po_details",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Po Details"
+  },
+  {
+   "fieldname": "attach_invoice",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "Attach Invoice",
+   "make_attachment_public": 1
+  },
+  {
+   "fieldname": "job_order_data",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Job Order Data"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-09 08:14:07.592604",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Invoice Creation",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

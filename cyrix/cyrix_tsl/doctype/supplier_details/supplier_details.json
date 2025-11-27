@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-16 12:20:35.676676",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_type",
+  "supply_order_data",
+  "supplier_quotation",
+  "column_break_hfvu",
+  "item_code",
+  "supplier",
+  "column_break_ipsa",
+  "price",
+  "shipment"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "supply_order_data",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Reference Name",
+   "options": "reference_type"
+  },
+  {
+   "columns": 2,
+   "fieldname": "supplier_quotation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier Quotation",
+   "options": "Supplier Quotation"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Supplier"
+  },
+  {
+   "columns": 1,
+   "fieldname": "price",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Price"
+  },
+  {
+   "columns": 1,
+   "fieldname": "shipment",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Shipment"
+  },
+  {
+   "fieldname": "column_break_hfvu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ipsa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "reference_type",
+   "fieldtype": "Select",
+   "label": "Reference Type",
+   "options": "Supply Order Data\nBudgetary Quotation"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-30 09:25:08.492080",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Supplier Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

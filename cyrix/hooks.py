@@ -43,7 +43,15 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+    "Delivery Note" : ["custom_js/delivery_note.js"],
+    "Purchase Order" : ["custom_js/purchase_order.js"],
+    "Payment Entry" : ["custom_js/payment_entry.js"],
+    "Quotation" : ["custom_js/quotation.js"],
+    "Sales Invoice" : ["custom_js/sales_invoice.js"],
+    "Request for Quotation" : ["custom_js/request_for_quotation.js"],
+    "Supplier Quotation" : ["custom_js/supplier_quotation.js"]
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -74,10 +82,11 @@ app_license = "mit"
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "cyrix.utils.jinja_methods",
-# 	"filters": "cyrix.utils.jinja_filters"
-# }
+jinja = {
+	"methods": [
+        "cyrix.custom_py.jinja.get_technicians",
+	]
+}
 
 # Installation
 # ------------
@@ -137,13 +146,75 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Supplier Quotation": {
+		"validate": [
+			"cyrix.custom_py.supplier_quotation.update_eval_report_status",
+			"cyrix.custom_py.supplier_quotation.update_price"
+		],
+		"on_submit": [
+			"cyrix.custom_py.supplier_quotation.update_job_order_status",
+			"cyrix.custom_py.supplier_quotation.update_supply_order_data",
+			"cyrix.custom_py.supplier_quotation.update_budgetary_quotation"
+		]
+	},
+    "Quotation": {
+		"validate": [
+            "cyrix.custom_py.quotation.fetch_item_price_details",
+            "cyrix.custom_py.quotation.update_job_order_status"
+		],
+        "on_submit": [
+            "cyrix.custom_py.quotation.update_job_order_status",
+            'cyrix.custom_py.quotation.update_service_call_form',
+            'cyrix.custom_py.quotation.update_budgetary_quotation_status'
+		],
+        "on_update_after_submit": [
+            "cyrix.custom_py.quotation.on_update_after_submit",
+            "cyrix.custom_py.quotation.update_supply_order_status"
+		],
+		"on_update": "cyrix.custom_py.quotation.update_supply_order_status"
+	},
+    
+	"Purchase Order": {
+		"on_submit": [
+			"cyrix.custom_py.purchase_order.update_job_order_status",
+			"cyrix.custom_py.purchase_order.update_supply_order_status",
+            "cyrix.custom_py.purchase_order.update_budgetary_quotation_status"
+		]
+	},
+    
+	"Purchase Receipt": {
+		"on_submit": [
+			"cyrix.custom_py.purchase_receipt.update_job_order_status",
+			"cyrix.custom_py.purchase_receipt.update_supply_order_status",
+		],
+        "on_cancel": "cyrix.custom_py.purchase_receipt.update_received_percentage"
+	},
+
+	"Delivery Note": {
+        "on_submit": [
+            "cyrix.custom_py.delivery_note.update_job_order_status",
+            "cyrix.custom_py.delivery_note.update_supply_order_status"
+		],
+		"on_update_after_submit": ["cyrix.custom_py.delivery_note.update_supply_order_status"]
+	},
+
+	"Sales Invoice": {
+        "on_submit": [
+            "cyrix.custom_py.sales_invoice.update_jo_so_status",
+            "cyrix.custom_py.sales_invoice.update_service_call_form"			
+		]
+	},
+    
+	"Payment Entry": {
+        "on_submit": [
+            "cyrix.custom_py.payment_entry.update_payment_reference"			
+		],
+        "on_cancel": [
+            "cyrix.custom_py.payment_entry.update_payment_reference_cancel"			
+		]
+	}
+}
 
 # Scheduled Tasks
 # ---------------

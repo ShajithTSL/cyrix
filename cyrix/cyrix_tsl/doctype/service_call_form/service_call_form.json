@@ -1,0 +1,246 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-09-09 08:24:23.947177",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "customer",
+  "customer_name",
+  "salesman_name",
+  "salesman_name1",
+  "document_type",
+  "related_doc",
+  "branch",
+  "department",
+  "column_break_6",
+  "date",
+  "company",
+  "technician_name",
+  "reason",
+  "status",
+  "suitable_date_and_time_for_customer_section",
+  "cus_date",
+  "time",
+  "schedule_visit_section",
+  "sch_date",
+  "day",
+  "sch_time",
+  "section_break_15",
+  "quotation",
+  "sales_invoice",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "options": "SCF-.YYYY.-\nSCF-DU.YY.-\nSCF-D.YY.-\nSCF-J.YY.-\nSCF-R.YY.-"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "salesman_name",
+   "fieldtype": "Link",
+   "label": "Salesman",
+   "options": "Sales Person",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "salesman_name.sales_person_name",
+   "fieldname": "salesman_name1",
+   "fieldtype": "Data",
+   "label": "Salesman Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "label": "Document Type",
+   "options": "\nService\nJob Order Data\nSupply Order Data"
+  },
+  {
+   "depends_on": "eval:doc.document_type != \"Service\" && doc.document_type",
+   "fieldname": "related_doc",
+   "fieldtype": "Dynamic Link",
+   "label": "Related JO/SO",
+   "options": "document_type"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "technician_name",
+   "fieldtype": "Table MultiSelect",
+   "label": "Technician Name",
+   "options": "Technician List"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Job Description"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nService Enquiry\nInternally Quoted\nQuoted\nApproved\nRSC - Repair to Ship\nUnder Process\nInvoiced\nRejected\nCancelled\nPaid\nNot Succeed"
+  },
+  {
+   "fieldname": "suitable_date_and_time_for_customer_section",
+   "fieldtype": "Section Break",
+   "label": "Suitable Date and Time for Customer"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "cus_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "label": "Time"
+  },
+  {
+   "fieldname": "schedule_visit_section",
+   "fieldtype": "Tab Break",
+   "label": "Schedule Visit"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sch_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "day",
+   "fieldtype": "Select",
+   "label": "Day",
+   "options": "\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sch_time",
+   "fieldtype": "Time",
+   "label": "Time"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Tab Break",
+   "label": "Documents Linked"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "label": "Quotation",
+   "options": "Quotation"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Service Call Form",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "Quotation",
+   "link_fieldname": "service_call_form"
+  },
+  {
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "service_call_form"
+  }
+ ],
+ "modified": "2025-09-10 10:07:00.479127",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Service Call Form",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

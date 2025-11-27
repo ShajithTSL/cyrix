@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-25 09:16:45.984293",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "job_order_data",
+  "total_hours_spent",
+  "value",
+  "column_break_kkdr",
+  "total_price",
+  "comments"
+ ],
+ "fields": [
+  {
+   "fieldname": "job_order_data",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Job Order data",
+   "options": "Job Order Data",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "total_hours_spent",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Total Hours Spent"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "default": "20",
+   "fieldname": "value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate/Hour",
+   "options": "currency"
+  },
+  {
+   "columns": 3,
+   "fieldname": "total_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Labor Cost",
+   "options": "currency"
+  },
+  {
+   "columns": 3,
+   "fieldname": "comments",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Comments"
+  },
+  {
+   "fieldname": "column_break_kkdr",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-25 09:17:56.783868",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Technician Hours Spent",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,30 @@
+def get_data():
+	return {
+		'fieldname': 'supply_order_data',
+		'transactions': [
+			{
+				'items': ['Request for Quotation']
+			},
+			{
+				'items': ['Supplier Quotation']
+			},
+			{
+				'items' : ['Quotation']
+			},
+			{
+				'items' : ['Purchase Order']
+			},
+			{
+				'items' : ['Purchase Receipt']
+			},
+			{				
+				'items': ['Sales Invoice']
+			},
+			{				
+				'items': ['Delivery Note']
+			},
+			{
+				'items': ['Payment Entry']
+			}
+		]
+	}

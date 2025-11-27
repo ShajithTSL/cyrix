@@ -1,0 +1,704 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-31 14:04:39.368491",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "naming_series",
+  "sales_rep",
+  "sales_rep_name",
+  "customer",
+  "customer_name",
+  "customer_rep",
+  "customer_email",
+  "address",
+  "incharge",
+  "warranty",
+  "delivery",
+  "returned_date",
+  "expiry_date",
+  "priority_status",
+  "unit_table_no",
+  "mistaken_ner",
+  "quoted",
+  "status_cap",
+  "status_cap_date",
+  "column_break_7",
+  "received_date",
+  "company",
+  "branch",
+  "repair_warehouse",
+  "posting_date",
+  "unit_type",
+  "technician",
+  "department",
+  "status",
+  "custom_status",
+  "parent_jo",
+  "remarks",
+  "payment_terms",
+  "automation",
+  "project_1",
+  "plant",
+  "section_break_14",
+  "image",
+  "attach_image",
+  "section_break_dc2tn",
+  "wod_component",
+  "linked_docs_tab",
+  "quotation",
+  "purchase_order_no",
+  "po_no",
+  "dn_no",
+  "invoice_no",
+  "return_note",
+  "column_break_dwsb",
+  "quoted_date",
+  "quotation_approved_date",
+  "dn_date",
+  "invoice_date",
+  "invoiced_value",
+  "section_break_sqor",
+  "payment_entry",
+  "column_break_3eiu",
+  "advance_payment_amount",
+  "column_break_eqhg",
+  "advance_paid_date",
+  "section_break_36",
+  "material_list",
+  "section_break_oy5vi",
+  "complaints",
+  "no_power",
+  "no_output",
+  "no_display",
+  "no_communication",
+  "no_backlight",
+  "supply_voltage",
+  "column_break_43",
+  "error_code",
+  "touch_keypad_not_working",
+  "short_circuit",
+  "overload_overcurrent",
+  "others",
+  "specify",
+  "attach_customer_image",
+  "section_break_23",
+  "extra_part_sheets",
+  "section_break_28",
+  "status_duration_details",
+  "online_price_section",
+  "price_table",
+  "tech_id",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_global_search": 1,
+   "in_preview": 1,
+   "label": "Naming Series",
+   "options": "WOD-.YY.-\nWOD-R.YY.-\nWOD-D.YY.-\nWOD-J.YY.-\nWOD-K.YY.-\nWOD-KO.YY.-\nWOD-DU-O-.YY.-\nWOD-DU.YY.-P.\nWOD-DU.YY.-PA."
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_rep",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Rep",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "sales_rep_name",
+   "fieldtype": "Data",
+   "label": "Sales Rep Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer_rep",
+   "fieldtype": "Data",
+   "label": "Customer Representative"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "customer.email_id",
+   "fieldname": "customer_email",
+   "fieldtype": "Data",
+   "label": "Customer Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "incharge",
+   "fieldtype": "Link",
+   "label": "Incharge",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "quoted_date",
+   "fieldtype": "Date",
+   "label": "Quoted Date / Approved Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "warranty",
+   "fieldtype": "Data",
+   "label": "Warranty Period"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivery",
+   "fieldtype": "Date",
+   "label": "Delivered Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation_approved_date",
+   "fieldtype": "Date",
+   "label": "Quotation Approved Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "returned_date",
+   "fieldtype": "Date",
+   "label": "Returned Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Warranty Expiry Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "priority_status",
+   "fieldtype": "Select",
+   "label": "Priority Status",
+   "options": "Normal\nUrgent"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "unit_table_no",
+   "fieldtype": "Data",
+   "label": "Unit Table No"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "mistaken_ner",
+   "fieldtype": "Check",
+   "label": "Mistaken NER"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "quoted",
+   "fieldtype": "Check",
+   "label": "Quoted"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation",
+   "fieldtype": "Data",
+   "label": "Quotation",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status_cap",
+   "fieldtype": "Data",
+   "label": "Status Cap",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status_cap_date",
+   "fieldtype": "Date",
+   "label": "Status Cap Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "received_date",
+   "fieldtype": "Date",
+   "label": "Received Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "repair_warehouse",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Repair Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "technician",
+   "fieldtype": "Table MultiSelect",
+   "in_standard_filter": 1,
+   "label": "Technician",
+   "options": "Technician List"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "NE-Need Evaluation",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "A-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "custom_status",
+   "fieldtype": "Select",
+   "label": "Custom Status",
+   "options": "\nUE-Under Evaluation\nUTR-Under Technician Repair\nRNA-Return Not Approved"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "po_no",
+   "fieldtype": "Data",
+   "label": "Po No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_terms",
+   "fieldtype": "Data",
+   "label": "Payment Terms",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "purchase_order_no",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dn_no",
+   "fieldtype": "Link",
+   "label": "Delivery Note",
+   "options": "Delivery Note",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "dn_no.posting_date",
+   "fieldname": "dn_date",
+   "fieldtype": "Date",
+   "label": "Delivery Note Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoice_no",
+   "fieldtype": "Data",
+   "label": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "invoice_no.posting_date",
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "return_note",
+   "fieldtype": "Data",
+   "label": "Return Note",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "automation",
+   "fieldtype": "Check",
+   "label": "Automation"
+  },
+  {
+   "default": "0",
+   "fieldname": "project_1",
+   "fieldtype": "Check",
+   "label": "Project"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "plant",
+   "fieldtype": "Data",
+   "label": "Plant"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "HTML",
+   "label": "Image",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "attach_image",
+   "fieldtype": "Data",
+   "label": "Attach Image"
+  },
+  {
+   "fieldname": "section_break_dc2tn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "wod_component",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "WOD Component",
+   "options": "Item"
+  },
+  {
+   "fieldname": "section_break_36",
+   "fieldtype": "Tab Break",
+   "label": "Complaints"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "material_list",
+   "fieldtype": "Table",
+   "label": "Material List",
+   "options": "Material List",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_oy5vi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "complaints",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Complaints"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "no_power",
+   "fieldtype": "Check",
+   "label": "No Power"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "no_output",
+   "fieldtype": "Check",
+   "label": "No Output"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "no_display",
+   "fieldtype": "Check",
+   "label": "No Display"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "no_communication",
+   "fieldtype": "Check",
+   "label": "No Communication"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "no_backlight",
+   "fieldtype": "Check",
+   "label": "No Backlight"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "supply_voltage",
+   "fieldtype": "Check",
+   "label": "Supply Voltage"
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "error_code",
+   "fieldtype": "Check",
+   "label": "Error Code"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "touch_keypad_not_working",
+   "fieldtype": "Check",
+   "label": "Touch Keypad Not Working"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "short_circuit",
+   "fieldtype": "Check",
+   "label": "Short Circuit"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "overload_overcurrent",
+   "fieldtype": "Check",
+   "label": "Burnt Components"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "others",
+   "fieldtype": "Check",
+   "label": "Others"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:(doc.others==1);",
+   "fieldname": "specify",
+   "fieldtype": "Small Text",
+   "label": "Specify",
+   "mandatory_depends_on": "eval:(doc.others==1);"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.others",
+   "fieldname": "attach_customer_image",
+   "fieldtype": "Attach",
+   "label": "Attach Customer Image"
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "extra_part_sheets",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Extra Parts Encountered",
+   "options": "Extra Part Sheets",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_28",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status_duration_details",
+   "fieldtype": "Table",
+   "label": "Status Duration Details",
+   "options": "Status Duration Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:frappe.user.has_role(\"Admin\",\"GCEO\")",
+   "fieldname": "online_price_section",
+   "fieldtype": "Tab Break",
+   "label": "Online Price"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "price_table",
+   "fieldtype": "Table",
+   "label": "Price Table",
+   "options": "Online Price List"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tech_id",
+   "fieldtype": "Link",
+   "label": "Tech ID",
+   "options": "Technician ID"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Job Order Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "linked_docs_tab",
+   "fieldtype": "Tab Break",
+   "label": "Linked Docs"
+  },
+  {
+   "fieldname": "column_break_dwsb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "unit_type",
+   "fieldtype": "Select",
+   "label": "Unit Type",
+   "options": "Service Level Unit\nBoard Level Unit\nService and Board Level Unit"
+  },
+  {
+   "fieldname": "parent_jo",
+   "fieldtype": "Link",
+   "label": "Parent JO",
+   "options": "Job Order Data"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoiced_value",
+   "fieldtype": "Float",
+   "label": "Invoiced Value",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_entry",
+   "fieldtype": "Data",
+   "label": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "advance_payment_amount",
+   "fieldtype": "Float",
+   "label": "Advance Payment Amount",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "advance_paid_date",
+   "fieldtype": "Date",
+   "label": "Advance Paid Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_sqor",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_3eiu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_eqhg",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-10-29 13:32:43.762350",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Job Order Data",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

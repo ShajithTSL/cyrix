@@ -1,0 +1,154 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "IR-.#####",
+ "creation": "2025-09-09 08:16:18.057379",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "html",
+  "date",
+  "branch",
+  "quotation",
+  "go_to",
+  "request_for",
+  "column_break_rkfva",
+  "requested_by",
+  "email_sent",
+  "sales",
+  "submitted_by",
+  "sales_email",
+  "section_break_nc32n",
+  "invoice_list",
+  "sod_quotation"
+ ],
+ "fields": [
+  {
+   "fieldname": "html",
+   "fieldtype": "HTML",
+   "label": "HTML"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Quotation",
+   "options": "Quotation"
+  },
+  {
+   "depends_on": "eval:doc.workflow_state == \"Pending with Finance\"",
+   "fieldname": "go_to",
+   "fieldtype": "Button",
+   "hidden": 1,
+   "label": "Go to Quotation"
+  },
+  {
+   "fieldname": "request_for",
+   "fieldtype": "Select",
+   "label": "Request For",
+   "options": "\nJob Order\nSupply Order\nService"
+  },
+  {
+   "fieldname": "column_break_rkfva",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "requested_by",
+   "fieldtype": "Data",
+   "label": "Initiated by"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "email_sent",
+   "fieldtype": "Check",
+   "label": "Email Sent"
+  },
+  {
+   "fieldname": "sales",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Requested Sales",
+   "options": "Sales Person",
+   "reqd": 1
+  },
+  {
+   "fieldname": "submitted_by",
+   "fieldtype": "Data",
+   "label": "Submitted By"
+  },
+  {
+   "fetch_from": "sales.custom_user",
+   "fieldname": "sales_email",
+   "fieldtype": "Data",
+   "label": "Sales Email"
+  },
+  {
+   "fieldname": "section_break_nc32n",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.request_for == \"Job Order\" || doc.request_for == \"Service\"",
+   "fieldname": "invoice_list",
+   "fieldtype": "Table",
+   "label": "Job Order Quotation",
+   "options": "Invoice Creation"
+  },
+  {
+   "depends_on": "eval:doc.request_for == \"Supply Order\"",
+   "fieldname": "sod_quotation",
+   "fieldtype": "Table",
+   "label": "Supply Order Quotation",
+   "options": "SOD IV Creation"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-09 11:13:36.528911",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Invoice Request",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

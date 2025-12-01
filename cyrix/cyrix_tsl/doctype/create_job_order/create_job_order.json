@@ -14,19 +14,21 @@
   "email",
   "address",
   "customer_address",
+  "column_break_ceox",
   "incharge",
   "incharge_name",
   "incharge_email",
   "incharge_phone_no",
-  "is_quotation_created",
-  "sts",
-  "column_break_3",
+  "sales_person",
+  "column_break_gflp",
   "company",
   "branch",
   "repair_warehouse",
   "received_date",
+  "is_quotation_created",
+  "sts",
+  "column_break_3",
   "unit_type",
-  "sales_person",
   "sales_person_name",
   "suggested_price",
   "customer_reference_number",
@@ -77,6 +79,8 @@
    "read_only": 1
   },
   {
+   "fetch_from": "customer.customer_primary_address",
+   "fetch_if_empty": 1,
    "fieldname": "address",
    "fieldtype": "Link",
    "label": "Address",
@@ -244,6 +248,14 @@
    "fieldtype": "Select",
    "label": "Unit Type",
    "options": "Service Level Unit\nBoard Level Unit"
+  },
+  {
+   "fieldname": "column_break_gflp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ceox",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -251,7 +263,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-01 09:54:18.224594",
+ "modified": "2025-12-01 09:41:52.965751",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Job Order",

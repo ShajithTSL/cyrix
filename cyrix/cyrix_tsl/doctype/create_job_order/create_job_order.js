@@ -7,7 +7,7 @@ frappe.ui.form.on("Create Job Order", {
 			frm.set_value("repair_warehouse", null);
 			return
 		}
-		frappe.db.get_value('Warehouse', {'is_repair':1,'company':frm.doc.company,"name":["like","%"+frm.doc.branch+"%"]}, 'name', (values) => {
+		frappe.db.get_value('Warehouse', {'is_repair_warehouse':1,'company':frm.doc.company,"name":["like","%"+frm.doc.branch+"%"]}, 'name', (values) => {
 			frm.set_value("repair_warehouse", values.name);
 		});
 	},
@@ -44,15 +44,11 @@ frappe.ui.form.on("Create Job Order", {
 			return {
 				filters: [
 					["company", "=", frm.doc.company],
-					["is_repair", "=", 1]
+					["is_repair_warehouse", "=", 1]
 				]
 			}
 		});
-		const branchMap = {
-			"CYRIX & TSL COMPANY - Kuwait": ["Kuwait"],
-			"CYRIX & TSL COMPANY - UAE": ["Dubai"],
-			"CYRIX & TSL COMPANY - KSA": ["Riyadh", "Dammam", "Jeddah"]
-		};
+		const branchMap = frappe.boot.company_branches;
 
 		if (branchMap[frm.doc.company]) {
 			frm.set_query("branch", function () {

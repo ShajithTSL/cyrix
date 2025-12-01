@@ -188,6 +188,7 @@ def check_for_item(i):
 			new_doc = frappe.new_doc('Item')
 			new_doc.naming_series = '.######'
 			new_doc.item_name = i['item_name']
+			new_doc.item_code = i['item_name']
 			new_doc.item_group = "Equipments"
 			new_doc.description = i['item_name']
 			new_doc.model = i['model']

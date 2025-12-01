@@ -14,6 +14,7 @@
  ],
  "fields": [
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "category",
    "fieldtype": "Data",
    "label": "Category",
@@ -37,7 +38,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-29 13:54:49.193457",
+ "modified": "2025-12-01 13:10:32.992280",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Category",

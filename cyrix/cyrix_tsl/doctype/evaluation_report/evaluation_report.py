@@ -238,18 +238,7 @@ def create_rfq(name):
 
 @frappe.whitelist()
 def warehouse_based_on_branch_and_company(company,branch):
-	if company == "CYRIX & TSL COMPANY - Kuwait":
-		warehouse = "Kuwait - CT"
-	if company == "CYRIX & TSL COMPANY - UAE":
-		warehouse = "Dubai - CT-UAE"
-	if company == "CYRIX & TSL COMPANY - KSA":
-		if branch == "Riyadh":
-			warehouse = "Riyadh - CT-KSA"
-		if branch == "Jeddah":
-			warehouse = "Jeddah - CT-KSA"
-		if branch == "Dammam":
-			warehouse = "Dammam - CT-KSA"
-
+	warehouse = frappe.db.get_value("Warehouse List",{"branch":branch,"parent":company},["actual_warehouse"])
 	return warehouse
 	
 @frappe.whitelist()
@@ -282,7 +271,7 @@ def release_parts(name):
 				i.released = 1
 		new_doc.job_order_data = doc.job_order_data
 		new_doc.save(ignore_permissions=True)
-		# new_doc.submit()
+		new_doc.submit()
 
 		# Mark parts as released in the Evaluation Report
 		# doc.parts_released = 1

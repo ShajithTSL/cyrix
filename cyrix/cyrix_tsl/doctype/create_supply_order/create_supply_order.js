@@ -48,11 +48,7 @@ frappe.ui.form.on("Create Supply Order", {
 				]
 			}
 		});
-		const branchMap = {
-			"CYRIX & TSL COMPANY - Kuwait": ["Kuwait"],
-			"CYRIX & TSL COMPANY - UAE": ["Dubai"],
-			"CYRIX & TSL COMPANY - KSA": ["Riyadh", "Dammam", "Jeddah"]
-		};
+		const branchMap = frappe.boot.company_branches;
 
 		if (branchMap[frm.doc.company]) {
 			frm.set_query("branch", function () {

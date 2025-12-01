@@ -14,12 +14,14 @@
  ],
  "fields": [
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "sub_category",
    "fieldtype": "Data",
    "in_preview": 1,
    "label": "Sub Category"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "category",
    "fieldtype": "Link",
    "label": "Parent Category",
@@ -35,7 +37,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-29 13:52:05.480412",
+ "modified": "2025-12-01 13:11:27.389529",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Sub Category",

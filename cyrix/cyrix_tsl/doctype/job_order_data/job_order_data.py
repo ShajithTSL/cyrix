@@ -152,7 +152,6 @@ def create_evaluation_report(doc_no):
 			"manufacturer": item.mfg,
 			"model": item.model_no,
 			"serial_no": item.serial_no,
-			"type": item.type
 		})
 
 	new_doc.warehouse = warehouse_based_on_branch_and_company(doc.company, doc.branch)
@@ -325,17 +324,7 @@ def create_return_note(job_order_data):
 
 
 @frappe.whitelist()
-def fetch_repair_warehouse(company,branch):
-	if company == "CYRIX & TSL COMPANY - Kuwait":
-		warehouse = "Kuwait - Repair - CT"
-	if company == "CYRIX & TSL COMPANY - UAE":
-		warehouse = "Dubai - Repair - CT-UAE"
-	if company == "CYRIX & TSL COMPANY - KSA":
-		if branch == "Riyadh":
-			warehouse = "Riyadh - Repair - CT-KSA"
-		if branch == "Jeddah":
-			warehouse = "Jeddah - Repair - CT-KSA"
-		if branch == "Dammam":
-			warehouse = "Dammam - Repair - CT-KSA"
+def fetch_repair_warehouse(company,branch):	
+	warehouse = frappe.db.get_value("Warehouse List",{"branch":branch,"parent":company},["repair_warehouse"])
 
 	return warehouse

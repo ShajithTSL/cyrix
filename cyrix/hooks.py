@@ -26,7 +26,9 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/cyrix/css/cyrix.css"
-# app_include_js = "/assets/cyrix/js/cyrix.js"
+app_include_js = [
+	"cyrix.bundle.js"
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/cyrix/css/cyrix.css"
@@ -50,7 +52,8 @@ doctype_js = {
     "Quotation" : ["custom_js/quotation.js"],
     "Sales Invoice" : ["custom_js/sales_invoice.js"],
     "Request for Quotation" : ["custom_js/request_for_quotation.js"],
-    "Supplier Quotation" : ["custom_js/supplier_quotation.js"]
+    "Supplier Quotation" : ["custom_js/supplier_quotation.js"],
+    "Company" : ["custom_js/company.js"]
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -215,6 +218,12 @@ doc_events = {
 		]
 	}
 }
+
+# Monkey Patch
+from frappe import boot as core
+from cyrix.custom_py import boot as custom
+core.get_bootinfo = custom.get_bootinfo
+
 
 # Scheduled Tasks
 # ---------------

@@ -84,18 +84,7 @@ def create_rfq(supply_order_data):
 
 @frappe.whitelist()
 def warehouse_based_on_branch_and_company(company,branch):
-	if company == "CYRIX & TSL COMPANY - Kuwait":
-		warehouse = "Kuwait - CT"
-	if company == "CYRIX & TSL COMPANY - UAE":
-		warehouse = "Dubai - CT-UAE"
-	if company == "CYRIX & TSL COMPANY - KSA":
-		if branch == "Riyadh":
-			warehouse = "Riyadh - CT-KSA"
-		if branch == "Jeddah":
-			warehouse = "Jeddah - CT-KSA"
-		if branch == "Dammam":
-			warehouse = "Dammam - CT-KSA"
-
+	warehouse = frappe.db.get_value("Warehouse List",{"branch":branch,"parent":company},["actual_warehouse"])
 	return warehouse
 
 from cyrix.custom_py.quotation import fetch_item_price_details

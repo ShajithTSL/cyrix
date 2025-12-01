@@ -256,7 +256,7 @@ def fetch_price_from_eval_report(self, method):
                     SELECT sq.supplier, sq.name AS sq, SUM(sq.shipping_cost) AS spc, sq.currency
                     FROM `tabSupplier Quotation` sq
                     INNER JOIN `tabSupplier Quotation Item` sqi ON sq.name = sqi.parent
-                    WHERE sq.docstatus = 1 AND sq.job_order_data = %s AND sqi.item_code = %s
+                    WHERE sq.docstatus = 1 AND sqi.job_order_data = %s AND sqi.item_code = %s
                     ORDER BY sq.modified DESC LIMIT 1
                 """, (eval_doc.job_order_data, eval_item.part), as_dict=True)
 

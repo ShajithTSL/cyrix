@@ -12,19 +12,18 @@
 			<div class="collapse navbar-collapse justify-content-end">
 				<form class="form-inline fill-width justify-content-end" role="search" onsubmit="return false;">
 					
-					<button class="nav-link timelink checkin_time" id="checkinout"
-						onclick="company_change()">
+					<button class="company-btn" onclick="company_change()">
 						{% if frappe.defaults.get_user_default("Company") %}
-						<span class="indicator-pill red no-indicator-dot">
-							{%= frappe.defaults.get_user_default("Company") %}
-						</span>
+							<span class="company-label">
+								{{ frappe.defaults.get_user_default("Company") }}
+							</span>
 						{% else %}
-						<span class="indicator-pill red no-indicator-dot">
-							Select Company
-						</span>
+							<span class="company-label company-not-set">
+								Select Company
+							</span>
 						{% endif %}
-
 					</button>
+
 					{% if (frappe.boot.read_only) { %}
 						<span class="indicator-pill yellow no-indicator-dot" title="{%= __("Your site is undergoing maintenance or being updated.") %}">
 							{%= __("Read Only Mode") %}
@@ -168,38 +167,32 @@
 
 </div>
 <style>
-	#checkinout {
-		background-color: transparent;
-		border: 2px solid transparent;
-		border-radius: 5px;
-		padding: 8px 20px;
-		font-weight: bold;
+	.company-btn {
+		background: hsla(215, 65%, 25%, 0.995);              /* bright orange */
+		color: #fff;
+		padding: 6px 16px;
+		border-radius: 20px;
+		border: none;
 		cursor: pointer;
-		transition: all 0.2s ease;
-		display: inline-flex; /* ensures pill stays aligned */
-		align-items: center;
-		gap: 10px; /* space between text and pill */
-	}
-
-	#checkinout:hover {
-		background-color: transparent; /* keep button transparent */
-		color: transparent; /* maybe slightly darker text on hover */
-	}
-
-	#checkinout .indicator-pill {
-		background-color: #FF4500;   /* pill color stays intact */
-		color: white;
-		padding: 3px 10px;
-		border-radius: 50px;
-		font-size: 14px;
 		font-weight: bold;
-		transition: all 0.2s ease;
+		font-size: 13px;
+		transition: 0.2s ease;
+		display: flex;
+		align-items: center;
 	}
 
-	/* optional: pill hover effect */
-	#checkinout:hover .indicator-pill {
-		background-color: #FF6347; /* slightly lighter red on hover */
+	.company-btn:hover {
+		background:  hsla(214, 37%, 29%, 0.708);             /* darker on hover */
 	}
+
+	.company-label {
+		color: #fff;
+	}
+
+	.company-not-set {
+		opacity: 0.9;
+	}
+
 
 </style>
 <script>

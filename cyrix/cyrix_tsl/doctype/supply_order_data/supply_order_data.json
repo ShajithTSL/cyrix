@@ -14,6 +14,7 @@
   "address",
   "quoted_date",
   "received_date",
+  "column_break_yhaq",
   "warranty",
   "delivery",
   "quotation_approved_date",
@@ -492,13 +493,17 @@
    "label": "Payment Entry Reference",
    "options": "Payment Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_yhaq",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 16:20:42.335937",
+ "modified": "2025-12-02 16:23:02.249943",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

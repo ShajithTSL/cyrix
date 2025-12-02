@@ -14,6 +14,7 @@
   "email",
   "address",
   "customer_address",
+  "column_break_fknk",
   "incharge",
   "incharge_name",
   "incharge_email",
@@ -74,6 +75,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "customer.customer_primary_address",
    "fieldname": "address",
    "fieldtype": "Link",
    "label": "Address",
@@ -222,13 +224,17 @@
    "fieldtype": "Link",
    "label": "Returned WOD ",
    "options": "Supply Order Data"
+  },
+  {
+   "fieldname": "column_break_fknk",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-03 09:57:05.441020",
+ "modified": "2025-12-02 16:06:17.099781",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Supply Order",

@@ -7,7 +7,7 @@ frappe.ui.form.on("Create Supply Order", {
 			frm.set_value("repair_warehouse", null);
 			return
 		}
-		frappe.db.get_value('Warehouse', {'is_repair':0,'company':frm.doc.company,"name":["like","%"+frm.doc.branch+"%"]}, 'name', (values) => {
+		frappe.db.get_value('Warehouse', {'is_repair_warehouse':0,'company':frm.doc.company,"name":["like","%"+frm.doc.branch+"%"]}, 'name', (values) => {
 			frm.set_value("repair_warehouse", values.name);
 		});
 	},
@@ -44,7 +44,7 @@ frappe.ui.form.on("Create Supply Order", {
 			return {
 				filters: [
 					["company", "=", frm.doc.company],
-					["is_repair", "=", 1]
+					["is_repair_warehouse", "=", 1]
 				]
 			}
 		});
@@ -77,102 +77,55 @@ frappe.ui.form.on("Create Supply Order", {
 	},
 	refresh(frm) {
 		frm.disable_save()
-        // if(frm.doc.job_order_data){
-		// 	if(frm.doc.is_returned_unit){
-		// 		 // If job_order_data exists Update the existing Job Order
-		// 		frm.add_custom_button(__("Update Job Order"), function () {
-		// 			frappe.call({
-		// 				method:"cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.update_job_order_data",
-		// 				args:{
-		// 					dict: cur_frm.doc
-		// 				},
-		// 				callback(r){
-		// 					if(r){
-		// 						// On success, reload the document to reflect changes
-		// 						cur_frm.reload_doc();
-		// 					}   
-		// 				}
-		// 			})
-		// 		})
-		// 		frm.remove_custom_button(__("Create Job Order")); // Remove the "Create Job Order" button to avoid duplication/conflict
-		// 		frm.remove_custom_button(__("Create Board Level JO")); // Remove the "Create Board Level JO" button to avoid duplication/conflict
-		// 	}
-		// 	else{
-		// 		 // If job_order_data exists Update the existing Job Order
-		// 		frm.add_custom_button(__("Create Board Level JO"), function () {
-		// 			frappe.call({
-		// 				method:"cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.create_job_order_data",
-		// 				args:{
-		// 					dict: cur_frm.doc
-		// 				},
-		// 				callback(r){
-		// 					if(r){
-		// 						// On success, reload the document to reflect changes
-		// 						cur_frm.reload_doc();
-		// 					}   
-		// 				}
-		// 			})
-		// 		})
-		// 		frm.remove_custom_button(__("Create Job Order")); // Remove the "Create Job Order" button to avoid duplication/conflict
-		// 		frm.remove_custom_button(__("Update Job Order")); // Remove the "Update Job Order" button since it's not applicable yet
-		// 	}
-        // }
-        // else{
-            // If job_order_data does not exist Create a New Job Order
-            frm.add_custom_button(__("Create Supply Order"), function () {
-                frappe.call({
-                    method:"cyrix.cyrix_tsl.doctype.create_supply_order.create_supply_order.create_supply_order_data",
-                    args:{
-                        dict: cur_frm.doc
-                    },
-                    callback(r){
-                        if(r){
-                            // On success, reload the document to reflect changes
-                            cur_frm.reload_doc();
-                        }   
-                    }
-                })
-            })
-		// 	frm.remove_custom_button(__("Update Job Order")); // Remove the "Update Job Order" button since it's not applicable yet
-        // }
-		// if (frappe.route_options.job_order_data) {
-		// 	frm.set_value("job_order_data", frappe.route_options.job_order_data);
-		// 	frappe.route_options = null
-		// }
-	},
-    job_order_data: function (frm) {
-        frm.trigger("refresh")
-		if (frm.doc.job_order_data) { // if the job_order_data is present, fetch the details
+       	// If job_order_data does not exist Create a New Job Order
+		frm.add_custom_button(__("Create Supply Order"), function () {
 			frappe.call({
-				method: 'cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.get_jo_details',
-				args: {
-					"jo": frm.doc.job_order_data,
+				method:"cyrix.cyrix_tsl.doctype.create_supply_order.create_supply_order.create_supply_order_data",
+				args:{
+					dict: cur_frm.doc
 				},
-				callback(r) {
-					if (r.message) {
-						for (var i = 0; i < r.message.length; i++) {
-							var childTable = cur_frm.add_child("received_equipment");
-							childTable.item_code = r.message[i]['item_code'],
-                            childTable.item_name = r.message[i]["item_name"],
-                            childTable.manufacturer = r.message[i]["mfg"]
-							childTable.model = r.message[i]["model_no"],
-							childTable.type = r.message[i]["type"],
-                            childTable.qty = r.message[i]["qty"],
-                            frm.doc.sales_person = r.message[i]["sales_rep"],
-                            frm.doc.customer = r.message[i]["customer"],
-							frm.doc.address = r.message[i]["address"],
-							frm.doc.incharge = r.message[i]["incharge"],
-							frm.doc.branch = r.message[i]["branch"]
-							frm.doc.company = r.message[i]["company"]
-							frm.doc.repair_warehouse = r.message[i]["repair_warehouse"]
-							cur_frm.refresh_fields();
-						}
-					}
+				callback(r){
+					if(r){
+						// On success, reload the document to reflect changes
+						cur_frm.reload_doc();
+					}   
 				}
-			});
-
-		}
+			})
+		})
 	},
+    // job_order_data: function (frm) {
+    //     frm.trigger("refresh")
+	// 	if (frm.doc.job_order_data) { // if the job_order_data is present, fetch the details
+	// 		frappe.call({
+	// 			method: 'cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.get_jo_details',
+	// 			args: {
+	// 				"jo": frm.doc.job_order_data,
+	// 			},
+	// 			callback(r) {
+	// 				if (r.message) {
+	// 					for (var i = 0; i < r.message.length; i++) {
+	// 						var childTable = cur_frm.add_child("received_equipment");
+	// 						childTable.item_code = r.message[i]['item_code'],
+    //                         childTable.item_name = r.message[i]["item_name"],
+    //                         childTable.manufacturer = r.message[i]["mfg"]
+	// 						childTable.model = r.message[i]["model_no"],
+	// 						childTable.type = r.message[i]["type"],
+    //                         childTable.qty = r.message[i]["qty"],
+    //                         frm.doc.sales_person = r.message[i]["sales_rep"],
+    //                         frm.doc.customer = r.message[i]["customer"],
+	// 						frm.doc.address = r.message[i]["address"],
+	// 						frm.doc.incharge = r.message[i]["incharge"],
+	// 						frm.doc.branch = r.message[i]["branch"]
+	// 						frm.doc.company = r.message[i]["company"]
+	// 						frm.doc.repair_warehouse = r.message[i]["repair_warehouse"]
+	// 						cur_frm.refresh_fields();
+	// 					}
+	// 				}
+	// 			}
+	// 		});
+
+	// 	}
+	// },
 	customer: function (frm) {
 		if (!frm.doc.customer) {
 			return

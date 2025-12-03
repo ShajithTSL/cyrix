@@ -20,15 +20,9 @@
   "quotation_approved_date",
   "priority_status",
   "customer_reference_number",
-  "supplier_name",
   "tender_issue_date",
   "remarks",
   "st",
-  "old_sod_no",
-  "so_old_quoted_amt",
-  "so_old_vat",
-  "so_old_total_amt",
-  "so_currency_old",
   "column_break_7",
   "image",
   "company",
@@ -38,6 +32,7 @@
   "department",
   "project",
   "status",
+  "column_break_rjhd",
   "reason",
   "payment_terms",
   "payment_date",
@@ -181,12 +176,6 @@
   },
   {
    "allow_on_submit": 1,
-   "fieldname": "supplier_name",
-   "fieldtype": "Data",
-   "label": "Supplier Name"
-  },
-  {
-   "allow_on_submit": 1,
    "fieldname": "tender_issue_date",
    "fieldtype": "Date",
    "label": "Tender Issue Date"
@@ -202,36 +191,6 @@
    "fieldname": "st",
    "fieldtype": "Check",
    "label": "ST"
-  },
-  {
-   "fieldname": "old_sod_no",
-   "fieldtype": "Int",
-   "in_standard_filter": 1,
-   "label": "Old Sod No"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "so_old_quoted_amt",
-   "fieldtype": "Float",
-   "label": "SO Old Quoted Amt"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "so_old_vat",
-   "fieldtype": "Data",
-   "label": "SO Old Vat"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "so_old_total_amt",
-   "fieldtype": "Float",
-   "label": "SO Old Total Amt"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "so_currency_old",
-   "fieldtype": "Data",
-   "label": "SO Currency Old"
   },
   {
    "fieldname": "column_break_7",
@@ -417,7 +376,8 @@
    "fieldname": "previously_quoted",
    "fieldtype": "Table",
    "label": "Previously Quoted",
-   "options": "Similar Item Repair"
+   "options": "Similar Item Repair",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_30",
@@ -497,13 +457,17 @@
   {
    "fieldname": "column_break_yhaq",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rjhd",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-02 16:23:02.249943",
+ "modified": "2025-12-03 09:01:29.920633",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

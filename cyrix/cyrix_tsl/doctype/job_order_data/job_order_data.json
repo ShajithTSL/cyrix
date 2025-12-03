@@ -13,18 +13,17 @@
   "customer",
   "customer_name",
   "customer_rep",
-  "customer_email",
   "address",
-  "incharge",
+  "unit_type",
   "column_break_ljre",
+  "customer_email",
+  "incharge",
   "warranty",
   "delivery",
   "returned_date",
   "expiry_date",
   "priority_status",
-  "unit_table_no",
   "mistaken_ner",
-  "quoted",
   "status_cap",
   "status_cap_date",
   "column_break_7",
@@ -33,17 +32,12 @@
   "branch",
   "repair_warehouse",
   "posting_date",
-  "unit_type",
   "department",
   "column_break_cwfo",
   "technician",
   "status",
-  "custom_status",
   "parent_jo",
-  "remarks",
   "payment_terms",
-  "automation",
-  "project_1",
   "plant",
   "section_break_14",
   "image",
@@ -86,6 +80,8 @@
   "column_break_43",
   "others",
   "specify",
+  "column_break_lquf",
+  "remarks",
   "complaints",
   "attach_customer_image",
   "section_break_23",
@@ -218,23 +214,10 @@
   },
   {
    "allow_on_submit": 1,
-   "fieldname": "unit_table_no",
-   "fieldtype": "Data",
-   "label": "Unit Table No"
-  },
-  {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "mistaken_ner",
    "fieldtype": "Check",
    "label": "Mistaken NER"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "quoted",
-   "fieldtype": "Check",
-   "label": "Quoted"
   },
   {
    "allow_on_submit": 1,
@@ -322,13 +305,6 @@
    "options": "A-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "custom_status",
-   "fieldtype": "Select",
-   "label": "Custom Status",
-   "options": "\nUE-Under Evaluation\nUTR-Under Technician Repair\nRNA-Return Not Approved"
-  },
-  {
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
@@ -391,19 +367,6 @@
    "fieldtype": "Data",
    "label": "Return Note",
    "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "automation",
-   "fieldtype": "Check",
-   "label": "Automation"
-  },
-  {
-   "default": "0",
-   "fieldname": "project_1",
-   "fieldtype": "Check",
-   "label": "Project"
   },
   {
    "allow_on_submit": 1,
@@ -685,13 +648,17 @@
   {
    "fieldname": "column_break_cwfo",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lquf",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-01 10:11:11.265201",
+ "modified": "2025-12-03 09:11:42.721139",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

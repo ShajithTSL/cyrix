@@ -21,7 +21,7 @@ def create_qtn(source):
 	new_doc.service_call_form = doc.name
 	new_doc.branch = doc.branch
 	new_doc.append("items",{
-		"item_code":"000010",
+		"item_code":frappe.db.get_value("Item",{"item_name":"Service Item"},'name'),
 		"item_name":"Service Item",
 		"description":"",
 		"qty":1,

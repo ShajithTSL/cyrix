@@ -19,9 +19,9 @@ def update_supply_order_status(doc, method):
             dn_date = supply_order_doc.posting_date
             
             # Determine the status
-            if supply_order_doc.payment_entry_reference and supply_order_doc.invoice_no:
+            if supply_order_doc.payment_entry and supply_order_doc.invoice_no:
                 status = 'Paid'
-            elif not supply_order_doc.payment_entry_reference and not supply_order_doc.invoice_no:
+            elif not supply_order_doc.payment_entry and not supply_order_doc.invoice_no:
                 status = 'Delivered'
             elif supply_order_doc.invoice_no:
                 status = 'Invoiced'

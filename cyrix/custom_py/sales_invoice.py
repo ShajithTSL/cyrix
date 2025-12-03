@@ -17,6 +17,7 @@ def update_jo_so_status(doc, method):
         elif item.get("supply_order_data"):
             doc = frappe.get_doc("Supply Order Data",item.get("supply_order_data"))
             doc.status = 'Invoiced'
+            doc.invoiced_value = item.net_amount
             doc.invoice_no=doc.name
             doc.invoice_date=doc.posting_date
             doc.save(ignore_permissions = True)

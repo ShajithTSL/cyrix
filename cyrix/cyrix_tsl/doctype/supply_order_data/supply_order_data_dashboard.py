@@ -1,6 +1,10 @@
+
 def get_data():
 	return {
 		'fieldname': 'supply_order_data',
+		"internal_links": {
+			"Supplier Quotation": ["items", "supply_order_data"]
+		},
 		'transactions': [
 			{
 				'items': ['Request for Quotation']

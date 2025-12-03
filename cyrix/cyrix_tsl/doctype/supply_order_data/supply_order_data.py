@@ -139,7 +139,6 @@ def create_delivery_note(supply_order_data):
 	new_doc = frappe.new_doc("Delivery Note")
 	new_doc.company = doc.company
 	new_doc.customer = doc.customer
-	new_doc.purchase_order_no = doc.po_number
 	new_doc.branch = doc.branch
 	new_doc.department = doc.department
 	new_doc.set_warehouse = doc.warehouse
@@ -175,7 +174,6 @@ def create_delivery_note(supply_order_data):
 			"model":i.model_no,
 			"rate":r,
 			"amount":amt, 
-			"type":i.type,
 			"serial_number":i.serial_no,
 			"description":i.description,
 			"qty":qty,
@@ -194,7 +192,6 @@ def create_delivery_note(supply_order_data):
 			"model":i.model_no,
 			"rate":r,
 			"amount":amt, 
-			"type":i.type,
 			"serial_number":i.serial_no,
 			"description":i.description,
 			"qty":qty,
@@ -250,7 +247,6 @@ def create_sales_invoice(supply_order_data):
 			"model":i.model_no,
 			"rate":r,
 			"amount":amt, 
-			"type":i.type,
 			"serial_number":i.serial_no,
 			"description":i.description,
 			"qty":qty,
@@ -269,7 +265,6 @@ def create_sales_invoice(supply_order_data):
 			"model":i.model_no,
 			"rate":r,
 			"amount":amt, 
-			"type":i.type,
 			"serial_number":i.serial_no,
 			"description":i.description,
 			"qty":qty,

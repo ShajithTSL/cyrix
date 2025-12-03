@@ -7,16 +7,31 @@ frappe.ui.form.on('Sales Invoice', {
     },
     naming_series: function(frm){
         if(frm.doc.__islocal){
-            const naming_series = {
-                "Kuwait": "INV-K.YY.-",
-                "Dammam": "INV-D.YY.-",
-                "Riyadh": "INV-R.YY.-",
-                "Jeddah": "INV-J.YY.-",
-                "Dubai": "INV-DU.YY.-"
-            };
-            const series = naming_series[frm.doc.branch];
-            if (series) {
-                frm.set_value('naming_series', series);
+            if(frm.doc.is_return == 1){
+                const series = {
+                    // "Kuwait": "INV-RE-K.YY.-",
+                    // "Dammam": "INV-RE-D.YY.-",
+                    "Riyadh": "INV-RE-R.YY.-",
+                    // "Jeddah": "INV-RE-J.YY.-",
+                    // "Dubai": "INV-RE-DU.YY.-"
+                };
+                const return_series = series[frm.doc.branch];
+                if (return_series) {
+                    frm.set_value('naming_series', return_series);
+                }
+            }
+            else{               
+                const naming_series = {
+                    // "Kuwait": "INV-K.YY.-",
+                    // "Dammam": "INV-D.YY.-",
+                    "Riyadh": "INV-R.YY.-",
+                    // "Jeddah": "INV-J.YY.-",
+                    // "Dubai": "INV-DU.YY.-"
+                };
+                const series = naming_series[frm.doc.branch];
+                if (series) {
+                    frm.set_value('naming_series', series);
+                }
             }
         }
     },

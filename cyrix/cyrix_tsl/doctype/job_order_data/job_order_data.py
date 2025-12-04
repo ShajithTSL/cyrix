@@ -309,7 +309,6 @@ def create_return_note(job_order_data):
 			"model":i.model_no,
 			"rate":0,
 			"amount":0, 
-			"type":i.type,
 			"description":i.item_name,
 			"qty":i.quantity,
 			"job_order_data":doc.name, 

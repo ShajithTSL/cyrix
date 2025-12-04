@@ -130,12 +130,15 @@ def update_quotation_reference(self,method):
 
             if self.quotation_type in ["Customer Quotation - Supply","Customer Quotation - S - Revised"]:
                 if i.supply_order_data:
+                    exists = frappe.db.exists("Supply Order Table",{'parent':i.supply_order_data, 'item_code':i.item_code, 'quantity':i.qty})
+                    if exists:
+                        frappe.db.set_value("Supply Order Table",exists,'quoted_price',i.base_net_rate)
+                        frappe.db.set_value("Supply Order Table",exists,'quoted_amount',i.base_net_amount)
                     so = frappe.get_doc("Supply Order Data",i.supply_order_data)
                     so.quotation = self.name
                     if self.get("purchase_order_no"):
                         so.po_no = self.get("purchase_order_no")
                     so.save(ignore_permissions =1)
-
 
 @frappe.whitelist()
 def get_quote(source,type = None):
@@ -294,6 +297,7 @@ def fetch_price_from_eval_report(self, method):
     # Append to parts_price table
     if self.item_price_details:
         total_material_cost = tsl_inventory_total + supplier_total + scrap_total
+
         self.append("parts_price", {
             "tsl_inventory": float(round(tsl_inventory_total, 2)),
             "supplier": float(round(supplier_total, 2)),
@@ -303,6 +307,8 @@ def fetch_price_from_eval_report(self, method):
 
 
 def fetch_supplier_details(self, method):
+    if self.quotation_type == "Internal Quotation - Repair":
+        return
     self.parts_price = []
     self.supplier_details = []
     

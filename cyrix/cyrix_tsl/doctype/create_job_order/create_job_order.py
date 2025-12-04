@@ -240,7 +240,6 @@ def get_jo_details(jo):
 		l.append(frappe._dict({
 			"item_name": i.item_name,
 			"item_code": i.item_code,
-			"type": i.type,
 			"mfg": i.mfg,
 			"model_no": i.model_no,
 			"serial_no": i.serial_no,

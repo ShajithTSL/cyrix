@@ -39,7 +39,7 @@ frappe.ui.form.on('Delivery Note', {
                 }
             });
             // Clear after applying
-            frm.custom_items_to_override = null;
+            // frm.custom_items_to_override = null;
         }
     }
 });

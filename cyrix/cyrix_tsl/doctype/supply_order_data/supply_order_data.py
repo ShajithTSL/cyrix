@@ -148,61 +148,44 @@ def create_delivery_note(supply_order_data):
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
 	list_ = []
 	for i in doc.get("material_list"):
-		qi_details = frappe.db.sql('''select 
-			q.name,qi.qty as qty,
-			qi.rate as rate,
-			qi.amount as amount 
-		from `tabQuotation Item` as qi 
-			inner join `tabQuotation` as q on q.name = qi.parent 
-		where qi.item_code = %s 
-			and q.workflow_state = "Approved by Customer" 
-			and qi.supply_order_data = %s 
-			and q.docstatus = 1 
-			order by q.modified desc limit 1''',(i.item_code,supply_order_data),as_dict=1)
-		r = 0
-		amt = 0
-		qty = i.quantity
-		if qi_details:
-			r = qi_details[0]['rate']
-			amt = qi_details[0]['amount']
-			qty = qi_details[0]['qty']
-
-		new_doc.append("items",{
-			"item_name":i.item_name or i.description,
-			"item_code":i.item_code,
-			"manufacturer":i.mfg,
-			"model":i.model_no,
-			"rate":r,
-			"amount":amt, 
-			"serial_number":i.serial_no,
-			"description":i.description,
-			"qty":qty,
-			"supply_order_data":supply_order_data,
-			"uom":"Nos",
-			"stock_uom":"Nos",
-			"conversion_factor":1,
-			"cost_center":doc.department,
-			"income_account":"",
-			"branch":doc.branch
-		})
-		list_.append({
-			"item_name":i.item_name or i.description,
-			"item_code":i.item_code,
-			"manufacturer":i.mfg,
-			"model":i.model_no,
-			"rate":r,
-			"amount":amt, 
-			"serial_number":i.serial_no,
-			"description":i.description,
-			"qty":qty,
-			"supply_order_data":supply_order_data,
-			"uom":"Nos",
-			"stock_uom":"Nos",
-			"conversion_factor":1,
-			"cost_center":doc.department,
-			"income_account":"",
-			"branch":doc.branch
-		})
+		remaining_qty = float(i.quantity) - float(i.delivered_quantity)
+		if remaining_qty > 0:
+			new_doc.append("items",{
+				"item_name":i.item_name or i.description,
+				"item_code":i.item_code,
+				"manufacturer":i.mfg,
+				"model":i.model_no,
+				"rate":i.quoted_price,
+				"amount":i.quoted_amount, 
+				"serial_number":i.serial_no,
+				"description":i.description,
+				"qty":remaining_qty,
+				"supply_order_data":supply_order_data,
+				"uom":"Nos",
+				"stock_uom":"Nos",
+				"conversion_factor":1,
+				"cost_center":doc.department,
+				"income_account":"",
+				"branch":doc.branch
+			})
+			list_.append({
+				"item_name":i.item_name or i.description,
+				"item_code":i.item_code,
+				"manufacturer":i.mfg,
+				"model":i.model_no,
+				"rate":i.quoted_price,
+				"amount":i.quoted_amount, 
+				"serial_number":i.serial_no,
+				"description":i.description,
+				"qty":remaining_qty,
+				"supply_order_data":supply_order_data,
+				"uom":"Nos",
+				"stock_uom":"Nos",
+				"conversion_factor":1,
+				"cost_center":doc.department,
+				"income_account":"",
+				"branch":doc.branch
+			})
 	return new_doc,list_
 
 

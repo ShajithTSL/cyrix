@@ -35,13 +35,17 @@ frappe.ui.form.on("Create Budgetary Quotation", {
 	},
 
 	setup: function (frm) {
-		frm.set_query("branch", function () {
-			return {
-                filters: {
-                    'custom_company': frm.doc.company  // Filter branch by company
-                }
-			}
-		});
+		const branchMap = frappe.boot.company_branches;
+
+		if (branchMap[frm.doc.company]) {
+			frm.set_query("branch", function () {
+				return {
+					filters: [
+						["name", "in", branchMap[frm.doc.company]]
+					]
+				};
+			});
+		}
 		frm.set_query("department", function () {
 			return {
                 filters: {

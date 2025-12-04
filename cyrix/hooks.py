@@ -199,7 +199,8 @@ doc_events = {
             "cyrix.custom_py.delivery_note.update_job_order_status",
             "cyrix.custom_py.delivery_note.update_supply_order_status"
 		],
-		"on_update_after_submit": ["cyrix.custom_py.delivery_note.update_supply_order_status"]
+		"on_update_after_submit": ["cyrix.custom_py.delivery_note.update_supply_order_status"],
+		"on_cancel": "cyrix.custom_py.delivery_note.update_so_qty_on_cancel"
 	},
 
 	"Sales Invoice": {

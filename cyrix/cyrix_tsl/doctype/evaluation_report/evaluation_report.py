@@ -14,7 +14,6 @@ class EvaluationReport(Document):
 				if frappe.db.exists("Bin",{'item_code':i.part,'warehouse':self.warehouse}):
 					bin = frappe.db.get_value("Bin",{'item_code':i.part,'warehouse':self.warehouse},'actual_qty')
 					price = frappe.db.get_value("Bin", {"item_code": i.part,'warehouse':self.warehouse}, "valuation_rate") or frappe.db.get_value("Item Price", {"item_code": i.part, "buying": 1}, "price_list_rate") or 0
-
 					if float(bin) >= float(i.qty):
 						status = "Yes"
 						i.parts_availability = status
@@ -22,10 +21,10 @@ class EvaluationReport(Document):
 						total = price * i.qty
 						i.total = total
 
-						frappe.db.sql('''update `tabPart Sheet Item` set parts_availability = '{0}' ,price_ea = {1}, total = {2} where name ='{3}' '''.format(status,price,total,i.name))
-					# else:
-					# 	i.parts_availability = "No"
-					# 	frappe.db.sql('''update `tabPart Sheet Item` set parts_availability = '{0}'  '''.format("No"))
+						frappe.db.sql('''update `tabPart Sheet Item` set parts_availability = '{0}', price_ea = {1}, total = {2} where name ='{3}' '''.format(status,price,total,i.name))
+					else:
+						i.parts_availability = "No"
+						frappe.db.sql('''update `tabPart Sheet Item` set parts_availability = '{0}'  where name ='{1}' '''.format("No",i.name))
 
 
 		self.check_stock_availability() # to update the stock availability
@@ -100,10 +99,12 @@ class EvaluationReport(Document):
 			for i in self.get("items"):
 				if i.parts_availability == "No" and not i.from_scrap:
 					check=1
+			doc = frappe.get_doc("Job Order Data",self.job_order_data)
 			if check == 0:
-				doc = frappe.get_doc("Job Order Data",self.job_order_data)
 				doc.status = "TR-Technician Repair"
-				doc.save(ignore_permissions=True)
+			else:
+				doc.status = "WP-Waiting Parts"
+			doc.save(ignore_permissions=True)
 
 	def update_job_order_status(self):
 		# based on the stock availability Job Order Data status will be defined
@@ -186,12 +187,13 @@ def sku_creation(doc): # Item creation
 
 				try:
 					item_doc.save(ignore_permissions=True)
+					frappe.db.set_value("Part Sheet Item",pm.get("name"),'part',item_doc.name)
 					sku_list.append(item_doc.name)
 				except Exception as e:
 					frappe.log_error(frappe.get_traceback(), "SKU Creation Error")
 			else:
 				frappe.msgprint(f"Item with model: {model}, category: {category}, sub-category: {sub_cat} already exists as <a href='/app/item/{existing_item[0].name}'>{existing_item[0].name}</a>.")
-
+				frappe.db.set_value("Part Sheet Item",pm.get("name"),'part',existing_item[0].name)
 	if sku_list:
 		links = [f"<a href='/app/item/{sku}'>{sku}</a>" for sku in sku_list]
 		frappe.msgprint("SKU Created: " + ', '.join(links))
@@ -208,6 +210,7 @@ def create_rfq(name):
 	rfq.job_order_data = doc.job_order_data
 	rfq.evaluation_report = doc.name
 	rfq.department = frappe.db.get_value("Job Order Data",doc.job_order_data,"department")
+	rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2)
 	rfq.items=[]
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
 	for i in doc.get("items"):
@@ -284,7 +287,3 @@ def release_parts(name):
 		# Catch all other exceptions
 		frappe.msgprint(f"An unexpected error occurred: {str(e)}")
 		return False
-
-
-def updates():
-	frappe.db.set_value("Part Sheet Item","chhdvsqtn2","released",0)

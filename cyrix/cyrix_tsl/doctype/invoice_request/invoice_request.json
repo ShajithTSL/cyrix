@@ -22,7 +22,8 @@
   "sales_email",
   "section_break_nc32n",
   "invoice_list",
-  "sod_quotation"
+  "sod_quotation",
+  "amended_from"
  ],
  "fields": [
   {
@@ -93,7 +94,6 @@
    "label": "Submitted By"
   },
   {
-   "fetch_from": "sales.custom_user",
    "fieldname": "sales_email",
    "fieldtype": "Data",
    "label": "Sales Email"
@@ -115,12 +115,22 @@
    "fieldtype": "Table",
    "label": "Supply Order Quotation",
    "options": "SOD IV Creation"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Invoice Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-09 11:13:36.528911",
+ "modified": "2025-12-06 15:44:50.214818",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Invoice Request",

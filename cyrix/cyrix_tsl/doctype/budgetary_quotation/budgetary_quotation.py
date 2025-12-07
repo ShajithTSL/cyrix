@@ -97,3 +97,57 @@ class BudgetaryQuotation(Document):
 			})
 			
 		return new_doc
+
+
+@frappe.whitelist()
+def create_delivery_note(budgetary_quotation):
+	doc = frappe.get_doc("Budgetary Quotation",budgetary_quotation)
+	new_doc = frappe.new_doc("Delivery Note")
+	new_doc.company = doc.company
+	new_doc.customer = doc.customer
+	new_doc.branch = doc.branch
+	new_doc.department = doc.department
+	new_doc.set_warehouse = warehouse_based_on_branch_and_company(doc.company,doc.branch)
+	new_doc.purchase_order_no = doc.po_no
+	new_doc.budgetary_quotation = doc.name
+	new_doc.custom_sales_person = doc.sales_person
+	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
+	list_ = []
+	for i in doc.get("items"):
+		remaining_qty = float(i.qty) - float(i.delivered_qty)
+		if remaining_qty > 0:
+			new_doc.append("items",{
+				"item_name":i.description,
+				"item_code":i.sku,
+				"manufacturer":i.mfg,
+				"model":i.model,
+				"rate":i.quoted_price,
+				"amount":i.quoted_amount, 
+				"description":i.description,
+				"qty":remaining_qty,
+				"budgetary_quotation":budgetary_quotation,
+				"uom":"Nos",
+				"stock_uom":"Nos",
+				"conversion_factor":1,
+				"cost_center":doc.department,
+				"income_account":"",
+				"branch":doc.branch
+			})
+			list_.append({
+				"item_name":i.description,
+				"item_code":i.sku,
+				"manufacturer":i.mfg,
+				"model":i.model,
+				"rate":i.quoted_price,
+				"amount":i.quoted_amount, 
+				"description":i.description,
+				"qty":remaining_qty,
+				"budgetary_quotation":budgetary_quotation,
+				"uom":"Nos",
+				"stock_uom":"Nos",
+				"conversion_factor":1,
+				"cost_center":doc.department,
+				"income_account":"",
+				"branch":doc.branch
+			})
+	return new_doc,list_

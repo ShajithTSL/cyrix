@@ -191,16 +191,23 @@ doc_events = {
 			"cyrix.custom_py.purchase_receipt.update_job_order_status",
 			"cyrix.custom_py.purchase_receipt.update_supply_order_status",
 		],
-        "on_cancel": "cyrix.custom_py.purchase_receipt.update_received_percentage"
+        "on_cancel": [
+			"cyrix.custom_py.purchase_receipt.update_received_percentage",
+			"cyrix.custom_py.purchase_receipt.update_job_order_status",
+		]
 	},
 
 	"Delivery Note": {
         "on_submit": [
-            "cyrix.custom_py.delivery_note.update_job_order_status",
-            "cyrix.custom_py.delivery_note.update_supply_order_status"
+			"cyrix.custom_py.delivery_note.update_job_order_status",
+            "cyrix.custom_py.delivery_note.update_supply_order_status",			
+            'cyrix.custom_py.delivery_note.update_budgetary_quotation_status'
 		],
 		"on_update_after_submit": ["cyrix.custom_py.delivery_note.update_supply_order_status"],
-		"on_cancel": "cyrix.custom_py.delivery_note.update_so_qty_on_cancel"
+		"on_cancel": [
+			"cyrix.custom_py.delivery_note.update_so_qty_on_cancel",
+			"cyrix.custom_py.delivery_note.update_bq_qty_on_cancel"
+		]
 	},
 
 	"Sales Invoice": {

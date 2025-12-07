@@ -15,17 +15,20 @@ def update_jo_so_status(doc, method):
             jo.save(ignore_permissions = True)
 
         elif item.get("supply_order_data"):
-            doc = frappe.get_doc("Supply Order Data",item.get("supply_order_data"))
-            doc.status = 'Invoiced'
-            doc.invoiced_value = item.net_amount
-            doc.invoice_no=doc.name
-            doc.invoice_date=doc.posting_date
-            doc.save(ignore_permissions = True)
+            so = frappe.get_doc("Supply Order Data",item.get("supply_order_data"))
+            so.status = 'Invoiced'
+            so.invoiced_value = item.net_amount
+            so.invoice_no=doc.name
+            so.invoice_date=doc.posting_date
+            so.save(ignore_permissions = True)
 
         elif item.get("budgetary_quotation"):
-            doc = frappe.get_doc("Budgetary Quotation",item.get("budgetary_quotation"))
-            doc.status = 'Invoiced'
-            doc.save(ignore_permissions = True)
+            bq = frappe.get_doc("Budgetary Quotation",item.get("budgetary_quotation"))
+            bq.status = 'Invoiced'
+            bq.invoiced_value = item.net_amount
+            bq.invoice_no=doc.name
+            bq.invoice_date=doc.posting_date
+            bq.save(ignore_permissions = True)
 
 def update_service_call_form(doc,method):
     if doc.get("service_call_form"):

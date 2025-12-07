@@ -34,6 +34,9 @@ frappe.ui.form.on("Evaluation Report", {
 			method:"cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.sku_creation",
 			args:{
 				doc:cur_frm.doc
+			},
+			callback(r){
+				frm.refresh_fields()
 			}
 		})
 	},

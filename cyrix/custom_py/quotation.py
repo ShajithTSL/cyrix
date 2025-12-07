@@ -42,7 +42,8 @@ naming_series = {
 
 quotation_type = ["Customer Quotation - Repair","Customer Quotation - R - Revised",
                 "Customer Quotation - Supply","Customer Quotation - S - Revised",
-                "Customer Quotation - Site Visit","Customer Quotation - SV - Revised"]
+                "Customer Quotation - Site Visit","Customer Quotation - SV - Revised",
+                "Customer Quotation - BQ"]
 
 
 def on_update_after_submit(doc,method):
@@ -55,6 +56,8 @@ def on_update_after_submit(doc,method):
                 frappe.db.set_value("Job Order Data",i.job_order_data,"quotation_approved_date",doc.approval_date)
             if i.supply_order_data:
                 frappe.db.set_value("Supply Order Data",i.supply_order_data,"quotation_approved_date",doc.approval_date)
+            if i.budgetary_quotation:
+                frappe.db.set_value("Budgetary Quotation",i.budgetary_quotation,"quotation_approved_date",doc.approval_date)
     update_quotation_reference(doc,method)
 
 
@@ -139,6 +142,18 @@ def update_quotation_reference(self,method):
                     if self.get("purchase_order_no"):
                         so.po_no = self.get("purchase_order_no")
                     so.save(ignore_permissions =1)
+
+            if self.quotation_type in ["Customer Quotation - BQ"]:
+                if i.budgetary_quotation:
+                    exists = frappe.db.exists("BQ Details",{'parent':i.budgetary_quotation, 'sku':i.item_code})
+                    if exists:
+                        frappe.db.set_value("BQ Details",exists,'quoted_price',i.base_net_rate)
+                        frappe.db.set_value("BQ Details",exists,'quoted_amount',i.base_net_amount)
+                    bq = frappe.get_doc("Budgetary Quotation",i.budgetary_quotation)
+                    bq.quotation = self.name
+                    if self.get("purchase_order_no"):
+                        bq.po_no = self.get("purchase_order_no")
+                    bq.save(ignore_permissions =1)
 
 @frappe.whitelist()
 def get_quote(source,type = None):

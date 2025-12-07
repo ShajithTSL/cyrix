@@ -41,6 +41,7 @@ frappe.ui.form.on('Invoice Creation', {
 			}).then(r => {
 				if (r.message) {
 					$.each(r.message, function(i,d) {
+						let child = frm.add_child('invoice_list');
 						child.job_order_data = d.job_order_data;
 					});
 					frm.refresh_field('invoice_list');		
@@ -63,6 +64,7 @@ frappe.ui.form.on('SOD IV Creation', {
 			}).then(r => {
 				if (r.message) {
 					$.each(r.message, function(i,d) {
+						let child = frm.add_child('sod_quotation');
 						child.supply_order_data = d.supply_order_data;
 					});
 					frm.refresh_field('sod_quotation');		

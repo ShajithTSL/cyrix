@@ -41,5 +41,26 @@ frappe.ui.form.on('Delivery Note', {
             // Clear after applying
             // frm.custom_items_to_override = null;
         }
+    },
+    
+    warranty_duration(frm) {
+        convert_warranty(frm);
+    },
+
+    warranty_type(frm) {
+        convert_warranty(frm);
     }
 });
+
+function convert_warranty(frm) {
+    if (!frm.doc.warranty_duration || !frm.doc.warranty_type){
+        frm.set_value("warranty_months",0);
+        return;
+    } 
+
+    if (frm.doc.warranty_type === "Years") {
+        frm.set_value("warranty_months", frm.doc.warranty_duration * 12);
+    } else {
+        frm.set_value("warranty_months", frm.doc.warranty_duration);
+    }
+}

@@ -10,6 +10,7 @@
   "branch",
   "customer",
   "attn",
+  "column_break_cilm",
   "specify_1",
   "hours_spent",
   "technician",
@@ -20,6 +21,7 @@
   "company",
   "date",
   "priority_status",
+  "column_break_obvw",
   "job_order_data",
   "parent_jo",
   "warehouse",
@@ -80,8 +82,7 @@
   "column_break_55",
   "technician_image",
   "technician_image_multiple",
-  "technician_id",
-  "amended_from"
+  "technician_id"
  ],
  "fields": [
   {
@@ -175,15 +176,6 @@
    "fieldtype": "Select",
    "label": "Priority Status",
    "options": "Normal\nUrgent",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Evaluation Report",
-   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -537,15 +529,6 @@
    "options": "Technician ID"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Evaluation Report",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "job_order_data",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -589,12 +572,20 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "part no"
+  },
+  {
+   "fieldname": "column_break_cilm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_obvw",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-29 08:22:47.298351",
+ "modified": "2025-12-09 09:53:26.218842",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Evaluation Report",

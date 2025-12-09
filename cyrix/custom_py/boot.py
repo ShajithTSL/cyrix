@@ -129,12 +129,16 @@ def get_bootinfo():
     remove_apps_with_incomplete_dependencies(bootinfo)
 
     company_list = frappe.db.get_all("Company","name")
+    bootinfo.company_branches = {}
+    bootinfo.company_territories = {}
     for com in company_list:
         companies_with_branches = frappe.db.get_all("Branch List",{"parent":com.name},"branch")
-        bootinfo.company_branches = {}
-
         for b in companies_with_branches:
             bootinfo.company_branches.setdefault(com.name, []).append(b.branch)
+
+        territories_list = frappe.db.get_all("Territory List",{"parent":com.name},"territory")
+        for b in territories_list:
+            bootinfo.company_territories.setdefault(com.name, []).append(b.territory)
     
     branch_list = frappe.db.get_all("Branch","name")
     actual_warehouse_branch_wise = {}

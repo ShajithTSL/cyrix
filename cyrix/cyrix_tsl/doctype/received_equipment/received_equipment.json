@@ -7,36 +7,38 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "model",
+  "item_group",
   "item_number",
+  "column_break_avnk",
+  "model",
   "manufacturer",
   "item_name",
   "column_break_5",
-  "suggested_price",
-  "has_serial_no",
-  "serial_no",
-  "category",
   "uom",
   "qty",
-  "item_group",
-  "column_break_auul",
-  "description",
+  "suggested_price",
+  "serial_no",
+  "has_serial_no",
   "complaint_section",
   "no_power",
-  "no_display",
   "no_output",
+  "no_display",
+  "column_break_faok",
+  "no_communication",
+  "no_backlight",
   "supply_voltage",
   "column_break_vmmb",
-  "no_communication",
-  "touchkeypad_not_working",
-  "no_backlight",
   "error_code",
-  "column_break_16",
   "short_circuit",
   "overloadovercurrent",
+  "column_break_16",
+  "touchkeypad_not_working",
   "other",
+  "column_break_kryn",
   "specify",
   "attach_customer_image",
+  "column_break_ummy",
+  "attach_image",
   "online_price_section",
   "price_type_section",
   "price",
@@ -45,7 +47,7 @@
   "websitelink",
   "used_websitelink",
   "warehouse_section",
-  "attach_image",
+  "column_break_yvkm",
   "column_break_34",
   "repair_warehouse"
  ],
@@ -53,7 +55,6 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "SKU",
    "options": "Item"
   },
@@ -85,20 +86,13 @@
    "options": "Item Mfg"
   },
   {
-   "columns": 2,
+   "columns": 3,
    "fetch_from": "item_code.item_name",
    "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Description and Specification"
-  },
-  {
-   "fetch_from": "item_code.description",
-   "fetch_if_empty": 1,
-   "fieldname": "description",
-   "fieldtype": "Text Editor",
-   "label": "Description"
   },
   {
    "fieldname": "column_break_5",
@@ -113,37 +107,33 @@
    "default": "0",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Has Serial No"
   },
   {
-   "columns": 1,
    "depends_on": "eval:(doc.has_serial_no == 1);",
    "fieldname": "serial_no",
    "fieldtype": "Data",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Serial No"
   },
   {
-   "fetch_from": "item_code.category",
-   "fetch_if_empty": 1,
-   "fieldname": "category",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Category",
-   "options": "Category"
-  },
-  {
+   "columns": 1,
+   "default": "Nos",
    "fetch_from": "item_code.stock_uom",
    "fetch_if_empty": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Unit/UOM",
    "options": "UOM"
   },
   {
+   "columns": 1,
    "default": "1",
    "fieldname": "qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Qty",
    "precision": "0"
   },
@@ -306,18 +296,34 @@
    "options": "Warehouse"
   },
   {
-   "fieldname": "column_break_auul",
+   "fieldname": "column_break_vmmb",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_vmmb",
+   "fieldname": "column_break_ummy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_yvkm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_avnk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_faok",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_kryn",
    "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-01 09:50:05.225923",
+ "modified": "2025-12-08 15:39:23.972019",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Received Equipment",

@@ -224,6 +224,11 @@ doc_events = {
         "on_cancel": [
             "cyrix.custom_py.payment_entry.update_payment_reference_cancel"			
 		]
+	},
+	"Contact": {
+		"before_save": [
+			"cyrix.custom_py.contact.before_save"
+		]
 	}
 }
 

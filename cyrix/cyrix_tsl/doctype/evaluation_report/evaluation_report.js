@@ -8,23 +8,33 @@ frappe.ui.form.on("Evaluation Report", {
 		const allChecked = child_table.every(row => row.released === 1); // Check if all checkboxes are enabled
 
 		if (!allChecked) {
-			console.log("vanakam")
 			frm.trigger("release_parts")
 		}
 	},
 
 	// Once all the materials were received, Release Parts button will be visible
 	release_parts: function(frm){
-		
-		if(frm.doc.parts_availability == "Yes" && frm.doc.docstatus == 1){
-			frm.add_custom_button(__("Release Parts"), function () {
-				frappe.call({
-					method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.release_parts",
-					args:{
-						'name':frm.doc.name,
-					},
-				});
-			}, __('Create'));
+		const child_table = frm.doc.items || [];
+		const scrapCount = child_table.filter(row => row.from_scrap === 1).length;
+		const totalItems = child_table.length;
+
+		const allScrap = (scrapCount === totalItems);        // all items are scrap
+		const hasNonScrap = scrapCount < totalItems;         // at least one non-scrap item exists
+		const singleScrap = (totalItems === 1 && scrapCount === 1);  // one item & it is scrap
+
+		if (frm.doc.parts_availability == "Yes" && frm.doc.docstatus == 1) {
+
+			// Show button ONLY if there is at least one non-scrap item
+			if (hasNonScrap && !singleScrap) {
+				frm.add_custom_button(__("Release Parts"), function () {
+					frappe.call({
+						method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.release_parts",
+						args:{
+							'name':frm.doc.name,
+						},
+					});
+				}, __('Create'));
+			}
 		}
 	},
 
@@ -37,6 +47,7 @@ frappe.ui.form.on("Evaluation Report", {
 			},
 			callback(r){
 				frm.refresh_fields()
+				cur_frm.reload_doc();
 			}
 		})
 	},
@@ -83,13 +94,16 @@ frappe.ui.form.on("Evaluation Report", {
 				filters: d
 			}
 		}
-		if(frappe.user.has_role("Technician") && (!frappe.user.has_role("Administrator"))){
-			set_field_options("status", ["Working","Spare Parts","Comparison","Parts Missing","Return Not Repaired","Return No Fault","RNP-Return No Parts"])
-			if(frm.doc.docstatus == 1){
-				frm.set_df_property('estimated_repair_time', 'hidden', 1);
-			}
-        }
+		set_field_options("status", ["Internal Extra Parts","Extra Parts","Working","Spare Parts","Comparison","Parts Missing","Return Not Repaired","Return No Fault","RNP-Return No Parts"])
+		if(frm.doc.docstatus == 1){
+			frm.set_df_property('estimated_repair_time', 'hidden', 1);
+			frm.set_df_property('evaluation_time', 'hidden', 1);
+			frm.set_df_property('extra_repair_time', 'hidden', 1);
+		}
 		frm.trigger("create_rfq")
+		if(frm.doc.status == "Extra Parts"){
+			frm.set_df_property('extra_repair_time', 'hidden', 0);
+		}
 	}
 });
 

@@ -217,7 +217,7 @@ def create_stock_entry(i,doc,jo):
 			'qty':i['qty'],
 			'uom':frappe.db.get_value("Item",i['item_code'],'stock_uom') or "Nos",
 			'branch':doc.branch,
-			# 'cost_center':frappe.db.get_value("Cost Center",{"company":doc.company,"is_repair":1}) or "",
+			'cost_center':frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
 			'job_order_data':jo.name,
 			'conversion_factor':1,
 			'allow_zero_valuation_rate':1
@@ -237,6 +237,9 @@ def get_jo_details(jo):
 	l = []
 	doc = frappe.get_doc("Job Order Data", jo)
 	for i in doc.get("material_list"):
+		incharge_name = frappe.db.get_value("Contact",doc.incharge,['first_name']) 
+		incharge_email = frappe.db.get_value("Contact",doc.incharge,['email_id']) 
+		incharge_phone_no = frappe.db.get_value("Contact",doc.incharge,['mobile_no']) 
 		l.append(frappe._dict({
 			"item_name": i.item_name,
 			"item_code": i.item_code,
@@ -247,6 +250,9 @@ def get_jo_details(jo):
 			"sales_rep": doc.sales_rep,
 			"customer": doc.customer,
 			"incharge": doc.incharge,
+			"incharge_name": incharge_name,
+			"incharge_email": incharge_email,
+			"incharge_phone_no": incharge_phone_no,
 			"address": doc.address,
 			"repair_warehouse": doc.repair_warehouse,
 			"branch": doc.branch,
@@ -266,3 +272,16 @@ def get_contacts(customer):
 	for i in doc.get("sales_team"):
 		sales_person.append(i.sales_person)
 	return [customer_rep, sales_person]
+
+
+def updates():
+	new_doc = frappe.new_doc('Item')
+	new_doc.naming_series = '.######'
+	new_doc.item_name = "Voltas - ITEM"
+	new_doc.item_code = "Voltas - ITEM"
+	new_doc.item_group = "Equipments"
+	new_doc.description = "Voltas - ITEM"
+	new_doc.model = "M000005"
+	new_doc.is_stock_item = 1
+	new_doc.mfg = "Voltas"
+	new_doc.save(ignore_permissions=True)

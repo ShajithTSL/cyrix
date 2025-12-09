@@ -214,7 +214,7 @@ def create_rfq(name):
 	rfq.items=[]
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
 	for i in doc.get("items"):
-		if i.parts_availability == "No" :
+		if i.parts_availability == "No" and i.from_scrap == 0:
 			rfq.append("items",{
 				"item_code":i.part,
 				"item_name":i.part_name,
@@ -261,7 +261,7 @@ def release_parts(name):
 		new_doc.from_warehouse = warehouse
 
 		for i in doc.items:
-			if i.released != 1:
+			if i.released != 1 and i.from_scrap == 0:
 				new_doc.append("items", {
 					's_warehouse': warehouse,
 					'item_code': i.part,

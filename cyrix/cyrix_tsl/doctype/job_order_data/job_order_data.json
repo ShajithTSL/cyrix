@@ -24,8 +24,6 @@
   "expiry_date",
   "priority_status",
   "mistaken_ner",
-  "status_cap",
-  "status_cap_date",
   "column_break_7",
   "received_date",
   "company",
@@ -33,12 +31,14 @@
   "repair_warehouse",
   "posting_date",
   "department",
+  "status_cap",
   "column_break_cwfo",
   "technician",
   "status",
   "parent_jo",
   "payment_terms",
   "plant",
+  "status_cap_date",
   "section_break_14",
   "image",
   "attach_image",
@@ -69,16 +69,18 @@
   "no_power",
   "no_output",
   "no_display",
+  "column_break_mvnb",
   "no_communication",
   "no_backlight",
-  "column_break_mvnb",
   "supply_voltage",
+  "column_break_nvav",
   "error_code",
-  "touch_keypad_not_working",
   "short_circuit",
   "overload_overcurrent",
-  "column_break_43",
+  "column_break_umjh",
+  "touch_keypad_not_working",
   "others",
+  "column_break_43",
   "specify",
   "column_break_lquf",
   "remarks",
@@ -91,7 +93,9 @@
   "online_price_section",
   "price_table",
   "tech_id",
-  "amended_from"
+  "amended_from",
+  "tab_5_tab",
+  "detail_html"
  ],
  "fields": [
   {
@@ -237,7 +241,7 @@
    "allow_on_submit": 1,
    "fieldname": "status_cap_date",
    "fieldtype": "Date",
-   "label": "Status Cap Date",
+   "label": "First NER Date",
    "read_only": 1
   },
   {
@@ -388,7 +392,8 @@
    "allow_on_submit": 1,
    "fieldname": "attach_image",
    "fieldtype": "Data",
-   "label": "Attach Image"
+   "label": "Attach Image",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_dc2tn",
@@ -578,6 +583,7 @@
   {
    "fieldname": "linked_docs_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Linked Docs"
   },
   {
@@ -652,13 +658,31 @@
   {
    "fieldname": "column_break_lquf",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tab_5_tab",
+   "fieldtype": "Tab Break",
+   "label": "Summary"
+  },
+  {
+   "fieldname": "detail_html",
+   "fieldtype": "HTML",
+   "label": "detail html"
+  },
+  {
+   "fieldname": "column_break_nvav",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_umjh",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-03 09:11:42.721139",
+ "modified": "2025-12-08 15:36:06.527241",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

@@ -10,13 +10,13 @@
   "item_name0",
   "model_no",
   "mfg",
+  "column_break_jhqf",
   "category",
-  "column_break_6",
   "serial_no",
   "update_serial",
   "item_name",
-  "wo",
   "quantity",
+  "column_break_6",
   "price",
   "amount",
   "online_price"
@@ -76,6 +76,7 @@
    "columns": 1,
    "fieldname": "serial_no",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Serial No",
    "options": "Serial No"
@@ -83,6 +84,7 @@
   {
    "fieldname": "update_serial",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Update Serial No"
   },
   {
@@ -93,12 +95,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Description and Specification"
-  },
-  {
-   "fieldname": "wo",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "WO"
   },
   {
    "default": "1",
@@ -127,13 +123,17 @@
    "fieldtype": "Currency",
    "label": "Online Price",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_jhqf",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-10 14:25:35.473677",
+ "modified": "2025-12-08 15:44:53.213703",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Material List",

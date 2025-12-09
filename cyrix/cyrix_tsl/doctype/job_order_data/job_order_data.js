@@ -12,6 +12,8 @@ frappe.ui.form.on("Job Order Data", {
 		frm.trigger("route_to_jo_creation")
 		frm.trigger("create_delivery_note")
 		frm.trigger("create_return_note")
+		const html = frappe.render_template("job_order_data", {});
+        frm.fields_dict.detail_html.$wrapper.html(html);
 	},
     create_evaluation_report(frm){
         if(frm.doc.docstatus == 1) {

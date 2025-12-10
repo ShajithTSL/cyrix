@@ -12,8 +12,25 @@ frappe.ui.form.on("Job Order Data", {
 		frm.trigger("route_to_jo_creation")
 		frm.trigger("create_delivery_note")
 		frm.trigger("create_return_note")
-		const html = frappe.render_template("job_order_data", {});
-        frm.fields_dict.detail_html.$wrapper.html(html);
+		// context = {
+		// 	"doc": frappe.get_doc(self.reference_doctype, self.reference_name),
+		// 	"payment_url": self.payment_url,
+		// }
+		frappe.call({
+			method:"cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.fetch_payment_details",
+			args:{
+				name: frm.doc.name
+			},
+			callback(r){
+				if(r.message){
+					const html = frappe.render_template("job_order_data", {
+						doc: frm.doc,
+						payment_details: r.message
+					});
+					frm.fields_dict.detail_html.$wrapper.html(html);
+				}
+			}
+		})
 	},
     create_evaluation_report(frm){
         if(frm.doc.docstatus == 1) {

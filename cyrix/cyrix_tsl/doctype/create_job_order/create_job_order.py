@@ -110,7 +110,7 @@ def create_job_order_data(dict):
 		else:
 			jo.naming_series = naming_series[doc.branch]["normal"]
 		jo.customer = doc.customer
-		jo.sales_rep = doc.sales_person
+		jo.sales_person = doc.sales_person
 		jo.incharge = doc.incharge
 		jo.priority_status = doc.sts
 		jo.branch = doc.branch
@@ -247,7 +247,7 @@ def get_jo_details(jo):
 			"model_no": i.model_no,
 			"serial_no": i.serial_no,
 			"qty": i.quantity,
-			"sales_rep": doc.sales_rep,
+			"sales_person": doc.sales_person,
 			"customer": doc.customer,
 			"incharge": doc.incharge,
 			"incharge_name": incharge_name,

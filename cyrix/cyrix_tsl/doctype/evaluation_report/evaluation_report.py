@@ -187,6 +187,10 @@ def sku_creation(doc): # Item creation
 
 				try:
 					item_doc.save(ignore_permissions=True)
+					if not des:
+						frappe.db.set_value("Item",item_doc.name,"description",item_doc.name,update_modified = False)
+						frappe.db.set_value("Item",item_doc.name,"item_name",item_doc.name,update_modified = False)
+
 					frappe.db.set_value("Part Sheet Item",pm.get("name"),'part',item_doc.name)
 					sku_list.append(item_doc.name)
 				except Exception as e:

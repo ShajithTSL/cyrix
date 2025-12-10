@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "sales_rep",
+  "sales_person",
   "customer",
   "customer_name",
   "incharge",
@@ -89,14 +89,6 @@
    "in_global_search": 1,
    "label": "Naming Series",
    "options": "SOD-.YY.-\nST-K.YY.-\nSOD-R.YY.-\nSOD-D.YY.-\nSOD-J.YY.-\nSOD-K.YY.-\nSOD-DU.YY.-\nSOD-DU-O-.YY.-\nSOD-DU.YY.-P."
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "sales_rep",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Sales Rep",
-   "options": "Sales Person"
   },
   {
    "allow_on_submit": 1,
@@ -494,13 +486,21 @@
    "fieldtype": "Int",
    "label": "Delivered Quantity",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Sales Person",
+   "options": "Sales Person"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-04 15:50:59.074577",
+ "modified": "2025-12-09 16:10:01.617333",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

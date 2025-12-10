@@ -31,14 +31,16 @@
   "no_power",
   "no_output",
   "no_display",
+  "column_break_vbpq",
   "no_communication",
   "no_backlight",
   "supply_voltage",
   "column_break_23",
   "error_code",
-  "touch_keypad_not_working",
   "short_circuit",
   "overload_overcurrent",
+  "column_break_clhj",
+  "touch_keypad_not_working",
   "others",
   "specify",
   "column_break_13",
@@ -61,11 +63,11 @@
   "status",
   "section_break_25",
   "evaluation_time",
-  "extra_repair_time",
-  "column_break_cb5ok",
-  "estimated_repair_time",
   "repaired_time",
   "return_repair_time",
+  "column_break_cb5ok",
+  "estimated_repair_time",
+  "extra_repair_time",
   "technician_comment_section",
   "comment",
   "info_comment",
@@ -82,7 +84,8 @@
   "column_break_55",
   "technician_image",
   "technician_image_multiple",
-  "technician_id"
+  "technician_id",
+  "amended_from"
  ],
  "fields": [
   {
@@ -267,7 +270,7 @@
    "default": "0",
    "fieldname": "overload_overcurrent",
    "fieldtype": "Check",
-   "label": "Overload/ Overcurrent"
+   "label": "Burnt Components"
   },
   {
    "allow_on_submit": 1,
@@ -580,12 +583,30 @@
   {
    "fieldname": "column_break_obvw",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_vbpq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_clhj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Evaluation Report",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 09:53:26.218842",
+ "modified": "2025-12-09 10:47:42.349011",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Evaluation Report",

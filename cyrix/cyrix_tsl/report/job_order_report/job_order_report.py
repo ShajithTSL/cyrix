@@ -377,7 +377,7 @@
 # 				row.append({
 # 					"job_order": jo.name,
 # 					"posting_date": jo.posting_date,
-# 					"sales_person": jo.sales_rep,
+# 					"sales_person": jo.sales_person,
 # 					"company": jo.company,
 # 					"branch": jo.branch,
 # 					"mfg": material.mfg,
@@ -578,7 +578,7 @@ def create_rows(jo, material_list_data, quote_details, technician_names, status_
 		rows.append({
 			"job_order": jo.name,
 			"posting_date": jo.posting_date,
-			"sales_person": jo.sales_rep,
+			"sales_person": jo.sales_person,
 			"company": jo.company,
 			"branch": jo.branch,
 			"mfg": material.mfg,

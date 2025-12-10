@@ -8,7 +8,7 @@ frappe.ui.form.on('Invoice Cancellation', {
 				filters:[
 					['company', '=', doc.company],
 					['branch', '=', doc.branch],
-					['sales_rep', '=', doc.sales_person],
+					['sales_person', '=', doc.sales_person],
 					['status', '!=', "C-Cancelled"],
 					['invoice_no', 'is', 'set']
 				]
@@ -20,7 +20,7 @@ frappe.ui.form.on('Invoice Cancellation', {
 				filters:[
 					['company', '=', doc.company],
 					['branch', '=', doc.branch],
-					['sales_rep', '=', doc.sales_person],
+					['sales_person', '=', doc.sales_person],
 					['is_return', '!=', "1"],
 				]
 			};

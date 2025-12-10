@@ -8,7 +8,7 @@
  "field_order": [
   "details_tab",
   "naming_series",
-  "sales_rep",
+  "sales_person",
   "sales_rep_name",
   "customer",
   "customer_name",
@@ -112,15 +112,6 @@
    "in_preview": 1,
    "label": "Naming Series",
    "options": "WOD-.YY.-\nWOD-R.YY.-\nWOD-D.YY.-\nWOD-J.YY.-\nWOD-K.YY.-\nWOD-KO.YY.-\nWOD-DU-O-.YY.-\nWOD-DU.YY.-P.\nWOD-DU.YY.-PA."
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "sales_rep",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "in_standard_filter": 1,
-   "label": "Sales Rep",
-   "options": "Sales Person"
   },
   {
    "fieldname": "sales_rep_name",
@@ -329,17 +320,15 @@
   {
    "allow_on_submit": 1,
    "fieldname": "purchase_order_no",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Purchase Order",
-   "options": "Purchase Order",
    "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "dn_no",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Delivery Note",
-   "options": "Delivery Note",
    "read_only": 1
   },
   {
@@ -583,7 +572,6 @@
   {
    "fieldname": "linked_docs_tab",
    "fieldtype": "Tab Break",
-   "hidden": 1,
    "label": "Linked Docs"
   },
   {
@@ -676,13 +664,22 @@
   {
    "fieldname": "column_break_umjh",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Person",
+   "options": "Sales Person"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-08 15:36:06.527241",
+ "modified": "2025-12-09 16:07:40.269760",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

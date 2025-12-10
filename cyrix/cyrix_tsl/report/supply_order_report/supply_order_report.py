@@ -61,7 +61,7 @@ def get_data(filters):
 			rows.append({
 				"job_order": order.name,
 				"posting_date": order.posting_date,
-				"sales_person": order.sales_rep,
+				"sales_person": order.sales_person,
 				"company": order.company,
 				"branch": order.branch,
 				"mfg": material.mfg,

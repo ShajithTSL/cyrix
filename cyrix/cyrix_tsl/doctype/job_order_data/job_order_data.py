@@ -96,7 +96,7 @@ def create_evaluation_report(doc_no):
 	field_map = {
 		"company": "company",
 		"customer": "customer",
-		"sales_rep": "attn",
+		"sales_person": "attn",
 		"name": "job_order_data",
 		"attach_image": "attach_image",
 		"technician": "technician",
@@ -163,7 +163,7 @@ from cyrix.custom_py.quotation import fetch_item_price_details
 def create_internal_quotation(job_order_data):
 	doc = frappe.get_doc("Job Order Data",job_order_data)
 	new_doc= frappe.new_doc("Quotation")
-	new_doc.sales_rep = doc.sales_rep
+	new_doc.sales_person = doc.sales_person
 	new_doc.naming_series = naming_series["Internal Quotation - Repair"][doc.branch]
 	new_doc.company = doc.company
 	new_doc.party_name = doc.customer
@@ -213,7 +213,7 @@ def create_delivery_note(job_order_data):
 	new_doc.company = doc.company
 	new_doc.customer = doc.customer
 	new_doc.plant = doc.plant
-	new_doc.custom_sales_person = doc.sales_rep
+	new_doc.custom_sales_person = doc.sales_person
 	new_doc.branch = doc.branch
 	new_doc.selling_price_list = "Standard Selling"
 	new_doc.department = doc.department
@@ -222,7 +222,7 @@ def create_delivery_note(job_order_data):
 	new_doc.contact_person = doc.incharge
 	new_doc.job_order_data = job_order_data
 
-	# new_doc.sales_rep = frappe.get_value("Sales Person",doc.sales_rep,"custom_user")
+	# new_doc.sales_person = frappe.get_value("Sales Person",doc.sales_person,"custom_user")
 	quote = []
 	for i in doc.get("material_list"):
 		qi_details = frappe.db.sql('''select q.name,
@@ -327,3 +327,22 @@ def fetch_repair_warehouse(company,branch):
 	warehouse = frappe.db.get_value("Warehouse List",{"branch":branch,"parent":company},["repair_warehouse"])
 
 	return warehouse
+
+@frappe.whitelist()
+def fetch_payment_details(name):
+	data = frappe.db.sql("""
+		SELECT 
+			t.parent AS payment_entry,
+			t.allocate_amount AS amount,
+			p.posting_date,
+			p.paid_to_account_currency AS currency
+		FROM `tabJob Order table` t
+		JOIN `tabPayment Entry` p
+			ON p.name = t.parent
+		WHERE 
+			t.parenttype = 'Payment Entry'
+			AND t.reference_type = 'Job Order Data'
+			AND t.reference_name = %s
+			AND p.docstatus = 1
+	""", (name), as_dict=True)
+	return data

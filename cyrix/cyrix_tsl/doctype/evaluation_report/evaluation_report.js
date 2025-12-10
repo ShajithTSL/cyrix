@@ -40,6 +40,9 @@ frappe.ui.form.on("Evaluation Report", {
 
 	// Item Creation
 	create_sku: function(frm){
+		if (frm.is_dirty()) {
+			frappe.throw("Save the document first")
+		}
 		frappe.call({
 			method:"cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.sku_creation",
 			args:{

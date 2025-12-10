@@ -92,7 +92,7 @@ from cyrix.custom_py.quotation import fetch_item_price_details
 def create_internal_quotation(supply_order_data):
 	doc = frappe.get_doc("Supply Order Data",supply_order_data)
 	new_doc= frappe.new_doc("Quotation")
-	new_doc.sales_rep = doc.sales_rep
+	new_doc.sales_person = doc.sales_person
 	if doc.branch:
 		d = {
 			"Internal Quotation - Supply":{
@@ -144,7 +144,7 @@ def create_delivery_note(supply_order_data):
 	new_doc.set_warehouse = doc.warehouse
 	new_doc.purchase_order_no = doc.po_no
 	new_doc.supply_order_data = doc.name
-	new_doc.custom_sales_person = doc.sales_rep
+	new_doc.custom_sales_person = doc.sales_person
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
 	list_ = []
 	for i in doc.get("material_list"):
@@ -198,7 +198,7 @@ def create_sales_invoice(supply_order_data):
 	new_doc.branch = doc.branch
 	new_doc.department = doc.department
 	new_doc.supply_order_data = supply_order_data
-	new_doc.sales_person = doc.sales_rep
+	new_doc.sales_person = doc.sales_person
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
 	new_doc.cost_center = doc.department
 	sales_invoice_list = []

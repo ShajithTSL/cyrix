@@ -30,7 +30,7 @@ frappe.ui.form.on('Service Call Form', {
                 customer: "customer",
                 branch: "branch",
                 department: "department",
-                sales_rep: "salesman_name"
+                sales_person: "sales_person"
             };
 
             for (let source_field in fields_to_fetch) {

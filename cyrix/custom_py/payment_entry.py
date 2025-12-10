@@ -98,13 +98,12 @@ def update_payment_reference(self, method):
                 updated_amount = (doc.advance_payment_amount or 0) + row.allocate_amount
 
                 # Determine status based on updated payment
-                if doc.dn_no:
-                    if doc.invoiced_value == updated_amount:
-                        doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
-                    elif updated_amount == 0:
-                        doc.status = "Unpaid"
-                    elif doc.dn_no:
-                        doc.status = "Partially Paid"
+                if doc.invoiced_value == updated_amount:
+                    doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
+                elif updated_amount == 0:
+                    doc.status = "Unpaid"
+                else:
+                    doc.status = "Partially Paid"
 
                 # Update fields
                 doc.payment_entry = self.name
@@ -126,13 +125,12 @@ def update_payment_reference_cancel(self, method):
                 updated_amount = (doc.advance_payment_amount or 0) - row.allocate_amount
 
                 # Determine status based on updated payment
-                if doc.dn_no:
-                    if doc.invoiced_value == updated_amount:
-                        doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
-                    elif updated_amount == 0:
-                        doc.status = "Unpaid"
-                    elif doc.dn_no:
-                        doc.status = "Partially Paid"
+                if doc.invoiced_value == updated_amount:
+                    doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
+                elif updated_amount == 0:
+                    doc.status = "Unpaid"
+                else:
+                    doc.status = "Partially Paid"
 
                 # Update fields
                 doc.payment_entry = ''

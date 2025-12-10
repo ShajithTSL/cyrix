@@ -461,8 +461,6 @@ def get_supply_order_data(supply_order_data):
 def create_sales_invoice(source):
     sales_invoice = frappe.new_doc("Sales Invoice")
     doc = frappe.get_doc("Quotation",source)
-    # sales_invoice.custom_sales_person = doc.custom_sales_person
-    # sales_invoice.sales_rep = doc.sales_rep
     doclist = get_mapped_doc("Quotation",source , {
         "Quotation": {
             "doctype": "Sales Invoice",

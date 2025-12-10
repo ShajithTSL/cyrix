@@ -7,9 +7,11 @@
  "engine": "InnoDB",
  "field_order": [
   "tsl_inventory",
+  "column_break_lkxt",
   "supplier",
   "column_break_fylj",
   "scrap",
+  "column_break_ymjn",
   "total_material_cost"
  ],
  "fields": [
@@ -40,12 +42,20 @@
   {
    "fieldname": "column_break_fylj",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lkxt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ymjn",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-27 13:44:29.257760",
+ "modified": "2025-12-09 10:55:18.970237",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Parts Price",

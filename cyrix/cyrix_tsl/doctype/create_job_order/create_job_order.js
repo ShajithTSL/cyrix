@@ -196,7 +196,7 @@ frappe.ui.form.on("Create Job Order", {
 								childTable.type = r.message[i]["type"],
 								childTable.qty = r.message[i]["qty"]
 							}
-                            frm.doc.sales_person = r.message[i]["sales_rep"],
+                            frm.doc.sales_person = r.message[i]["sales_person"],
                             frm.doc.customer = r.message[i]["customer"],
 							frm.doc.address = r.message[i]["address"],
 							frm.doc.incharge = r.message[i]["incharge"],

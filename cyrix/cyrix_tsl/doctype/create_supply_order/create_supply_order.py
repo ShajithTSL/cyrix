@@ -30,7 +30,7 @@ def create_supply_order_data(dict):
 	so = frappe.new_doc("Supply Order Data")
 	so.naming_series = naming_series[doc.branch]["normal"]
 	so.customer = doc.customer
-	so.sales_rep = doc.sales_person
+	so.sales_person = doc.sales_person
 	so.incharge = doc.incharge
 	so.priority_status = doc.sts
 	so.branch = doc.branch

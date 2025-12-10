@@ -1,45 +1,68 @@
 
     <div class="container">
+        {% if doc.quotation || doc.purchase_order_no %}
         <!-- Document Summary Section -->
         <div class="summary-section">
             <h3>Document Summary</h3>
             <div class="summary-grid">
                 <div class="summary-item">
+                    {% if doc.quotation %}
                     <div class="summary-label">Quotation</div>
-                    <a href="/app/quotation/CQR-K25-00001" class="doc-link summary-value">CQR-K25-00001</a>
-                    <div class="summary-label" style="margin-top:0.5rem;">Date</div>
-                    <div class="summary-value">07-12-2025</div>
+                    <a href="/app/quotation/{{doc.quotation}}" class="doc-link summary-value">{{doc.quotation}}</a>
+                    {% endif %}
+
+                    {% if doc.quotation_approved_date %}
+                    <div class="summary-label" style="margin-top:0.5rem;">Quotation Approved Date</div>
+                    <div class="summary-value">{{ frappe.datetime.str_to_user(doc.quotation_approved_date) }}</div>
+                    {% endif %}
                 </div>
 
                 <div class="summary-item">
-                    <div class="summary-label">PO Number</div>
-                    <a href="/app/purchase-order/PO-K25-00002" class="doc-link summary-value">PO-K25-00002</a>
-                    <div class="summary-label" style="margin-top:0.5rem;">Date</div>
-                    <div class="summary-value">05-12-2025</div>
+                    {% if doc.purchase_order_no %}
+                    <div class="summary-label">Purchase Order No</div>
+                    <a href="/app/purchase-order/{{doc.purchase_order_no}}" class="doc-link summary-value">{{doc.purchase_order_no}}</a>
+                    {% endif %}
+
+                    {% if doc.po_no %}
+                    <div class="summary-label" style="margin-top:0.5rem;">Customer PO Number</div>
+                    <div class="summary-value">{{doc.po_no}}</div>
+                    {% endif %}
                 </div>
 
+                {% if doc.invoice_no %}
                 <div class="summary-item">
                     <div class="summary-label">Sales Invoice</div>
-                    <a href="/app/sales-invoice/INV-R25-00004" class="doc-link summary-value">INV-R25-00004</a>
-                    <div class="summary-label" style="margin-top:0.5rem;">Date</div>
-                    <div class="summary-value">07-12-2025</div>
+                    <a href="/app/sales-invoice/{{doc.invoice_no}}" class="doc-link summary-value">{{doc.invoice_no}}</a>
+                    <div class="summary-label" style="margin-top:0.5rem;">Sales Invoice Date</div>
+                    <div class="summary-value">{{frappe.datetime.str_to_user(doc.invoice_date)}}</div>
                 </div>
+                {% endif %}
 
+                {% if doc.dn_no %}
                 <div class="summary-item">
                     <div class="summary-label">Delivery Note</div>
-                    <a href="/app/delivery-note/DN-K25-00001" class="doc-link summary-value">DN-K25-00001</a>
-                    <div class="summary-label" style="margin-top:0.5rem;">Date</div>
-                    <div class="summary-value">07-12-2025</div>
+                    <a href="/app/delivery-note/{{doc.dn_no}}" class="doc-link summary-value">{{doc.dn_no}}</a>
+                    <div class="summary-label" style="margin-top:0.5rem;">Delivered Date</div>
+                    <div class="summary-value">{{ frappe.datetime.str_to_user(doc.dn_date)}}</div>
                 </div>
+                {% endif %}
+
+                {% if doc.return_note %}
+                <div class="summary-item">
+                    <div class="summary-label">Return Note</div>
+                    <a href="/app/return-note/{{doc.return_note}}" class="doc-link summary-value">{{doc.return_note}}</a>
+                </div>
+                {% endif %}
             </div>
         </div>
+        {% endif %}
 
-
+        {% if payment_details.length %}
         <!-- Payment Entries Table -->
         <div class="table-wrapper">
             <div class="table-header">
-                <h2>Payment Entries</h2>
-                <div class="payment-count">3 Payments</div>
+                <h2 style="color:rgb(255, 255, 255)">Payment Entries</h2>
+                <div class="payment-count">{{payment_details.length}} Payments</div>
             </div>
 
             <div style="overflow-x: auto;">
@@ -53,31 +76,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Row 1 -->
+                        {% for pay in payment_details %}
                         <tr>
-                            <td><a href="/app/payment-entry/ACC-PAY-2025-00005-1" class="doc-link">ACC-PAY-2025-00005-1</a></td>
-                            <td class="amount">₹ 640</td>
-                            <td class="date">07-12-2025</td>
+                            <td><a href="/app/payment-entry/{{pay.payment_entry}}" class="doc-link">{{pay.payment_entry}}</a></td>
+                            <td class="amount"><b>{{pay.currency}} </b>{{pay.amount}}</td>
+                            <td class="date">{{frappe.datetime.str_to_user(pay.posting_date)}}</td>
                             <td><span class="status-badge status-submitted">Submitted</span></td>
                         </tr>
-
-                        <!-- Row 2 -->
-                        <tr>
-                            <td><a href="/app/payment-entry/ACC-PAY-2025-00006-1" class="doc-link">ACC-PAY-2025-00006-1</a></td>
-                            <td class="amount">₹ 320</td>
-                            <td class="date">10-12-2025</td>
-                            <td><span class="status-badge status-submitted">Submitted</span></td>
-                        </tr>
-
-                        <!-- Row 3 -->
-                        <tr>
-                            <td><a href="/app/payment-entry/ACC-PAY-2025-00007-1" class="doc-link">ACC-PAY-2025-00007-1</a></td>
-                            <td class="amount">₹ 1,250</td>
-                            <td class="date">15-12-2025</td>
-                            <td><span class="status-badge status-submitted">Submitted</span></td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
+        {% endif %}
     </div>
+    <br>

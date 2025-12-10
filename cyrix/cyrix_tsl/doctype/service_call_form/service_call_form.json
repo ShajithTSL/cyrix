@@ -10,8 +10,7 @@
   "naming_series",
   "customer",
   "customer_name",
-  "salesman_name",
-  "salesman_name1",
+  "sales_person",
   "document_type",
   "related_doc",
   "branch",
@@ -57,22 +56,6 @@
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "label": "Customer Name",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "salesman_name",
-   "fieldtype": "Link",
-   "label": "Salesman",
-   "options": "Sales Person",
-   "reqd": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fetch_from": "salesman_name.sales_person_name",
-   "fieldname": "salesman_name1",
-   "fieldtype": "Data",
-   "label": "Salesman Name",
    "read_only": 1
   },
   {
@@ -205,6 +188,14 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -219,7 +210,7 @@
    "link_fieldname": "service_call_form"
   }
  ],
- "modified": "2025-09-10 10:07:00.479127",
+ "modified": "2025-12-09 15:57:10.752728",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Service Call Form",

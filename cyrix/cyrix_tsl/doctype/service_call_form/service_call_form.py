@@ -17,7 +17,7 @@ def create_qtn(source):
 	new_doc.customer_address = frappe.db.get_value("Customer",doc.customer,"customer_primary_address")
 	new_doc.address_display = frappe.db.get_value("Customer",doc.customer,"primary_address")
 	new_doc.quotation_type = "Internal Quotation - Site Visit"
-	new_doc.sales_rep = doc.salesman_name
+	new_doc.sales_person = doc.sales_person
 	new_doc.service_call_form = doc.name
 	new_doc.branch = doc.branch
 	new_doc.append("items",{

@@ -23,7 +23,7 @@ def update_job_order_status(doc,method):
             jo.status = "RSC-Repaired and Shipped Client"        
         jo.dn_no=doc.name
         jo.dn_date=doc.posting_date
-        jo.warranty=doc.warranty
+        jo.warranty=doc.warranty_months
         jo.delivery=doc.posting_date
         jo.save(ignore_permissions = True)
         

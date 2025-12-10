@@ -25,6 +25,8 @@ def update_job_order_data(dict):
 			# Fetch delivery date and warranty duration from Job Order Data
 			warr = frappe.db.get_value("Job Order Data", doc.job_order_data, ["delivery", "warranty"], as_dict=1)
 			if warr['delivery'] and warr['warranty']:
+				if warr['warranty'] == "NA":
+					frappe.throw("Warranty Not Applicable")
 				# Calculate warranty expiry date
 				date = frappe.utils.add_to_date(warr['delivery'], months=int(warr['warranty']))
 
@@ -60,7 +62,9 @@ def update_job_order_data(dict):
 					
 					# Set Job Order Data CAP status and date
 					frappe.db.set_value("Job Order Data", doc.job_order_data, "status_cap", "NER-Need Evaluation Return")
-					frappe.db.set_value("Job Order Data", doc.job_order_data, "status_cap_date", datetime.now().date())
+					status_cap_exists = frappe.db.get_value("Job Order Data", doc.job_order_data, "status_cap_date")
+					if not status_cap_exists:
+						frappe.db.set_value("Job Order Data", doc.job_order_data, "status_cap_date", datetime.now().date())
 
 					jo_list = [""" <a href='/app/job-order-data/{0}'>{0}</a> """.format(doc.job_order_data)]
 					frappe.msgprint("Job Order Updated: "+', '.join(jo_list))

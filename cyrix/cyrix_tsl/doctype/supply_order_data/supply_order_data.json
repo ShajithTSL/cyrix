@@ -350,8 +350,9 @@
   {
    "allow_on_submit": 1,
    "fieldname": "plant",
-   "fieldtype": "Data",
-   "label": "Plant"
+   "fieldtype": "Link",
+   "label": "Plant",
+   "options": "Plant"
   },
   {
    "fieldname": "section_break_14",
@@ -500,7 +501,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 16:10:01.617333",
+ "modified": "2025-12-10 11:55:19.166861",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

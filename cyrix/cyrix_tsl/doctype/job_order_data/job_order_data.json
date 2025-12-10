@@ -15,6 +15,7 @@
   "customer_rep",
   "address",
   "unit_type",
+  "priority_status",
   "column_break_ljre",
   "customer_email",
   "incharge",
@@ -22,8 +23,6 @@
   "delivery",
   "returned_date",
   "expiry_date",
-  "priority_status",
-  "mistaken_ner",
   "column_break_7",
   "received_date",
   "company",
@@ -39,6 +38,7 @@
   "payment_terms",
   "plant",
   "status_cap_date",
+  "mistaken_ner",
   "section_break_14",
   "image",
   "attach_image",
@@ -364,8 +364,9 @@
   {
    "allow_on_submit": 1,
    "fieldname": "plant",
-   "fieldtype": "Data",
-   "label": "Plant"
+   "fieldtype": "Link",
+   "label": "Plant",
+   "options": "Plant"
   },
   {
    "fieldname": "section_break_14",
@@ -679,7 +680,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 16:07:40.269760",
+ "modified": "2025-12-10 11:54:56.154840",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

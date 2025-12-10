@@ -4,6 +4,9 @@
 import frappe
 from frappe.model.document import Document
 from datetime import datetime
+from cyrix.custom_py.quotation import fetch_item_price_details
+from cyrix.custom_py import utils
+
 from cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report import warehouse_based_on_branch_and_company
 naming_series = {
 	"Internal Quotation - Repair":{
@@ -158,7 +161,6 @@ def create_evaluation_report(doc_no):
 
 	return new_doc
 
-from cyrix.custom_py.quotation import fetch_item_price_details
 @frappe.whitelist()
 def create_internal_quotation(job_order_data):
 	doc = frappe.get_doc("Job Order Data",job_order_data)
@@ -168,7 +170,9 @@ def create_internal_quotation(job_order_data):
 	new_doc.company = doc.company
 	new_doc.party_name = doc.customer
 	new_doc.plant = doc.plant
-	new_doc.branch = doc.branch
+	new_doc.branch = doc.branch	
+	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
+
 	new_doc.quotation_type = "Internal Quotation - Repair"
 	for i in doc.material_list:
 		new_doc.append("items",{
@@ -215,7 +219,7 @@ def create_delivery_note(job_order_data):
 	new_doc.plant = doc.plant
 	new_doc.custom_sales_person = doc.sales_person
 	new_doc.branch = doc.branch
-	new_doc.selling_price_list = "Standard Selling"
+	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
 	new_doc.department = doc.department
 	new_doc.set_warehouse = fetch_repair_warehouse(doc.company,doc.branch)
 	new_doc.customer_address = doc.address

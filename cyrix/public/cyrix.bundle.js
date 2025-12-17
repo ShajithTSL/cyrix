@@ -947,7 +947,14 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 	}
 
 	refresh(have_filters_changed) {
-		frappe.query_report.set_filter_value("company",frappe.defaults.get_user_default("company"))
+		let company_filter = frappe.query_report.get_filter("company");
+		if (company_filter) {
+			frappe.query_report.set_filter_value(
+				"company",
+				frappe.defaults.get_user_default("company")
+			);
+		}
+
 		this.toggle_message(true);
 		this.toggle_report(false);
 		let filters = this.get_filter_values(!this.prepared_report_name);

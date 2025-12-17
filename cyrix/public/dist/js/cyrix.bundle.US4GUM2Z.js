@@ -6126,7 +6126,13 @@ window.company_change = function() {
       this.page.clear_fields();
     }
     refresh(have_filters_changed) {
-      frappe.query_report.set_filter_value("company", frappe.defaults.get_user_default("company"));
+      let company_filter = frappe.query_report.get_filter("company");
+      if (company_filter) {
+        frappe.query_report.set_filter_value(
+          "company",
+          frappe.defaults.get_user_default("company")
+        );
+      }
       this.toggle_message(true);
       this.toggle_report(false);
       let filters = this.get_filter_values(!this.prepared_report_name);
@@ -7382,4 +7388,4 @@ window.company_change = function() {
   };
 })();
 /*! Sortable 1.15.0 - MIT | git://github.com/SortableJS/Sortable.git */
-//# sourceMappingURL=cyrix.bundle.UZ3HGCKU.js.map
+//# sourceMappingURL=cyrix.bundle.US4GUM2Z.js.map

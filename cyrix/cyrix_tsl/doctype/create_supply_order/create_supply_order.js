@@ -7,7 +7,7 @@ frappe.ui.form.on("Create Supply Order", {
 			frm.set_value("repair_warehouse", null);
 			return
 		}
-		frappe.db.get_value('Warehouse', {'is_repair_warehouse':0,'company':frm.doc.company,"name":["like","%"+frm.doc.branch+"%"]}, 'name', (values) => {
+		frappe.db.get_value('Warehouse', {'is_repair_warehouse':0,'company':frappe.defaults.get_default("company"),"name":["like","%"+frm.doc.branch+"%"]}, 'name', (values) => {
 			frm.set_value("repair_warehouse", values.name);
 		});
 	},
@@ -43,23 +43,43 @@ frappe.ui.form.on("Create Supply Order", {
 		frm.set_query("repair_warehouse", function () {
 			return {
 				filters: [
-					["company", "=", frm.doc.company],
-					["is_repair_warehouse", "=", 1]
+					["company", "=", frappe.defaults.get_default("company")],
+					["is_repair_warehouse", "=", 0]
 				]
 			}
 		});
 		const branchMap = frappe.boot.company_branches;
 
-		if (branchMap[frm.doc.company]) {
+		if (branchMap[frappe.defaults.get_default("company")]) {
+			const branches = branchMap[frappe.defaults.get_default("company")];
+
+			// If only one branch exists, auto-set it
+			if (branches.length === 1) {
+				frm.set_value("branch", branches[0]);
+				frm.set_df_property("branch", "read_only", 1);
+			}
 			frm.set_query("branch", function () {
 				return {
 					filters: [
-						["name", "in", branchMap[frm.doc.company]]
+						["name", "in", branchMap[frappe.defaults.get_default("company")]]
 					]
 				};
 			});
-		}		
+		}
+
+		const territoryMap = frappe.boot.company_territories;
+
+		if (territoryMap[frappe.defaults.get_default("company")]) {
+			frm.set_query("customer", function () {
+				return {
+					filters: [
+						["territory", "in", territoryMap[frappe.defaults.get_default("company")]]
+					]
+				};
+			});
+		}	
 	},
+	
     address: function (frm) {
         // to set address_display
 		if (frm.doc.address) {
@@ -75,57 +95,42 @@ frappe.ui.form.on("Create Supply Order", {
 			});
 		}
 	},
+
 	refresh(frm) {
 		frm.disable_save()
-       	// If job_order_data does not exist Create a New Job Order
-		frm.add_custom_button(__("Create Supply Order"), function () {
-			frappe.call({
-				method:"cyrix.cyrix_tsl.doctype.create_supply_order.create_supply_order.create_supply_order_data",
-				args:{
-					dict: cur_frm.doc
-				},
-				callback(r){
-					if(r){
-						// On success, reload the document to reflect changes
-						cur_frm.reload_doc();
-					}   
-				}
-			})
-		})
-	},
-    // job_order_data: function (frm) {
-    //     frm.trigger("refresh")
-	// 	if (frm.doc.job_order_data) { // if the job_order_data is present, fetch the details
-	// 		frappe.call({
-	// 			method: 'cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.get_jo_details',
-	// 			args: {
-	// 				"jo": frm.doc.job_order_data,
-	// 			},
-	// 			callback(r) {
-	// 				if (r.message) {
-	// 					for (var i = 0; i < r.message.length; i++) {
-	// 						var childTable = cur_frm.add_child("received_equipment");
-	// 						childTable.item_code = r.message[i]['item_code'],
-    //                         childTable.item_name = r.message[i]["item_name"],
-    //                         childTable.manufacturer = r.message[i]["mfg"]
-	// 						childTable.model = r.message[i]["model_no"],
-	// 						childTable.type = r.message[i]["type"],
-    //                         childTable.qty = r.message[i]["qty"],
-    //                         frm.doc.sales_person = r.message[i]["sales_person"],
-    //                         frm.doc.customer = r.message[i]["customer"],
-	// 						frm.doc.address = r.message[i]["address"],
-	// 						frm.doc.incharge = r.message[i]["incharge"],
-	// 						frm.doc.branch = r.message[i]["branch"]
-	// 						frm.doc.company = r.message[i]["company"]
-	// 						frm.doc.repair_warehouse = r.message[i]["repair_warehouse"]
-	// 						cur_frm.refresh_fields();
-	// 					}
-	// 				}
-	// 			}
-	// 		});
+		frappe.run_serially([
+			() => frm.set_value("company", frappe.defaults.get_default("company")),
 
-	// 	}
-	// },
+			() => frm.trigger("branch"),
+			
+			() => {
+				// If job_order_data does not exist Create a New Job Order
+				frm.add_custom_button(__("Create Supply Order"), function () {
+					frappe.call({
+						method:"cyrix.cyrix_tsl.doctype.create_supply_order.create_supply_order.create_supply_order_data",
+						args:{
+							dict: cur_frm.doc
+						},
+						callback(r){
+							if(r){
+								// On success, reload the document to reflect changes
+								cur_frm.reload_doc();
+							}   
+						}
+					})
+				})
+			},
+
+			() => {
+				frm.add_custom_button(__('<i class="fa fa-trash"></i>'), function () {
+					frappe.model.delete_doc("Create Supply Order", "Create Supply Order", function () {
+						window.location.reload();
+					});
+				})
+			}
+		])
+	},
+    
 	customer: function (frm) {
 		if (!frm.doc.customer) {
 			return
@@ -156,10 +161,10 @@ frappe.ui.form.on("Create Supply Order", {
 								}
 							};
 						});
+						frm.set_value("sales_person",r.message[1])
 					}
 				}
 			}
 		});
 	},
 });
-

@@ -190,9 +190,8 @@ def check_for_item(i):
 			if not 'item_name' in i:
 				i['item_name'] = ""
 			new_doc = frappe.new_doc('Item')
-			new_doc.naming_series = '.######'
+			new_doc.naming_series = 'P.######'
 			new_doc.item_name = i['item_name']
-			new_doc.item_code = i['item_name']
 			new_doc.item_group = "Equipments"
 			new_doc.description = i['item_name']
 			new_doc.model = i['model']
@@ -202,7 +201,6 @@ def check_for_item(i):
 			new_doc.save(ignore_permissions=True)
 			if new_doc.name:
 				i['item_code'] = new_doc.name
-
 
 def create_stock_entry(i,doc,jo):
 	# If item code exists, create stock entry for the received item

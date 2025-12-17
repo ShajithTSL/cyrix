@@ -6,25 +6,26 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_hkeq",
   "naming_series",
-  "sales_person",
   "customer",
   "customer_name",
   "incharge",
   "address",
+  "priority_status",
   "received_date",
   "column_break_yhaq",
   "company",
   "branch",
   "department",
+  "sales_person",
   "warranty",
   "delivery",
-  "priority_status",
   "column_break_7",
   "image",
   "warehouse",
-  "tender_issue_date",
   "posting_date",
+  "tender_issue_date",
   "project",
   "customer_reference_number",
   "status",
@@ -50,6 +51,7 @@
   "section_break_23",
   "previously_quoted",
   "links_tab",
+  "section_break_zxqm",
   "quotation",
   "quoted_date",
   "purchase_order_no",
@@ -65,6 +67,10 @@
   "dn_date",
   "advance_payment_amount",
   "advance_paid_date",
+  "section_break_miaw",
+  "detail_html",
+  "section_break_fmvr",
+  "delivery_details",
   "track_tab",
   "section_break_30",
   "status_duration_details",
@@ -270,16 +276,14 @@
   {
    "allow_on_submit": 1,
    "fieldname": "purchase_order_no",
-   "fieldtype": "Link",
-   "label": "Purchase Order",
-   "options": "Purchase Order"
+   "fieldtype": "Data",
+   "label": "Purchase Order"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "dn_no",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Delivery Note",
-   "options": "Delivery Note",
    "read_only": 1
   },
   {
@@ -412,7 +416,7 @@
   {
    "fieldname": "links_tab",
    "fieldtype": "Tab Break",
-   "label": "Links"
+   "label": "Summary"
   },
   {
    "fieldname": "column_break_mhco",
@@ -450,9 +454,8 @@
   {
    "allow_on_submit": 1,
    "fieldname": "payment_entry",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Payment Entry Reference",
-   "options": "Payment Entry",
    "read_only": 1
   },
   {
@@ -495,13 +498,42 @@
    "in_standard_filter": 1,
    "label": "Sales Person",
    "options": "Sales Person"
+  },
+  {
+   "fieldname": "detail_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_hkeq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_fmvr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivery_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Delivery Details",
+   "options": "Delivery Details"
+  },
+  {
+   "fieldname": "section_break_zxqm",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "section_break_miaw",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 11:55:19.166861",
+ "modified": "2025-12-15 14:38:06.497930",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

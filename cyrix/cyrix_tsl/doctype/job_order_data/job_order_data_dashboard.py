@@ -13,7 +13,8 @@ def get_data():
 		'transactions': [
 			{
 				'label': _(''),
-				'items': ['Quotation']
+				'items': ['Quotation'],
+				'disable_create_buttons': 1
 			},
 			{
 				'label': _(''),

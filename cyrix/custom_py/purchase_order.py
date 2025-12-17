@@ -23,6 +23,7 @@ def update_budgetary_quotation_status(self, method):
 	if self.budgetary_quotation:
 		update = frappe.get_doc("Budgetary Quotation", self.budgetary_quotation)
 		update.status = "Ordered"
+		update.purchase_order_no = self.name
 		update.save(ignore_permissions=True)
 
 @frappe.whitelist()

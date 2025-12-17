@@ -144,8 +144,9 @@ def get_valuation_rate(item, warehouse, qty):
 
 	return {"price": price, "status": sts}
 
+# Item creation
 @frappe.whitelist()
-def sku_creation(doc): # Item creation
+def sku_creation(doc):
 	sku_list = []
 	data_dict = frappe._dict(json.loads(doc))
 

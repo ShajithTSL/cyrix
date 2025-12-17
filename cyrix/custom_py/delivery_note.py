@@ -19,7 +19,7 @@ from frappe.utils import (
 def update_job_order_status(doc,method):
     if doc.get("job_order_data"):
         jo = frappe.get_doc("Job Order Data",doc.get("job_order_data"))
-        if jo.status != "RSC-Repaired and Shipped Client":
+        if jo.status != "RSC-Repaired and Shipped Client" and not jo.payment_entry:
             jo.status = "RSC-Repaired and Shipped Client"        
         jo.dn_no=doc.name
         jo.dn_date=doc.posting_date
@@ -29,6 +29,7 @@ def update_job_order_status(doc,method):
         
 
 def update_supply_order_status(doc, method):
+
     for i in doc.get("items"):
         if not i.supply_order_data:
             continue
@@ -56,9 +57,22 @@ def update_supply_order_status(doc, method):
             status = "Pending"
 
         supply_order_doc.status = status
+        update_dn_reference(supply_order_doc, doc)
         supply_order_doc.save(ignore_permissions=True)
-        frappe.db.set_value("Supply Order Data", i.supply_order_data, "dn_no", doc.name)
-        frappe.db.set_value("Supply Order Data", i.supply_order_data, "dn_date", doc.posting_date)
+
+def update_dn_reference(reference_doc, doc):
+    # Prevent duplicate Delivery Note entries
+    for d in reference_doc.delivery_details:
+        if d.delivery_note == doc.name:
+            return
+
+    reference_doc.append("delivery_details", {
+        "delivery_note": doc.name,
+        "delivered_date": doc.posting_date,
+        "warranty_in_months": doc.warranty_months,
+        "warranty_expire_date": add_months(doc.posting_date, doc.warranty_months)
+    })
+
 
 def update_budgetary_quotation_status(doc, method):
     for i in doc.get("items"):
@@ -86,14 +100,11 @@ def update_budgetary_quotation_status(doc, method):
             status = "Invoiced"
         else:
             status = "Pending"
-        bq_doc.append("delivery_details",{
-            "delivery_note":doc.name,
-            "delivered_date":doc.posting_date,
-            "warranty_in_months":doc.warranty_months,
-            "warranty_expire_date":add_days(add_months(doc.posting_date,doc.warranty_months),1)
-        })
-        bq_doc.status = status
+
+        bq_doc.status = status        
+        update_dn_reference(bq_doc, doc)
         bq_doc.save(ignore_permissions=True)
+
 
 def update_so_qty_on_cancel(self, method):
     for i in self.get("items"):
@@ -137,6 +148,11 @@ def update_so_qty_on_cancel(self, method):
 
         supply_order_doc.status = status
         supply_order_doc.save(ignore_permissions=True)
+        
+        dn_exists = frappe.db.exists("Delivery Details",{"parenttype":"Supply Order Data","delivery_note":self.name},"name")
+        if dn_exists:
+            frappe.db.delete("Delivery Details", dn_exists)
+            frappe.db.commit()
 
 
 
@@ -183,7 +199,7 @@ def update_bq_qty_on_cancel(self, method):
         bq_doc.status = status
         bq_doc.save(ignore_permissions=True)
 
-        dn_exists = frappe.db.exists("Delivery Details",{"delivery_note":self.name},"name")
+        dn_exists = frappe.db.exists("Delivery Details",{"parenttype":"Budgetary Quotation","delivery_note":self.name},"name")
         if dn_exists:
             frappe.db.delete("Delivery Details", dn_exists)
             frappe.db.commit()

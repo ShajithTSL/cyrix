@@ -33,4 +33,4 @@ frappe.ui.form.on('Company', {
 			};
 		});
     }
-})
+});

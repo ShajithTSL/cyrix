@@ -110,7 +110,7 @@ def check_for_item(i):
 			new_doc = frappe.new_doc('Item')
 			new_doc.naming_series = '.######'
 			new_doc.item_name = i['item_name']
-			if i['item_group']:
+			if 'item_group' in i:
 				new_doc.item_group = i['item_group']
 			else:
 				new_doc.item_group = "Equipments"

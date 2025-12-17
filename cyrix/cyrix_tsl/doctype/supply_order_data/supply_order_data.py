@@ -164,7 +164,7 @@ def create_delivery_note(supply_order_data):
 				"uom":"Nos",
 				"stock_uom":"Nos",
 				"conversion_factor":1,
-				"cost_center":doc.department,
+				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 				"income_account":"",
 				"branch":doc.branch
 			})
@@ -182,7 +182,7 @@ def create_delivery_note(supply_order_data):
 				"uom":"Nos",
 				"stock_uom":"Nos",
 				"conversion_factor":1,
-				"cost_center":doc.department,
+				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 				"income_account":"",
 				"branch":doc.branch
 			})
@@ -200,7 +200,7 @@ def create_sales_invoice(supply_order_data):
 	new_doc.supply_order_data = supply_order_data
 	new_doc.sales_person = doc.sales_person
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
-	new_doc.cost_center = doc.department
+	new_doc.cost_center = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 	sales_invoice_list = []
 	for i in doc.get("material_list"):
 		qi_details = frappe.db.sql('''select 
@@ -237,7 +237,7 @@ def create_sales_invoice(supply_order_data):
 			"uom":"Nos",
 			"stock_uom":"Nos",
 			"conversion_factor":1,
-			"cost_center":frappe.db.get_value("Cost Center",{'cost_center_name':"Main",'company':doc.company}),
+			"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 			"income_account":"",
 			"branch":doc.branch
 		})
@@ -255,7 +255,7 @@ def create_sales_invoice(supply_order_data):
 			"uom":"Nos",
 			"stock_uom":"Nos",
 			"conversion_factor":1,
-			"cost_center":frappe.db.get_value("Cost Center",{'cost_center_name':"Main",'company':doc.company}),
+			"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 			"income_account":"",
 			"branch":doc.branch
 		})
@@ -268,3 +268,23 @@ def list_desk():
 	doc = frappe.get_doc("Desktop Icon","CYRIX")
 	doc.delete()
 	print(list)
+
+
+@frappe.whitelist()
+def fetch_payment_details(name):
+	data = frappe.db.sql("""
+		SELECT 
+			t.parent AS payment_entry,
+			t.allocate_amount AS amount,
+			p.posting_date,
+			p.paid_to_account_currency AS currency
+		FROM `tabJob Order table` t
+		JOIN `tabPayment Entry` p
+			ON p.name = t.parent
+		WHERE 
+			t.parenttype = 'Payment Entry'
+			AND t.reference_type = 'Supply Order Data'
+			AND t.reference_name = %s
+			AND p.docstatus = 1
+	""", (name), as_dict=True)
+	return data

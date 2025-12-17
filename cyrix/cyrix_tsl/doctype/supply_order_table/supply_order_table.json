@@ -12,17 +12,19 @@
   "model_no",
   "update_model_no",
   "mfg",
+  "column_break_ioet",
+  "item_name",
+  "item_group",
   "unit",
   "serial_no",
   "description",
   "column_break_6",
-  "item_name",
-  "item_group",
   "wo",
   "quantity",
   "delivered_quantity",
   "price",
   "amount",
+  "column_break_rlqg",
   "supplier_quotation",
   "online_price",
   "parts_availability",
@@ -66,6 +68,7 @@
   {
    "fieldname": "update_model_no",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Update Model No"
   },
   {
@@ -97,7 +100,7 @@
    "columns": 2,
    "fetch_from": "item_code.description",
    "fieldname": "description",
-   "fieldtype": "Text Editor",
+   "fieldtype": "Small Text",
    "in_list_view": 1,
    "label": "Description"
   },
@@ -192,12 +195,20 @@
    "fieldtype": "Currency",
    "label": "Quoted Amount",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ioet",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rlqg",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-04 16:42:08.668150",
+ "modified": "2025-12-11 08:14:38.715006",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Table",

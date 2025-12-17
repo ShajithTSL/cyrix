@@ -97,6 +97,21 @@ frappe.ui.form.on("Budgetary Quotation", {
         if(frm.doc.docstatus == 1){
             frm.trigger("create_delivery_note")
         }
+        frappe.call({
+			method:"cyrix.cyrix_tsl.doctype.budgetary_quotation.budgetary_quotation.fetch_payment_details",
+			args:{
+				name: frm.doc.name
+			},
+			callback(r){
+				if(r.message){
+					const html = frappe.render_template("budgetary_quotation", {
+						doc: frm.doc,
+						payment_details: r.message
+					});
+					frm.fields_dict.html.$wrapper.html(html);
+				}
+			}
+		})
 	},
     create_quotation: function(frm){
         frm.add_custom_button(__('Quotation'), function(){	

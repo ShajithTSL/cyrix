@@ -8,32 +8,31 @@
  "field_order": [
   "details_tab",
   "naming_series",
-  "sales_person",
-  "sales_rep_name",
   "customer",
   "customer_name",
   "customer_rep",
+  "customer_email",
   "address",
-  "unit_type",
+  "incharge",
   "priority_status",
   "column_break_ljre",
-  "customer_email",
-  "incharge",
-  "warranty",
+  "company",
+  "branch",
+  "department",
+  "sales_person",
   "delivery",
-  "returned_date",
+  "warranty",
   "expiry_date",
   "column_break_7",
   "received_date",
-  "company",
-  "branch",
   "repair_warehouse",
   "posting_date",
-  "department",
   "status_cap",
-  "column_break_cwfo",
-  "technician",
   "status",
+  "returned_date",
+  "column_break_cwfo",
+  "unit_type",
+  "technician",
   "parent_jo",
   "payment_terms",
   "plant",
@@ -44,6 +43,8 @@
   "attach_image",
   "section_break_dc2tn",
   "wod_component",
+  "tab_5_tab",
+  "detail_html",
   "linked_docs_tab",
   "quotation",
   "purchase_order_no",
@@ -93,9 +94,7 @@
   "online_price_section",
   "price_table",
   "tech_id",
-  "amended_from",
-  "tab_5_tab",
-  "detail_html"
+  "amended_from"
  ],
  "fields": [
   {
@@ -112,11 +111,6 @@
    "in_preview": 1,
    "label": "Naming Series",
    "options": "WOD-.YY.-\nWOD-R.YY.-\nWOD-D.YY.-\nWOD-J.YY.-\nWOD-K.YY.-\nWOD-KO.YY.-\nWOD-DU-O-.YY.-\nWOD-DU.YY.-P.\nWOD-DU.YY.-PA."
-  },
-  {
-   "fieldname": "sales_rep_name",
-   "fieldtype": "Data",
-   "label": "Sales Rep Name"
   },
   {
    "allow_on_submit": 1,
@@ -147,7 +141,8 @@
    "fieldname": "customer_email",
    "fieldtype": "Data",
    "label": "Customer Email",
-   "options": "Email"
+   "options": "Email",
+   "read_only": 1
   },
   {
    "fieldname": "address",
@@ -573,6 +568,7 @@
   {
    "fieldname": "linked_docs_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Linked Docs"
   },
   {
@@ -680,7 +676,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 11:54:56.154840",
+ "modified": "2025-12-15 14:42:50.261999",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

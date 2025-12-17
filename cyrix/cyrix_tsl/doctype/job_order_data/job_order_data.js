@@ -12,10 +12,7 @@ frappe.ui.form.on("Job Order Data", {
 		frm.trigger("route_to_jo_creation")
 		frm.trigger("create_delivery_note")
 		frm.trigger("create_return_note")
-		// context = {
-		// 	"doc": frappe.get_doc(self.reference_doctype, self.reference_name),
-		// 	"payment_url": self.payment_url,
-		// }
+
 		frappe.call({
 			method:"cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.fetch_payment_details",
 			args:{

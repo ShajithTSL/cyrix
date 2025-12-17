@@ -214,6 +214,9 @@ doc_events = {
         "on_submit": [
             "cyrix.custom_py.sales_invoice.update_jo_so_status",
             "cyrix.custom_py.sales_invoice.update_service_call_form"			
+		],
+		"on_cancel": [
+			"cyrix.custom_py.sales_invoice.update_jo_so_status_on_cancel"			
 		]
 	},
     

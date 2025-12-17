@@ -7,7 +7,7 @@ frappe.ui.form.on("Create Job Order", {
 			frm.set_value("repair_warehouse", null);
 			return
 		}
-		frappe.db.get_value('Warehouse', {'is_repair_warehouse':1,'company':frm.doc.company,"name":["like","%"+frm.doc.branch+"%"]}, 'name', (values) => {
+		frappe.db.get_value('Warehouse', {'is_repair_warehouse':1,'company':frappe.defaults.get_default("company"),"name":["like","%"+frm.doc.branch+"%"]}, 'name', (values) => {
 			frm.set_value("repair_warehouse", values.name);
 		});
 	},
@@ -43,7 +43,7 @@ frappe.ui.form.on("Create Job Order", {
 		frm.set_query("repair_warehouse", function () {
 			return {
 				filters: [
-					["company", "=", frm.doc.company],
+					["company", "=", frappe.defaults.get_default("company")],
 					["is_repair_warehouse", "=", 1]
 				]
 			}
@@ -56,6 +56,7 @@ frappe.ui.form.on("Create Job Order", {
 			// If only one branch exists, auto-set it
 			if (branches.length === 1) {
 				frm.set_value("branch", branches[0]);
+				frm.set_df_property("branch", "read_only", 1);
 			}
 			frm.set_query("branch", function () {
 				return {
@@ -88,7 +89,7 @@ frappe.ui.form.on("Create Job Order", {
 					"address_dict": frm.doc.address
 				},
 				callback: function (r) {
-					frm.set_df_property("customer_address", "options", "Customer  Address <br><br>" + r.message + "<br>");
+					frm.set_df_property("customer_address", "options", "Customer  Address <br>" + r.message + "<br>");
 					frm.refresh_fields();
 				}
 			});
@@ -172,6 +173,14 @@ frappe.ui.form.on("Create Job Order", {
 					frm.set_value("job_order_data", frappe.route_options.job_order_data);
 					frappe.route_options = null;
 				}
+			},
+			
+			() => {
+				frm.add_custom_button(__('<i class="fa fa-trash"></i>'), function () {
+					frappe.model.delete_doc("Create Job Order", "Create Job Order", function () {
+						window.location.reload();
+					});
+				})
 			}
 		]);
 	},
@@ -217,6 +226,7 @@ frappe.ui.form.on("Create Job Order", {
 
 		}
 	},
+
 	customer: function (frm) {
 		if (!frm.doc.customer) {
 			return

@@ -50,7 +50,6 @@ class CreateBudgetaryQuotation(Document):
 						"description":i.description,
 						"mfg":i.mfg,
 						"qty":i.qty,
-						"order_type":i.order_type,
 					})
 		s.save()
 		s.submit()

@@ -41,32 +41,63 @@
                     <div class="summary-value">{{frappe.datetime.str_to_user(doc.invoice_date)}}</div>
                 </div>
                 {% endif %}
-
-                {% if doc.dn_no %}
-                <div class="summary-item">
-                    <div class="summary-label">Delivery Note</div>
-                    <a href="/app/delivery-note/{{doc.dn_no}}" class="doc-link summary-value">{{doc.dn_no}}</a>
-                    <div class="summary-label" style="margin-top:0.5rem;">Delivered Date</div>
-                    <div class="summary-value">{{ frappe.datetime.str_to_user(doc.dn_date)}}</div>
-                </div>
-                {% endif %}
-
-                {% if doc.return_note %}
-                <div class="summary-item">
-                    <div class="summary-label">Return Note</div>
-                    <a href="/app/return-note/{{doc.return_note}}" class="doc-link summary-value">{{doc.return_note}}</a>
-                </div>
-                {% endif %}
             </div>
         </div>
         {% endif %}
+
+        {% if doc.delivery_details.length %}
+        <!-- Payment Entries Table -->
+        <div class="table-wrapper">
+            <div class="table-header">
+                <h2 style="color:rgb(255, 255, 255)">Delivery Details</h2>
+                {% if doc.delivery_details.length == 1 %}
+                <div class="payment-count">{{doc.delivery_details.length}} Delivery</div>
+                {% else %}
+                <div class="payment-count">{{doc.delivery_details.length}} Deliveries</div>
+                {% endif %}
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Delivery Note</th>
+                            <th style="text-align: center">Delivered Date</th>
+                            <th style="text-align: center">Warranty (Months)</th>
+                            <th style="text-align: center">Warranty Expire Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pay in doc.delivery_details %}
+                        <tr>
+                            <td><a class="doc-link" href="/app/delivery-note/{{pay.delivery_note}}">{{pay.delivery_note}}</a></td>
+                            <!-- <td style="text-align: center"><a href="/app/delivery-note/{{pay.delivery_note}}" class="doc-link">{{pay.delivery_note}}</a></td> -->
+                            <td style="text-align: center">{{frappe.datetime.str_to_user(pay.delivered_date)}}</td>
+                            <td style="text-align: center">{{pay.warranty_in_months}}</td>
+                            <td style="text-align: center">{{frappe.datetime.str_to_user(pay.warranty_expire_date)}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+        {% endif %}
+
 
         {% if payment_details.length %}
         <!-- Payment Entries Table -->
         <div class="table-wrapper">
             <div class="table-header">
                 <h2 style="color:rgb(255, 255, 255)">Payment Entries</h2>
+                
+                {% if payment_details.length == 1 %}
+                <div class="payment-count">{{payment_details.length}} Payment</div>
+                {% else %}
                 <div class="payment-count">{{payment_details.length}} Payments</div>
+                {% endif %}
+
+                
             </div>
 
             <div style="overflow-x: auto;">

@@ -56,7 +56,7 @@ class ReturnNote(Document):
 					'qty':i.quantity,
 					'uom':frappe.db.get_value("Item",i.item_code,'stock_uom') or "Nos",
 					'branch':doc.branch,
-					'cost_center':doc.department,
+					'cost_center':frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
 					'job_order_data':doc.name,
 					'conversion_factor':1,
 					'allow_zero_valuation_rate':1
@@ -83,7 +83,7 @@ class ReturnNote(Document):
 					'qty':i.quantity,
 					'uom':frappe.db.get_value("Item",i.item_code,'stock_uom') or "Nos",
 					'branch':doc.branch,
-					'cost_center':doc.department,
+					'cost_center':frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
 					'job_order_data':doc.name,
 					'conversion_factor':1,
 					'allow_zero_valuation_rate':1

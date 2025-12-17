@@ -106,7 +106,7 @@ def create_delivery_note(budgetary_quotation):
 	new_doc.company = doc.company
 	new_doc.customer = doc.customer
 	new_doc.branch = doc.branch
-	new_doc.department = doc.department
+	new_doc.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or ""
 	new_doc.set_warehouse = warehouse_based_on_branch_and_company(doc.company,doc.branch)
 	new_doc.purchase_order_no = doc.po_no
 	new_doc.budgetary_quotation = doc.name
@@ -129,7 +129,7 @@ def create_delivery_note(budgetary_quotation):
 				"uom":"Nos",
 				"stock_uom":"Nos",
 				"conversion_factor":1,
-				"cost_center":doc.department,
+				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 				"income_account":"",
 				"branch":doc.branch
 			})
@@ -146,8 +146,28 @@ def create_delivery_note(budgetary_quotation):
 				"uom":"Nos",
 				"stock_uom":"Nos",
 				"conversion_factor":1,
-				"cost_center":doc.department,
+				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 				"income_account":"",
 				"branch":doc.branch
 			})
 	return new_doc,list_
+
+	
+@frappe.whitelist()
+def fetch_payment_details(name):
+	data = frappe.db.sql("""
+		SELECT 
+			t.parent AS payment_entry,
+			t.allocate_amount AS amount,
+			p.posting_date,
+			p.paid_to_account_currency AS currency
+		FROM `tabJob Order table` t
+		JOIN `tabPayment Entry` p
+			ON p.name = t.parent
+		WHERE 
+			t.parenttype = 'Payment Entry'
+			AND t.reference_type = 'Budgetary Quotation'
+			AND t.reference_name = %s
+			AND p.docstatus = 1
+	""", (name), as_dict=True)
+	return data

@@ -141,6 +141,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Company",
    "options": "Company",
    "read_only": 1
@@ -149,12 +150,12 @@
    "fieldname": "branch",
    "fieldtype": "Link",
    "label": "Branch",
-   "options": "Branch",
-   "read_only": 1
+   "options": "Branch"
   },
   {
    "fieldname": "repair_warehouse",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Repair Warehouse",
    "options": "Warehouse",
    "read_only": 1
@@ -194,6 +195,7 @@
   {
    "fieldname": "plant",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Plant",
    "options": "Plant"
   },
@@ -267,7 +269,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-10 11:55:31.226870",
+ "modified": "2025-12-14 13:14:34.027247",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Job Order",

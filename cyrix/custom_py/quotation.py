@@ -346,6 +346,8 @@ def fetch_supplier_details(self, method):
 
             if sup:  # Check if the query returned any data
                 cur = frappe.get_value("Supplier", {"name": sup[0]["supplier"]}, ["default_currency"])
+                if not cur:
+                    frappe.throw("Please set the Default Currency for the Supplier")
                 exr = get_exchange_rate(cur, self.currency)
                 cost = sup[0]["shipping_cost"] * exr
                 total_cost += sup[0]["base_amount"]

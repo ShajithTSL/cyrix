@@ -126,5 +126,21 @@ frappe.ui.form.on("Supply Order Data", {
 				});
 			},__('Create'));
 		}
+
+		frappe.call({
+			method:"cyrix.cyrix_tsl.doctype.supply_order_data.supply_order_data.fetch_payment_details",
+			args:{
+				name: frm.doc.name
+			},
+			callback(r){
+				if(r.message){
+					const html = frappe.render_template("supply_order_data", {
+						doc: frm.doc,
+						payment_details: r.message
+					});
+					frm.fields_dict.detail_html.$wrapper.html(html);
+				}
+			}
+		})
 	},
 });

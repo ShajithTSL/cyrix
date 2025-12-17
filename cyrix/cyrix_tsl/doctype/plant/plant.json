@@ -10,6 +10,7 @@
  ],
  "fields": [
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "plant",
    "fieldtype": "Data",
    "label": "Plant",
@@ -19,7 +20,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-10 11:54:11.784252",
+ "modified": "2025-12-10 13:15:34.098501",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Plant",
@@ -39,6 +40,7 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",

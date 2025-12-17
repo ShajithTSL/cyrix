@@ -25,13 +25,12 @@
   "received_quantity",
   "column_break_ovyd",
   "delivered_qty",
-  "status_track_tab",
-  "section_break_tvsc",
-  "status_duration_details",
-  "amended_from",
   "links_tab",
+  "html",
+  "section_break_sncr",
   "quotation",
   "po_no",
+  "purchase_order_no",
   "invoice_no",
   "dn_no",
   "dn_date",
@@ -42,7 +41,11 @@
   "invoice_date",
   "advance_payment_amount",
   "section_break_izkz",
-  "delivery_details"
+  "delivery_details",
+  "status_track_tab",
+  "section_break_tvsc",
+  "status_duration_details",
+  "amended_from"
  ],
  "fields": [
   {
@@ -170,7 +173,7 @@
   {
    "fieldname": "links_tab",
    "fieldtype": "Tab Break",
-   "label": "Links"
+   "label": "Summary"
   },
   {
    "allow_on_submit": 1,
@@ -262,14 +265,30 @@
   },
   {
    "fieldname": "section_break_izkz",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "purchase_order_no",
+   "fieldtype": "Read Only",
+   "label": "Purchase Order"
+  },
+  {
+   "fieldname": "html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_sncr",
+   "fieldtype": "Section Break",
+   "hidden": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-06 15:59:53.098780",
+ "modified": "2025-12-16 15:52:04.029747",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Budgetary Quotation",

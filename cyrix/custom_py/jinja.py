@@ -71,9 +71,6 @@ def show_address(address_name):
     html = f"""
     <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New&family=Roboto&display=swap" rel="stylesheet">
 
-    <table>
-        <tr>
-            <td class="address-box" style="text-align:left;">
                 {styled_text_per_word(address.address_line1)}
                 {styled_text_per_word(address.address_line2)}
                 {styled_text_per_word(address.city)}
@@ -83,9 +80,7 @@ def show_address(address_name):
                 <br>
                 {styled_text_per_word("Phone: " + address.phone if address.phone else "")}
                 {styled_text_per_word("Email: " + address.email_id if address.email_id else "")}
-            </td>
-        </tr>
-    </table>
+
     """
 
     return html

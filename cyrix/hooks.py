@@ -88,6 +88,7 @@ doctype_js = {
 jinja = {
 	"methods": [
         "cyrix.custom_py.jinja.get_technicians",
+		"cyrix.custom_py.jinja.show_address"
 	]
 }
 

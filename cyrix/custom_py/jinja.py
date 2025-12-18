@@ -20,3 +20,72 @@ def get_technicians(doc_name):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Get Technicians Error")
         return "-"
+
+
+
+import frappe
+
+def is_english(text):
+    if not text:
+        return True
+    try:
+        text.encode("ascii")
+        return True
+    except UnicodeEncodeError:
+        return False
+
+
+def styled_text_per_word(text):
+    if not text:
+        return ""
+
+    words = text.split(" ")
+    styled_words = []
+
+    for word in words:
+        if is_english(word):
+            font_family = "Roboto"
+            font_size = "9px"
+        else:
+            font_family = "'Scheherazade New'"
+            font_size = "12px"  # adjust if needed
+
+        styled_words.append(
+            f'<span style="font-family:{font_family}; font-size:{font_size};">'
+            f'{word}'
+            f'</span>'
+        )
+
+    return " ".join(styled_words) + "<br>"
+
+
+def show_address(address_name):
+    if not address_name:
+        return ""
+
+    try:
+        address = frappe.get_doc("Address", address_name)
+    except frappe.DoesNotExistError:
+        return ""
+
+    html = f"""
+    <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New&family=Roboto&display=swap" rel="stylesheet">
+
+    <table>
+        <tr>
+            <td class="address-box" style="text-align:left;">
+                {styled_text_per_word(address.address_line1)}
+                {styled_text_per_word(address.address_line2)}
+                {styled_text_per_word(address.city)}
+                {styled_text_per_word(address.state)}
+                {styled_text_per_word(address.pincode)}
+                {styled_text_per_word(address.country)}
+                <br>
+                {styled_text_per_word("Phone: " + address.phone if address.phone else "")}
+                {styled_text_per_word("Email: " + address.email_id if address.email_id else "")}
+            </td>
+        </tr>
+    </table>
+    """
+
+    return html

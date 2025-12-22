@@ -21,10 +21,6 @@ def get_technicians(doc_name):
         frappe.log_error(frappe.get_traceback(), "Get Technicians Error")
         return "-"
 
-
-
-import frappe
-
 def is_english(text):
     if not text:
         return True

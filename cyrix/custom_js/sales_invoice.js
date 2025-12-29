@@ -9,11 +9,11 @@ frappe.ui.form.on('Sales Invoice', {
         if(frm.doc.__islocal){
             if(frm.doc.is_return == 1){
                 const series = {
-                    // "Kuwait": "INV-RE-K.YY.-",
-                    // "Dammam": "INV-RE-D.YY.-",
+                    "Kuwait": "INV-RE-K.YY.-",
+                    "Dammam": "INV-RE-D.YY.-",
                     "Riyadh": "INV-RE-R.YY.-",
-                    // "Jeddah": "INV-RE-J.YY.-",
-                    // "Dubai": "INV-RE-DU.YY.-"
+                    "Jeddah": "INV-RE-J.YY.-",
+                    "Dubai": "INV-RE-DU.YY.-"
                 };
                 const return_series = series[frm.doc.branch];
                 if (return_series) {
@@ -22,11 +22,11 @@ frappe.ui.form.on('Sales Invoice', {
             }
             else{               
                 const naming_series = {
-                    // "Kuwait": "INV-K.YY.-",
-                    // "Dammam": "INV-D.YY.-",
+                    "Kuwait": "INV-K.YY.-",
+                    "Dammam": "INV-D.YY.-",
                     "Riyadh": "INV-R.YY.-",
-                    // "Jeddah": "INV-J.YY.-",
-                    // "Dubai": "INV-DU.YY.-"
+                    "Jeddah": "INV-J.YY.-",
+                    "Dubai": "INV-DU.YY.-"
                 };
                 const series = naming_series[frm.doc.branch];
                 if (series) {

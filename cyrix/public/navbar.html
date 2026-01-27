@@ -11,7 +11,7 @@
 			<ul class="nav navbar-nav d-none d-sm-flex" id="navbar-breadcrumbs"></ul>
 			<div class="collapse navbar-collapse justify-content-end">
 				<form class="form-inline fill-width justify-content-end" role="search" onsubmit="return false;">
-					
+					{% if frappe.boot.list_companies.length > 1 %}
 					<button class="company-btn" onclick="company_change()">
 						{% if frappe.defaults.get_user_default("Company") %}
 							<span class="company-label">
@@ -23,7 +23,7 @@
 							</span>
 						{% endif %}
 					</button>
-
+					{% endif %}
 					{% if (frappe.boot.read_only) { %}
 						<span class="indicator-pill yellow no-indicator-dot" title="{%= __("Your site is undergoing maintenance or being updated.") %}">
 							{%= __("Read Only Mode") %}

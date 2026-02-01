@@ -27,7 +27,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-13 14:33:57.660823",
+ "modified": "2026-01-28 08:55:21.448745",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technician ID",
@@ -49,7 +49,9 @@
  ],
  "row_format": "Dynamic",
  "search_fields": "technician",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "technician"
 }

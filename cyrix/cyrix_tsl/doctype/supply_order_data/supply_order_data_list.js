@@ -1,5 +1,5 @@
 frappe.listview_settings['Supply Order Data'] = {
-	add_fields: ["status","name","priority_status"],
+	add_fields: ["status","name","priority_status","supply_status"],
 	get_indicator: function (doc) {
         if (doc.status === "Inquiry") {
             return [__("Inquiry"), "blue", "status,=,Inquiry"];
@@ -68,6 +68,12 @@ frappe.listview_settings['Supply Order Data'] = {
         }
         else if (doc.priority_status == "Not Urgent") {
                 return [__("Not Urgent"), "gray", "priority_status=Not Urgent"];
+        }
+        else if (doc.supply_status == "To Deliver") {
+                return [__("To Deliver"), "green", "supply_status=To Deliver"];
+        }
+        else if (doc.status === "Pending Internal Approval") {
+                return [__("Pending Internal Approval"), "orange", "status,=,Pending Internal Approval"];
         }
     },
 };

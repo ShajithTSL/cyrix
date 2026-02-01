@@ -5,9 +5,75 @@ import frappe
 from frappe.model.document import Document
 import json
 from datetime import datetime
+import rembg
+from rembg import remove
+from PIL import Image
+import io
 
 class CreateJobOrder(Document):
 	pass
+
+
+
+@frappe.whitelist(allow_guest=True)
+def remove_background(file_url):
+    # Step 1: Fetch file from Frappe
+    file_doc = frappe.get_doc("File", {"file_url": file_url})
+    file_content = file_doc.get_content()
+
+    # Step 2: Remove background with alpha matting for cleaner edges
+    output = remove(
+        file_content,
+        alpha_matting=True,
+        alpha_matting_foreground_threshold=240,
+        alpha_matting_background_threshold=10,
+        alpha_matting_erode_size=10
+    )
+
+    # Step 3: Load image with alpha channel
+    img = Image.open(io.BytesIO(output)).convert("RGBA")
+
+    # Step 4: Auto-crop transparent edges
+    bbox = img.getbbox()
+    if bbox:
+        img = img.crop(bbox)
+
+    # Step 5: Resize to 500x500 (maintaining aspect ratio + transparent padding)
+    final_size = (500, 500)
+    img.thumbnail(final_size, Image.LANCZOS)  # resize keeping aspect ratio
+
+    # Create new transparent 500x500 background
+    new_img = Image.new("RGBA", final_size, (0, 0, 0, 0))
+
+    # Center the resized image
+    x_offset = (final_size[0] - img.width) // 2
+    y_offset = (final_size[1] - img.height) // 2
+    new_img.paste(img, (x_offset, y_offset))
+
+    # Step 6: Save optimized PNG (smaller size)
+    output_io = io.BytesIO()
+    new_img.save(
+        output_io,
+        format="PNG",
+        optimize=True,
+        compress_level=9  # 0 (fastest) → 9 (smallest)
+    )
+    output_io.seek(0)
+
+    # Step 7: Save new file in Frappe
+    new_file = frappe.get_doc({
+        "doctype": "File",
+        "file_name": f"cleaned_{file_doc.file_name.rsplit('.', 1)[0]}_500x500.png",
+        "attached_to_doctype": file_doc.attached_to_doctype,
+        "attached_to_name": file_doc.attached_to_name,
+        "content": output_io.getvalue(),
+        "is_private": 0
+    })
+    new_file.save(ignore_permissions=True)
+
+    return new_file.file_url
+
+
 
 naming_series = {
 	"Dammam": {"normal":"JO-D.YY.-", "updated": "SB-JO-D.YY.-"},
@@ -128,12 +194,19 @@ def create_job_order_data(dict):
 		jo.customer_rep = doc.incharge
 		if doc.job_order_data:
 			jo.parent_jo = doc.job_order_data
+		if doc.warranty_date:
+			jo.expiry_date = doc.warranty_date
 		jo.status = "NE-Need Evaluation"
-		jo.attach_image = (i['attach_image']).replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
+		
+		if 'attach_image' in i and i['attach_image']:
+			bg_less_image = remove_background(i["attach_image"])
+		else:
+			bg_less_image = ""
+		jo.attach_image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
 		
 
 		# check whether item_code exists or create new Item if needed
-		check_for_item(i)
+		check_for_item(i,bg_less_image)
 
 		jo.append("material_list",{
 			"item_code": i['item_code'],
@@ -160,7 +233,7 @@ def create_job_order_data(dict):
 
 		# Update the File record if image was uploaded
 		if jo.name and "attach_image" in i:
-			frappe.db.sql('''update `tabFile` set attached_to_name = %s where file_url = %s ''',(jo.name,i["attach_image"]))
+			frappe.db.sql('''update `tabFile` set attached_to_name = %s where file_url = %s ''',(jo.name,bg_less_image))
 		jo.submit()
 		
 		# Create stock entry for the received item
@@ -179,7 +252,7 @@ def create_job_order_data(dict):
 		return True
 	return False
 
-def check_for_item(i):
+def check_for_item(i,bg_less_image):
 	# If item_code is not provided, try to fetch or create Item based on model and manufacturer
 	if not 'item_code' in i:
 		item = frappe.db.get_value("Item", {"model": i['model'], "mfg": i['manufacturer']}, "name")
@@ -195,7 +268,7 @@ def check_for_item(i):
 			new_doc.item_group = "Equipments"
 			new_doc.description = i['item_name']
 			new_doc.model = i['model']
-			new_doc.image = (i['attach_image']).replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
+			new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
 			new_doc.is_stock_item = 1
 			new_doc.mfg = i['manufacturer']
 			new_doc.save(ignore_permissions=True)

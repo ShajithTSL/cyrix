@@ -128,7 +128,7 @@ frappe.ui.form.on('Quotation', {
                 });
             },__("Create"))
         }
-        if(frm.doc.workflow_state == "Rejected"){
+        if(frm.doc.workflow_state == "Rejected by Customer"){
             if (["Customer Quotation - R - Revised","Customer Quotation - Repair"].includes(frm.doc.quotation_type)){
                 var rev_type = "Customer Quotation - R - Revised"
             }

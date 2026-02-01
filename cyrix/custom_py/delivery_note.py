@@ -25,6 +25,7 @@ def update_job_order_status(doc,method):
         jo.dn_date=doc.posting_date
         jo.warranty=doc.warranty_months
         jo.delivery=doc.posting_date
+        jo.expiry_date = add_months(doc.posting_date, doc.warranty_months)
         jo.save(ignore_permissions = True)
         
 
@@ -49,8 +50,8 @@ def update_supply_order_status(doc, method):
         elif not supply_order_doc.payment_entry and not supply_order_doc.invoice_no:
             if supply_order_doc.quantity == supply_order_doc.delivered_quantity:
                 status = "Delivered"
-            else:
-                status = "Partially Delivered"
+            # else:
+            #     status = "Partially Delivered"
         elif supply_order_doc.invoice_no:
             status = "Invoiced"
         else:
@@ -135,8 +136,8 @@ def update_so_qty_on_cancel(self, method):
         elif not supply_order_doc.payment_entry and not supply_order_doc.invoice_no:
             if supply_order_doc.delivered_quantity == supply_order_doc.quantity:
                 status = "Delivered"
-            elif supply_order_doc.delivered_quantity > 0:
-                status = "Partially Delivered"
+            # elif supply_order_doc.delivered_quantity > 0:
+            #     status = "Partially Delivered"
             else:
                 status = "Received"
 

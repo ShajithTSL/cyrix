@@ -18,10 +18,10 @@ def update_stock_received_percentage(doc, method):
         if item.supply_order_data:
             supply_order_data = frappe.get_doc("Supply Order Data", item.supply_order_data)
             supply_order_data.received_quantity += item.received_qty
-            if supply_order_data.received_quantity == supply_order_data.quantity:
-                supply_order_data.status = "Received"  # Fully received
-            elif supply_order_data.received_quantity > 0:
-                supply_order_data.status = "Partially Received"  # Partially received
+            # if supply_order_data.received_quantity == supply_order_data.quantity:
+            #     supply_order_data.status = "Received"  # Fully received
+            # elif supply_order_data.received_quantity > 0:
+            #     supply_order_data.status = "Partially Received"  # Partially received
             supply_order_data.save()
 
         if item.budgetary_quotation:
@@ -38,10 +38,10 @@ def update_received_percentage(doc, method):
         if item.supply_order_data:
             supply_order_data = frappe.get_doc("Supply Order Data", item.supply_order_data)
             supply_order_data.received_quantity -= item.received_qty
-            if supply_order_data.received_quantity == supply_order_data.quantity:
-                supply_order_data.status = "Received"  # Fully received
-            elif supply_order_data.received_quantity > 0:
-                supply_order_data.status = "Partially Received"  # Partially received
+            # if supply_order_data.received_quantity == supply_order_data.quantity:
+            #     supply_order_data.status = "Received"  # Fully received
+            # elif supply_order_data.received_quantity > 0:
+            #     supply_order_data.status = "Partially Received"  # Partially received
             supply_order_data.save()
 
         if item.budgetary_quotation:

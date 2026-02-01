@@ -103,6 +103,8 @@ frappe.ui.form.on("Create Job Order", {
 				frm.add_custom_button(__("Update Job Order"), function () {
 					frappe.call({
 						method:"cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.update_job_order_data",
+						freeze: true,
+						freeze_message: __("Please Wait, Job Order Updation is in Progress ..."),
 						args:{
 							dict: cur_frm.doc
 						},
@@ -122,6 +124,8 @@ frappe.ui.form.on("Create Job Order", {
 				frm.add_custom_button(__("Create Board Level JO"), function () {
 					frappe.call({
 						method:"cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.create_job_order_data",
+						freeze: true,
+						freeze_message: __("Please Wait, Job Order Creation is in Progress ..."),
 						args:{
 							dict: cur_frm.doc
 						},
@@ -142,6 +146,8 @@ frappe.ui.form.on("Create Job Order", {
             frm.add_custom_button(__("Create Job Order"), function () {
                 frappe.call({
                     method:"cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.create_job_order_data",
+					freeze: true,
+					freeze_message: __("Please Wait, Job Order Creation is in Progress ..."),
                     args:{
                         dict: cur_frm.doc
                     },

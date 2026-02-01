@@ -70,8 +70,8 @@ def update_job_order_status(self, method):
             update.save(ignore_permissions=True)
 
     if method == "on_submit":        
-        # if not self.type_of_approval and self.quotation_type in quotation_type and self.docstatus == 1:
-        #     frappe.throw("Cannot submit: 'Type of Approval' field is required.")
+        if not self.type_of_approval and self.quotation_type in quotation_type and self.docstatus == 1:
+            frappe.throw("Cannot submit: 'Type of Approval' field is required.")
         for item in self.get("items"):
             if self.quotation_type:
                 status = naming_series.get(self.quotation_type, {}).get(self.branch, {}).get("status")
@@ -82,30 +82,45 @@ def update_job_order_status(self, method):
     if method == "validate":
         for item in self.get("items"):
             if self.quotation_type in ["Customer Quotation - Repair","Customer Quotation - R - Revised"]:
-                if self.workflow_state == "Draft":
+                if self.workflow_state == "Quoted to Customer":
                     update_status(self,item, "Q-Quoted")
-                if self.workflow_state == "Rejected":
+                if self.workflow_state == "Rejected by Customer":
                     update_status(self,item, "RNA-Return Not Approved")
                 
             if self.quotation_type in ["Internal Quotation - Repair","Internal Quotation - Supply"]:
-                if self.workflow_state == "Draft":
+                frappe.log_error("Internal Quotation - Repair Triggered","Quotation Update Job Order Status")
+
+                if self.workflow_state == "Waiting For Approval":
                     update_status(self,item, "Pending Internal Approval")
 
 def update_supply_order_status(self, method):
-    for i in self.get("items"):
-        if i.supply_order_data:            
-            doc = frappe.get_doc("Supply Order Data",i.supply_order_data)
-            if self.quotation_type in ["Customer Quotation - Supply","Customer Quotation - S - Revised"]:
-                if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Customer":
-                    doc.status = "Quoted"
-                    doc.save(ignore_permissions=True)
-                if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Rejected":
-                    doc.status =  "Not Approved"
-                    doc.save(ignore_permissions=True)
+    supply_status_map = {
+        "Customer Quotation - Supply": {
+            "Quoted to Customer": "Quoted",
+            "Approved by Customer": "Approved",
+            "Rejected by Customer": "Not Approved"
+        },
+        "Customer Quotation - S - Revised": {
+            "Quoted to Customer": "Quoted",
+            "Approved by Customer": "Approved",
+            "Rejected by Customer": "Not Approved"
+        },
+        "Internal Quotation - Supply": {
+            "Approved by Management": "Internal Quotation",
+            "Waiting For Approval": "Pending Internal Approval"
+        }
+    }
 
-            if self.quotation_type == "Internal Quotation - Supply":
-                if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Management":
-                    doc.status = "Internal Quotation"	
+    for item in self.items:
+        if not item.supply_order_data:
+            continue
+
+        doc = frappe.get_doc("Supply Order Data", item.supply_order_data)
+        status = supply_status_map.get(self.quotation_type, {}).get(self.workflow_state)
+
+        if status:
+            if doc.status not in ["Paid", "Partially Paid", "Invoiced"]:
+                doc.status = status
                 doc.save(ignore_permissions=True)
 
 def update_budgetary_quotation_status(self, method):

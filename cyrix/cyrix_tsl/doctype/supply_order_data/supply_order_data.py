@@ -8,15 +8,103 @@ from datetime import datetime
 
 
 class SupplyOrderData(Document):	
+	def supply_order_status(self, ordered_percentage, received_percentage, delivered_percentage):
+		ordered = ordered_percentage or 0
+		received = received_percentage or 0
+		delivered = delivered_percentage or 0
+
+		if ordered == 0:
+			supply_status = "To Order"
+
+		elif 0 < ordered < 100:
+			supply_status = "Partially Ordered"
+			
+		elif received == 100 and delivered == 100:
+			supply_status = "Delivered"
+
+		elif 0 < delivered < 100:
+			supply_status = "Partially Delivered"
+
+		elif received == 100 and delivered == 0:
+			supply_status = "To Deliver"
+
+		elif 0 < received < 100:
+			supply_status = "Partially Received"
+
+		else:
+			supply_status = "To Receive and Deliver"
+
+		self.supply_status = supply_status
+		frappe.db.set_value("Supply Order Data",self.name,'supply_status',supply_status,update_modified=False)
+
 	def update_qty(self):
 		total_quantity = 0
 		for i in self.get("material_list"):
 			total_quantity += int(i.quantity)
 		self.quantity = total_quantity
 		frappe.db.set_value("Supply Order Data",self.name,'quantity',total_quantity,update_modified=False)
+	
+	def update_po_percentage(self):
+		# need to calculate the ordered %
+		if self.get("ordered_quantity") > 0:
+			ordered_percentage = (self.get("ordered_quantity")/self.get("quantity"))*100
+		else:
+			ordered_percentage = 0
+			
+		self.ordered_percentage = ordered_percentage
+		frappe.db.set_value("Supply Order Data",self.name,'ordered_percentage',ordered_percentage,update_modified=False)
+		self.supply_order_status(ordered_percentage,self.get("received_percentage"), delivered_percentage = self.delivered_percentage)
 
-	def validate(self):
+	def update_dn_percentage(self):
+		# need to calculate the delivered %
+		delivered_qty = 0
+		for i in self.get("material_list"):
+			if i.delivered_quantity:
+				delivered_qty += float(i.delivered_quantity)
+		if self.get("received_quantity") > 0:
+			delivered_percentage = (delivered_qty/self.get("received_quantity"))*100
+		else:
+			delivered_percentage = 0
+
+		self.delivered_percentage = delivered_percentage
+		frappe.db.set_value("Supply Order Data",self.name,'delivered_percentage',delivered_percentage,update_modified=False)
+		self.supply_order_status(self.get("ordered_percentage"),self.get("received_percentage"), delivered_percentage)
+
+	def update_pr_percentage(self):
+		# need to calculate the procured % based on the received_quantity field in the parent table
+		if self.get("quantity") > 0:
+			received_percentage = (self.get("received_quantity")/self.get("quantity"))*100
+		else:
+			received_percentage = 0
+			
+		self.received_percentage = received_percentage
+		frappe.db.set_value("Supply Order Data",self.name,'received_percentage',received_percentage,update_modified=False)
+		self.supply_order_status(self.get("ordered_percentage"), received_percentage, delivered_percentage = self.delivered_percentage)
+
+	def update_inv_percentage(self):
+		# need to calculate the invoiced % based on the invoiced_quantity field in the parent table
+		if self.invoice_no:
+			frappe.db.set_value("Supply Order Data",self.name,'invoice_percentage',100,update_modified=False)
+		else:
+			frappe.db.set_value("Supply Order Data",self.name,'invoice_percentage',0,update_modified=False)
+
+	def update_payment_percentage(self):
+		# need to calculate the payment % based on the advance_payment_amount field in the parent table
+		if self.invoiced_value and self.advance_payment_amount:
+			payment_percentage = (self.advance_payment_amount/self.invoiced_value)*100
+			frappe.db.set_value("Supply Order Data",self.name,'payment_percentage',payment_percentage,update_modified=False)
+		else:
+			self.payment_percentage = 0
+			frappe.db.set_value("Supply Order Data",self.name,'payment_percentage',0,update_modified=False)
+
+
+	def trigger_fn(self):
 		self.update_qty()
+		self.update_dn_percentage()
+		self.update_pr_percentage()
+		self.update_inv_percentage()
+		self.update_payment_percentage()
+		self.update_po_percentage()
 
 	def before_submit(self):		
 		now = datetime.now()
@@ -25,6 +113,7 @@ class SupplyOrderData(Document):
 			"date":now,
 		})
 		self.update_qty()
+
 		
 	def on_update_after_submit(self):
 		if self.status != self.status_duration_details[-1].status:
@@ -48,7 +137,7 @@ class SupplyOrderData(Document):
 				"date":now,
 			})
 			doc.save(ignore_permissions=True)
-		self.update_qty()
+		self.trigger_fn()
 
 @frappe.whitelist()
 def create_rfq(supply_order_data):

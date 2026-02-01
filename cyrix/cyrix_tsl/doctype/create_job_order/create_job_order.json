@@ -35,6 +35,8 @@
   "plant",
   "is_returned_unit",
   "job_order_data",
+  "in_warranty",
+  "warranty_date",
   "section_break_9",
   "received_equipment",
   "previously_quoted_item_in_repair_section",
@@ -253,7 +255,7 @@
    "fieldname": "unit_type",
    "fieldtype": "Select",
    "label": "Unit Type",
-   "options": "Service Level Unit\nBoard Level Unit"
+   "options": "Service Level Unit\nBoard Level Unit\nCalibration"
   },
   {
    "fieldname": "column_break_gflp",
@@ -262,6 +264,18 @@
   {
    "fieldname": "column_break_ceox",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "in_warranty",
+   "fieldtype": "Check",
+   "label": "Still Under Warranty"
+  },
+  {
+   "depends_on": "in_warranty",
+   "fieldname": "warranty_date",
+   "fieldtype": "Date",
+   "label": "Warranty Date"
   }
  ],
  "grid_page_length": 50,
@@ -269,7 +283,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-14 13:14:34.027247",
+ "modified": "2026-01-28 14:42:40.124018",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Job Order",

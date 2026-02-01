@@ -128,7 +128,7 @@ def update_payment_reference_cancel(self, method):
                 if doc.invoiced_value == updated_amount:
                     doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
                 elif updated_amount == 0:
-                    doc.status = "Unpaid"
+                    doc.status = "Unpaid" if row.reference_type == "Job Order Data" else "Invoiced"
                 else:
                     doc.status = "Partially Paid"
 

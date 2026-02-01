@@ -186,6 +186,9 @@ doc_events = {
 			"cyrix.custom_py.purchase_order.update_job_order_status",
 			"cyrix.custom_py.purchase_order.update_supply_order_status",
             "cyrix.custom_py.purchase_order.update_budgetary_quotation_status"
+		],
+		"on_cancel": [
+			"cyrix.custom_py.purchase_order.update_supply_order_status_on_cancel"
 		]
 	},
     

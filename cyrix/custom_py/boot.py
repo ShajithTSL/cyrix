@@ -129,6 +129,7 @@ def get_bootinfo():
     remove_apps_with_incomplete_dependencies(bootinfo)
 
     company_list = frappe.db.get_all("Company","name")
+    bootinfo.list_companies = frappe.db.get_list("Company", pluck="name")
     bootinfo.company_branches = {}
     bootinfo.company_territories = {}
     for com in company_list:

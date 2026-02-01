@@ -33,6 +33,7 @@
   "column_break_cwfo",
   "unit_type",
   "technician",
+  "multiple_technicians",
   "parent_jo",
   "payment_terms",
   "plant",
@@ -268,14 +269,6 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Date"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "technician",
-   "fieldtype": "Table MultiSelect",
-   "in_standard_filter": 1,
-   "label": "Technician",
-   "options": "Technician List"
   },
   {
    "fieldname": "department",
@@ -580,7 +573,7 @@
    "fieldname": "unit_type",
    "fieldtype": "Select",
    "label": "Unit Type",
-   "options": "Service Level Unit\nBoard Level Unit\nService and Board Level Unit"
+   "options": "Service Level Unit\nBoard Level Unit\nService and Board Level Unit\nCalibration"
   },
   {
    "fieldname": "parent_jo",
@@ -670,13 +663,28 @@
    "in_standard_filter": 1,
    "label": "Sales Person",
    "options": "Sales Person"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "technician",
+   "fieldtype": "Link",
+   "label": "Technician",
+   "options": "Technician ID"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "multiple_technicians",
+   "fieldtype": "Table MultiSelect",
+   "in_standard_filter": 1,
+   "label": "Multiple Technicians (Add if Multiple Technicians involved)",
+   "options": "Technician List"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-18 08:44:41.752890",
+ "modified": "2026-01-28 14:39:34.824781",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

@@ -13,11 +13,20 @@ def update_job_order_status(self, method):
 			update.save(ignore_permissions=True)
 
 def update_supply_order_status(self, method):
-	if self.supply_order_data:
-		update = frappe.get_doc("Supply Order Data", self.supply_order_data)
-		update.status = "Ordered"
-		update.purchase_order_no = self.name
-		update.save(ignore_permissions=True)
+	for item in self.get("items"):
+		if item.supply_order_data:
+			update = frappe.get_doc("Supply Order Data", item.supply_order_data)
+			update.ordered_quantity += item.qty
+			update.purchase_order_no = self.name
+			update.save(ignore_permissions=True)
+
+def update_supply_order_status_on_cancel(self, method):
+	for item in self.get("items"):
+		if item.supply_order_data:
+			update = frappe.get_doc("Supply Order Data", item.supply_order_data)
+			update.ordered_quantity -= item.qty
+			update.purchase_order_no = ""
+			update.save(ignore_permissions=True)
 
 def update_budgetary_quotation_status(self, method):
 	if self.budgetary_quotation:

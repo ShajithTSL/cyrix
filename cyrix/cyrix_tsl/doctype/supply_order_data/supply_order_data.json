@@ -44,10 +44,22 @@
   "material_list",
   "section_break_rgkj",
   "quantity",
+  "supply_status",
+  "column_break_fcpg",
+  "ordered_quantity",
+  "ordered_percentage",
   "column_break_xuus",
   "received_quantity",
+  "received_percentage",
   "column_break_jgqf",
   "delivered_quantity",
+  "delivered_percentage",
+  "column_break_qswu",
+  "invoice_no",
+  "invoice_percentage",
+  "column_break_rkcy",
+  "advance_payment_amount",
+  "payment_percentage",
   "section_break_23",
   "previously_quoted",
   "links_tab",
@@ -55,7 +67,6 @@
   "quotation",
   "quoted_date",
   "purchase_order_no",
-  "invoice_no",
   "invoiced_value",
   "invoice_date",
   "payment_entry",
@@ -65,7 +76,6 @@
   "po_no",
   "dn_no",
   "dn_date",
-  "advance_payment_amount",
   "advance_paid_date",
   "section_break_miaw",
   "detail_html",
@@ -250,7 +260,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nPartially Received\nReceived\nIn Custom\nDelivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nPartially Delivered\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid"
+   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nPending Internal Approval\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nReceived\nIn Custom\nDelivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid"
   },
   {
    "allow_on_submit": 1,
@@ -298,8 +308,7 @@
    "allow_on_submit": 1,
    "fieldname": "invoice_no",
    "fieldtype": "Data",
-   "label": "Sales Invoice",
-   "read_only": 1
+   "label": "Invoiced Amount"
   },
   {
    "allow_on_submit": 1,
@@ -322,8 +331,7 @@
    "allow_on_submit": 1,
    "fieldname": "advance_payment_amount",
    "fieldtype": "Currency",
-   "label": "Advance Payment Amount",
-   "read_only": 1
+   "label": "Paid Amount"
   },
   {
    "allow_on_submit": 1,
@@ -433,8 +441,7 @@
    "allow_on_submit": 1,
    "fieldname": "received_quantity",
    "fieldtype": "Int",
-   "label": "Received Quantity",
-   "read_only": 1
+   "label": "Received Quantity"
   },
   {
    "allow_on_submit": 1,
@@ -488,8 +495,7 @@
    "allow_on_submit": 1,
    "fieldname": "delivered_quantity",
    "fieldtype": "Int",
-   "label": "Delivered Quantity",
-   "read_only": 1
+   "label": "Delivered Quantity"
   },
   {
    "allow_on_submit": 1,
@@ -527,13 +533,70 @@
   {
    "fieldname": "section_break_miaw",
    "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivered_percentage",
+   "fieldtype": "Percent",
+   "label": "Delivered Percentage"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "received_percentage",
+   "fieldtype": "Percent",
+   "label": "Received Percentage"
+  },
+  {
+   "fieldname": "column_break_qswu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoice_percentage",
+   "fieldtype": "Percent",
+   "label": "Invoiced %"
+  },
+  {
+   "fieldname": "column_break_rkcy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_percentage",
+   "fieldtype": "Percent",
+   "label": "Paid %"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "supply_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supply Status",
+   "options": "\nTo Order\nPartially Ordered\nTo Receive and Deliver\nPartially Received\nTo Deliver\nPartially Delivered\nDelivered"
+  },
+  {
+   "fieldname": "column_break_fcpg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "ordered_quantity",
+   "fieldtype": "Int",
+   "label": "Ordered Quantity"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "ordered_percentage",
+   "fieldtype": "Percent",
+   "label": "Ordered Percentage"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 14:38:06.497930",
+ "modified": "2026-02-01 12:23:16.085155",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

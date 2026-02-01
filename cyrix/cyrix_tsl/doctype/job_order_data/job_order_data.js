@@ -28,11 +28,65 @@ frappe.ui.form.on("Job Order Data", {
 				}
 			}
 		})
+		
+		frappe.call({
+            method: "frappe.client.get_list",
+            args: {
+                doctype: "DocShare",
+                filters: {
+                    share_doctype: frm.doctype,
+                    share_name: frm.doc.name
+                },
+                fields: ["user"]
+            },
+            callback: function (r) {
+                let description;
+
+                if (r.message && r.message.length) {
+                    const users = r.message.map(d => d.user).join(", ");
+                    description = `
+                        <span>Shared with: <b>${users}</b></span>
+                        &nbsp;•&nbsp;
+                        <a href="#" class="open-share">Manage</a>
+                    `;
+                } else {
+                    description = `
+                        <a href="#" class="open-share text-muted">
+                            Not shared with any users — Click to share
+                        </a>
+                    `;
+                }
+
+                frm.set_df_property(
+                    "multiple_technicians",
+                    "description",
+                    description
+                );
+
+                // Attach click handler AFTER description is rendered
+                setTimeout(() => {
+                    frm.fields_dict.multiple_technicians.$wrapper
+                        .find(".open-share")
+                        .off("click")
+                        .on("click", function (e) {
+                            e.preventDefault();
+							if (!frm.shared) {
+								frm.shared = new frappe.ui.form.Share({ frm: frm, parent: frm.sidebar });
+							}
+							
+							// Show the standard share dialog
+							frm.shared.show();
+                        });
+                }, 0);
+            }
+        });
+
+
 	},
     create_evaluation_report(frm){
         if(frm.doc.docstatus == 1) {
 			frm.add_custom_button(__("Evaluation Report"), function(){
-				if(frm.doc.technician.length == 0){
+				if(!frm.doc.technician && !frm.doc.multiple_technicians.length > 0){
 					frappe.msgprint("Select <b>Technician</b> to create Evaluation Report")
 					return
 				}

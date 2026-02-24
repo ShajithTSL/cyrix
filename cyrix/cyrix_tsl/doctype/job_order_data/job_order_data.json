@@ -7,6 +7,9 @@
  "engine": "InnoDB",
  "field_order": [
   "details_tab",
+  "summary_summary_section",
+  "detail_html",
+  "section_break_nbbx",
   "naming_series",
   "customer",
   "customer_name",
@@ -44,8 +47,6 @@
   "attach_image",
   "section_break_dc2tn",
   "wod_component",
-  "tab_5_tab",
-  "detail_html",
   "linked_docs_tab",
   "quotation",
   "purchase_order_no",
@@ -268,6 +269,8 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Date"
   },
   {
@@ -638,11 +641,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "tab_5_tab",
-   "fieldtype": "Tab Break",
-   "label": "Summary"
-  },
-  {
    "fieldname": "detail_html",
    "fieldtype": "HTML",
    "label": "detail html"
@@ -660,6 +658,7 @@
    "fieldname": "sales_person",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Sales Person",
    "options": "Sales Person"
@@ -668,6 +667,8 @@
    "allow_on_submit": 1,
    "fieldname": "technician",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Technician",
    "options": "Technician ID"
   },
@@ -678,13 +679,23 @@
    "in_standard_filter": 1,
    "label": "Multiple Technicians (Add if Multiple Technicians involved)",
    "options": "Technician List"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "summary_summary_section",
+   "fieldtype": "Section Break",
+   "label": "Summary "
+  },
+  {
+   "fieldname": "section_break_nbbx",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-28 14:39:34.824781",
+ "modified": "2026-02-02 09:34:55.489474",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

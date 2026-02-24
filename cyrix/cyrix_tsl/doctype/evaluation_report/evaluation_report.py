@@ -48,13 +48,13 @@ class EvaluationReport(Document):
 				self.part_no = i.part_sheet_no
 				frappe.db.sql('''update `tabEvaluation Report` set part_no = %s where name = %s''',((int(i.part_sheet_no)),self.name))
 		
-		if int(self.items[-1].part_sheet_no) > int(1) and self.status in ["Spare Parts","Comparison","Extra Parts","Internal Extra Parts"] and self.ner_field != "NER-Need Evaluation Return":
-			self.status = "Internal Extra Parts"
-			frappe.db.sql('''update `tabEvaluation Report` set status = %s where name = %s ''',("Internal Extra Parts",self.name))
-			if self.document_active_status == "Yes":
-				wd = frappe.get_doc("Job Order Data",self.job_order_data)
-				wd.status = "IP-Internal Extra Parts"
-				wd.save(ignore_permissions = 1)
+			if int(self.items[-1].part_sheet_no) > int(1) and self.status in ["Spare Parts","Comparison","Extra Parts","Internal Extra Parts"] and self.ner_field != "NER-Need Evaluation Return":
+				self.status = "Internal Extra Parts"
+				frappe.db.sql('''update `tabEvaluation Report` set status = %s where name = %s ''',("Internal Extra Parts",self.name))
+				if self.document_active_status == "Yes":
+					wd = frappe.get_doc("Job Order Data",self.job_order_data)
+					wd.status = "IP-Internal Extra Parts"
+					wd.save(ignore_permissions = 1)
 			
 	def after_insert(self):		
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
@@ -124,13 +124,25 @@ class EvaluationReport(Document):
 	def update_working_status(self):
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
 		if self.status == "Working":
-			if doc.status != "W-Working":
+			if doc.status != "W-Working" and not self.check_quotation_exists(self.job_order_data):
 				doc.status = "W-Working"
 			doc.save(ignore_permissions=True)
 		if self.status == "Installed and Completed/Repaired":
 			if doc.status != "RS-Repaired and Shipped":
 				doc.status = "RS-Repaired and Shipped"
 			doc.save(ignore_permissions=True)
+
+	def check_quotation_exists(self,jo):
+		# check whether the Customer Quotation is exists for the given Job Order Data, workflow_state should beApproved by Customer and the job_order_data is set in Quotation Item table.
+		quotation_exists = False
+		quotations = frappe.get_all("Quotation Item", filters={"job_order_data": jo, "docstatus": 1}, pluck="parent")
+		if quotations:
+			for q in quotations:
+				quotation_doc = frappe.get_doc("Quotation", q)
+				if quotation_doc.workflow_state == "Approved by Customer":
+					quotation_exists = True
+					break
+		return quotation_exists
 
 @frappe.whitelist()
 def get_valuation_rate(item, warehouse, qty):

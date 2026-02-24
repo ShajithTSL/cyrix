@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+from cyrix.custom_py import utils
 from frappe.utils import add_to_date
 from datetime import datetime
 
@@ -52,8 +53,8 @@ class SupplyOrderData(Document):
 			ordered_percentage = 0
 			
 		self.ordered_percentage = ordered_percentage
-		frappe.db.set_value("Supply Order Data",self.name,'ordered_percentage',ordered_percentage,update_modified=False)
-		self.supply_order_status(ordered_percentage,self.get("received_percentage"), delivered_percentage = self.delivered_percentage)
+		frappe.db.set_value("Supply Order Data",self.name,'ordered_percentage',float(round(ordered_percentage, 2)),update_modified=False)
+		self.supply_order_status(ordered_percentage,self.get("received_percentage"), delivered_percentage = float(round(self.delivered_percentage, 2)))
 
 	def update_dn_percentage(self):
 		# need to calculate the delivered %
@@ -67,8 +68,8 @@ class SupplyOrderData(Document):
 			delivered_percentage = 0
 
 		self.delivered_percentage = delivered_percentage
-		frappe.db.set_value("Supply Order Data",self.name,'delivered_percentage',delivered_percentage,update_modified=False)
-		self.supply_order_status(self.get("ordered_percentage"),self.get("received_percentage"), delivered_percentage)
+		frappe.db.set_value("Supply Order Data",self.name,'delivered_percentage',float(round(delivered_percentage, 2)),update_modified=False)
+		self.supply_order_status(self.get("ordered_percentage"),self.get("received_percentage"), float(round(delivered_percentage, 2)))
 
 	def update_pr_percentage(self):
 		# need to calculate the procured % based on the received_quantity field in the parent table
@@ -78,8 +79,8 @@ class SupplyOrderData(Document):
 			received_percentage = 0
 			
 		self.received_percentage = received_percentage
-		frappe.db.set_value("Supply Order Data",self.name,'received_percentage',received_percentage,update_modified=False)
-		self.supply_order_status(self.get("ordered_percentage"), received_percentage, delivered_percentage = self.delivered_percentage)
+		frappe.db.set_value("Supply Order Data",self.name,'received_percentage',float(round(received_percentage, 2)),update_modified=False)
+		self.supply_order_status(self.get("ordered_percentage"), received_percentage, delivered_percentage = float(round(self.delivered_percentage, 2)))
 
 	def update_inv_percentage(self):
 		# need to calculate the invoiced % based on the invoiced_quantity field in the parent table
@@ -92,7 +93,7 @@ class SupplyOrderData(Document):
 		# need to calculate the payment % based on the advance_payment_amount field in the parent table
 		if self.invoiced_value and self.advance_payment_amount:
 			payment_percentage = (self.advance_payment_amount/self.invoiced_value)*100
-			frappe.db.set_value("Supply Order Data",self.name,'payment_percentage',payment_percentage,update_modified=False)
+			frappe.db.set_value("Supply Order Data",self.name,'payment_percentage',float(round(payment_percentage, 2)),update_modified=False)
 		else:
 			self.payment_percentage = 0
 			frappe.db.set_value("Supply Order Data",self.name,'payment_percentage',0,update_modified=False)
@@ -205,6 +206,9 @@ def create_internal_quotation(supply_order_data):
 	new_doc.party_name = doc.customer
 	new_doc.plant = doc.plant
 	new_doc.branch = doc.branch
+	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
+	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
+
 	new_doc.quotation_type = "Internal Quotation - Supply"
 	for i in doc.material_list:
 		new_doc.append("items",{

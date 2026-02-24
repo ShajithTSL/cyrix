@@ -138,8 +138,12 @@ frappe.ui.form.on("Supply Order Data", {
 						doc: frm.doc,
 						payment_details: r.message
 					});
-					// const html = frappe.render_template("status");
 					frm.fields_dict.detail_html.$wrapper.html(html);
+					
+					const status_html = frappe.render_template("status", {
+						doc: frm.doc
+					});
+					frm.fields_dict.status_detail.$wrapper.html(status_html);
 				}
 			}
 		})

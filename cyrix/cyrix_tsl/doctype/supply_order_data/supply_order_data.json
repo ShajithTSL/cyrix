@@ -6,6 +6,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "summary_section",
+  "detail_html",
   "section_break_hkeq",
   "naming_series",
   "customer",
@@ -42,6 +44,8 @@
   "st",
   "section_break_14",
   "material_list",
+  "section_break_fgbj",
+  "status_detail",
   "section_break_rgkj",
   "quantity",
   "supply_status",
@@ -55,7 +59,7 @@
   "delivered_quantity",
   "delivered_percentage",
   "column_break_qswu",
-  "invoice_no",
+  "invoiced_value",
   "invoice_percentage",
   "column_break_rkcy",
   "advance_payment_amount",
@@ -67,7 +71,7 @@
   "quotation",
   "quoted_date",
   "purchase_order_no",
-  "invoiced_value",
+  "invoice_no",
   "invoice_date",
   "payment_entry",
   "column_break_mhco",
@@ -78,7 +82,6 @@
   "dn_date",
   "advance_paid_date",
   "section_break_miaw",
-  "detail_html",
   "section_break_fmvr",
   "delivery_details",
   "track_tab",
@@ -308,7 +311,7 @@
    "allow_on_submit": 1,
    "fieldname": "invoice_no",
    "fieldtype": "Data",
-   "label": "Invoiced Amount"
+   "label": "Invoice Number"
   },
   {
    "allow_on_submit": 1,
@@ -455,8 +458,7 @@
    "allow_on_submit": 1,
    "fieldname": "invoiced_value",
    "fieldtype": "Float",
-   "label": "Invoiced Value",
-   "read_only": 1
+   "label": "Invoiced Value"
   },
   {
    "allow_on_submit": 1,
@@ -481,7 +483,8 @@
   },
   {
    "fieldname": "section_break_rgkj",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "column_break_xuus",
@@ -590,13 +593,27 @@
    "fieldname": "ordered_percentage",
    "fieldtype": "Percent",
    "label": "Ordered Percentage"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "summary_section",
+   "fieldtype": "Section Break",
+   "label": "Summary"
+  },
+  {
+   "fieldname": "section_break_fgbj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status_detail",
+   "fieldtype": "HTML"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-01 12:23:16.085155",
+ "modified": "2026-02-02 10:08:44.109044",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

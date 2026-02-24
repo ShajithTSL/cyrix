@@ -116,11 +116,11 @@ def create_evaluation_report(doc_no):
 
 	# Set naming series based on branch
 	branch_series_map = {
-		"Dammam": "EVAL-D-.YY.-",
-		"Jeddah": "EVAL-J-.YY.-",
-		"Riyadh": "EVAL-R-.YY.-",
-		"Kuwait": "EVAL-K-.YY.-",
-		"Dubai": "EVAL-DU-.YY.-"
+		"Dammam": "EVAL-D.YY.-",
+		"Jeddah": "EVAL-J.YY.-",
+		"Riyadh": "EVAL-R.YY.-",
+		"Kuwait": "EVAL-K.YY.-",
+		"Dubai": "EVAL-DU.YY.-"
 	}
 	new_doc.naming_series = branch_series_map.get(doc.branch, "")
 
@@ -170,7 +170,8 @@ def create_internal_quotation(job_order_data):
 	new_doc.company = doc.company
 	new_doc.party_name = doc.customer
 	new_doc.plant = doc.plant
-	new_doc.branch = doc.branch	
+	new_doc.branch = doc.branch
+	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
 	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
 
 	new_doc.quotation_type = "Internal Quotation - Repair"

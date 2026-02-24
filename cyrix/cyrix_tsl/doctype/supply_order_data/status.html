@@ -1,167 +1,218 @@
+<style>
+.supply-card {
+    width:40%;
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    font-family: Inter, Arial, sans-serif;
+}
 
-    <div class="metrics-container">
-        <!-- Header -->
-        <div class="metrics-header">
-            <h1 class="metrics-title">Purchase Order Metrics</h1>
-            <p class="metrics-subtitle">Order completion status overview</p>
-        </div>
+/* Title */
+.supply-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: #2d3436;
+}
 
-        <!-- Overall Progress -->
-        <div class="overall-section">
-            <div class="overall-card">
-                <div class="circle-container">
-                    <svg width="120" height="120" viewBox="0 0 120 120">
-                        <defs>
-                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stop-color="#3b82f6"/>
-                                <stop offset="100%" stop-color="#8b5cf6"/>
-                            </linearGradient>
-                        </defs>
-                        <circle class="circle-bg" cx="60" cy="60" r="50"/>
-                        <!-- 72% = 314 - (314 * 0.72) = 87.92 -->
-                        <circle class="circle-progress" cx="60" cy="60" r="50" 
-                            stroke-dasharray="314" 
-                            stroke-dashoffset="87.92"/>
-                    </svg>
-                    <span class="circle-text">72%</span>
-                </div>
-                <p class="overall-label">Overall Completion</p>
-            </div>
-        </div>
+/* Main Grid */
+.supply-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Equal width */
+    border: 1px solid #e3e8ee;
+    border-radius: 12px;
+    overflow: hidden;
+}
 
-        <!-- Metrics Grid -->
-        <div class="metrics-grid">
-            <!-- Purchase Receipt -->
-            <div class="metric-card blue">
-                <div class="metric-header">
-                    <div class="metric-icon blue">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    <div class="metric-info">
-                        <p class="metric-label">Purchase Receipt</p>
-                        <p class="metric-value">85%</p>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill blue" style="width: 85%;"></div>
-                </div>
-                <div class="metric-footer">
-                    <span class="metric-detail">850 / 1000 items</span>
-                    <span class="status-badge good">Good</span>
-                </div>
-            </div>
+/* Column */
+.supply-col {
+    padding: 18px 15px;
+    text-align: center;
+    border-right: 1px solid #e3e8ee;
+}
 
-            <!-- Delivered Qty -->
-            <div class="metric-card green">
-                <div class="metric-header">
-                    <div class="metric-icon green">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                        </svg>
-                    </div>
-                    <div class="metric-info">
-                        <p class="metric-label">Delivered Qty</p>
-                        <p class="metric-value">92%</p>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill green" style="width: 92%;"></div>
-                </div>
-                <div class="metric-footer">
-                    <span class="metric-detail">920 / 1000 items</span>
-                    <span class="status-badge excellent">Excellent</span>
-                </div>
-            </div>
+.supply-col:last-child {
+    border-right: none;
+}
 
-            <!-- Invoiced -->
-            <div class="metric-card amber">
-                <div class="metric-header">
-                    <div class="metric-icon amber">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
-                        </svg>
-                    </div>
-                    <div class="metric-info">
-                        <p class="metric-label">Invoiced</p>
-                        <p class="metric-value">68%</p>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill amber" style="width: 68%;"></div>
-                </div>
-                <div class="metric-footer">
-                    <span class="metric-detail">680 / 1000 items</span>
-                    <span class="status-badge average">Average</span>
-                </div>
-            </div>
+/* Label */
+.supply-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 6px;
+}
 
-            <!-- Payment Received -->
-            <div class="metric-card violet">
-                <div class="metric-header">
-                    <div class="metric-icon violet">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div class="metric-info">
-                        <p class="metric-label">Payment Received</p>
-                        <p class="metric-value">55%</p>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill violet" style="width: 55%;"></div>
-                </div>
-                <div class="metric-footer">
-                    <span class="metric-detail">$55,000 / $100,000</span>
-                    <span class="status-badge average">Average</span>
-                </div>
-            </div>
+/* Big Number */
+.supply-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f6fe5;
+    margin-bottom: 8px;
+}
 
-            <!-- Return -->
-            <div class="metric-card red">
-                <div class="metric-header">
-                    <div class="metric-icon red">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/>
-                        </svg>
-                    </div>
-                    <div class="metric-info">
-                        <p class="metric-label">Return</p>
-                        <p class="metric-value">8%</p>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill red" style="width: 8%;"></div>
-                </div>
-                <div class="metric-footer">
-                    <span class="metric-detail">80 / 1000 items</span>
-                    <span class="status-badge excellent">Low</span>
-                </div>
-            </div>
-        </div>
+/* Progress */
+.progress-bar {
+    height: 8px;
+    background: #e4ebf3;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 8px 0 4px;
+}
 
-        <!-- Legend -->
-        <div class="legend">
-            <p class="legend-title">Status Legend</p>
-            <div class="legend-items">
-                <div class="legend-item">
-                    <span class="legend-dot excellent"></span>
-                    <span>Excellent (90%+)</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot good"></span>
-                    <span>Good (70-89%)</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot average"></span>
-                    <span>Average (50-69%)</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot low"></span>
-                    <span>Low (&lt;50%)</span>
-                </div>
-            </div>
-        </div>
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, #1f6fe5, #5fa8ff);
+    border-radius: 6px;
+}
+
+/* Percentage */
+.progress-text {
+    font-size: 12px;
+    color: #636e72;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #e7f6ec;
+    color: #1e8449;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+/* Amount Section */
+.amount-box {
+    border-top: 1px solid #e3e8ee;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.amount-label {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.amount-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3436;
+    margin-bottom: 8px;
+}
+</style>
+
+
+<div class="supply-card">
+
+    <div class="supply-title">
+        📦 Supply Progress Summary
     </div>
+
+    <div class="supply-grid">
+
+        <!-- Ordered -->
+        <div class="supply-col">
+
+            <div class="supply-label">Ordered</div>
+
+            <div class="supply-value">
+                {{ doc.ordered_quantity }}
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width: {{ doc.ordered_percentage }}%;">
+                </div>
+            </div>
+
+            <div class="progress-text">
+                {{ doc.ordered_percentage }}%
+            </div>
+
+        </div>
+
+
+        <!-- Received -->
+        <div class="supply-col">
+
+            <div class="supply-label">Received</div>
+
+            <div class="supply-value">
+                {{ doc.received_quantity }}
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width: {{ doc.received_percentage }}%;">
+                </div>
+            </div>
+
+            <div class="progress-text">
+                {{ doc.received_percentage }}%
+            </div>
+
+        </div>
+
+
+        <!-- Delivered -->
+        <div class="supply-col">
+
+            <div class="supply-label">Delivered</div>
+
+            <div class="supply-value">
+                {{ doc.delivered_quantity }}
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width: {{ doc.delivered_percentage }}%;">
+                </div>
+            </div>
+
+            <div class="progress-text">
+                {{ doc.delivered_percentage }}%
+            </div>
+
+        </div>
+
+
+        <!-- Status + Amount -->
+        <div class="supply-col">
+
+            <div class="supply-label">Status</div>
+
+            <div class="status-badge">
+                {{ doc.supply_status }}
+            </div>
+
+
+            <div class="amount-box">
+
+                <div class="amount-label">
+                    Invoiced
+                </div>
+
+                <div class="amount-value">
+                    {{ doc.invoiced_value }}
+                </div>
+
+
+                <div class="amount-label">
+                    Paid
+                </div>
+
+                <div class="amount-value">
+                    {{ doc.advance_payment_amount }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,248 +1,77 @@
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+.summary-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-top: 15px;
+    font-family: Inter, Arial, sans-serif;
+}
 
-        .metrics-container {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 24px;
-            background: #f8fafc;
-        }
+.summary-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #2d3436;
+}
 
-        .metrics-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
 
-        .metrics-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 8px;
-        }
+/* KPI Box */
+.kpi-box {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid #e5e9f0;
+    text-align: center;
+}
 
-        .metrics-subtitle {
-            font-size: 14px;
-            color: #64748b;
-        }
+.kpi-label {
+    font-size: 12px;
+    color: #636e72;
+    margin-bottom: 6px;
+}
 
-        /* Overall Progress Circle */
-        .overall-section {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 32px;
-        }
+.kpi-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0984e3;
+}
 
-        .overall-card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px 48px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            text-align: center;
-        }
+/* Progress */
+.progress-wrap {
+    margin-top: 8px;
+}
 
-        .circle-container {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 16px;
-        }
+.progress-bar {
+    height: 6px;
+    background: #e0e6ed;
+    border-radius: 5px;
+    overflow: hidden;
+}
 
-        .circle-bg {
-            fill: none;
-            stroke: #e2e8f0;
-            stroke-width: 10;
-        }
+.progress-fill {
+    height: 100%;
+    background: #0984e3;
+    border-radius: 5px;
+}
 
-        .circle-progress {
-            fill: none;
-            stroke: url(#gradient);
-            stroke-width: 10;
-            stroke-linecap: round;
-            transform: rotate(-90deg);
-            transform-origin: center;
-            transition: stroke-dashoffset 0.5s ease;
-        }
+.progress-text {
+    font-size: 11px;
+    margin-top: 3px;
+    color: #636e72;
+}
 
-        .circle-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 28px;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .overall-label {
-            font-size: 14px;
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        /* Metric Cards Grid */
-        .metrics-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .metric-card {
-            flex: 1;
-            min-width: 160px;
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid;
-        }
-
-        .metric-card.blue { border-left-color: #3b82f6; }
-        .metric-card.green { border-left-color: #10b981; }
-        .metric-card.amber { border-left-color: #f59e0b; }
-        .metric-card.violet { border-left-color: #8b5cf6; }
-        .metric-card.red { border-left-color: #ef4444; }
-
-        .metric-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .metric-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .metric-icon.blue { background: #dbeafe; color: #3b82f6; }
-        .metric-icon.green { background: #d1fae5; color: #10b981; }
-        .metric-icon.amber { background: #fef3c7; color: #f59e0b; }
-        .metric-icon.violet { background: #ede9fe; color: #8b5cf6; }
-        .metric-icon.red { background: #fee2e2; color: #ef4444; }
-
-        .metric-icon svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .metric-info {
-            flex: 1;
-        }
-
-        .metric-label {
-            font-size: 12px;
-            color: #64748b;
-            font-weight: 500;
-            margin-bottom: 2px;
-        }
-
-        .metric-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-
-        .progress-fill.blue { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .progress-fill.green { background: linear-gradient(90deg, #10b981, #34d399); }
-        .progress-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .progress-fill.violet { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
-        .progress-fill.red { background: linear-gradient(90deg, #ef4444, #f87171); }
-
-        .metric-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .metric-detail {
-            font-size: 11px;
-            color: #94a3b8;
-        }
-
-        .status-badge {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 12px;
-            text-transform: uppercase;
-        }
-
-        .status-badge.excellent { background: #d1fae5; color: #059669; }
-        .status-badge.good { background: #dbeafe; color: #2563eb; }
-        .status-badge.average { background: #fef3c7; color: #d97706; }
-        .status-badge.low { background: #fee2e2; color: #dc2626; }
-
-        /* Legend */
-        .legend {
-            background: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .legend-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .legend-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: #475569;
-        }
-
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        .legend-dot.excellent { background: #10b981; }
-        .legend-dot.good { background: #3b82f6; }
-        .legend-dot.average { background: #f59e0b; }
-        .legend-dot.low { background: #ef4444; }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .metrics-grid {
-                flex-direction: column;
-            }
-            .metric-card {
-                min-width: 100%;
-            }
-        }
+/* Status */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #e8f5e9;
+    color: #2e7d32;
+}

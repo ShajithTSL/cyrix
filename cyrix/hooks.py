@@ -276,9 +276,10 @@ core.get_bootinfo = custom.get_bootinfo
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "cyrix.event.get_events"
-# }
+override_whitelisted_methods = {
+	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_journal_entry_bts",
+	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_payment_entry_bts"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

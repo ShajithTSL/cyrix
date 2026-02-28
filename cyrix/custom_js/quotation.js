@@ -1,4 +1,33 @@
 frappe.ui.form.on('Quotation', {
+    filter_reference: function(frm) {
+        let job_orders = [];
+
+        if (frm.doc.items && frm.doc.items.length) {
+            frm.doc.items.forEach(row => {
+                if (row.job_order_data) {
+                    job_orders.push(row.job_order_data);
+                }
+            });
+        }
+
+        frm.fields_dict['online_price_list'].grid.get_field('job_order_data').get_query = function(doc, cdt, cdn) {
+
+            if (!job_orders.length) {
+                return {
+                    filters: {
+                        name: ['=', '']
+                    }
+                };
+            }
+
+            return {
+                filters: {
+                    name: ['in', job_orders]
+                }
+            };
+        };
+    },
+
     validate: function(frm){
         frm.trigger("naming_series")
     },
@@ -95,71 +124,84 @@ frappe.ui.form.on('Quotation', {
         }
     },
     onload:function(frm){
+        frm.trigger("filter_reference")
         frm.remove_custom_button("Create")
         frm.remove_custom_button("Sales Invoice")
     },
     refresh:function(frm){
-        if(frm.doc.workflow_state == "Approved by Management"){
-            if(frm.doc.quotation_type == "Internal Quotation - Repair"){
-                var quote_type = "Customer Quotation - Repair"
-            }
-            if(frm.doc.quotation_type == "Internal Quotation - Supply"){
-                var quote_type = "Customer Quotation - Supply"
-            }
-            if(frm.doc.quotation_type == "Internal Quotation - Site Visit"){
-                var quote_type = "Customer Quotation - Site Visit"
-            }
-            if(frm.doc.quotation_type == "Internal Quotation - BQ"){
-                var quote_type = "Customer Quotation - BQ"
-            }
-            frm.add_custom_button("Customer Quotation", function(){
-                frappe.call({
-                    method: "cyrix.custom_py.quotation.get_quote",
-                    args: {
-                        "source": frm.doc.name,
-                        "type":quote_type
-                    },
-                    callback: function(r) {
-                        if(r.message) {
-                            var doc = frappe.model.sync(r.message);
-                            frappe.set_route("Form", doc[0].doctype, doc[0].name);
-                        }
+        frappe.run_serially([
+            () => {
+                if(frm.doc.workflow_state == "Approved by Management"){
+                    if(frm.doc.quotation_type == "Internal Quotation - Repair"){
+                        var quote_type = "Customer Quotation - Repair"
                     }
-                });
-            },__("Create"))
-        }
-        if(frm.doc.workflow_state == "Rejected by Customer"){
-            if (["Customer Quotation - R - Revised","Customer Quotation - Repair"].includes(frm.doc.quotation_type)){
-                var rev_type = "Customer Quotation - R - Revised"
-            }
-            if (["Customer Quotation - S - Revised","Customer Quotation - Supply"].includes(frm.doc.quotation_type)){
-                var rev_type = "Customer Quotation - S - Revised"
-            }
-            if(frm.doc.quotation_type == "Customer Quotation - Site Visit"){
-                var rev_type = "Customer Quotation - SV - Revised"
-            }
-            if(frm.doc.quotation_type == "Customer Quotation - BQ"){
-                var rev_type = "Customer Quotation - BQ - Revised"
-            }
-            frm.add_custom_button("Revised Quotation", function(){
-                frappe.call({
-                    method: "cyrix.custom_py.quotation.get_quote",
-                    args: {
-                        "source": frm.doc.name,
-                        "type": rev_type
-                    },
-                    callback: function(r) {
-                        if(r.message) {
-                            var doc = frappe.model.sync(r.message);
-                            frappe.set_route("Form", doc[0].doctype, doc[0].name);
-                        }
+                    if(frm.doc.quotation_type == "Internal Quotation - Supply"){
+                        var quote_type = "Customer Quotation - Supply"
                     }
-                });
-            },__("Create"))
-        }
-        frm.trigger("fetch_job_order_data")
-        frm.trigger("fetch_supply_order_data")
-        frm.trigger("create_sales_invoice")
+                    if(frm.doc.quotation_type == "Internal Quotation - Site Visit"){
+                        var quote_type = "Customer Quotation - Site Visit"
+                    }
+                    if(frm.doc.quotation_type == "Internal Quotation - BQ"){
+                        var quote_type = "Customer Quotation - BQ"
+                    }
+                    frm.add_custom_button("Customer Quotation", function(){
+                        frappe.call({
+                            method: "cyrix.custom_py.quotation.get_quote",
+                            args: {
+                                "source": frm.doc.name,
+                                "type":quote_type
+                            },
+                            callback: function(r) {
+                                if(r.message) {
+                                    var doc = frappe.model.sync(r.message);
+                                    frappe.set_route("Form", doc[0].doctype, doc[0].name);
+                                }
+                            }
+                        });
+                    },__("Create"))
+                }
+            },
+       
+            () => {
+                 if(frm.doc.workflow_state == "Rejected by Customer"){
+                    if (["Customer Quotation - R - Revised","Customer Quotation - Repair"].includes(frm.doc.quotation_type)){
+                        var rev_type = "Customer Quotation - R - Revised"
+                    }
+                    if (["Customer Quotation - S - Revised","Customer Quotation - Supply"].includes(frm.doc.quotation_type)){
+                        var rev_type = "Customer Quotation - S - Revised"
+                    }
+                    if(frm.doc.quotation_type == "Customer Quotation - Site Visit"){
+                        var rev_type = "Customer Quotation - SV - Revised"
+                    }
+                    if(frm.doc.quotation_type == "Customer Quotation - BQ"){
+                        var rev_type = "Customer Quotation - BQ - Revised"
+                    }
+                    frm.add_custom_button("Revised Quotation", function(){
+                        frappe.call({
+                            method: "cyrix.custom_py.quotation.get_quote",
+                            args: {
+                                "source": frm.doc.name,
+                                "type": rev_type
+                            },
+                            callback: function(r) {
+                                if(r.message) {
+                                    var doc = frappe.model.sync(r.message);
+                                    frappe.set_route("Form", doc[0].doctype, doc[0].name);
+                                }
+                            }
+                        });
+                    },__("Create"))
+                }
+            },
+
+            () => frm.trigger("filter_reference"),
+            () => frm.trigger("fetch_job_order_data"),
+            () => frm.trigger("fetch_supply_order_data"),
+            () => frm.trigger("create_sales_invoice")
+        ]);
+    },
+    setup :function(frm){
+        frm.trigger("filter_reference")
     },
     fetch_job_order_data: function(frm){    
         if(frm.doc.docstatus == 0){

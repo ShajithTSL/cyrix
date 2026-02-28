@@ -253,7 +253,7 @@ def fetch_price_from_eval_report(self, method):
     # Clear existing tables and totals
     self.item_price_details = []
     self.parts_price = []
-    self.total_actual_cost = 0.0
+    self.shipping_cost = 0.0
 
     # Initialize totals with descriptive names
     tsl_inventory_total = 0.0
@@ -301,12 +301,13 @@ def fetch_price_from_eval_report(self, method):
                     try:
                         exchange_rate = get_exchange_rate(sq.currency, self.currency)
                         if sq.spc:
-                            self.total_actual_cost += sq.spc * exchange_rate
+                            self.shipping_cost += sq.spc * exchange_rate
                     except Exception as e:
                         frappe.log_error(f"Exchange rate fetch failed: {e}", "Quotation Fetch Error")
 
             # Add to item_price_details
             self.append("item_price_details", {
+                "job_order_data": eval_doc.job_order_data,
                 "item": eval_item.part,
                 "item_source": item_source,
                 "model": eval_item.model,
@@ -324,6 +325,10 @@ def fetch_price_from_eval_report(self, method):
             elif item_source == "Scrap":
                 scrap_total += amount
 
+    total_price = 0
+    if self.technician_hours_spent:
+        for hour in self.technician_hours_spent:
+            total_price = hour.total_price if hour.total_price else 0
     # Append to parts_price table
     if self.item_price_details:
         total_material_cost = tsl_inventory_total + supplier_total + scrap_total
@@ -334,6 +339,8 @@ def fetch_price_from_eval_report(self, method):
             "scrap": float(round(scrap_total, 2)),
             "total_material_cost": float(round(total_material_cost, 2))
         })
+
+        self.total_actual_cost = float(round(total_material_cost + self.shipping_cost, 2)) + total_price
 
 
 def fetch_supplier_details(self, method):

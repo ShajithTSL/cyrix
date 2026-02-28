@@ -90,7 +90,8 @@ jinja = {
         "cyrix.custom_py.jinja.get_technicians",
 		"cyrix.custom_py.jinja.show_address",
 		"cyrix.custom_py.jinja.get_mt",
-		"cyrix.custom_py.jinja.get_labour"
+		"cyrix.custom_py.jinja.get_labour",
+		"cyrix.custom_py.jinja.get_material_cost"
 	]
 }
 

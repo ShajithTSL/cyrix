@@ -414,8 +414,12 @@ def fetch_supplier_details(self, method):
                     'item_code': j.item_code,
                 }
                 self.append("supplier_details", row)
-
+    
+    total_cost = 0
     if self.supplier_details:
+        for detail in self.supplier_details:
+            total_cost += float(round(detail.price, 2)) + float(round(detail.shipment, 2))
+            self.total_actual_cost = float(round(total_cost))
         self.append("parts_price", {
             "supplier": float(round(total_cost, 2)),
             "total_material_cost": float(round(total_cost, 2))

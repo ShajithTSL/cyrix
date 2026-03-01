@@ -8,8 +8,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "id",
-  "technician"
+  "technician",
+  "column_break_adoo",
+  "id"
  ],
  "fields": [
   {
@@ -22,12 +23,16 @@
    "fieldname": "technician",
    "fieldtype": "Data",
    "label": "Technician"
+  },
+  {
+   "fieldname": "column_break_adoo",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-28 08:55:21.448745",
+ "modified": "2026-03-01 12:25:17.129192",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technician ID",

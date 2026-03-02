@@ -17,6 +17,7 @@
   "priority_status",
   "received_date",
   "column_break_yhaq",
+  "document_type",
   "company",
   "branch",
   "department",
@@ -81,7 +82,6 @@
   "dn_no",
   "dn_date",
   "advance_paid_date",
-  "section_break_miaw",
   "section_break_fmvr",
   "delivery_details",
   "track_tab",
@@ -107,7 +107,7 @@
    "fieldtype": "Select",
    "in_global_search": 1,
    "label": "Naming Series",
-   "options": "SOD-.YY.-\nST-K.YY.-\nSOD-R.YY.-\nSOD-D.YY.-\nSOD-J.YY.-\nSOD-K.YY.-\nSOD-DU.YY.-\nSOD-DU-O-.YY.-\nSOD-DU.YY.-P."
+   "options": "SOD-.YY.-\nST-R.YY.-\nST-D.YY.-\nST-J.YY.-\nST-K.YY.-\nST-DU.YY.-\nSO-R.YY.-\nSO-D.YY.-\nSO-J.YY.-\nSO-K.YY.-\nSO-DU.YY.-"
   },
   {
    "allow_on_submit": 1,
@@ -534,10 +534,6 @@
    "hidden": 1
   },
   {
-   "fieldname": "section_break_miaw",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "delivered_percentage",
    "fieldtype": "Percent",
@@ -607,13 +603,21 @@
   {
    "fieldname": "status_detail",
    "fieldtype": "HTML"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "label": "Document Type",
+   "options": "Supply\nTender",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-02 10:08:44.109044",
+ "modified": "2026-03-02 14:15:06.864303",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

@@ -88,6 +88,9 @@ def update_job_order_data(dict):
 	# Proceed only if job_order_data reference exists
 	if doc.job_order_data:
 		for i in doc.get("received_equipment"):
+			if not i.get("uom"):
+				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
+
 			# Fetch delivery date and warranty duration from Job Order Data
 			warr = frappe.db.get_value("Job Order Data", doc.job_order_data, ["delivery", "warranty"], as_dict=1)
 			if warr['delivery'] and warr['warranty']:
@@ -174,11 +177,17 @@ def create_job_order_data(dict):
 	# Loop through each received equipment to create a Job Order Data record
 	link = []
 	for i in doc.get("received_equipment"):
+		# check if UOM is provided for each item
+		if not i.get("uom"):
+			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
+
 		jo = frappe.new_doc("Job Order Data")
 		if doc.job_order_data:
 			jo.naming_series = naming_series[doc.branch]["updated"]
 		else:
 			jo.naming_series = naming_series[doc.branch]["normal"]
+
+		jo.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or ""
 		jo.customer = doc.customer
 		jo.sales_person = doc.sales_person
 		jo.incharge = doc.incharge
@@ -268,6 +277,7 @@ def check_for_item(i,bg_less_image):
 			new_doc.item_group = "Equipments"
 			new_doc.description = i['item_name']
 			new_doc.model = i['model']
+			new_doc.stock_uom = i['uom']
 			new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
 			new_doc.is_stock_item = 1
 			new_doc.mfg = i['manufacturer']

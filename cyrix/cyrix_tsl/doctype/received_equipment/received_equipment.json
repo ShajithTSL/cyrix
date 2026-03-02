@@ -119,14 +119,14 @@
   },
   {
    "columns": 1,
-   "default": "Nos",
    "fetch_from": "item_code.stock_uom",
    "fetch_if_empty": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Unit/UOM",
-   "options": "UOM"
+   "options": "UOM",
+   "reqd": 1
   },
   {
    "columns": 1,
@@ -323,7 +323,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-08 15:39:23.972019",
+ "modified": "2026-03-02 11:50:21.460675",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Received Equipment",

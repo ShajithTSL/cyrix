@@ -99,6 +99,7 @@ frappe.ui.form.on("Create Supply Order", {
 	refresh(frm) {
 		frm.disable_save()
 		frappe.run_serially([
+			// () => $('[data-fieldname="document_type"] select').css({'color':'white', 'background':'#00adef', 'font-weight':'bold'}),
 			() => frm.set_value("company", frappe.defaults.get_default("company")),
 
 			() => frm.trigger("branch"),

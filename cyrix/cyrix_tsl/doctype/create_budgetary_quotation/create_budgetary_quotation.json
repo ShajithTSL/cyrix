@@ -13,6 +13,7 @@
   "branch",
   "department",
   "sales_person",
+  "customer_ref",
   "section_break_0vyeu",
   "items"
  ],
@@ -76,6 +77,11 @@
    "fieldtype": "Table",
    "options": "BQ Details",
    "reqd": 1
+  },
+  {
+   "fieldname": "customer_ref",
+   "fieldtype": "Data",
+   "label": "Customer reference / BQ "
   }
  ],
  "grid_page_length": 50,
@@ -83,7 +89,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-15 15:28:51.171867",
+ "modified": "2026-03-02 14:45:31.059117",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Budgetary Quotation",

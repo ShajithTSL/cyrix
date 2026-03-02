@@ -3,12 +3,37 @@
 
 frappe.ui.form.on("Create Budgetary Quotation", {
     customer(frm){
-		frm.call('get_contact').then(r=>{
-			if(r.message){
-				console.log(r.message[0])
-				frm.set_value("customer_representative",r.message[0])
-			}					
-        })
+		frappe.call({
+			method: 'cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.get_contacts',
+			args: {
+				"customer": frm.doc.customer,
+			},
+			callback(r) {
+				if (r.message) {
+                    console.log(r.message)
+					frm.set_query("customer_representative", function () {
+						return {
+							"filters": {
+								"name": ["in", r.message[0]]
+							}
+						};
+					});
+					if (r.message[0]) {
+						frm.set_value("customer_representative", r.message[0][0])
+					}
+					if (r.message[1]) {
+						frm.set_query("sales_person", function () {
+							return {
+								"filters": {
+									"name": ["in", r.message[1]]
+								}
+							};
+						});
+						frm.set_value("sales_person",r.message[1])
+					}
+				}
+			}
+		});
 	},
 
     create_bq(frm){        

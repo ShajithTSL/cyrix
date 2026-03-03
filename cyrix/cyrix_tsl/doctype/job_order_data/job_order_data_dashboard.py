@@ -8,7 +8,8 @@ def get_data():
 		'fieldname': 'job_order_data',
 		'non_standard_fieldnames': {
 			'Quotation': 'job_order_data',
-			'Job Order Data': 'parent_jo'
+			'Job Order Data': 'parent_jo',
+			'Service Call Form': 'related_doc'
 		},
 		'transactions': [
 			{
@@ -51,6 +52,10 @@ def get_data():
 			{
 				'label': _(''),
                 'items': ['Return Note']
+			},
+			{
+				'label': _(''),
+                'items': ['Service Call Form']
 			},
 			{
                 'label': _('Boards'),

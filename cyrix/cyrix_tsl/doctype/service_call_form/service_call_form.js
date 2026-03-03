@@ -44,12 +44,18 @@ frappe.ui.form.on('Service Call Form', {
                 });
             }
         }
-    },
-
-	sch_date:function(frm){
-		var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-		var now = new Date(frm.doc.sch_date);
-		var day = days[ now.getDay() ];
-		frm.set_value("day",day);
-	}
+    },	
 });
+
+frappe.ui.form.on('Service Call Schedule', {
+	date: function(frm, cdt, cdn){
+		let row = locals[cdt][cdn]
+		if(row.date){
+            var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            var now = new Date(row.date);
+            var day = days[ now.getDay() ];
+            row.day = day;
+            frm.refresh_field("service_call_schedule")
+        }
+	}
+})

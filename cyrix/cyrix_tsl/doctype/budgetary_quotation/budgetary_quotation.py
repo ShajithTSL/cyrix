@@ -57,6 +57,7 @@ class BudgetaryQuotation(Document):
 		new_doc.currency = frappe.db.get_value("Company",self.company,"default_currency")
 		new_doc.customer_name = frappe.db.get_value("Customer",self.customer,"customer_name")
 		new_doc.sales_person = self.sales_person
+		new_doc.customer_reference_number = self.customer_ref
 		new_doc.branch = self.branch
 		new_doc.budgetary_quotation = self.name
 		new_doc.quotation_type = "Internal Quotation - BQ"

@@ -262,7 +262,7 @@ frappe.ui.form.on("Create Job Order", {
 								}
 							};
 						});
-						frm.set_value("sales_person",r.message[1])
+						frm.set_value("sales_person",r.message[1][0])
 					}
 				}
 			}

@@ -162,7 +162,7 @@ frappe.ui.form.on("Create Supply Order", {
 								}
 							};
 						});
-						frm.set_value("sales_person",r.message[1])
+						frm.set_value("sales_person",r.message[1][0])
 					}
 				}
 			}

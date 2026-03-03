@@ -9,6 +9,7 @@
   "customer",
   "customer_representative",
   "mobile",
+  "customer_ref",
   "tender_number",
   "tender_converted_date",
   "column_break_fccdv",
@@ -56,8 +57,9 @@
   },
   {
    "fieldname": "customer_representative",
-   "fieldtype": "Data",
-   "label": "Customer Representative"
+   "fieldtype": "Link",
+   "label": "Customer Representative",
+   "options": "Contact"
   },
   {
    "fieldname": "mobile",
@@ -282,13 +284,19 @@
    "fieldname": "section_break_sncr",
    "fieldtype": "Section Break",
    "hidden": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer_ref",
+   "fieldtype": "Data",
+   "label": "Customer Reference"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-16 15:52:04.029747",
+ "modified": "2026-03-03 09:41:18.693077",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Budgetary Quotation",

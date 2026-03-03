@@ -8,6 +8,7 @@ from frappe.model.document import Document
 class CreateBudgetaryQuotation(Document):
 	@frappe.whitelist()
 	def create_budget_quote(self):
+		frappe.errprint("called")
 		link = []
 		if not self.customer:
 			frappe.throw("Please mention Customer")
@@ -36,6 +37,7 @@ class CreateBudgetaryQuotation(Document):
 		s.company = self.company
 		s.status = "Inquiry"
 		s.customer_representative = self.customer_representative
+		s.customer_ref = self.customer_ref
 		s.mobile = self.mobile
 		s.branch = self.branch
 		s.department = self.department

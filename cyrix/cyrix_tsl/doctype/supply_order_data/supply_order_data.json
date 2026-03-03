@@ -617,7 +617,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-03 10:29:55.747931",
+ "modified": "2026-03-03 10:52:31.216479",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",
@@ -639,6 +639,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "sales_person,customer,status",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

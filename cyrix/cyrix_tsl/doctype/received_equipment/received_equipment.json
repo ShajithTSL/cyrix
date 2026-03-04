@@ -33,6 +33,7 @@
   "overloadovercurrent",
   "column_break_16",
   "touchkeypad_not_working",
+  "not_working",
   "other",
   "column_break_kryn",
   "specify",
@@ -318,12 +319,18 @@
   {
    "fieldname": "column_break_kryn",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "not_working",
+   "fieldtype": "Check",
+   "label": "Not Working"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-02 11:50:21.460675",
+ "modified": "2026-03-03 14:47:02.907901",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Received Equipment",

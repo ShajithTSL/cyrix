@@ -108,7 +108,7 @@ def create_supply_order_data(dict):
 	link.append(so.name)
 
 	if link:
-		frappe.delete_doc("Create Supply Order", "Create Supply Order")
+		# frappe.delete_doc("Create Supply Order", "Create Supply Order")
 		links_list = []
 		for l in link:
 			links_list.append(""" <a href='/app/supply-order-data/{0}'>{0}</a> """.format(l))

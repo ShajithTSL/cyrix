@@ -82,6 +82,7 @@
   "overload_overcurrent",
   "column_break_umjh",
   "touch_keypad_not_working",
+  "not_working",
   "others",
   "column_break_43",
   "specify",
@@ -689,13 +690,20 @@
   {
    "fieldname": "section_break_nbbx",
    "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "not_working",
+   "fieldtype": "Check",
+   "label": "Not Working"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-03 10:51:18.856645",
+ "modified": "2026-03-03 14:48:21.658338",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

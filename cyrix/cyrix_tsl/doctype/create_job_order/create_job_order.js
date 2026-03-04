@@ -11,7 +11,15 @@ frappe.ui.form.on("Create Job Order", {
 			frm.set_value("repair_warehouse", values.name);
 		});
 	},
-    setup: function (frm) {
+	
+	onload: function (frm) {
+		frm.trigger("setup_query");
+	},
+
+	setup: function (frm) {
+		frm.trigger("setup_query");
+	},
+    setup_query: function (frm) {
         // child table set_query
 		frm.fields_dict['received_equipment'].grid.get_field('item_code').get_query = function (frm, cdt, cdn) {
 			var child = locals[cdt][cdn];
@@ -169,6 +177,8 @@ frappe.ui.form.on("Create Job Order", {
 
 		frappe.run_serially([
 			() => frm.set_value("company", frappe.defaults.get_default("company")),
+
+			() => frm.trigger("setup_query"),
 
 			() => frm.trigger("branch"),
 

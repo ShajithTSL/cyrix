@@ -41,6 +41,7 @@
   "overload_overcurrent",
   "column_break_clhj",
   "touch_keypad_not_working",
+  "not_working",
   "others",
   "specify",
   "column_break_13",
@@ -601,12 +602,19 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "not_working",
+   "fieldtype": "Check",
+   "label": "Not Working"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-28 12:24:28.256547",
+ "modified": "2026-03-03 14:48:34.088024",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Evaluation Report",

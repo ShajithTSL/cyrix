@@ -5,75 +5,9 @@ import frappe
 from frappe.model.document import Document
 import json
 from datetime import datetime
-import rembg
-from rembg import remove
-from PIL import Image
-import io
 
 class CreateJobOrder(Document):
 	pass
-
-
-
-@frappe.whitelist(allow_guest=True)
-def remove_background(file_url):
-    # Step 1: Fetch file from Frappe
-    file_doc = frappe.get_doc("File", {"file_url": file_url})
-    file_content = file_doc.get_content()
-
-    # Step 2: Remove background with alpha matting for cleaner edges
-    output = remove(
-        file_content,
-        alpha_matting=True,
-        alpha_matting_foreground_threshold=240,
-        alpha_matting_background_threshold=10,
-        alpha_matting_erode_size=10
-    )
-
-    # Step 3: Load image with alpha channel
-    img = Image.open(io.BytesIO(output)).convert("RGBA")
-
-    # Step 4: Auto-crop transparent edges
-    bbox = img.getbbox()
-    if bbox:
-        img = img.crop(bbox)
-
-    # Step 5: Resize to 500x500 (maintaining aspect ratio + transparent padding)
-    final_size = (500, 500)
-    img.thumbnail(final_size, Image.LANCZOS)  # resize keeping aspect ratio
-
-    # Create new transparent 500x500 background
-    new_img = Image.new("RGBA", final_size, (0, 0, 0, 0))
-
-    # Center the resized image
-    x_offset = (final_size[0] - img.width) // 2
-    y_offset = (final_size[1] - img.height) // 2
-    new_img.paste(img, (x_offset, y_offset))
-
-    # Step 6: Save optimized PNG (smaller size)
-    output_io = io.BytesIO()
-    new_img.save(
-        output_io,
-        format="PNG",
-        optimize=True,
-        compress_level=9  # 0 (fastest) → 9 (smallest)
-    )
-    output_io.seek(0)
-
-    # Step 7: Save new file in Frappe
-    new_file = frappe.get_doc({
-        "doctype": "File",
-        "file_name": f"cleaned_{file_doc.file_name.rsplit('.', 1)[0]}_500x500.png",
-        "attached_to_doctype": file_doc.attached_to_doctype,
-        "attached_to_name": file_doc.attached_to_name,
-        "content": output_io.getvalue(),
-        "is_private": 0
-    })
-    new_file.save(ignore_permissions=True)
-
-    return new_file.file_url
-
-
 
 naming_series = {
 	"Dammam": {"normal":"JO-D.YY.-", "updated": "SB-JO-D.YY.-"},
@@ -114,6 +48,7 @@ def update_job_order_data(dict):
 					jo.status = "NER-Need Evaluation Return"
 					if i.get("no_power"): jo.no_power = 1
 					if i.get("no_output"): jo.no_output = 1
+					if i.get("not_working"): jo.not_working = 1
 					if i.get("no_display"): jo.no_display = 1
 					if i.get("no_communication"): jo.no_communication = 1
 					if i.get("supply_voltage"): jo.supply_voltage = 1
@@ -141,7 +76,7 @@ def update_job_order_data(dict):
 					frappe.throw("Warranty Expired for the Job Order Data - "+str(doc.job_order_data))
 			else:
 				frappe.throw("No Warranty Period or Delivery Date is Mentioned In work order")
-	frappe.delete_doc("Create Job Order", "Create Job Order")
+	# frappe.delete_doc("Create Job Order", "Create Job Order")
 
 
 @frappe.whitelist()
@@ -177,8 +112,14 @@ def create_job_order_data(dict):
 	# Loop through each received equipment to create a Job Order Data record
 	link = []
 	for i in doc.get("received_equipment"):
-		# check if UOM is provided for each item
-		if not i.get("uom"):
+
+		# validation for mandatory fields in received equipment
+
+		if not 'model' in i:
+			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Model Number for the Received Equipment")
+		if not 'manufacturer' in i:
+			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Manufacturer for the Received Equipment")
+		if not 'uom' in i:
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
 
 		jo = frappe.new_doc("Job Order Data")
@@ -208,7 +149,7 @@ def create_job_order_data(dict):
 		jo.status = "NE-Need Evaluation"
 		
 		if 'attach_image' in i and i['attach_image']:
-			bg_less_image = remove_background(i["attach_image"])
+			bg_less_image = i["attach_image"]
 		else:
 			bg_less_image = ""
 		jo.attach_image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
@@ -226,6 +167,7 @@ def create_job_order_data(dict):
 		})
 		if i.get("no_power"): jo.no_power = 1
 		if i.get("no_output"): jo.no_output = 1
+		if i.get("not_working"): jo.not_working = 1
 		if i.get("no_display"): jo.no_display = 1
 		if i.get("no_communication"): jo.no_communication = 1
 		if i.get("supply_voltage"): jo.supply_voltage = 1
@@ -253,7 +195,7 @@ def create_job_order_data(dict):
 		link.append(jo.name)
 
 	if link:
-		frappe.delete_doc("Create Job Order", "Create Job Order")
+		# frappe.delete_doc("Create Job Order", "Create Job Order")
 		links_list = []
 		for l in link:
 			links_list.append(""" <a href='/app/job-order-data/{0}'>{0}</a> """.format(l))

@@ -128,6 +128,7 @@ def create_evaluation_report(doc_no):
 	checkbox_fields = [
 		"no_power",
 		"no_output",
+		"not_working",
 		"no_display",
 		"no_communication",
 		"supply_voltage",

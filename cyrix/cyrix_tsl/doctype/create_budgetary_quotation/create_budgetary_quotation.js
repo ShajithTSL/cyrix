@@ -53,14 +53,22 @@ frappe.ui.form.on("Create Budgetary Quotation", {
 			() => frm.set_value("company", frappe.defaults.get_default("company")),
 
 			() => {
-				frm.fields_dict['items'].grid.get_field('sku').get_query = function(doc, cdt, cdn) {
-					let row = locals[cdt][cdn];
+				frm.fields_dict['items'].grid.get_field('sku').get_query = function (frm, cdt, cdn) {
+					var child = locals[cdt][cdn];
+					var d = {};
+					if (child.model) {
+						d['model'] = child.model;
+					}
+					if (child.mfg) {
+						d['mfg'] = child.mfg;
+					}					
+					if (child.item_group){
+						d['item_group'] = child.item_group;
+					}
 					return {
-						filters: {
-							'model': row.model // Filter by model
-						}
-					};
-				};
+						filters: d
+					}
+				}
 			},
 
 			() => frm.trigger("create_bq") // create BQ

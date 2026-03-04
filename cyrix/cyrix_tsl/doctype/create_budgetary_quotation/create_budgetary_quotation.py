@@ -35,6 +35,7 @@ class CreateBudgetaryQuotation(Document):
 				s.model = i.model
 				s.item_name = i.description
 				s.description = i.description
+				s.item_group = i.item_group
 				s.mfg = i.mfg
 				s.uom = i.uom
 				s.item_group = "Equipments"
@@ -52,12 +53,13 @@ class CreateBudgetaryQuotation(Document):
 		s.department = self.department
 		s.sales_person = self.sales_person
 		if self.items:
-			for i in self.items:
+			for i in self.get("items"):
 				it = frappe.db.exists("Item",{"model":i.model,"mfg":i.mfg})
 				if it:
 					s.append("items",{
 						"sku":it,
 						"model":i.model,
+						"item_group":i.item_group,
 						"uom":i.uom,
 						"description":i.description,
 						"mfg":i.mfg,
@@ -67,7 +69,6 @@ class CreateBudgetaryQuotation(Document):
 		s.submit()
 		link.append(s.name)
 		if link:
-			frappe.delete_doc("Create Budgetary Quotation", "Create Budgetary Quotation")
 			frappe.msgprint("Budgetary Quotation is created: <a href='/app/budgetary-quotation/{0}'>{0}</a>".format(s.name,s.name))
 			return True
 		return False

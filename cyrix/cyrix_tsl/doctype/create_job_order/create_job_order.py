@@ -114,13 +114,15 @@ def create_job_order_data(dict):
 	for i in doc.get("received_equipment"):
 
 		# validation for mandatory fields in received equipment
-
-		if not 'model' in i:
+		if not 'model' in i and i.get("ignore") != 1:
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Model Number for the Received Equipment")
-		if not 'manufacturer' in i:
+		if not 'manufacturer' in i and i.get("ignore") != 1:
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Manufacturer for the Received Equipment")
 		if not 'uom' in i:
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
+
+		if i.get("ignore") == 1 and not i.get("item_name"):
+			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Description and Specification")
 
 		jo = frappe.new_doc("Job Order Data")
 		if doc.job_order_data:
@@ -159,11 +161,11 @@ def create_job_order_data(dict):
 		check_for_item(i,bg_less_image)
 
 		jo.append("material_list",{
-			"item_code": i['item_code'],
-			"item_name":i['item_name'],
-			"model_no":i['model'],
-			"mfg":i['manufacturer'],
-			"quantity":i['qty'],
+			"item_code": i.get('item_code', ""),
+			"item_name":i.get('item_name', ""),
+			"model_no":i.get('model', ""),
+			"mfg":i.get('manufacturer', ""),
+			"quantity":i.get('qty', 0),
 		})
 		if i.get("no_power"): jo.no_power = 1
 		if i.get("no_output"): jo.no_output = 1
@@ -205,8 +207,8 @@ def create_job_order_data(dict):
 
 def check_for_item(i,bg_less_image):
 	# If item_code is not provided, try to fetch or create Item based on model and manufacturer
-	if not 'item_code' in i:
-		item = frappe.db.get_value("Item", {"model": i['model'], "mfg": i['manufacturer']}, "name")
+	if not 'item_code' in i and (i.get('model') or i.get('manufacturer')):
+		item = frappe.db.get_value("Item", {"model": i.get('model'), "mfg": i.get('manufacturer')}, "name")
 		if item:
 			i['item_code'] = item
 			i['item_name'] = frappe.db.get_value("Item", item, "item_name")
@@ -214,18 +216,41 @@ def check_for_item(i,bg_less_image):
 			if not 'item_name' in i:
 				i['item_name'] = ""
 			new_doc = frappe.new_doc('Item')
-			new_doc.naming_series = 'P.######'
-			new_doc.item_name = i['item_name']
-			new_doc.item_group = "Equipments"
-			new_doc.description = i['item_name']
-			new_doc.model = i['model']
-			new_doc.stock_uom = i['uom']
-			new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
+			new_doc.naming_series = '.######'
+			new_doc.item_name = i.get('item_name')
+			if 'item_group' in i:
+				new_doc.item_group = i.get('item_group')
+			else:
+				new_doc.item_group = "Equipments"
+			new_doc.description = i.get('item_name')
+			new_doc.model = i.get('model')
+			new_doc.stock_uom = i.get('uom')
+			new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
 			new_doc.is_stock_item = 1
-			new_doc.mfg = i['manufacturer']
+			new_doc.mfg = i.get('manufacturer')
 			new_doc.save(ignore_permissions=True)
 			if new_doc.name:
 				i['item_code'] = new_doc.name
+
+	elif 'item_name' in i and not 'item_code' in i:
+		new_doc = frappe.new_doc('Item')
+		new_doc.naming_series = '.######'
+		new_doc.item_name = i.get('item_name', "")
+		if 'item_group' in i:
+			new_doc.item_group = i.get('item_group')
+		else:
+			new_doc.item_group = "Equipments"
+		new_doc.description = i.get('item_name', "")
+		new_doc.model = i.get('model', "")
+		new_doc.stock_uom = i.get('uom', "")
+		new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
+		new_doc.is_stock_item = 1
+		new_doc.mfg = i.get('manufacturer', "")
+		new_doc.save(ignore_permissions=True)
+		if new_doc.name:
+			i['item_code'] = new_doc.name
+
+
 
 def create_stock_entry(i,doc,jo):
 	# If item code exists, create stock entry for the received item

@@ -19,7 +19,15 @@ class CreateBudgetaryQuotation(Document):
 		if not self.items:
 			frappe.throw("Please fill Budgetary Quotation Details Table")
 
-		for i in self.items:
+		for i in self.get("items"):
+			if not i.get("description"):
+				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Description")
+			if not i.get("uom"):
+				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
+			
+			if not i.get("qty") or i.get("qty")<=0:
+				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Quantity should be greater than zero")
+
 			md = frappe.get_value("Item Model",i.model,["model"])
 			item = frappe.db.exists("Item",{"model":i.model,"mfg":i.mfg})
 			if not item:
@@ -28,6 +36,7 @@ class CreateBudgetaryQuotation(Document):
 				s.item_name = i.description
 				s.description = i.description
 				s.mfg = i.mfg
+				s.uom = i.uom
 				s.item_group = "Equipments"
 				s.stock_uom = "Nos"
 				s.save()
@@ -49,6 +58,7 @@ class CreateBudgetaryQuotation(Document):
 					s.append("items",{
 						"sku":it,
 						"model":i.model,
+						"uom":i.uom,
 						"description":i.description,
 						"mfg":i.mfg,
 						"qty":i.qty,

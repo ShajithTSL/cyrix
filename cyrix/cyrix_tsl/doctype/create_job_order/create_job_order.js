@@ -97,7 +97,7 @@ frappe.ui.form.on("Create Job Order", {
 					"address_dict": frm.doc.address
 				},
 				callback: function (r) {
-					frm.set_df_property("customer_address", "options", "Customer  Address <br>" + r.message + "<br>");
+					frm.set_df_property("customer_address", "options", "<b>Customer Address</b> <br>" + r.message + "<br>");
 					frm.refresh_fields();
 				}
 			});

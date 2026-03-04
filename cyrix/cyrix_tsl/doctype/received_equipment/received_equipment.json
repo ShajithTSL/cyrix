@@ -17,6 +17,7 @@
   "uom",
   "qty",
   "suggested_price",
+  "ignore",
   "serial_no",
   "has_serial_no",
   "complaint_section",
@@ -77,7 +78,7 @@
    "label": "Item Number"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fetch_from": "item_code.mfg",
    "fetch_if_empty": 1,
    "fieldname": "manufacturer",
@@ -325,12 +326,20 @@
    "fieldname": "not_working",
    "fieldtype": "Check",
    "label": "Not Working"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "ignore",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Ignore Existing Combination"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-03 14:47:02.907901",
+ "modified": "2026-03-04 09:44:48.179382",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Received Equipment",

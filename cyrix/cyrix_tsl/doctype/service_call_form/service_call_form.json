@@ -21,9 +21,6 @@
   "technician_name",
   "reason",
   "status",
-  "suitable_date_and_time_for_customer_section",
-  "cus_date",
-  "time",
   "schedule_visit_section",
   "service_call_schedule",
   "section_break_15",
@@ -44,6 +41,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Customer",
    "options": "Customer",
    "reqd": 1
@@ -72,6 +70,8 @@
   {
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Branch",
    "options": "Branch"
   },
@@ -94,6 +94,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -112,27 +113,13 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "Service Enquiry",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nService Enquiry\nInternally Quoted\nQuoted\nApproved\nRSC - Repair to Ship\nUnder Process\nInvoiced\nRejected\nCancelled\nPaid\nNot Succeed"
-  },
-  {
-   "fieldname": "suitable_date_and_time_for_customer_section",
-   "fieldtype": "Section Break",
-   "label": "Suitable Date and Time for Customer"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "cus_date",
-   "fieldtype": "Date",
-   "label": "Date"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "time",
-   "fieldtype": "Time",
-   "label": "Time"
+   "options": "\nService Enquiry\nInternally Quoted\nQuoted\nApproved\nRSC - Repair to Ship\nUnder Process\nInvoiced\nRejected\nCancelled\nPaid\nNot Succeed\nClosed\nCompleted"
   },
   {
    "fieldname": "schedule_visit_section",
@@ -172,6 +159,8 @@
    "allow_on_submit": 1,
    "fieldname": "sales_person",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Sales Person",
    "options": "Sales Person",
    "reqd": 1
@@ -195,7 +184,7 @@
    "link_fieldname": "service_call_form"
   }
  ],
- "modified": "2026-03-03 11:33:45.833513",
+ "modified": "2026-03-05 13:59:05.207931",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Service Call Form",

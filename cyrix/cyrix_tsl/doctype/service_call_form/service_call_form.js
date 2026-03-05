@@ -2,6 +2,29 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Service Call Form', {
+
+    company: function(frm) {
+        frm.trigger("set_query");
+    },
+
+    set_query: function(frm) {
+        frm.set_query("department", function () {
+			return {
+				filters: [
+					["company", "=", frm.doc.company],
+				]
+			}
+		});
+        frm.set_query("related_doc", function () {
+            return {
+                filters: [
+                    ["company", "=", frm.doc.company],
+                ]
+            }
+        });
+        
+    },
+
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 1){
 			frm.add_custom_button(__('Internal Quotation'), function(){
@@ -19,6 +42,7 @@ frappe.ui.form.on('Service Call Form', {
                 });
 			}, ('Create'))
 		}
+        frm.trigger("set_query");
 	},
 
     related_doc: function(frm) {
@@ -30,7 +54,8 @@ frappe.ui.form.on('Service Call Form', {
                 customer: "customer",
                 branch: "branch",
                 department: "department",
-                sales_person: "sales_person"
+                sales_person: "sales_person",
+                company: "company",
             };
 
             for (let source_field in fields_to_fetch) {

@@ -22,10 +22,9 @@ frappe.ui.form.on("Create Supply Order", {
 			if (child.manufacturer) {
 				d['mfg'] = child.manufacturer;
 			}
-			if (child.type) {
-				d['type'] = child.type;
+			if (child.item_group) {
+				d['item_group'] = child.item_group;
 			}
-			d['item_group'] = "Equipments";
 			return {
 				filters: d
 			}

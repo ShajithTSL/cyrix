@@ -76,7 +76,7 @@
   {
    "fieldname": "items",
    "fieldtype": "Table",
-   "options": "BQ Details",
+   "options": "Create BQ Details",
    "reqd": 1
   },
   {
@@ -90,7 +90,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-03 09:42:07.637358",
+ "modified": "2026-03-05 09:29:55.884242",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Budgetary Quotation",

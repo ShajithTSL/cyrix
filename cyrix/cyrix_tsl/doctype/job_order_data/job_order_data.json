@@ -96,7 +96,6 @@
   "status_duration_details",
   "online_price_section",
   "price_table",
-  "tech_id",
   "amended_from"
  ],
  "fields": [
@@ -546,13 +545,6 @@
    "options": "Online Price List"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "tech_id",
-   "fieldtype": "Link",
-   "label": "Tech ID",
-   "options": "Technician ID"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -703,7 +695,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-03 14:48:21.658338",
+ "modified": "2026-03-05 11:49:42.188163",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

@@ -111,7 +111,7 @@ class EvaluationReport(Document):
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
 
 		self.update_working_status() # if the document status is changed as Working, Need to change the JO status as Working
-		
+		self.update_board_evaluation_status() # if the document status is changed as Board Evaluation, Need to change the JO status as Board Evaluation
 		# 1. this case mostly works on initial submission
 		if self.status == "Spare Parts":
 			# if parts avaliability field is yes
@@ -130,6 +130,13 @@ class EvaluationReport(Document):
 		if self.status == "Installed and Completed/Repaired":
 			if doc.status != "RS-Repaired and Shipped":
 				doc.status = "RS-Repaired and Shipped"
+			doc.save(ignore_permissions=True)
+
+	def update_board_evaluation_status(self):
+		doc = frappe.get_doc("Job Order Data",self.job_order_data)
+		if self.status == "Board Evaluation":
+			if doc.status != "Board Evaluation":
+				doc.status = "Board Evaluation"
 			doc.save(ignore_permissions=True)
 
 	def check_quotation_exists(self,jo):

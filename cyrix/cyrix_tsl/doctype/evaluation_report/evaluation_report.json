@@ -378,7 +378,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nInstalled and Completed/Repaired\nWorking\nSpare Parts\nExtra Parts\nComparison\nParts Missing\nReturn Not Repaired\nReturn No Fault\nRNP-Return No Parts\nSupplier Quoted\nInternal Extra Parts"
+   "options": "\nBoard Evaluation\nInstalled and Completed/Repaired\nWorking\nSpare Parts\nExtra Parts\nComparison\nParts Missing\nReturn Not Repaired\nReturn No Fault\nRNP-Return No Parts\nSupplier Quoted\nInternal Extra Parts"
   },
   {
    "fieldname": "section_break_25",
@@ -614,7 +614,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-03 14:48:34.088024",
+ "modified": "2026-03-08 10:09:42.379534",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Evaluation Report",

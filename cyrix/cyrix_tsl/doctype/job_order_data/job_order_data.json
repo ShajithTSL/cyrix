@@ -192,10 +192,10 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "expiry_date",
    "fieldtype": "Date",
-   "label": "Warranty Expiry Date",
-   "read_only": 1
+   "label": "Warranty Expiry Date"
   },
   {
    "allow_on_submit": 1,
@@ -695,7 +695,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-08 10:09:13.108879",
+ "modified": "2026-03-08 10:13:35.321867",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

@@ -197,7 +197,48 @@ frappe.ui.form.on('Quotation', {
             () => frm.trigger("filter_reference"),
             () => frm.trigger("fetch_job_order_data"),
             () => frm.trigger("fetch_supply_order_data"),
-            () => frm.trigger("create_sales_invoice")
+            () => frm.trigger("create_sales_invoice"),
+            () => {
+                const quotation_formats = {
+                    "Internal Quotation - Supply": {
+                        label: "Internal Quotation",
+                        format: "INT/KW/SO - V1"
+                    },
+                    "Customer Quotation - Supply": {
+                        label: "Customer Quotation",
+                        format: "CUS/KW/SO-V1"
+                    },
+                    "Internal Quotation - Repair": {
+                        label: "Internal Quotation",
+                        format: "INT/KW/JO - V1"
+                    },
+                    "Customer Quotation - Repair": {
+                        label: "Customer Quotation",
+                        format: "CUS/KW/JO - V1"
+                    }
+                };
+
+                let config = quotation_formats[frm.doc.quotation_type];
+
+                if (config) {
+                    frm.add_custom_button(__(config.label), function () {
+
+                        let f_name = frm.doc.name;
+
+                        window.open(
+                            frappe.urllib.get_full_url(
+                                "/api/method/frappe.utils.print_format.download_pdf?"
+                                + "doctype=" + encodeURIComponent(frm.doc.doctype)
+                                + "&name=" + encodeURIComponent(f_name)
+                                + "&trigger_print=1"
+                                + "&format=" + encodeURIComponent(config.format)
+                                + "&no_letterhead=0"
+                            )
+                        );
+
+                    }, __('Print'));
+                }
+            }
         ]);
     },
     setup :function(frm){

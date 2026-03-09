@@ -425,6 +425,20 @@ def fetch_supplier_details(self, method):
             "total_material_cost": float(round(total_cost, 2))
         })
 
+    total_price = 0
+    shipment_total = 0
+    quotations = set()
+
+    if self.supplier_details:
+        for detail in self.supplier_details:
+            total_price += round(detail.price, 2)
+
+            if detail.supplier_quotation and detail.supplier_quotation not in quotations:
+                quotations.add(detail.supplier_quotation)
+                shipment_total += round(detail.shipment, 2)
+
+    self.total_actual_cost = round(total_price + shipment_total, 2)
+
 
 @frappe.whitelist()
 def get_job_order_data(job_order_data):

@@ -127,10 +127,18 @@ class EvaluationReport(Document):
 			if doc.status != "W-Working" and not self.check_quotation_exists(self.job_order_data):
 				doc.status = "W-Working"
 			doc.save(ignore_permissions=True)
+
 		if self.status == "Installed and Completed/Repaired":
 			if doc.status != "RS-Repaired and Shipped":
 				doc.status = "RS-Repaired and Shipped"
 			doc.save(ignore_permissions=True)
+
+		if self.status == "Return Not Repaired":
+			if doc.status != "RNR-Return Not Repaired":
+				doc.status = "RNR-Return Not Repaired"
+			doc.save(ignore_permissions=True)
+
+		
 
 	def update_board_evaluation_status(self):
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)

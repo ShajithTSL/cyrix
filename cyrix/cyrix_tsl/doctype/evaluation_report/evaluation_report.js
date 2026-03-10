@@ -97,7 +97,7 @@ frappe.ui.form.on("Evaluation Report", {
 				filters: d
 			}
 		}
-		set_field_options("status", ["Board Evaluation","Internal Extra Parts","Extra Parts","Working","Spare Parts","Comparison","Parts Missing","Return Not Repaired","Return No Fault","RNP-Return No Parts"])
+		set_field_options("status", ["Installed and Completed/Repaired","Board Evaluation","Internal Extra Parts","Extra Parts","Working","Spare Parts","Comparison","Parts Missing","Return Not Repaired","Return No Fault","RNP-Return No Parts"])
 		if(frm.doc.docstatus == 1){
 			frm.set_df_property('estimated_repair_time', 'hidden', 1);
 			frm.set_df_property('evaluation_time', 'hidden', 1);

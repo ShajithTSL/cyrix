@@ -32,8 +32,16 @@ class CreateBudgetaryQuotation(Document):
 		s.sales_person = self.sales_person
 
 		for i in self.get("items"):
-			if not i.get("description"):
+
+			if not i.get("model") and i.get("ignore") != 1:
+				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Model Number for the Received Equipment")
+
+			if i.get("ignore") == 1 and not i.get("description"):
 				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Description")
+			
+			if not i.get("mfg") and i.get("ignore") != 1:
+				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Manufacturer for the Received Equipment")
+
 			if not i.get("uom"):
 				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
 			
@@ -41,7 +49,6 @@ class CreateBudgetaryQuotation(Document):
 				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Quantity should be greater than zero")
 
 			check_for_item(i)
-			frappe.errprint(i)
 			
 			s.append("items",{
 				"sku":i.sku,

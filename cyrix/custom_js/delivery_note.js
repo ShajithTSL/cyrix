@@ -36,6 +36,7 @@ frappe.ui.form.on('Delivery Note', {
                     row.rate = custom_item.rate;
                     row.price_list_rate = custom_item.rate;
                     row.amount = custom_item.rate * row.qty;
+                    row.serial_number = custom_item.serial_number;
                 }
             });
             // Clear after applying

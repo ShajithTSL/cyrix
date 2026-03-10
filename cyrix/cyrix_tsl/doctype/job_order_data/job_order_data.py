@@ -222,6 +222,7 @@ def create_delivery_note(job_order_data):
 	new_doc.custom_sales_person = doc.sales_person
 	new_doc.branch = doc.branch
 	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
+	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
 	new_doc.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
 	new_doc.set_warehouse = fetch_repair_warehouse(doc.company,doc.branch)
 	new_doc.customer_address = doc.address
@@ -254,7 +255,8 @@ def create_delivery_note(job_order_data):
 			"item_code":i.item_code,
 			"manufacturer":i.mfg,
 			"model":i.model_no,
-			"description":i.item_name,
+			"description":i.item_name,			
+			"serial_number":i.serial_no,
 			"qty":qty,
 			"rate":rate,
 			"amount":amount,
@@ -274,6 +276,7 @@ def create_delivery_note(job_order_data):
 			"qty":qty,
 			"rate":rate,
 			"amount":amount,
+			"serial_number":i.serial_no,
 			"job_order_data":job_order_data,
 			"uom":"Nos",
 			"stock_uom":"Nos",

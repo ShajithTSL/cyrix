@@ -238,6 +238,32 @@ frappe.ui.form.on('Quotation', {
 
                     }, __('Print'));
                 }
+            },
+            () => {
+                if(frm.doc.docstatus == 1 && frm.doc.workflow_state == "Approved by Customer"){
+				    frm.add_custom_button(__('Invoice Request'), function(){
+                        frappe.call({
+                            method: "cyrix.custom_py.quotation.create_invoice_request",
+                            args: {
+                                "source": frm.doc.name,
+                                "user": frappe.session.user,
+                            },
+                            callback: function(r) {
+                                if(r.message) {
+                                    var doc = frappe.model.sync(r.message);
+                                    frappe.db.get_value('Customer', {'name':frm.doc.customer}, ['customer_type'], (r) => {
+                                        if(r.customer_type == "Company"){
+                                            // if(!frm.doc.customer_address){
+                                            //     frappe.throw("Please ensure the customer address is filled in; otherwise, the quotation will not be created. 😞 ")
+                                            // }
+                                            frappe.set_route("Form", doc[0].doctype, doc[0].name);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }, ('Create'))
+			    }			
             }
         ]);
     },

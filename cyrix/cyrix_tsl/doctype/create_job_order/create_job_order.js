@@ -213,11 +213,20 @@ frappe.ui.form.on("Create Job Order", {
 						for (var i = 0; i < r.message.length; i++) {
 							if(frm.doc.is_returned_unit){								
 								var childTable = cur_frm.add_child("received_equipment");
-								childTable.item_code = r.message[i]['item_code'],
-								childTable.item_name = r.message[i]["item_name"],
+								childTable.item_code = r.message[i]['item_code']
+								childTable.item_name = r.message[i]["item_name"]
 								childTable.manufacturer = r.message[i]["mfg"]
-								childTable.model = r.message[i]["model_no"],
-								childTable.type = r.message[i]["type"],
+								childTable.serial_no = r.message[i]["serial_no"]
+								childTable.uom = r.message[i]["uom"]
+								if(r.message[i]["serial_no"]){
+									childTable.has_serial_no = 1
+								}
+								else{
+									childTable.has_serial_no = 0
+								}
+								
+								childTable.model = r.message[i]["model_no"]
+								childTable.type = r.message[i]["type"]
 								childTable.qty = r.message[i]["qty"]
 							}
                             frm.doc.sales_person = r.message[i]["sales_person"],

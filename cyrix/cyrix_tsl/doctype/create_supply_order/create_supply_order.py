@@ -85,11 +85,11 @@ def create_supply_order_data(dict):
 	link = []
 	for i in doc.get("received_equipment"):
 		# validation for mandatory fields in received equipment
-		if not 'model' in i and i.get("ignore") != 1:
+		if not i.get("model") and i.get("ignore") != 1:
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Model Number for the Received Equipment")
-		if not 'manufacturer' in i and i.get("ignore") != 1:
+		if not i.get("manufacturer") and i.get("ignore") != 1:
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Manufacturer for the Received Equipment")
-		if not 'uom' in i:
+		if not i.get("uom"):
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
 		
 		if i.get("ignore") == 1 and not i.get("item_name"):

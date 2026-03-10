@@ -61,9 +61,10 @@ def update_job_order_data(dict):
 						jo.others = 1
 						jo.specify = i["specify"]
 					jo.save(ignore_permissions = 1)
-
-					create_stock_entry(i, doc, jo) # Create a related stock entry based on the returned equipment
 					
+					
+					create_stock_entry(i, doc, jo) # Create a related stock entry based on the returned equipment
+					create_serial_no(i, doc)
 					# Set Job Order Data CAP status and date
 					frappe.db.set_value("Job Order Data", doc.job_order_data, "status_cap", "NER-Need Evaluation Return")
 					status_cap_exists = frappe.db.get_value("Job Order Data", doc.job_order_data, "status_cap_date")
@@ -114,11 +115,11 @@ def create_job_order_data(dict):
 	for i in doc.get("received_equipment"):
 
 		# validation for mandatory fields in received equipment
-		if not 'model' in i and i.get("ignore") != 1:
+		if not i.get("model") and i.get("ignore") != 1:
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Model Number for the Received Equipment")
-		if not 'manufacturer' in i and i.get("ignore") != 1:
+		if not i.get("manufacturer") and i.get("ignore") != 1:
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Manufacturer for the Received Equipment")
-		if not 'uom' in i:
+		if not i.get("uom"):
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
 
 		if i.get("ignore") == 1 and not i.get("item_name"):
@@ -159,6 +160,7 @@ def create_job_order_data(dict):
 
 		# check whether item_code exists or create new Item if needed
 		check_for_item(i,bg_less_image)
+		create_serial_no(i, doc)
 
 		jo.append("material_list",{
 			"item_code": i.get('item_code', ""),
@@ -166,6 +168,7 @@ def create_job_order_data(dict):
 			"model_no":i.get('model', ""),
 			"mfg":i.get('manufacturer', ""),
 			"quantity":i.get('qty', 0),
+			"serial_no":i.get('serial_no', "")
 		})
 		if i.get("no_power"): jo.no_power = 1
 		if i.get("no_output"): jo.no_output = 1
@@ -250,9 +253,27 @@ def check_for_item(i,bg_less_image):
 		if new_doc.name:
 			i['item_code'] = new_doc.name
 
+def create_serial_no(i, doc):
+	
+	# Create Serial Number record if the item has serial number and update its status to Active
+	if i.get('has_serial_no') and i.get('serial_no'):
+		s_number = frappe.db.exists("Serial Number",{"name":i.get('serial_no')})
+		if s_number:
+			sn_doc = frappe.get_doc("Serial Number",i.get('serial_no'))
+			sn_doc.item_code = i['item_code']
+			sn_doc.status = "Active"
+			sn_doc.save()
+			
+		else:
+			sn_doc = frappe.new_doc("Serial Number")
+			sn_doc.serial_no = i.get('serial_no')
+			sn_doc.item_code = i['item_code']
+			sn_doc.company = doc.company
+			sn_doc.status = "Active"
+			sn_doc.save(ignore_permissions=True)
 
+def create_stock_entry(i, doc, jo):
 
-def create_stock_entry(i,doc,jo):
 	# If item code exists, create stock entry for the received item
 	if i['item_code']:
 		se_doc = frappe.new_doc("Stock Entry")
@@ -266,6 +287,7 @@ def create_stock_entry(i,doc,jo):
 			'item_code':i['item_code'],
 			'item_name':i['item_name'],
 			'description':i['item_name'],
+			'serial_number':i.get('serial_no', ""),
 			'qty':i['qty'],
 			'uom':frappe.db.get_value("Item",i['item_code'],'stock_uom') or "Nos",
 			'branch':doc.branch,
@@ -295,6 +317,7 @@ def get_jo_details(jo):
 		l.append(frappe._dict({
 			"item_name": i.item_name,
 			"item_code": i.item_code,
+			"uom": frappe.db.get_value("Item", i.item_code, "stock_uom") or "Nos",
 			"mfg": i.mfg,
 			"model_no": i.model_no,
 			"serial_no": i.serial_no,

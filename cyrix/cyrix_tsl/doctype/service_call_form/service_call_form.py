@@ -4,6 +4,7 @@
 
 import frappe
 from frappe.model.document import Document
+from cyrix.custom_py import utils
 
 class ServiceCallForm(Document):
 	pass
@@ -19,10 +20,12 @@ def create_qtn(source):
 	new_doc.quotation_type = "Internal Quotation - Site Visit"
 	new_doc.sales_person = doc.sales_person
 	new_doc.service_call_form = doc.name
+	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
+	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
 	new_doc.branch = doc.branch
 	new_doc.append("items",{
-		"item_code":frappe.db.get_value("Item",{"item_name":"Service Item"},'name'),
-		"item_name":"Service Item",
+		"item_code":frappe.db.get_value("Item",{"item_name":"Service Call"},'name'),
+		"item_name":"Service Call",
 		"description":"",
 		"qty":1,
 		"uom":"Nos",

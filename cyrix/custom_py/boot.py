@@ -154,6 +154,33 @@ def get_bootinfo():
     
     bootinfo.actual_warehouse_branch_wise = actual_warehouse_branch_wise
     bootinfo.repair_warehouse_branch_wise = repair_warehouse_branch_wise
+
+    bootinfo.finance_cc = {}
+    bootinfo.finance_to = {}
+    bootinfo.hr_cc = {}
+    bootinfo.hr_to = {}
+    bootinfo.purchase_to = {}
+
+    for com in company_list:
+        finance_cc = frappe.db.get_all("Email List",{"parent":com.name,"parentfield":"finance_cc"},"user")
+        for b in finance_cc:
+            bootinfo.finance_cc.setdefault(com.name, []).append(b.user)
+
+        finance_to = frappe.db.get_all("Email List",{"parent":com.name,"parentfield":"finance_to"},"user")
+        for b in finance_to:
+            bootinfo.finance_to.setdefault(com.name, []).append(b.user)
+
+        hr_cc = frappe.db.get_all("Email List",{"parent":com.name,"parentfield":"hr_cc"},"user")
+        for b in hr_cc:
+            bootinfo.hr_cc.setdefault(com.name, []).append(b.user)
+
+        hr_to = frappe.db.get_all("Email List",{"parent":com.name,"parentfield":"hr_to"},"user")
+        for b in hr_to:
+            bootinfo.hr_to.setdefault(com.name, []).append(b.user)
+
+        purchase_to = frappe.db.get_all("Email List",{"parent":com.name,"parentfield":"purchase_to"},"user")
+        for b in purchase_to:
+            bootinfo.purchase_to.setdefault(com.name, []).append(b.user)
     
     return bootinfo
 

@@ -1,5 +1,6 @@
 import frappe
 from frappe.utils.pdf import get_pdf
+from frappe.core.doctype.communication.email import _make as make_communication
 
 def fetch_price_list(company, document_type):
 	field = "selling" if document_type == "selling" else "buying"
@@ -28,3 +29,41 @@ def download_custom_pdf(doctype, name, print_format="Standard", no_letterhead=0)
 	frappe.local.response.filename = filename
 	frappe.local.response.filecontent = pdf
 	frappe.local.response.type = "download"
+
+@frappe.whitelist()
+def sendmail(self, message = None, subject = None, sender = None, recipients = None, attachments = None, cc = None):
+	communication = make_communication(
+		doctype=get_reference_doctype(self),
+		name=get_reference_name(self),
+		content=message,
+		subject=subject,
+		sender=sender,
+		recipients=recipients,
+		communication_medium="Email",
+		send_email=False,
+		attachments=attachments,
+		cc=cc,
+		bcc=None,
+		communication_type="Automated Message",
+	).get("name")
+
+	frappe.sendmail(
+		recipients=recipients,
+		subject=subject,
+		sender=sender,
+		cc=cc,
+		bcc=None,
+		message=message,
+		reference_doctype=get_reference_doctype(self),
+		reference_name=get_reference_name(self),
+		attachments=attachments,
+		expose_recipients="header",
+		print_letterhead=((attachments and attachments[0].get("print_letterhead")) or False),
+		communication=communication,
+	)
+
+def get_reference_doctype(doc):
+	return doc.parenttype if doc.meta.istable else doc.doctype
+
+def get_reference_name(doc):
+	return doc.parent if doc.meta.istable else doc.name

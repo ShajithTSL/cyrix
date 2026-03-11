@@ -2,6 +2,22 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Invoice Request", {
+	before_workflow_action: async (frm) => {
+		if(frm.doc.workflow_state == "Draft"){
+			let promise = new Promise((resolve, reject) => {
+				if (frm.selected_workflow_action == "Send to Finance") {
+					frm.call({
+						method: 'trigger_mail_on_invoice_request',
+						args: {
+							"name": frm.doc.name,
+						},
+					})
+				}
+				resolve();
+			});
+			await promise.catch(() => frappe.throw());
+		}
+	},
     onload: function(frm) {
         // Set the query for the child table field
         frm.fields_dict['invoice_list'].grid.get_field('quotation').get_query = function(doc, cdt, cdn) {

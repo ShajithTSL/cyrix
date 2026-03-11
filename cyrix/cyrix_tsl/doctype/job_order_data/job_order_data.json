@@ -669,6 +669,7 @@
    "allow_on_submit": 1,
    "fieldname": "multiple_technicians",
    "fieldtype": "Table MultiSelect",
+   "ignore_user_permissions": 1,
    "label": "Multiple Technicians (Add if Multiple Technicians involved)",
    "options": "Technician List"
   },
@@ -694,7 +695,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 10:09:20.910259",
+ "modified": "2026-03-11 14:30:44.608413",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

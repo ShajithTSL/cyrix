@@ -70,8 +70,7 @@ class EvaluationReport(Document):
 		self.validate_evaluation_time()
 		
 	def on_submit(self):
-		if self.if_parts_required:
-			self.update_job_order_status() # to update the Job Order Data status
+		self.update_job_order_status() # to update the Job Order Data status
 
 	def on_update_after_submit(self):
 		self.check_stock_availability() # to update the stock availability

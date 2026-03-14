@@ -17,7 +17,6 @@
   "column_break_rkfva",
   "company",
   "requested_by",
-  "email_sent",
   "sales_person",
   "submitted_by",
   "sales_email",
@@ -78,18 +77,13 @@
   {
    "fieldname": "requested_by",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Initiated by"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "email_sent",
-   "fieldtype": "Check",
-   "label": "Email Sent"
   },
   {
    "fieldname": "submitted_by",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Submitted By"
   },
   {
@@ -146,7 +140,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-11 12:02:33.555654",
+ "modified": "2026-03-12 09:58:02.443011",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Invoice Request",

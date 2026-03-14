@@ -1,5 +1,5 @@
 import frappe
-
+from datetime import datetime
 @frappe.whitelist()
 def get_technicians(doc_name):
 	technician_names = set()
@@ -184,7 +184,7 @@ def get_material_cost(name):
 	data = ""
 	data += '<thead>'
 	data+= '<tr>'
-	data+= '<th class="text-center" ><b style = "color:#4a5568" >WO</b></th>'
+	data+= '<th class="text-center" ><b style = "color:#4a5568" >JO</b></th>'
 	data+= '<th class="text-center" colspan="3"><b style = "color:#4a5568">Labor Cost</b></th>'
 	data+= '<th class="text-center" colspan="3" ><b style = "color:#4a5568">Inventory</b></th>'
 	data+= '<th class="text-center" colspan="3" ><b style = "color:#4a5568">Supplier Cost</b></th>'
@@ -299,3 +299,82 @@ def get_material_cost(name):
 
 	return data
 
+@frappe.whitelist()
+def get_invoice_details(name):
+	ic = frappe.get_doc("Invoice Cancellation",name)
+	data = ''
+	if ic:
+		for i in ic.cancellation_list:
+			if i.invoice_no and not i.job_order_data:
+				customer = frappe.get_value("Sales Invoice",i.invoice_no,"customer")
+				company = frappe.get_value("Sales Invoice",i.invoice_no,"company")
+				vat_applicable = frappe.db.get_value("Company",company,"vat_applicable")
+				data = ""
+				ogdate = datetime.strptime(str(ic.date),"%Y-%m-%d")
+				formatted_date = ogdate.strftime("%d-%m-%Y")
+				data+= '<table border = 1 width = 100% style = "border-collapse:collapse;font-size:9px"><tr>'
+				data+= '<td colspan = 2 style = "border-right:hidden;text-align:left;font-weight:bold;"><b>Customer :</b></td>'
+				if vat_applicable:
+					data+= '<td colspan = 5 style = "border-right:hidden;text-align:left;">%s</td>' %(customer)
+				else:
+					data+= '<td colspan = 3 style = "border-right:hidden;text-align:left;">%s</td>' %(customer)
+				data+= '<td colspan = 1 style = "border-right:hidden;text-align:right;font-weight:bold;"><b>Date :</b></td>'
+				data+= '<td colspan = 2 style = "text-align:left;">%s</td>' %(formatted_date)
+				data+= '</tr>'
+	
+	data+= '<tr>'
+	data+= '<td style = "width:5%;text-align:center;font-weight:bold;padding:1px !important"><b>Sr</b></td>'
+	data+= '<td style = "text-align:center;font-weight:bold;padding:1px !important"><b>Invoice No</b></td>'
+	data+= '<td style = "text-align:center;font-weight:bold;padding:1px !important"><b>Invoice Date</b></td>'
+	data+= '<td style = "text-align:center;font-weight:bold;padding:1px !important"><b>JO / SO</b></td>'
+	data+= '<td style = "text-align:center;font-weight:bold;padding:1px !important"><b>Model</b></td>'
+	data+= '<td style = "text-align:center;font-weight:bold;padding:1px !important"><b>Mfg</b></td>'
+	data+= '<td style = "text-align:center;font-weight:bold;padding:1px !important"><b>Amount</b></td>'
+	if vat_applicable:
+		data+= '<td style = "text-align:center;font-weight:bold;padding:1px !important"><b>VAT</b></td>'
+		data+= '<td style = "text-align:center;font-weight:bold;padding:1px !important"><b>Amount with VAT</b></td>'
+	data+='</tr>'
+	count = 0
+	
+	invoice_nos = []
+
+	if ic.cancellation_list:
+		for i in ic.cancellation_list:
+			if i.invoice_no and i.invoice_no not in invoice_nos:
+				invoice_nos.append(i.invoice_no)
+
+	for i in invoice_nos:
+		if i:
+			sales_details = frappe.db.sql(""" select 
+			`tabSales Invoice Item`.tax_amount,
+			`tabSales Invoice`.posting_date as date,
+			`tabSales Invoice Item`.total_amount,
+			`tabSales Invoice`.name as name,
+			`tabSales Invoice`.company,
+			`tabSales Invoice Item`.job_order_data as jod,
+			`tabSales Invoice Item`.supply_order_data as sod,
+			IFNULL(`tabSales Invoice Item`.manufacturer, '-') AS mfg,
+			`tabSales Invoice Item`.base_net_amount as amt,
+			IFNULL(`tabItem Model`.model, '-') AS md  
+			from `tabSales Invoice` 
+			left join `tabSales Invoice Item` on `tabSales Invoice`.name = `tabSales Invoice Item`.parent
+			left join `tabItem Model` on `tabSales Invoice Item`.model = `tabItem Model`.name
+			where  `tabSales Invoice`.name = '%s' """ %(i),as_dict=1)
+			for s in sales_details:
+				count = count + 1
+				data+= '<tr>'
+				data+= '<td style = "text-align:center;">%s</td>' %(count)
+				data+= '<td style = "text-align:center;">%s</td>' %(s.name or "")
+				nv_date = datetime.strptime(str(s.date),"%Y-%m-%d")
+				i_date = nv_date.strftime("%d-%m-%Y")
+				data+= '<td style = "text-align:center;">%s</td>' %(i_date or "")
+				data+= '<td style="text-align:center;">%s</td>'   %(s.jod or s.sod or '-')
+				data+= '<td style = "text-align:center;">%s</td>' %(s.md)
+				data+= '<td style = "text-align:center;">%s</td>' %(s.mfg)
+				data+= '<td style = "text-align:center;">%s</td>'  % (f"{s.amt or 0:,.2f}")
+				if vat_applicable:
+					data+= '<td style = "text-align:center;">%s</td>'  % (f"{s.tax_amount or 0:,.2f}")
+					data+= '<td style = "text-align:center;">%s</td>'  % (f"{s.total_amount or 0:,.2f}")
+				data+='</tr>'
+
+	return data

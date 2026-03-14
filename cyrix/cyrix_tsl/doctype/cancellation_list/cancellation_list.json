@@ -8,11 +8,16 @@
  "engine": "InnoDB",
  "field_order": [
   "invoice_no",
+  "column_break_tmgp",
   "job_order_data",
+  "column_break_n0p0",
+  "supply_order_data",
+  "column_break_q1gw",
   "reason"
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "invoice_no",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -20,6 +25,7 @@
    "options": "Sales Invoice"
   },
   {
+   "columns": 2,
    "fieldname": "job_order_data",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -27,17 +33,38 @@
    "options": "Job Order Data"
   },
   {
+   "columns": 4,
    "fieldname": "reason",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Reason"
+  },
+  {
+   "fieldname": "column_break_tmgp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_n0p0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "supply_order_data",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supply Order Data",
+   "options": "Supply Order Data"
+  },
+  {
+   "fieldname": "column_break_q1gw",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-09 08:17:59.318028",
+ "modified": "2026-03-14 10:06:42.901908",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Cancellation List",

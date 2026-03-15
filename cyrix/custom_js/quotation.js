@@ -292,12 +292,14 @@ frappe.ui.form.on('Quotation', {
                     target: frm,
                     setters: {
                         status: "",
+                        customer:frm.doc.party_name
                     },
                     add_filters_group: 1,
                     get_query() {
                         return {
                             filters: {
                                 company: frm.doc.company,
+                                // customer: frm.doc.party_name,
                                 docstatus: 1,
                                 parent_jo: ["is", "not set"],
                                 quotation: ["is", "not set"]
@@ -336,12 +338,16 @@ frappe.ui.form.on('Quotation', {
                     target: frm,
                     setters: {
                         status: "",
+                        customer:frm.doc.party_name
                     },
                     add_filters_group: 1,
                     get_query() {
                         return {
                             filters: {
-                                docstatus: 1
+                                company: frm.doc.company,
+                                // customer: frm.doc.party_name,
+                                docstatus: 1,
+                                quotation: ["is", "not set"]
                             }
                         };
                     },
@@ -353,7 +359,6 @@ frappe.ui.form.on('Quotation', {
                             },
                             callback: function(r) {
                                 if(r.message) {
-                                    console.log(r.message)
                                     frm.set_value("items",r.message[0])
                                     frm.set_value("quotation_type","Internal Quotation - Supply")
                                     frm.set_value("branch",r.message[1])

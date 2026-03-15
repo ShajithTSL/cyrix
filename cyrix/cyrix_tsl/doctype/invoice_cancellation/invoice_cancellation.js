@@ -106,9 +106,11 @@ frappe.ui.form.on('Cancellation List', {
 					if(r.message) {
 						$.each(r.message,function(i,d){
 							console.log( d.job_order_data)
-							let child = frm.add_child('cancellation_list');
-							child.job_order_data = d.job_order_data;
-							child.supply_order_data = d.supply_order_data;
+							if (d.job_order_data || d.supply_order_data) {
+								let child = frm.add_child('cancellation_list');
+								child.job_order_data = d.job_order_data;
+								child.supply_order_data = d.supply_order_data;
+							}
 						})
 						frm.refresh_field('cancellation_list');		
 					}

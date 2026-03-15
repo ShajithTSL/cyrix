@@ -378,3 +378,109 @@ def get_invoice_details(name):
 				data+='</tr>'
 
 	return data
+
+
+@frappe.whitelist()
+def get_pi(doc):
+	# posting_date,name,party_name,amount_in,total_allocated_amount,currency_paid,cost_center,references,remarks,company
+	data = ""
+	data+= '<tr><td colspan = 6><center><b style = "color:blue;font-size:15px">%s</b></center></td></tr>' %(doc.company)
+	data+= '<tr><td colspan = 2><center><b style = "color:red";>PAYMENT TRANSFER APPROVAL FORM</b></center></td></tr>'
+	data+= '<tr><td>Date</td><td>%s</td></tr>' %(doc.get_formatted("posting_date"))
+	data+='<tr><td>REF NO</td><td>%s</td></tr>' %(doc.name)
+	data+='<tr>  <td>Supplier Name</td><td>%s</td></tr>' %(doc.party_name)
+	data+='<tr> <td>Amount</td><td>%s</td></tr>' %("{:,.2f}".format(doc.total_allocated_amount))
+	data+='<tr><td>Currency</td><td>%s</td></tr>' %(doc.paid_from_account_currency)
+	data+='<tr><td>Department</td><td>%s</td></tr>' %(doc.cost_center)
+	data+='<tr><td >Remarks</td><td>%s</td></tr>' %(doc.remarks or "")
+
+	for i in doc.references:
+
+		if i.reference_doctype == "Purchase Invoice" or i.reference_doctype == "Purchase Order":
+
+			cr = ""
+			pat = ""
+			conv_amt = 0
+
+			cur = frappe.get_value("Company",{"name":doc.company},"default_currency")
+
+			if i.reference_doctype == "Purchase Invoice":
+				pat = frappe.get_value("Purchase Invoice",{"name":i.reference_name},"supplier_invoice_attach")
+				cr = frappe.get_value("Purchase Invoice",{"name":i.reference_name},"currency")
+				conv_amt = frappe.get_value("Purchase Invoice",{"name":i.reference_name},"grand_total")
+
+			if i.reference_doctype == "Purchase Order":
+				pat = frappe.get_value("Purchase Order",{"name":i.reference_name},"supplier_invoice_attach")
+				cr = frappe.get_value("Purchase Order",{"name":i.reference_name},"currency")
+				conv_amt = frappe.get_value("Purchase Order",{"name":i.reference_name},"grand_total")
+
+			pi = frappe.db.sql("""
+				select DISTINCT 
+				`tabPurchase Invoice`.name as p,
+				`tabPurchase Invoice Item`.job_order_data as jo,
+				`tabPurchase Invoice Item`.supply_order_data as so
+				from `tabPurchase Invoice` 
+				left join `tabPurchase Invoice Item`
+				on `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.parent
+				where `tabPurchase Invoice`.name = %s
+			""",(i.reference_name),as_dict=1)
+
+			po = frappe.db.sql("""
+				select DISTINCT 
+				`tabPurchase Order`.name as p,
+				`tabPurchase Order Item`.job_order_data as jo,
+				`tabPurchase Order Item`.supply_order_data as so
+				from `tabPurchase Order`
+				left join `tabPurchase Order Item`
+				on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
+				where `tabPurchase Order`.name = %s
+			""",(i.reference_name),as_dict=1)
+
+			if i.reference_doctype == "Purchase Invoice":
+				data+='<tr><td>Attached Document</td><td><b>%s - (Outstanding - %s %s)</b>/<a href="%s" target="_blank"><u><b style="color:red"><br>Supplier Invoice Link</b></u></a></td></tr>'%(i.reference_name,f"{round(conv_amt,2):,.2f}",cr,pat)
+
+			if i.reference_doctype == "Purchase Order":
+				data+='<tr><td>Attached Document</td><td><b>%s - (Outstanding - %s %s)</b>/<a href="%s" target="_blank"><u><b style="color:red"><br>Supplier Invoice Link</b></u></a></td></tr>'%(i.reference_name,f"{round(conv_amt,2):,.2f}",cr,pat)
+
+			wo_so_links = []
+
+			for j in pi:
+				if j["jo"]:
+					wo_so_links.append(j["jo"])
+				if j["so"]:
+					wo_so_links.append(j["so"])
+
+			for j in po:
+				if j["jo"]:
+					wo_so_links.append(j["jo"])
+				if j["so"]:
+					wo_so_links.append(j["so"])
+
+			# -------- FORMAT WOD/SOD/SCV ----------
+			
+			formatted = {}
+			for val in wo_so_links:
+				if val:
+					parts = val.split("-")
+					if len(parts) >= 3:
+						prefix = parts[0]
+						number = parts[-1]
+
+						if prefix not in formatted:
+							formatted[prefix] = []
+
+						formatted[prefix].append(number)
+
+			final_links = []
+			for k,v in formatted.items():
+				final_links.append(f",".join(v))
+
+			if final_links:
+				frappe.log_error("final_links",final_links)
+				data += "<tr><td></td><td>%s</td></tr>" % ", ".join(final_links)
+
+		if i.reference_doctype == "Journal Entry":
+			je_attach = frappe.get_value("Journal Entry",{"name":i.reference_name},"attach")
+			data+='<tr><td>Attached With Supporting Document</td><td><b>%s</b>/ <a href="%s"><u><b style="color:red">Journal Entry Attachment</b></u></a></td></tr>'%(i.reference_name,je_attach)
+
+	return data

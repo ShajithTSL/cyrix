@@ -5,6 +5,11 @@ import frappe
 from frappe.model.document import Document
 import json
 from frappe.utils import add_to_date
+from cyrix.custom_py.boot import get_bootinfo as info
+from cyrix.custom_py.utils import sendmail
+
+NO_REPLY_EMAIL = "no-reply@cyrix-tsl.com"
+base_url = frappe.utils.get_url()
 
 class EvaluationReport(Document):
 	@frappe.whitelist()
@@ -71,11 +76,13 @@ class EvaluationReport(Document):
 		
 	def on_submit(self):
 		self.update_job_order_status() # to update the Job Order Data status
+		self.send_mail_on_status_update(action = "on_submit")
 
 	def on_update_after_submit(self):
 		self.check_stock_availability() # to update the stock availability
 		self.update_job_order_status() # to update the Job Order Data status
 		self.update_part_no()
+		self.send_mail_on_status_update(action = "on_update_after_submit")
 
 	def check_stock_availability(self):
 		# based on the stock availability check in child table rows, overall availability is defined
@@ -135,9 +142,7 @@ class EvaluationReport(Document):
 		if self.status == "Return Not Repaired":
 			if doc.status != "RNR-Return Not Repaired":
 				doc.status = "RNR-Return Not Repaired"
-			doc.save(ignore_permissions=True)
-
-		
+			doc.save(ignore_permissions=True)		
 
 	def update_board_evaluation_status(self):
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
@@ -157,6 +162,37 @@ class EvaluationReport(Document):
 					quotation_exists = True
 					break
 		return quotation_exists
+
+	def send_mail_on_status_update(self, action):
+		if self.status not in ["Internal Extra Parts", "Spare Parts", "Extra Parts"]:
+			return
+
+		# to check for the previous status
+		before = self.get_doc_before_save()
+
+		if not before:
+			return
+
+		if before.status == self.status and action != "on_submit":
+			return
+
+		message = f""" Dear Purchase Team,<br><br>
+						Evaluation Report - <b>{self.name}</b> has been created<br>
+						Job Order Data - <b>{self.get("job_order_data")}</b><br>
+						Status - <b>{self.get("status")}</b><br><br>
+						Please take action to release the parts.<br><br>
+						<a href="{base_url}/app/evaluation-report/{self.name}" target="_blank">Click Here</a>
+					"""
+
+		sendmail(self, 
+			message, 
+			subject = f"Evaluation Report - {self.name}", 
+			sender = NO_REPLY_EMAIL, 
+			recipients = info().get("purchase_to").get(self.company), 
+			attachments = None, 
+			cc = None 
+		)
+
 
 @frappe.whitelist()
 def get_valuation_rate(item, warehouse, qty):

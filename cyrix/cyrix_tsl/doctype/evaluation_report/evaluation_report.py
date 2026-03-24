@@ -35,7 +35,7 @@ class EvaluationReport(Document):
 		self.check_stock_availability() # to update the stock availability
 		self.update_job_order_status() # to update the Job Order Data status
 
-	def validate(self):
+	def validate(self):			
 		self.update_part_sheet_number()
 
 	def update_part_sheet_number(self):
@@ -65,6 +65,10 @@ class EvaluationReport(Document):
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
 		doc.status = "UE-Under Evaluation"
 		doc.save(ignore_permissions = True)
+		check_for_shared_docs_on_evaluation(self)	
+	
+	def on_update(self):		
+		check_for_shared_docs_on_evaluation(self)
 		
 	def validate_evaluation_time(self):
 		if not self.evaluation_time or not self.estimated_repair_time:
@@ -82,6 +86,7 @@ class EvaluationReport(Document):
 		self.check_stock_availability() # to update the stock availability
 		self.update_job_order_status() # to update the Job Order Data status
 		self.update_part_no()
+		check_for_shared_docs_on_evaluation(self)
 		self.send_mail_on_status_update(action = "on_update_after_submit")
 
 	def check_stock_availability(self):
@@ -193,6 +198,30 @@ class EvaluationReport(Document):
 			cc = None 
 		)
 
+def check_for_shared_docs_on_evaluation(self):
+	jo_doc = frappe.get_doc("Job Order Data",self.job_order_data)
+	tech_user = frappe.db.get_value("Technician ID",jo_doc.technician,"user_email")
+	technicians = [tech_user]
+	# self.multiple_technicians is a table_multiselect
+	for row in jo_doc.multiple_technicians:
+		if row.get("email") not in technicians:
+			technicians.append(row.get("email"))
+
+	for t_id in technicians:
+		if t_id:
+			doc = frappe.db.exists("DocShare",{
+				"user":t_id,
+				"share_doctype": self.doctype,
+				"share_name": self.name
+			})
+			if not doc:
+				doc = frappe.new_doc("DocShare")
+				doc.user = t_id
+				doc.share_doctype = self.doctype
+				doc.share_name = self.name
+				doc.read = 1
+				doc.write = 1
+				doc.save()
 
 @frappe.whitelist()
 def get_valuation_rate(item, warehouse, qty):

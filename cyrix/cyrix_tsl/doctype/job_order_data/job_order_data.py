@@ -7,7 +7,7 @@ from datetime import datetime
 from cyrix.custom_py.quotation import fetch_item_price_details
 from cyrix.custom_py import utils
 
-from cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report import warehouse_based_on_branch_and_company
+from cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report import warehouse_based_on_branch_and_company, check_for_shared_docs_on_evaluation
 naming_series = {
 	"Internal Quotation - Repair":{
 		"Kuwait":"IQR-K.YY.-",
@@ -63,7 +63,8 @@ class JobOrderData(Document):
 				"date":now,
 			})
 
-	def on_update_after_submit(self):
+	def on_update_after_submit(self):		
+		check_for_shared_docs_on_jo(self)
 		if self.status != self.status_duration_details[-1].status:
 			ldate = self.status_duration_details[-1].date
 			now = datetime.now()
@@ -86,7 +87,34 @@ class JobOrderData(Document):
 			})
 			doc.save(ignore_permissions=True)
 
+def check_for_shared_docs_on_jo(self):
+	tech_user = frappe.db.get_value("Technician ID",self.technician,"user_email")
+	technicians = [tech_user]
+	# self.multiple_technicians is a table_multiselect
+	for row in self.multiple_technicians:
+		if row.get("email") not in technicians:
+			technicians.append(row.get("email"))
 
+	for t_id in technicians:
+		if t_id:
+			doc = frappe.db.exists("DocShare",{
+				"user":t_id,
+				"share_doctype": self.doctype,
+				"share_name": self.name
+			})
+			if not doc:
+				doc = frappe.new_doc("DocShare")
+				doc.user = t_id
+				doc.share_doctype = self.doctype
+				doc.share_name = self.name
+				doc.read = 1
+				doc.write = 1
+				doc.save()
+	eval_list = frappe.get_all("Evaluation Report",{'job_order_data':self.name},"name")
+	for eval in eval_list:
+		eval_doc = frappe.get_doc("Evaluation Report",eval.name)
+		check_for_shared_docs_on_evaluation(self = eval_doc)
+	
 @frappe.whitelist()
 def create_evaluation_report(doc_no):
 	# Fetch the source document

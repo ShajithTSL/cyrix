@@ -121,6 +121,8 @@ def create_job_order_data(dict):
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Manufacturer for the Received Equipment")
 		if not i.get("uom"):
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
+		if not i.get("attach_image"):
+			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Attach Image for the Item")
 
 		if i.get("ignore") == 1 and not i.get("item_name"):
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Description and Specification")

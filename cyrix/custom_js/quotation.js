@@ -213,9 +213,10 @@ frappe.ui.form.on('Quotation', {
                         format: "INT/KW/JO - V1"
                     },
                     "Customer Quotation - Repair": {
-                        label: "Customer Quotation",
+                        label: "Customer Quotation - N",
                         format: "CUS/KW/JO - V1"
                     },
+                
                     "Internal Quotation - BQ": {
                         label: "Internal Quotation",
                         format: "INT/KW/BQ - V1"

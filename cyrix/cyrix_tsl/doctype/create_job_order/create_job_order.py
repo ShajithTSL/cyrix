@@ -201,6 +201,9 @@ def create_job_order_data(dict):
 		# append the Job Order names for message popup
 		link.append(jo.name)
 
+		if doc.job_order_data:
+			check_for_shared_docs_on_sub_jo(jo)
+
 	if link:
 		# frappe.delete_doc("Create Job Order", "Create Job Order")
 		links_list = []
@@ -254,6 +257,32 @@ def check_for_item(i,bg_less_image):
 		new_doc.save(ignore_permissions=True)
 		if new_doc.name:
 			i['item_code'] = new_doc.name
+
+def check_for_shared_docs_on_sub_jo(jo):
+	jo_doc = frappe.get_doc("Job Order Data",jo.parent_jo)
+	tech_user = frappe.db.get_value("Technician ID",jo_doc.technician,"user_email")
+	technicians = [tech_user]
+	# self.multiple_technicians is a table_multiselect
+	for row in jo_doc.multiple_technicians:
+		if row.get("email") not in technicians:
+			technicians.append(row.get("email"))
+
+	for t_id in technicians:
+		if t_id:
+			doc = frappe.db.exists("DocShare",{
+				"user":t_id,
+				"share_doctype": jo.doctype,
+				"share_name": jo.name
+			})
+			if not doc:
+				doc = frappe.new_doc("DocShare")
+				doc.user = t_id
+				doc.share_doctype = jo.doctype
+				doc.share_name = jo.name
+				doc.read = 1
+				doc.write = 1
+				doc.save()
+
 
 def create_serial_no(i, doc):
 	

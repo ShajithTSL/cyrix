@@ -211,7 +211,8 @@ def create_internal_quotation(job_order_data):
 			"description":i.item_name,
 			"uom":'Nos',
 			"qty":i.quantity,
-			"model_no":i.model_no,
+			"model":i.model_no,
+			"mfg":i.mfg,
 			"job_order_data":doc.name,
 			"warehouse":fetch_repair_warehouse(doc.company,doc.branch)
 		})

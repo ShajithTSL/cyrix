@@ -39,9 +39,9 @@ def get_columns():
 		{"label": _("Delivery Date"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 150},
 		{"label": _("Invoice No"), "fieldname": "invoice_no", "fieldtype": "Link", "options": "Sales Invoice", "width": 160},
 		{"label": _("Invoice Date"), "fieldname": "invoice_date", "fieldtype": "Date", "width": 150},
-		{"label": _("Quoted Amount"), "fieldname": "quoted_amount", "fieldtype": "Currency", "width": 150},
-		{"label": _("VAT Amount"), "fieldname": "vat_amount", "fieldtype": "Currency", "width": 150},
-		{"label": _("Total Amount"), "fieldname": "total_amount", "fieldtype": "Currency", "width": 150},
+		{"label": _("Quoted Amount"), "fieldname": "quoted_amount", "fieldtype": "Currency", "options":"currency", "width": 150},
+		{"label": _("VAT Amount"), "fieldname": "vat_amount", "fieldtype": "Currency", "options":"currency", "width": 150},
+		{"label": _("Total Amount"), "fieldname": "total_amount", "fieldtype": "Currency", "options":"currency", "width": 150},
 		{"label": _("Quotation"), "fieldname": "quotation", "fieldtype": "Link", "options": "Quotation", "width": 100},
 		{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 150},
 	]
@@ -81,7 +81,8 @@ def get_data(filters):
 				"payment_entry_reference": order.payment_entry,
 				"payment_date": order.advance_paid_date,
 				"status": order.status,
-				"total_amount": quote.get("amount", 0),  # taxes can be added later
+				"total_amount": quote.get("amount", 0),  # taxes can be added later,
+				"currency": frappe.get_value("Company", order.company, "default_currency")
 			})
 
 	return rows
@@ -103,7 +104,7 @@ def get_supply_order_materials(order_name):
 	"""Fetch materials linked to a Supply Order."""
 	return frappe.db.sql(
 		"""
-		SELECT type, mfg, model_no, quantity, item_name, parent as quote_name
+		SELECT mfg, model_no, quantity, item_name, parent as quote_name
 		FROM `tabSupply Order Table`
 		WHERE parent = %s
 		""",
@@ -123,7 +124,7 @@ def get_quotation_details(order_name, model_no):
 		FROM `tabQuotation` q
 		JOIN `tabQuotation Item` qi ON q.name = qi.parent
 		WHERE qi.supply_order_data = %s
-		  AND qi.model_no = %s
+		  AND qi.model = %s
 		  AND q.workflow_state = "Approved By Customer"
 		LIMIT 1
 		""",

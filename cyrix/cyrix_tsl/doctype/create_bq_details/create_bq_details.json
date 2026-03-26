@@ -13,9 +13,9 @@
   "mfg",
   "column_break_nmwl",
   "description",
-  "qty",
   "column_break_x5mo",
   "uom",
+  "qty",
   "ignore"
  ],
  "fields": [
@@ -64,7 +64,7 @@
    "columns": 2,
    "fetch_from": "sku.description",
    "fieldname": "description",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_list_view": 1,
    "label": "Description"
   },
@@ -104,7 +104,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-26 16:22:46.025816",
+ "modified": "2026-03-26 16:27:51.774354",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create BQ Details",

@@ -67,3 +67,7 @@ def get_reference_doctype(doc):
 
 def get_reference_name(doc):
 	return doc.parent if doc.meta.istable else doc.name
+
+
+def delete_doc():
+	frappe.delete_doc("Stock Ledger Entry","e29229ccc0")

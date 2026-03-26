@@ -33,7 +33,7 @@ def get_columns(filters):
 		{"fieldname": "email", "label": _("Contact Email"), "fieldtype": "Data", "width": 200},
 		{"fieldname": "phone_number", "label": _("Contact Number"), "fieldtype": "Data", "width": 150},
 		{"fieldname": "technician", "label": _("Technician"), "fieldtype": "Data", "width": 150},
-		{"fieldname": "quoted_price", "label": _("Quoted Price"), "fieldtype": "Currency", "width": 150},
+		{"fieldname": "quoted_price", "label": _("Quoted Price"), "fieldtype": "Currency", "options":"currency", "width": 150},
 		{"fieldname": "quoted_date", "label": _("Quoted Date"), "fieldtype": "Date", "width": 150},
 		{"fieldname": "approval_type", "label": _("Approval Type"), "fieldtype": "Data", "width": 150},
 		{"fieldname": "purchase_order", "label": _("Purchase Order"), "fieldtype": "Data", "width": 140},
@@ -49,10 +49,10 @@ def get_columns(filters):
 		{"fieldname": "rnr_date", "label": _("RNR Date"), "fieldtype": "Date", "width": 150},
 		{"fieldname": "rnf_date", "label": _("RNF Date"), "fieldtype": "Date", "width": 150},
 		{"fieldname": "rnp_date", "label": _("RNP Date"), "fieldtype": "Date", "width": 150},
-		{"fieldname": "quoted_amount", "label": _("Quoted Amount"), "fieldtype": "Currency", "width": 150},
-		{"fieldname": "actual_cost", "label": _("Cost"), "fieldtype": "Currency", "width": 150},
-		{"fieldname": "vat_amount", "label": _("VAT Amount"), "fieldtype": "Currency", "width": 150},
-		{"fieldname": "total_amount", "label": _("Total Amount"), "fieldtype": "Currency", "width": 150},
+		{"fieldname": "quoted_amount", "label": _("Quoted Amount"), "fieldtype": "Currency", "options":"currency", "width": 150},
+		{"fieldname": "actual_cost", "label": _("Cost"), "fieldtype": "Currency","options":"currency", "width": 150},
+		{"fieldname": "vat_amount", "label": _("VAT Amount"), "fieldtype": "Currency","options":"currency", "width": 150},
+		{"fieldname": "total_amount", "label": _("Total Amount"), "fieldtype": "Currency","options":"currency", "width": 150},
 		{"fieldname": "quotation", "label": _("Quotation"), "fieldtype": "Link", "options": "Quotation", "width": 100},
 		{"fieldname": "ner", "label": _("NER"), "fieldtype": "Data", "width": 150},
 		{"fieldname": "ner_date", "label": _("NER Date"), "fieldtype": "Date", "width": 150},
@@ -191,6 +191,7 @@ def create_rows(jo, material_list_data, quote_details, technician_names, status_
 			"status": jo.status,
 			"payment_reference": jo.payment_entry,
 			"payment_date": jo.advance_paid_date,
-			"total_amount": total_amount
+			"total_amount": total_amount,
+			"currency": frappe.get_value("Company", jo.company, "default_currency")
 		})
 	return rows

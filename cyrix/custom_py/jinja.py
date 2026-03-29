@@ -384,8 +384,8 @@ def get_invoice_details(name):
 def get_pi(doc):
 	# posting_date,name,party_name,amount_in,total_allocated_amount,currency_paid,cost_center,references,remarks,company
 	data = ""
-	data+= '<tr><td colspan = 6><center><b style = "color:blue;font-size:15px">%s</b></center></td></tr>' %(doc.company)
-	data+= '<tr><td colspan = 2><center><b style = "color:red";>PAYMENT TRANSFER APPROVAL FORM</b></center></td></tr>'
+	data+= '<tr><td colspan = 6><center><b style = "color:blue !important;font-size:15px">%s</b></center></td></tr>' %(doc.company)
+	data+= '<tr><td colspan = 2><center><b style = "color:red !important">PAYMENT TRANSFER APPROVAL FORM</b></center></td></tr>'
 	data+= '<tr><td>Date</td><td>%s</td></tr>' %(doc.get_formatted("posting_date"))
 	data+='<tr><td>REF NO</td><td>%s</td></tr>' %(doc.name)
 	data+='<tr>  <td>Supplier Name</td><td>%s</td></tr>' %(doc.party_name)
@@ -437,10 +437,10 @@ def get_pi(doc):
 			""",(i.reference_name),as_dict=1)
 
 			if i.reference_doctype == "Purchase Invoice":
-				data+='<tr><td>Attached Document</td><td><b>%s - (Outstanding - %s %s)</b>/<a href="%s" target="_blank"><u><b style="color:red"><br>Supplier Invoice Link</b></u></a></td></tr>'%(i.reference_name,f"{round(conv_amt,2):,.2f}",cr,pat)
+				data+='<tr><td>Attached Document</td><td><b>%s - (Outstanding - %s %s)</b>/<a href="%s" target="_blank"><u><b style="color:red !important"><br>Supplier Invoice Link</b></u></a></td></tr>'%(i.reference_name,f"{round(conv_amt,2):,.2f}",cr,pat)
 
 			if i.reference_doctype == "Purchase Order":
-				data+='<tr><td>Attached Document</td><td><b>%s - (Outstanding - %s %s)</b>/<a href="%s" target="_blank"><u><b style="color:red"><br>Supplier Invoice Link</b></u></a></td></tr>'%(i.reference_name,f"{round(conv_amt,2):,.2f}",cr,pat)
+				data+='<tr><td>Attached Document</td><td><b>%s - (Outstanding - %s %s)</b>/<a href="%s" target="_blank"><u><b style="color:red !important"><br>Supplier Invoice Link</b></u></a></td></tr>'%(i.reference_name,f"{round(conv_amt,2):,.2f}",cr,pat)
 
 			wo_so_links = []
 
@@ -481,6 +481,6 @@ def get_pi(doc):
 
 		if i.reference_doctype == "Journal Entry":
 			je_attach = frappe.get_value("Journal Entry",{"name":i.reference_name},"attach")
-			data+='<tr><td>Attached With Supporting Document</td><td><b>%s</b>/ <a href="%s"><u><b style="color:red">Journal Entry Attachment</b></u></a></td></tr>'%(i.reference_name,je_attach)
+			data+='<tr><td>Attached With Supporting Document</td><td><b>%s</b>/ <a href="%s"><u><b style="color:red !important">Journal Entry Attachment</b></u></a></td></tr>'%(i.reference_name,je_attach)
 
 	return data

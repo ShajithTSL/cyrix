@@ -1,6 +1,9 @@
 import frappe
 from frappe.utils.pdf import get_pdf
 from frappe.core.doctype.communication.email import _make as make_communication
+from frappe.utils.file_manager import get_file
+from frappe.utils.csvutils import read_csv_content
+
 
 def fetch_price_list(company, document_type):
 	field = "selling" if document_type == "selling" else "buying"
@@ -71,3 +74,165 @@ def get_reference_name(doc):
 
 def delete_doc():
 	frappe.delete_doc("Stock Ledger Entry","e29229ccc0")
+
+@frappe.whitelist()
+def update_jd():
+	frappe.db.sql("""
+		UPDATE `tabJob Order Data`
+		SET docstatus = 1
+		WHERE owner = 'Administrator'
+		AND DATE(creation) = CURDATE()
+	""")
+
+	frappe.db.commit()
+# @frappe.whitelist()
+# def dlt_jo():
+# 	frappe.db.sql("""
+# 		DELETE FROM `tabJob Order Data`
+# 		WHERE owner = 'Administrator'
+# 		AND DATE(creation) = '2026-03-29'
+# 	""")
+
+# 	frappe.db.commit()
+# 	return "Items deleted for 2026-03-28"
+
+
+# @frappe.whitelist()
+# def jo_import(import_file):
+# 	"""
+# 	import_file = File Doc name OR file URL
+# 	"""
+# 	# get file path
+# 	file_doc = get_file(import_file)
+# 	file_path = file_doc[1]
+
+# 	# read csv
+# 	data = read_csv_content(file_path)
+
+# 	# skip header, process first 20 rows
+# 	count = 0
+# 	for i in data:
+# 		print(i[0])
+# 		s = frappe.new_doc("Item")
+# 		s.description = i[0]
+# 		s.item_group = "Scope"
+# 		s.save()
+	
+
+
+
+
+
+import frappe
+from frappe.utils.file_manager import get_file
+from frappe.utils.csvutils import read_csv_content
+from datetime import datetime
+
+
+@frappe.whitelist()
+def jo_import(import_file):
+
+	# 🔹 Get file
+	file_doc = get_file(import_file)
+	file_path = file_doc[1]
+
+	# 🔹 Read CSV
+	data = read_csv_content(file_path)
+
+	count = 0
+
+	# 🔹 Status Mapping
+	status_map = {
+		"P": "P-Paid",
+		"RNRC": "RNRC-Return Not Repaired Client",
+		"A": "Approved",
+		"C": "C-Comparison",
+		"CC": "CC-Comparison Client",
+		"EP": "EP-Extra Parts",
+		"NE": "NE-Need Evaluation",
+		"NER": "NER-Need Evaluation Return",
+		"Q": "Quoted",
+		"RNA": "RNA-Return Not Approved",
+		"RNAC": "RNAC-Return Not Approved Client",
+		"RNF": "RNF-Return No Fault",
+		"RNFC": "RNFC-Return No Fault Client",
+		"RNP": "RNP-Return No Parts",
+		"RNPC": "RNPC-Return No Parts Client",
+		"RNR": "RNR-Return Not Repaired",
+		"RS": "RS-Repaired and Shipped",
+		"RSC": "RSC-Repaired and Shipped Client",
+		"RSI": "Invoiced",
+		"SP": "SP-Searching Parts",
+		"TR": "TR-Technician Repair",
+		"UE": "UE-Under Evaluation",
+		"UTR": "UTR-Under Technician Repair",
+		"W": "W-Working",
+		"WP": "WP-Waiting Parts",
+		"CT": "CT-Customer Testing"
+	}
+
+	for i in data[1:]:
+
+		# ✅ Skip invalid rows
+		if len(i) < 5:
+			continue
+
+		# 🔹 Extract values safely
+		jo_number = i[0]
+		sales_person = i[1]
+		date_str = i[2]
+		customer = i[3]
+		status_code = i[4]
+
+		# 🔹 Convert Date (dd-mm-yyyy → yyyy-mm-dd)
+		posting_date = None
+		if date_str:
+			try:
+				posting_date = datetime.strptime(date_str, "%d-%m-%Y").strftime("%Y-%m-%d")
+			except:
+				continue  # skip invalid date
+
+		# 🔹 Create Customer if not exists
+		if customer and not frappe.db.exists("Customer", customer):
+			c = frappe.new_doc("Customer")
+			c.customer_name = customer
+			c.territory = "Kuwait"
+			c.customer_type = "Company"
+			c.insert(ignore_permissions=True)
+
+		# 🔹 Map Status
+		status = status_map.get(status_code, status_code)
+
+		# 🔹 Naming (JO-xxxx)
+		name = f"SO-{jo_number}"
+
+		# 🔹 Avoid duplicate
+		if frappe.db.exists("Supply Order Data", name):
+			continue
+
+		# 🔹 Create Job Order
+		wo = frappe.new_doc("Supply Order Data")
+		wo.name = name
+		wo.naming_series = ""   # disable auto series
+
+		wo.customer = customer
+		wo.status = status
+		wo.sales_person = sales_person
+		wo.posting_date = posting_date
+
+		# 🔹 Child table
+		wo.append("material_list", {
+			"item_code": "000240",
+			"quantity": 1
+		})
+
+		# 🔹 Insert + Submit
+		wo.insert(ignore_permissions=True)
+		# wo.submit()
+
+		count += 1
+
+	# 🔹 Commit once
+	# frappe.db.commit()
+
+	return f"✅ Total Job Orders Created & Submitted: {count}"

@@ -498,7 +498,7 @@ def create_stock_entry(evaluation, items):
 
 	new_doc.awaiting_parts = 1
 	new_doc.save(ignore_permissions=True)
-	# new_doc.submit()
+	new_doc.submit()
 
 	frappe.msgprint("Parts Released and Material Issue is Created")
 	return new_doc.name

@@ -241,7 +241,21 @@ doc_events = {
 		"before_save": [
 			"cyrix.custom_py.contact.before_save"
 		]
-	}
+	},
+	"Stock Entry":{
+		"on_submit":[
+			"cyrix.custom_py.stock_entry.validate_awaiting_parts"
+		],
+		"on_update":[
+			"cyrix.custom_py.stock_entry.validate_awaiting_parts"
+		],
+		"on_cancel":[
+			"cyrix.custom_py.stock_entry.validate_awaiting_parts"
+		],
+		"on_trash":[
+			"cyrix.custom_py.stock_entry.validate_awaiting_parts"
+		]
+	},
 }
 
 # Monkey Patch

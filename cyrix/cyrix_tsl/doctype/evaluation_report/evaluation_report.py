@@ -10,6 +10,11 @@ from cyrix.custom_py.utils import sendmail
 
 NO_REPLY_EMAIL = "no-reply@cyrix-tsl.com"
 base_url = frappe.utils.get_url()
+warehouse_list = {
+	"Kuwait": "Kuwait - CT-K"
+}
+
+
 
 class EvaluationReport(Document):
 	@frappe.whitelist()
@@ -390,3 +395,180 @@ def release_parts(name):
 		# Catch all other exceptions
 		frappe.msgprint(f"An unexpected error occurred: {str(e)}")
 		return False
+
+
+from frappe.utils import flt
+
+
+@frappe.whitelist()
+def get_release_items(docname):
+
+	doc = frappe.get_doc("Evaluation Report", docname)
+
+	output = []
+
+	for row in doc.items:
+		if row.from_scrap == 1:
+			continue
+
+		# REQUIRED QTY
+		required_qty = flt(row.qty)
+
+		# ALREADY RELEASED (from Stock Entry)
+		released_qty = frappe.db.sql("""
+			SELECT IFNULL(SUM(sed.qty),0)
+			FROM `tabStock Entry Detail` sed
+			JOIN `tabStock Entry` se ON se.name = sed.parent
+			WHERE se.docstatus < 2
+			AND sed.item_code=%s
+			AND sed.job_order_data=%s
+			AND se.awaiting_parts = 1
+			AND sed.evaluation_row = %s
+		""", (row.part, doc.job_order_data, row.name))[0][0] or 0
+
+		# STOCK IN WAREHOUSE
+		stock_qty = frappe.db.get_value(
+			"Bin",
+			{"item_code": row.part, "warehouse": warehouse_list.get(doc.branch)},
+			["actual_qty"],
+			# ["actual_qty", "awaiting_qty"],
+			as_dict=True
+		)
+		reserved_qty = 0
+		
+		available_qty = 0
+		if stock_qty:
+			available_qty = (stock_qty.actual_qty or 0) - reserved_qty
+			# available_qty = (stock_qty.actual_qty or 0) - (stock_qty.awaiting_qty or 0) - reserved_qty
+
+
+		output.append({
+			"row_name": row.name,
+			"item_code": row.part,
+			"required_qty": required_qty,
+			"released_qty": released_qty,
+			"stock_qty": available_qty
+		})
+
+	# frappe.errprint(output)
+
+	return output
+
+
+@frappe.whitelist()
+def create_stock_entry(evaluation, items):
+
+	doc = frappe.get_doc("Evaluation Report", evaluation)
+	items = frappe.parse_json(items)
+
+	# Branch Mapping
+
+	branch_map = {
+		"Kuwait": ("Kuwait - CT-K", "Kuwait - Repair - CT-K")
+	}
+
+	war, cc = branch_map.get(doc.branch, ("", ""))
+
+	if not war:
+		frappe.throw("Warehouse not configured for this branch")
+
+	new_doc = frappe.new_doc("Stock Entry")
+	new_doc.company = doc.company
+	new_doc.stock_entry_type = "Material Issue"
+	new_doc.from_warehouse = war
+
+	for item in items:
+		if item.get("qty", 0) <= 0:
+			continue
+
+		new_doc.append("items", {
+			"s_warehouse": war,
+			"item_code": item["item_code"],
+			"qty": item["qty"],
+			"serial_no": item.get("serial_no", ""),
+			"uom": item.get("uom"),
+			"stock_uom": item.get("uom"),
+			"cost_center": cc,
+			"job_order_data": doc.job_order_data,
+			"conversion_factor": 1,
+			"evaluation_row":item.get("row_name")
+			# "allow_zero_valuation_rate": 1
+		})
+
+
+	new_doc.awaiting_parts = 1
+	new_doc.save(ignore_permissions=True)
+	# new_doc.submit()
+
+	frappe.msgprint("Parts Released and Material Issue is Created")
+	return new_doc.name
+
+
+def migrate_old_releases():
+	# find old entries without row reference
+	old_rows = frappe.db.sql("""
+		SELECT 
+			sed.parent,
+			sed.name, 
+			sed.item_code,
+			sed.qty, 
+			sed.job_order_data
+		FROM `tabStock Entry Detail` sed
+		JOIN `tabStock Entry` se ON se.name = sed.parent
+		WHERE se.docstatus = 1
+			AND se.awaiting_parts = 1
+			AND se.stock_entry_type = 'Material Issue'
+			AND IFNULL(sed.job_order_data,'') != ''
+			AND IFNULL(sed.evaluation_row,'') = ''
+			ORDER BY se.posting_date, se.creation
+	""", as_dict=True)
+
+	for sed in old_rows:
+		print(sed)
+
+		remaining_qty = flt(sed.qty)
+		eval_list = frappe.db.get_all("Evaluation Report",{'job_order_data':sed.job_order_data},'name')
+		for eval in eval_list:
+			# get evaluation rows FIFO
+			eval_rows = frappe.db.sql("""
+				SELECT parent,name, part, qty
+				FROM `tabPart Sheet Item`
+				WHERE parent=%s
+				AND parenttype = 'Evaluation Report'
+				AND part=%s
+				ORDER BY idx
+			""", (eval.name, sed.item_code), as_dict=True)
+			if eval_rows:
+				print(eval_rows)
+
+			for row in eval_rows:
+
+				if remaining_qty <= 0:
+					break
+
+				# already allocated qty for this row
+				allocated = frappe.db.sql("""
+					SELECT IFNULL(SUM(qty),0)
+					FROM `tabStock Entry Detail`
+					WHERE evaluation_row=%s
+				""", row.name)[0][0] or 0
+
+				balance = flt(row.qty) - flt(allocated)
+
+				if balance <= 0:
+					continue
+
+				allocate = min(balance, remaining_qty)
+				print(allocate)
+
+				# update stock entry row
+				frappe.db.set_value(
+					"Stock Entry Detail",
+					sed.name,
+					"evaluation_row",
+					row.name
+				)
+
+				remaining_qty -= allocate
+			frappe.db.commit()
+		print("Migration completed")

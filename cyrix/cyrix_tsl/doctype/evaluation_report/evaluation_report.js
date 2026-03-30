@@ -3,34 +3,21 @@
 
 frappe.ui.form.on("Evaluation Report", {
 
-	check_all_checked(frm) {
-		const child_table = frm.doc.items || [];  // Get the child table records
-		const allChecked = child_table.every(row => row.released === 1); // Check if all checkboxes are enabled
-
-		if (!allChecked) {
-			frm.trigger("release_parts")
-		}
-	},
-
 	// Once all the materials were received, Release Parts button will be visible
 	release_parts: function(frm){
-		const child_table = frm.doc.items || [];
-		const scrapCount = child_table.filter(row => row.from_scrap === 1).length;
-		const totalItems = child_table.length;
-
-		const allScrap = (scrapCount === totalItems);        // all items are scrap
-		const hasNonScrap = scrapCount < totalItems;         // at least one non-scrap item exists
-		const singleScrap = (totalItems === 1 && scrapCount === 1);  // one item & it is scrap
-
-		if (frm.doc.parts_availability == "Yes" && frm.doc.docstatus == 1) {
-
-			// Show button ONLY if there is at least one non-scrap item
-			if (hasNonScrap && !singleScrap) {
-				frm.add_custom_button(__("Release Parts"), function () {
-					open_release_dialog(frm);
-				}, __('Create'));
+		var s = 0 
+		$.each(frm.doc.items, function(i,d) {
+			if(d.parts_availability == "Yes"){
+				s = s + 1
 			}
+		})
+		
+		if(s > 0){
+			frm.add_custom_button(__("Release Parts"), function () {
+				open_release_dialog(frm);
+			}, __('Create'));
 		}
+			
 	},
 
 	// Item Creation
@@ -74,7 +61,7 @@ frappe.ui.form.on("Evaluation Report", {
 		}
 	},
 	refresh: function(frm){
-		frm.trigger("check_all_checked")
+		frm.trigger("release_parts")
 		frm.fields_dict['items'].grid.get_field('part').get_query = function(frm, cdt, cdn) {
 			var child = locals[cdt][cdn];
 			var d = {};

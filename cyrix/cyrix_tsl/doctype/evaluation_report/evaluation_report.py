@@ -430,16 +430,14 @@ def get_release_items(docname):
 		stock_qty = frappe.db.get_value(
 			"Bin",
 			{"item_code": row.part, "warehouse": warehouse_list.get(doc.branch)},
-			["actual_qty"],
-			# ["actual_qty", "awaiting_qty"],
+			["actual_qty", "awaiting_qty"],
 			as_dict=True
 		)
 		reserved_qty = 0
 		
 		available_qty = 0
 		if stock_qty:
-			available_qty = (stock_qty.actual_qty or 0) - reserved_qty
-			# available_qty = (stock_qty.actual_qty or 0) - (stock_qty.awaiting_qty or 0) - reserved_qty
+			available_qty = (stock_qty.actual_qty or 0) - (stock_qty.awaiting_qty or 0) - reserved_qty
 
 
 		output.append({

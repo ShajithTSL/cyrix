@@ -514,7 +514,7 @@ def migrate_old_releases():
 		FROM `tabStock Entry Detail` sed
 		JOIN `tabStock Entry` se ON se.name = sed.parent
 		WHERE se.docstatus = 1
-			AND se.awaiting_parts = 1
+			# AND se.awaiting_parts = 1
 			AND se.stock_entry_type = 'Material Issue'
 			AND IFNULL(sed.job_order_data,'') != ''
 			AND IFNULL(sed.evaluation_row,'') = ''

@@ -199,64 +199,6 @@ frappe.ui.form.on('Quotation', {
             () => frm.trigger("fetch_supply_order_data"),
             () => frm.trigger("create_sales_invoice"),
             () => {
-                const quotation_formats = {
-                    "Internal Quotation - Supply": {
-                        label: "Internal Quotation",
-                        format: "INT/KW/SO - V1"
-                    },
-                    "Customer Quotation - Supply": {
-                        label: "Customer Quotation",
-                        format: "CUS/KW/SO-V1"
-                    },
-                    "Customer Quotation - S - Revised": {
-                        label: "Customer Quotation",
-                        format: "CUS/KW/SO-V1"
-                    },
-                    "Internal Quotation - Repair": {
-                        label: "Internal Quotation",
-                        format: "INT/KW/JO - V1"
-                    },
-                    // "Customer Quotation - Repair": {
-                    //     label: "Customer Quotation - N",
-                    //     format: "CUS/KW/JO - V1"
-                    // },
-                
-                    "Internal Quotation - BQ": {
-                        label: "Internal Quotation",
-                        format: "INT/KW/BQ - V1"
-                    },
-                    "Customer Quotation - BQ": {
-                        label: "Customer Quotation",
-                        format: "CUS/KW/BQ - V1"
-                    },
-                    "Customer Quotation - BQ": {
-                        label: "TSL - Customer Quotation",
-                        format: "CUS/KW/BQ/TSL"
-                    },
-                };
-
-                let config = quotation_formats[frm.doc.quotation_type];
-
-                if (config) {
-                    frm.add_custom_button(__(config.label), function () {
-
-                        let f_name = frm.doc.name;
-
-                        window.open(
-                            frappe.urllib.get_full_url(
-                                "/api/method/frappe.utils.print_format.download_pdf?"
-                                + "doctype=" + encodeURIComponent(frm.doc.doctype)
-                                + "&name=" + encodeURIComponent(f_name)
-                                + "&trigger_print=1"
-                                + "&format=" + encodeURIComponent(config.format)
-                                + "&no_letterhead=0"
-                            )
-                        );
-
-                    }, __('Print'));
-                }
-            },
-            () => {
                 if(frm.doc.docstatus == 1 && frm.doc.workflow_state == "Approved by Customer"){
 				    frm.add_custom_button(__('Invoice Request'), function(){
                         frappe.call({

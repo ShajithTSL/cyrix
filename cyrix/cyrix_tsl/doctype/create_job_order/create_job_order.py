@@ -287,7 +287,7 @@ def check_for_shared_docs_on_sub_jo(jo):
 def create_serial_no(i, doc):
 	
 	# Create Serial Number record if the item has serial number and update its status to Active
-	if i.get('has_serial_no') and i.get('serial_no'):
+	if i.get('serial_no'):
 		s_number = frappe.db.exists("Serial Number",{"name":i.get('serial_no')})
 		if s_number:
 			sn_doc = frappe.get_doc("Serial Number",i.get('serial_no'))

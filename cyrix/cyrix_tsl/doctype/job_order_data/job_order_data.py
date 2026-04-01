@@ -209,6 +209,7 @@ def create_internal_quotation(job_order_data):
 			"item_code":i.item_code,
 			"item_name":i.item_name,
 			"description":i.item_name,
+			"serial_number":i.serial_no,
 			"uom":'Nos',
 			"qty":i.quantity,
 			"model":i.model_no,

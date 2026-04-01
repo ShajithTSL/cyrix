@@ -32,6 +32,8 @@ frappe.ui.form.on('Delivery Note', {
         if (frm.custom_items_to_override && Array.isArray(frm.custom_items_to_override)) {
             frm.doc.items.forEach(row => {
                 const custom_item = frm.custom_items_to_override.find(ci => ci.item_code === row.item_code);
+                console.log(custom_item)
+
                 if (custom_item) {
                     row.rate = custom_item.rate;
                     row.price_list_rate = custom_item.rate;

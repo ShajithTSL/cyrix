@@ -340,7 +340,7 @@ def fetch_price_from_eval_report(self, method):
 			"total_material_cost": float(round(total_material_cost, 2))
 		})
 
-		self.total_actual_cost = float(round(total_material_cost + self.shipping_cost, 2)) + total_price
+		self.total_actual_cost = float(round(total_material_cost + self.get("shipping_cost"), 2)) + total_price
 
 
 def fetch_supplier_details(self, method):

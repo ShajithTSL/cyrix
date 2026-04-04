@@ -256,6 +256,10 @@ doc_events = {
 			"cyrix.custom_py.stock_entry.validate_awaiting_parts"
 		]
 	},
+    
+	"Item": {
+		"before_insert": "cyrix.custom_py.item.set_item_code_series"
+	}
 }
 
 # Monkey Patch

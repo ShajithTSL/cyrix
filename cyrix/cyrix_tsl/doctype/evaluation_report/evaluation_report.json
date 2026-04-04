@@ -10,6 +10,7 @@
   "branch",
   "customer",
   "attn",
+  "column_break_cilm",
   "specify_1",
   "hours_spent",
   "technician",
@@ -20,6 +21,7 @@
   "company",
   "date",
   "priority_status",
+  "column_break_obvw",
   "job_order_data",
   "parent_jo",
   "warehouse",
@@ -29,14 +31,17 @@
   "no_power",
   "no_output",
   "no_display",
+  "column_break_vbpq",
   "no_communication",
   "no_backlight",
   "supply_voltage",
   "column_break_23",
   "error_code",
-  "touch_keypad_not_working",
   "short_circuit",
   "overload_overcurrent",
+  "column_break_clhj",
+  "touch_keypad_not_working",
+  "not_working",
   "others",
   "specify",
   "column_break_13",
@@ -59,11 +64,11 @@
   "status",
   "section_break_25",
   "evaluation_time",
-  "extra_repair_time",
-  "column_break_cb5ok",
-  "estimated_repair_time",
   "repaired_time",
   "return_repair_time",
+  "column_break_cb5ok",
+  "estimated_repair_time",
+  "extra_repair_time",
   "technician_comment_section",
   "comment",
   "info_comment",
@@ -126,9 +131,9 @@
   },
   {
    "fieldname": "technician",
-   "fieldtype": "Table MultiSelect",
+   "fieldtype": "Link",
    "label": "Technician",
-   "options": "Technician List",
+   "options": "Technician ID",
    "read_only": 1
   },
   {
@@ -175,15 +180,6 @@
    "fieldtype": "Select",
    "label": "Priority Status",
    "options": "Normal\nUrgent",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Evaluation Report",
-   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -275,7 +271,7 @@
    "default": "0",
    "fieldname": "overload_overcurrent",
    "fieldtype": "Check",
-   "label": "Overload/ Overcurrent"
+   "label": "Burnt Components"
   },
   {
    "allow_on_submit": 1,
@@ -382,7 +378,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nInstalled and Completed/Repaired\nWorking\nSpare Parts\nExtra Parts\nComparison\nParts Missing\nReturn Not Repaired\nReturn No Fault\nRNP-Return No Parts\nSupplier Quoted\nInternal Extra Parts"
+   "options": "\nBoard Evaluation\nInstalled and Completed/Repaired\nWorking\nSpare Parts\nExtra Parts\nComparison\nParts Missing\nReturn Not Repaired\nReturn No Fault\nRNP-Return No Parts\nSupplier Quoted\nInternal Extra Parts"
   },
   {
    "fieldname": "section_break_25",
@@ -537,15 +533,6 @@
    "options": "Technician ID"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Evaluation Report",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "job_order_data",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -589,12 +576,45 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "part no"
+  },
+  {
+   "fieldname": "column_break_cilm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_obvw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_vbpq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_clhj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Evaluation Report",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "not_working",
+   "fieldtype": "Check",
+   "label": "Not Working"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-29 08:22:47.298351",
+ "modified": "2026-03-08 10:09:42.379534",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Evaluation Report",

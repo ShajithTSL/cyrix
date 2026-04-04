@@ -3,12 +3,37 @@
 
 frappe.ui.form.on("Create Budgetary Quotation", {
     customer(frm){
-		frm.call('get_contact').then(r=>{
-			if(r.message){
-				console.log(r.message[0])
-				frm.set_value("customer_representative",r.message[0])
-			}					
-        })
+		frappe.call({
+			method: 'cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.get_contacts',
+			args: {
+				"customer": frm.doc.customer,
+			},
+			callback(r) {
+				if (r.message) {
+                    console.log(r.message)
+					frm.set_query("customer_representative", function () {
+						return {
+							"filters": {
+								"name": ["in", r.message[0]]
+							}
+						};
+					});
+					if (r.message[0]) {
+						frm.set_value("customer_representative", r.message[0][0])
+					}
+					if (r.message[1]) {
+						frm.set_query("sales_person", function () {
+							return {
+								"filters": {
+									"name": ["in", r.message[1]]
+								}
+							};
+						});
+						frm.set_value("sales_person",r.message[1][0])
+					}
+				}
+			}
+		});
 	},
 
     create_bq(frm){        
@@ -22,30 +47,70 @@ frappe.ui.form.on("Create Budgetary Quotation", {
     },
 
 	refresh: function(frm) {
-		frm.disable_save()
-		frm.fields_dict['items'].grid.get_field('sku').get_query = function(doc, cdt, cdn) {
-            let row = locals[cdt][cdn];
-            return {
-                filters: {
-                    'model': row.model // Filter by model
-                }
-            };
-        };
-        frm.trigger("create_bq") // create BQ
+		frappe.run_serially([
+			() => frm.disable_save(),
+
+			() => frm.set_value("company", frappe.defaults.get_default("company")),
+
+			() => {
+				frm.fields_dict['items'].grid.get_field('sku').get_query = function (frm, cdt, cdn) {
+					var child = locals[cdt][cdn];
+					var d = {};
+					if (child.model) {
+						d['model'] = child.model;
+					}
+					if (child.mfg) {
+						d['mfg'] = child.mfg;
+					}					
+					if (child.item_group){
+						d['item_group'] = child.item_group;
+					}
+					return {
+						filters: d
+					}
+				}
+			},
+
+			() => frm.trigger("create_bq") // create BQ
+		]);
 	},
 
 	setup: function (frm) {
-		frm.set_query("branch", function () {
-			return {
-                filters: {
-                    'custom_company': frm.doc.company  // Filter branch by company
-                }
+		const branchMap = frappe.boot.company_branches;
+
+		if (branchMap[frappe.defaults.get_default("company")]) {
+			const branches = branchMap[frappe.defaults.get_default("company")];
+
+			// If only one branch exists, auto-set it
+			if (branches.length === 1) {
+				frm.set_value("branch", branches[0]);
+				frm.set_df_property("branch", "read_only", 1);
 			}
-		});
+			frm.set_query("branch", function () {
+				return {
+					filters: [
+						["name", "in", branchMap[frappe.defaults.get_default("company")]]
+					]
+				};
+			});
+		}	
+		
+		const territoryMap = frappe.boot.company_territories;
+
+		if (territoryMap[frappe.defaults.get_default("company")]) {
+			frm.set_query("customer", function () {
+				return {
+					filters: [
+						["territory", "in", territoryMap[frappe.defaults.get_default("company")]]
+					]
+				};
+			});
+		}
+		
 		frm.set_query("department", function () {
 			return {
                 filters: {
-                    'company': frm.doc.company  // Filter department by company
+                    'company': frappe.defaults.get_default("company")  // Filter department by company
                 }
 			}
 		});

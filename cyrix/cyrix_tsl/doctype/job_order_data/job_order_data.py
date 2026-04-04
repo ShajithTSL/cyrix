@@ -4,7 +4,10 @@
 import frappe
 from frappe.model.document import Document
 from datetime import datetime
-from cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report import warehouse_based_on_branch_and_company
+from cyrix.custom_py.quotation import fetch_item_price_details
+from cyrix.custom_py import utils
+
+from cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report import warehouse_based_on_branch_and_company, check_for_shared_docs_on_evaluation
 naming_series = {
 	"Internal Quotation - Repair":{
 		"Kuwait":"IQR-K.YY.-",
@@ -60,7 +63,8 @@ class JobOrderData(Document):
 				"date":now,
 			})
 
-	def on_update_after_submit(self):
+	def on_update_after_submit(self):		
+		check_for_shared_docs_on_jo(self)
 		if self.status != self.status_duration_details[-1].status:
 			ldate = self.status_duration_details[-1].date
 			now = datetime.now()
@@ -83,7 +87,34 @@ class JobOrderData(Document):
 			})
 			doc.save(ignore_permissions=True)
 
+def check_for_shared_docs_on_jo(self):
+	tech_user = frappe.db.get_value("Technician ID",self.technician,"user_email")
+	technicians = [tech_user]
+	# self.multiple_technicians is a table_multiselect
+	for row in self.multiple_technicians:
+		if row.get("email") not in technicians:
+			technicians.append(row.get("email"))
 
+	for t_id in technicians:
+		if t_id:
+			doc = frappe.db.exists("DocShare",{
+				"user":t_id,
+				"share_doctype": self.doctype,
+				"share_name": self.name
+			})
+			if not doc:
+				doc = frappe.new_doc("DocShare")
+				doc.user = t_id
+				doc.share_doctype = self.doctype
+				doc.share_name = self.name
+				doc.read = 1
+				doc.write = 1
+				doc.save()
+	eval_list = frappe.get_all("Evaluation Report",{'job_order_data':self.name},"name")
+	for eval in eval_list:
+		eval_doc = frappe.get_doc("Evaluation Report",eval.name)
+		check_for_shared_docs_on_evaluation(self = eval_doc)
+	
 @frappe.whitelist()
 def create_evaluation_report(doc_no):
 	# Fetch the source document
@@ -96,7 +127,7 @@ def create_evaluation_report(doc_no):
 	field_map = {
 		"company": "company",
 		"customer": "customer",
-		"sales_rep": "attn",
+		"sales_person": "attn",
 		"name": "job_order_data",
 		"attach_image": "attach_image",
 		"technician": "technician",
@@ -113,11 +144,11 @@ def create_evaluation_report(doc_no):
 
 	# Set naming series based on branch
 	branch_series_map = {
-		"Dammam": "EVAL-D-.YY.-",
-		"Jeddah": "EVAL-J-.YY.-",
-		"Riyadh": "EVAL-R-.YY.-",
-		"Kuwait": "EVAL-K-.YY.-",
-		"Dubai": "EVAL-DU-.YY.-"
+		"Dammam": "EVAL-D.YY.-",
+		"Jeddah": "EVAL-J.YY.-",
+		"Riyadh": "EVAL-R.YY.-",
+		"Kuwait": "EVAL-K.YY.-",
+		"Dubai": "EVAL-DU.YY.-"
 	}
 	new_doc.naming_series = branch_series_map.get(doc.branch, "")
 
@@ -125,6 +156,7 @@ def create_evaluation_report(doc_no):
 	checkbox_fields = [
 		"no_power",
 		"no_output",
+		"not_working",
 		"no_display",
 		"no_communication",
 		"supply_voltage",
@@ -152,33 +184,36 @@ def create_evaluation_report(doc_no):
 			"manufacturer": item.mfg,
 			"model": item.model_no,
 			"serial_no": item.serial_no,
-			"type": item.type
 		})
 
 	new_doc.warehouse = warehouse_based_on_branch_and_company(doc.company, doc.branch)
 
 	return new_doc
 
-from cyrix.custom_py.quotation import fetch_item_price_details
 @frappe.whitelist()
 def create_internal_quotation(job_order_data):
 	doc = frappe.get_doc("Job Order Data",job_order_data)
 	new_doc= frappe.new_doc("Quotation")
-	new_doc.sales_rep = doc.sales_rep
+	new_doc.sales_person = doc.sales_person
 	new_doc.naming_series = naming_series["Internal Quotation - Repair"][doc.branch]
 	new_doc.company = doc.company
 	new_doc.party_name = doc.customer
 	new_doc.plant = doc.plant
 	new_doc.branch = doc.branch
+	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
+	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
+
 	new_doc.quotation_type = "Internal Quotation - Repair"
 	for i in doc.material_list:
 		new_doc.append("items",{
 			"item_code":i.item_code,
 			"item_name":i.item_name,
 			"description":i.item_name,
+			"serial_number":i.serial_no,
 			"uom":'Nos',
 			"qty":i.quantity,
-			"model_no":i.model_no,
+			"model":i.model_no,
+			"mfg":i.mfg,
 			"job_order_data":doc.name,
 			"warehouse":fetch_repair_warehouse(doc.company,doc.branch)
 		})
@@ -214,16 +249,17 @@ def create_delivery_note(job_order_data):
 	new_doc.company = doc.company
 	new_doc.customer = doc.customer
 	new_doc.plant = doc.plant
-	new_doc.custom_sales_person = doc.sales_rep
+	new_doc.custom_sales_person = doc.sales_person
 	new_doc.branch = doc.branch
-	new_doc.selling_price_list = "Standard Selling"
-	new_doc.department = doc.department
+	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
+	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
+	new_doc.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
 	new_doc.set_warehouse = fetch_repair_warehouse(doc.company,doc.branch)
 	new_doc.customer_address = doc.address
 	new_doc.contact_person = doc.incharge
 	new_doc.job_order_data = job_order_data
 
-	# new_doc.sales_rep = frappe.get_value("Sales Person",doc.sales_rep,"custom_user")
+	# new_doc.sales_person = frappe.get_value("Sales Person",doc.sales_person,"custom_user")
 	quote = []
 	for i in doc.get("material_list"):
 		qi_details = frappe.db.sql('''select q.name,
@@ -249,7 +285,8 @@ def create_delivery_note(job_order_data):
 			"item_code":i.item_code,
 			"manufacturer":i.mfg,
 			"model":i.model_no,
-			"description":i.item_name,
+			"description":i.item_name,			
+			"serial_number":i.serial_no,
 			"qty":qty,
 			"rate":rate,
 			"amount":amount,
@@ -257,7 +294,7 @@ def create_delivery_note(job_order_data):
 			"uom":"Nos",
 			"stock_uom":"Nos",
 			"conversion_factor":1,
-			"cost_center":doc.department,
+			"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
 			"warehouse":doc.repair_warehouse
 		})
 		quote.append({
@@ -269,11 +306,12 @@ def create_delivery_note(job_order_data):
 			"qty":qty,
 			"rate":rate,
 			"amount":amount,
+			"serial_number":i.serial_no,
 			"job_order_data":job_order_data,
 			"uom":"Nos",
 			"stock_uom":"Nos",
 			"conversion_factor":1,
-			"cost_center":doc.department,
+			"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
 			"warehouse":doc.repair_warehouse
 		})
 		return new_doc, quote
@@ -310,14 +348,13 @@ def create_return_note(job_order_data):
 			"model":i.model_no,
 			"rate":0,
 			"amount":0, 
-			"type":i.type,
 			"description":i.item_name,
 			"qty":i.quantity,
 			"job_order_data":doc.name, 
 			"uom":"Nos",
 			"stock_uom":"Nos",
 			"conversion_factor":1,
-			"cost_center":doc.department,
+			"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
 			"warehouse":fetch_repair_warehouse(doc.company, doc.branch)
 		})
 	return new_doc
@@ -325,17 +362,26 @@ def create_return_note(job_order_data):
 
 
 @frappe.whitelist()
-def fetch_repair_warehouse(company,branch):
-	if company == "CYRIX & TSL COMPANY - Kuwait":
-		warehouse = "Kuwait - Repair - CT"
-	if company == "CYRIX & TSL COMPANY - UAE":
-		warehouse = "Dubai - Repair - CT-UAE"
-	if company == "CYRIX & TSL COMPANY - KSA":
-		if branch == "Riyadh":
-			warehouse = "Riyadh - Repair - CT-KSA"
-		if branch == "Jeddah":
-			warehouse = "Jeddah - Repair - CT-KSA"
-		if branch == "Dammam":
-			warehouse = "Dammam - Repair - CT-KSA"
+def fetch_repair_warehouse(company,branch):	
+	warehouse = frappe.db.get_value("Warehouse List",{"branch":branch,"parent":company},["repair_warehouse"])
 
 	return warehouse
+
+@frappe.whitelist()
+def fetch_payment_details(name):
+	data = frappe.db.sql("""
+		SELECT 
+			t.parent AS payment_entry,
+			t.allocate_amount AS amount,
+			p.posting_date,
+			p.paid_to_account_currency AS currency
+		FROM `tabJob Order table` t
+		JOIN `tabPayment Entry` p
+			ON p.name = t.parent
+		WHERE 
+			t.parenttype = 'Payment Entry'
+			AND t.reference_type = 'Job Order Data'
+			AND t.reference_name = %s
+			AND p.docstatus = 1
+	""", (name), as_dict=True)
+	return data

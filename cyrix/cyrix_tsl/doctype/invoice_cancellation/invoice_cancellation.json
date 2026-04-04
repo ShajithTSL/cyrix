@@ -22,13 +22,9 @@
   "submitted_by",
   "sales_email",
   "reason_for_cancellation",
-  "section_break_wzpw",
-  "type",
   "section_break_e4nvk",
   "column_break_rfcy",
   "cancellation_list",
-  "section_break_otvl",
-  "cancellation_table",
   "amended_from"
  ],
  "fields": [
@@ -99,10 +95,10 @@
   {
    "fieldname": "submitted_by",
    "fieldtype": "Data",
-   "label": "Submitted By"
+   "label": "Submitted By",
+   "no_copy": 1
   },
   {
-   "fetch_from": "sales_person.custom_user",
    "fieldname": "sales_email",
    "fieldtype": "Data",
    "label": "Sales Email"
@@ -115,16 +111,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_wzpw",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "type",
-   "fieldtype": "Select",
-   "label": "Type",
-   "options": "\nSingle\nMultiple"
-  },
-  {
    "fieldname": "section_break_e4nvk",
    "fieldtype": "Section Break"
   },
@@ -134,16 +120,10 @@
    "hidden": 1
   },
   {
-   "depends_on": "eval:doc.type == \"Multiple\"",
    "fieldname": "cancellation_list",
    "fieldtype": "Table",
    "label": "Cancellation List",
    "options": "Cancellation List"
-  },
-  {
-   "depends_on": "eval:doc.type == \"Single\"",
-   "fieldname": "section_break_otvl",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "amended_from",
@@ -154,19 +134,12 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "depends_on": "eval:doc.type == \"Single\"",
-   "fieldname": "cancellation_table",
-   "fieldtype": "Table",
-   "label": "Cancellation List",
-   "options": "Cancellation Table"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-09 13:08:51.786195",
+ "modified": "2026-03-14 12:36:18.732328",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Invoice Cancellation",

@@ -7,42 +7,41 @@
  "engine": "InnoDB",
  "field_order": [
   "details_tab",
+  "summary_summary_section",
+  "detail_html",
+  "section_break_nbbx",
   "naming_series",
-  "sales_rep",
-  "sales_rep_name",
   "customer",
   "customer_name",
   "customer_rep",
   "customer_email",
   "address",
   "incharge",
-  "warranty",
-  "delivery",
-  "returned_date",
-  "expiry_date",
   "priority_status",
-  "unit_table_no",
-  "mistaken_ner",
-  "quoted",
-  "status_cap",
-  "status_cap_date",
-  "column_break_7",
-  "received_date",
+  "column_break_ljre",
   "company",
   "branch",
+  "department",
+  "sales_person",
+  "delivery",
+  "warranty",
+  "expiry_date",
+  "column_break_7",
+  "received_date",
   "repair_warehouse",
   "posting_date",
+  "status_cap",
+  "status",
+  "returned_date",
+  "column_break_cwfo",
   "unit_type",
   "technician",
-  "department",
-  "status",
-  "custom_status",
+  "multiple_technicians",
   "parent_jo",
-  "remarks",
   "payment_terms",
-  "automation",
-  "project_1",
   "plant",
+  "status_cap_date",
+  "mistaken_ner",
   "section_break_14",
   "image",
   "attach_image",
@@ -70,20 +69,26 @@
   "section_break_36",
   "material_list",
   "section_break_oy5vi",
-  "complaints",
   "no_power",
   "no_output",
   "no_display",
+  "column_break_mvnb",
   "no_communication",
   "no_backlight",
   "supply_voltage",
-  "column_break_43",
+  "column_break_nvav",
   "error_code",
-  "touch_keypad_not_working",
   "short_circuit",
   "overload_overcurrent",
+  "column_break_umjh",
+  "touch_keypad_not_working",
+  "not_working",
   "others",
+  "column_break_43",
   "specify",
+  "column_break_lquf",
+  "remarks",
+  "complaints",
   "attach_customer_image",
   "section_break_23",
   "extra_part_sheets",
@@ -91,7 +96,6 @@
   "status_duration_details",
   "online_price_section",
   "price_table",
-  "tech_id",
   "amended_from"
  ],
  "fields": [
@@ -109,20 +113,6 @@
    "in_preview": 1,
    "label": "Naming Series",
    "options": "WOD-.YY.-\nWOD-R.YY.-\nWOD-D.YY.-\nWOD-J.YY.-\nWOD-K.YY.-\nWOD-KO.YY.-\nWOD-DU-O-.YY.-\nWOD-DU.YY.-P.\nWOD-DU.YY.-PA."
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "sales_rep",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "in_standard_filter": 1,
-   "label": "Sales Rep",
-   "options": "Sales Person"
-  },
-  {
-   "fieldname": "sales_rep_name",
-   "fieldtype": "Data",
-   "label": "Sales Rep Name"
   },
   {
    "allow_on_submit": 1,
@@ -153,7 +143,8 @@
    "fieldname": "customer_email",
    "fieldtype": "Data",
    "label": "Customer Email",
-   "options": "Email"
+   "options": "Email",
+   "read_only": 1
   },
   {
    "fieldname": "address",
@@ -201,10 +192,10 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "expiry_date",
    "fieldtype": "Date",
-   "label": "Warranty Expiry Date",
-   "read_only": 1
+   "label": "Warranty Expiry Date"
   },
   {
    "allow_on_submit": 1,
@@ -215,23 +206,10 @@
   },
   {
    "allow_on_submit": 1,
-   "fieldname": "unit_table_no",
-   "fieldtype": "Data",
-   "label": "Unit Table No"
-  },
-  {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "mistaken_ner",
    "fieldtype": "Check",
    "label": "Mistaken NER"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "quoted",
-   "fieldtype": "Check",
-   "label": "Quoted"
   },
   {
    "allow_on_submit": 1,
@@ -244,14 +222,14 @@
    "allow_on_submit": 1,
    "fieldname": "status_cap",
    "fieldtype": "Data",
-   "label": "Status Cap",
+   "label": "NER Cap",
    "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "status_cap_date",
    "fieldtype": "Date",
-   "label": "Status Cap Date",
+   "label": "First NER Date",
    "read_only": 1
   },
   {
@@ -291,15 +269,9 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Date"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "technician",
-   "fieldtype": "Table MultiSelect",
+   "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Technician",
-   "options": "Technician List"
+   "label": "Date"
   },
   {
    "fieldname": "department",
@@ -316,14 +288,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "A-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "custom_status",
-   "fieldtype": "Select",
-   "label": "Custom Status",
-   "options": "\nUE-Under Evaluation\nUTR-Under Technician Repair\nRNA-Return Not Approved"
+   "options": "Board Evaluation\nA-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled"
   },
   {
    "fieldname": "remarks",
@@ -346,17 +311,15 @@
   {
    "allow_on_submit": 1,
    "fieldname": "purchase_order_no",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Purchase Order",
-   "options": "Purchase Order",
    "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "dn_no",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Delivery Note",
-   "options": "Delivery Note",
    "read_only": 1
   },
   {
@@ -391,22 +354,10 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "automation",
-   "fieldtype": "Check",
-   "label": "Automation"
-  },
-  {
-   "default": "0",
-   "fieldname": "project_1",
-   "fieldtype": "Check",
-   "label": "Project"
-  },
-  {
-   "allow_on_submit": 1,
    "fieldname": "plant",
-   "fieldtype": "Data",
-   "label": "Plant"
+   "fieldtype": "Link",
+   "label": "Plant",
+   "options": "Plant"
   },
   {
    "fieldname": "section_break_14",
@@ -422,7 +373,8 @@
    "allow_on_submit": 1,
    "fieldname": "attach_image",
    "fieldtype": "Data",
-   "label": "Attach Image"
+   "label": "Attach Image",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_dc2tn",
@@ -593,13 +545,6 @@
    "options": "Online Price List"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "tech_id",
-   "fieldtype": "Link",
-   "label": "Tech ID",
-   "options": "Technician ID"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -612,6 +557,7 @@
   {
    "fieldname": "linked_docs_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Linked Docs"
   },
   {
@@ -623,7 +569,7 @@
    "fieldname": "unit_type",
    "fieldtype": "Select",
    "label": "Unit Type",
-   "options": "Service Level Unit\nBoard Level Unit\nService and Board Level Unit"
+   "options": "Service Level Unit\nBoard Level Unit\nService and Board Level Unit\nCalibration"
   },
   {
    "fieldname": "parent_jo",
@@ -670,13 +616,85 @@
   {
    "fieldname": "column_break_eqhg",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_mvnb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ljre",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_cwfo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lquf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "detail_html",
+   "fieldtype": "HTML",
+   "label": "detail html"
+  },
+  {
+   "fieldname": "column_break_nvav",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_umjh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "technician",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Technician",
+   "options": "Technician ID"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "multiple_technicians",
+   "fieldtype": "Table MultiSelect",
+   "ignore_user_permissions": 1,
+   "label": "Multiple Technicians (Add if Multiple Technicians involved)",
+   "options": "Technician List"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "summary_summary_section",
+   "fieldtype": "Section Break",
+   "label": "Summary "
+  },
+  {
+   "fieldname": "section_break_nbbx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "not_working",
+   "fieldtype": "Check",
+   "label": "Not Working"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-29 13:32:43.762350",
+ "modified": "2026-03-29 08:50:57.245258",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",
@@ -698,7 +716,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "sales_person,customer,status",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

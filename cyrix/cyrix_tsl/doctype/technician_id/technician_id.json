@@ -8,26 +8,45 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "id",
-  "technician"
+  "technician",
+  "user_email",
+  "column_break_adoo",
+  "id"
  ],
  "fields": [
   {
    "fieldname": "id",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "ID",
    "unique": 1
   },
   {
    "fieldname": "technician",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Technician"
+  },
+  {
+   "fieldname": "column_break_adoo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "user_email",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "User Email",
+   "options": "User"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-13 14:33:57.660823",
+ "modified": "2026-03-26 09:42:16.676910",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technician ID",
@@ -48,8 +67,10 @@
   }
  ],
  "row_format": "Dynamic",
- "search_fields": "technician",
+ "search_fields": "technician, user_email",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "technician"
 }

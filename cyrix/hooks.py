@@ -26,7 +26,9 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/cyrix/css/cyrix.css"
-# app_include_js = "/assets/cyrix/js/cyrix.js"
+app_include_js = [
+	"cyrix.bundle.js"
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/cyrix/css/cyrix.css"
@@ -50,7 +52,8 @@ doctype_js = {
     "Quotation" : ["custom_js/quotation.js"],
     "Sales Invoice" : ["custom_js/sales_invoice.js"],
     "Request for Quotation" : ["custom_js/request_for_quotation.js"],
-    "Supplier Quotation" : ["custom_js/supplier_quotation.js"]
+    "Supplier Quotation" : ["custom_js/supplier_quotation.js"],
+    "Company" : ["custom_js/company.js"]
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -85,6 +88,12 @@ doctype_js = {
 jinja = {
 	"methods": [
         "cyrix.custom_py.jinja.get_technicians",
+		"cyrix.custom_py.jinja.show_address",
+		"cyrix.custom_py.jinja.get_mt",
+		"cyrix.custom_py.jinja.get_labour",
+		"cyrix.custom_py.jinja.get_material_cost",
+		"cyrix.custom_py.jinja.get_invoice_details",
+		"cyrix.custom_py.jinja.get_pi"
 	]
 }
 
@@ -180,6 +189,9 @@ doc_events = {
 			"cyrix.custom_py.purchase_order.update_job_order_status",
 			"cyrix.custom_py.purchase_order.update_supply_order_status",
             "cyrix.custom_py.purchase_order.update_budgetary_quotation_status"
+		],
+		"on_cancel": [
+			"cyrix.custom_py.purchase_order.update_supply_order_status_on_cancel"
 		]
 	},
     
@@ -188,21 +200,32 @@ doc_events = {
 			"cyrix.custom_py.purchase_receipt.update_job_order_status",
 			"cyrix.custom_py.purchase_receipt.update_supply_order_status",
 		],
-        "on_cancel": "cyrix.custom_py.purchase_receipt.update_received_percentage"
+        "on_cancel": [
+			"cyrix.custom_py.purchase_receipt.update_received_percentage",
+			"cyrix.custom_py.purchase_receipt.update_job_order_status",
+		]
 	},
 
 	"Delivery Note": {
         "on_submit": [
-            "cyrix.custom_py.delivery_note.update_job_order_status",
-            "cyrix.custom_py.delivery_note.update_supply_order_status"
+			"cyrix.custom_py.delivery_note.update_job_order_status",
+            "cyrix.custom_py.delivery_note.update_supply_order_status",			
+            'cyrix.custom_py.delivery_note.update_budgetary_quotation_status'
 		],
-		"on_update_after_submit": ["cyrix.custom_py.delivery_note.update_supply_order_status"]
+		"on_update_after_submit": ["cyrix.custom_py.delivery_note.update_supply_order_status"],
+		"on_cancel": [
+			"cyrix.custom_py.delivery_note.update_so_qty_on_cancel",
+			"cyrix.custom_py.delivery_note.update_bq_qty_on_cancel"
+		]
 	},
 
 	"Sales Invoice": {
         "on_submit": [
             "cyrix.custom_py.sales_invoice.update_jo_so_status",
             "cyrix.custom_py.sales_invoice.update_service_call_form"			
+		],
+		"on_cancel": [
+			"cyrix.custom_py.sales_invoice.update_jo_so_status_on_cancel"			
 		]
 	},
     
@@ -213,8 +236,37 @@ doc_events = {
         "on_cancel": [
             "cyrix.custom_py.payment_entry.update_payment_reference_cancel"			
 		]
+	},
+	"Contact": {
+		"before_save": [
+			"cyrix.custom_py.contact.before_save"
+		]
+	},
+	"Stock Entry":{
+		"on_submit":[
+			"cyrix.custom_py.stock_entry.validate_awaiting_parts"
+		],
+		"on_update":[
+			"cyrix.custom_py.stock_entry.validate_awaiting_parts"
+		],
+		"on_cancel":[
+			"cyrix.custom_py.stock_entry.validate_awaiting_parts"
+		],
+		"on_trash":[
+			"cyrix.custom_py.stock_entry.validate_awaiting_parts"
+		]
+	},
+    
+	"Item": {
+		"before_insert": "cyrix.custom_py.item.set_item_code_series"
 	}
 }
+
+# Monkey Patch
+from frappe import boot as core
+from cyrix.custom_py import boot as custom
+core.get_bootinfo = custom.get_bootinfo
+
 
 # Scheduled Tasks
 # ---------------
@@ -245,9 +297,10 @@ doc_events = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "cyrix.event.get_events"
-# }
+override_whitelisted_methods = {
+	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_journal_entry_bts",
+	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_payment_entry_bts"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

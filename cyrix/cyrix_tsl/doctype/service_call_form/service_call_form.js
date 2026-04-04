@@ -2,6 +2,29 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Service Call Form', {
+
+    company: function(frm) {
+        frm.trigger("set_query");
+    },
+
+    set_query: function(frm) {
+        frm.set_query("department", function () {
+			return {
+				filters: [
+					["company", "=", frm.doc.company],
+				]
+			}
+		});
+        frm.set_query("related_doc", function () {
+            return {
+                filters: [
+                    ["company", "=", frm.doc.company],
+                ]
+            }
+        });
+        
+    },
+
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 1){
 			frm.add_custom_button(__('Internal Quotation'), function(){
@@ -19,6 +42,7 @@ frappe.ui.form.on('Service Call Form', {
                 });
 			}, ('Create'))
 		}
+        frm.trigger("set_query");
 	},
 
     related_doc: function(frm) {
@@ -30,7 +54,8 @@ frappe.ui.form.on('Service Call Form', {
                 customer: "customer",
                 branch: "branch",
                 department: "department",
-                sales_rep: "salesman_name"
+                sales_person: "sales_person",
+                company: "company",
             };
 
             for (let source_field in fields_to_fetch) {
@@ -44,12 +69,18 @@ frappe.ui.form.on('Service Call Form', {
                 });
             }
         }
-    },
-
-	sch_date:function(frm){
-		var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-		var now = new Date(frm.doc.sch_date);
-		var day = days[ now.getDay() ];
-		frm.set_value("day",day);
-	}
+    },	
 });
+
+frappe.ui.form.on('Service Call Schedule', {
+	date: function(frm, cdt, cdn){
+		let row = locals[cdt][cdn]
+		if(row.date){
+            var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            var now = new Date(row.date);
+            var day = days[ now.getDay() ];
+            row.day = day;
+            frm.refresh_field("service_call_schedule")
+        }
+	}
+})

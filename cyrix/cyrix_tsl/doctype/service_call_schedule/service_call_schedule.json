@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-03 11:19:59.295701",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_8eun",
+  "date",
+  "column_break_xltf",
+  "day",
+  "column_break_gxvd",
+  "time"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_8eun",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 4,
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "columns": 3,
+   "fieldname": "day",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Day",
+   "options": "\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday"
+  },
+  {
+   "columns": 3,
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Time"
+  },
+  {
+   "fieldname": "column_break_xltf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_gxvd",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-03 11:22:57.610946",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Service Call Schedule",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -10,8 +10,7 @@
   "naming_series",
   "customer",
   "customer_name",
-  "salesman_name",
-  "salesman_name1",
+  "sales_person",
   "document_type",
   "related_doc",
   "branch",
@@ -22,13 +21,8 @@
   "technician_name",
   "reason",
   "status",
-  "suitable_date_and_time_for_customer_section",
-  "cus_date",
-  "time",
   "schedule_visit_section",
-  "sch_date",
-  "day",
-  "sch_time",
+  "service_call_schedule",
   "section_break_15",
   "quotation",
   "sales_invoice",
@@ -47,6 +41,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Customer",
    "options": "Customer",
    "reqd": 1
@@ -57,22 +52,6 @@
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "label": "Customer Name",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "salesman_name",
-   "fieldtype": "Link",
-   "label": "Salesman",
-   "options": "Sales Person",
-   "reqd": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fetch_from": "salesman_name.sales_person_name",
-   "fieldname": "salesman_name1",
-   "fieldtype": "Data",
-   "label": "Salesman Name",
    "read_only": 1
   },
   {
@@ -91,6 +70,8 @@
   {
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Branch",
    "options": "Branch"
   },
@@ -113,6 +94,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -131,51 +113,18 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "Service Enquiry",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nService Enquiry\nInternally Quoted\nQuoted\nApproved\nRSC - Repair to Ship\nUnder Process\nInvoiced\nRejected\nCancelled\nPaid\nNot Succeed"
-  },
-  {
-   "fieldname": "suitable_date_and_time_for_customer_section",
-   "fieldtype": "Section Break",
-   "label": "Suitable Date and Time for Customer"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "cus_date",
-   "fieldtype": "Date",
-   "label": "Date"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "time",
-   "fieldtype": "Time",
-   "label": "Time"
+   "options": "\nService Enquiry\nInternally Quoted\nQuoted\nApproved\nRSC - Repair to Ship\nUnder Process\nInvoiced\nRejected\nCancelled\nPaid\nNot Succeed\nClosed\nCompleted"
   },
   {
    "fieldname": "schedule_visit_section",
    "fieldtype": "Tab Break",
    "label": "Schedule Visit"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "sch_date",
-   "fieldtype": "Date",
-   "label": "Date"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "day",
-   "fieldtype": "Select",
-   "label": "Day",
-   "options": "\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "sch_time",
-   "fieldtype": "Time",
-   "label": "Time"
   },
   {
    "fieldname": "section_break_15",
@@ -205,6 +154,22 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Person",
+   "options": "Sales Person",
+   "reqd": 1
+  },
+  {
+   "fieldname": "service_call_schedule",
+   "fieldtype": "Table",
+   "label": "Service Call Schedule",
+   "options": "Service Call Schedule"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -219,7 +184,7 @@
    "link_fieldname": "service_call_form"
   }
  ],
- "modified": "2025-09-10 10:07:00.479127",
+ "modified": "2026-03-05 13:59:05.207931",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Service Call Form",

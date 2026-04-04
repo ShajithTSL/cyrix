@@ -15,14 +15,15 @@
   "go_to",
   "request_for",
   "column_break_rkfva",
+  "company",
   "requested_by",
-  "email_sent",
-  "sales",
+  "sales_person",
   "submitted_by",
   "sales_email",
   "section_break_nc32n",
   "invoice_list",
-  "sod_quotation"
+  "sod_quotation",
+  "amended_from"
  ],
  "fields": [
   {
@@ -40,6 +41,8 @@
    "allow_on_submit": 1,
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Branch",
    "options": "Branch"
   },
@@ -47,6 +50,8 @@
    "fieldname": "quotation",
    "fieldtype": "Link",
    "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Quotation",
    "options": "Quotation"
   },
@@ -60,6 +65,8 @@
   {
    "fieldname": "request_for",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Request For",
    "options": "\nJob Order\nSupply Order\nService"
   },
@@ -70,30 +77,18 @@
   {
    "fieldname": "requested_by",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Initiated by"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "email_sent",
-   "fieldtype": "Check",
-   "label": "Email Sent"
-  },
-  {
-   "fieldname": "sales",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Requested Sales",
-   "options": "Sales Person",
-   "reqd": 1
   },
   {
    "fieldname": "submitted_by",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Submitted By"
   },
   {
-   "fetch_from": "sales.custom_user",
+   "fetch_from": "sales_person.user",
+   "fetch_if_empty": 1,
    "fieldname": "sales_email",
    "fieldtype": "Data",
    "label": "Sales Email"
@@ -115,12 +110,37 @@
    "fieldtype": "Table",
    "label": "Supply Order Quotation",
    "options": "SOD IV Creation"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Invoice Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Requested Sales",
+   "options": "Sales Person",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-09 11:13:36.528911",
+ "modified": "2026-03-12 09:58:02.443011",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Invoice Request",

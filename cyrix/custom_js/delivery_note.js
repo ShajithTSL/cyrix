@@ -32,14 +32,38 @@ frappe.ui.form.on('Delivery Note', {
         if (frm.custom_items_to_override && Array.isArray(frm.custom_items_to_override)) {
             frm.doc.items.forEach(row => {
                 const custom_item = frm.custom_items_to_override.find(ci => ci.item_code === row.item_code);
+                console.log(custom_item)
+
                 if (custom_item) {
                     row.rate = custom_item.rate;
                     row.price_list_rate = custom_item.rate;
                     row.amount = custom_item.rate * row.qty;
+                    row.serial_number = custom_item.serial_number;
                 }
             });
             // Clear after applying
-            frm.custom_items_to_override = null;
+            // frm.custom_items_to_override = null;
         }
+    },
+    
+    warranty_duration(frm) {
+        convert_warranty(frm);
+    },
+
+    warranty_type(frm) {
+        convert_warranty(frm);
     }
 });
+
+function convert_warranty(frm) {
+    if (!frm.doc.warranty_duration || !frm.doc.warranty_type){
+        frm.set_value("warranty_months",0);
+        return;
+    } 
+
+    if (frm.doc.warranty_type === "Years") {
+        frm.set_value("warranty_months", frm.doc.warranty_duration * 12);
+    } else {
+        frm.set_value("warranty_months", frm.doc.warranty_duration);
+    }
+}

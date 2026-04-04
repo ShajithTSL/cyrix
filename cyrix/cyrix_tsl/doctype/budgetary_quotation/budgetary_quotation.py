@@ -56,7 +56,8 @@ class BudgetaryQuotation(Document):
 		new_doc.party_name = self.customer
 		new_doc.currency = frappe.db.get_value("Company",self.company,"default_currency")
 		new_doc.customer_name = frappe.db.get_value("Customer",self.customer,"customer_name")
-		new_doc.sales_rep = self.sales_person
+		new_doc.sales_person = self.sales_person
+		new_doc.customer_reference_number = self.customer_ref
 		new_doc.branch = self.branch
 		new_doc.budgetary_quotation = self.name
 		new_doc.quotation_type = "Internal Quotation - BQ"
@@ -97,3 +98,77 @@ class BudgetaryQuotation(Document):
 			})
 			
 		return new_doc
+
+
+@frappe.whitelist()
+def create_delivery_note(budgetary_quotation):
+	doc = frappe.get_doc("Budgetary Quotation",budgetary_quotation)
+	new_doc = frappe.new_doc("Delivery Note")
+	new_doc.company = doc.company
+	new_doc.customer = doc.customer
+	new_doc.branch = doc.branch
+	new_doc.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or ""
+	new_doc.set_warehouse = warehouse_based_on_branch_and_company(doc.company,doc.branch)
+	new_doc.purchase_order_no = doc.po_no
+	new_doc.budgetary_quotation = doc.name
+	new_doc.custom_sales_person = doc.sales_person
+	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
+	list_ = []
+	for i in doc.get("items"):
+		remaining_qty = float(i.qty) - float(i.delivered_qty)
+		if remaining_qty > 0:
+			new_doc.append("items",{
+				"item_name":i.description,
+				"item_code":i.sku,
+				"manufacturer":i.mfg,
+				"model":i.model,
+				"rate":i.quoted_price,
+				"amount":i.quoted_amount, 
+				"description":i.description,
+				"qty":remaining_qty,
+				"budgetary_quotation":budgetary_quotation,
+				"uom":"Nos",
+				"stock_uom":"Nos",
+				"conversion_factor":1,
+				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
+				"income_account":"",
+				"branch":doc.branch
+			})
+			list_.append({
+				"item_name":i.description,
+				"item_code":i.sku,
+				"manufacturer":i.mfg,
+				"model":i.model,
+				"rate":i.quoted_price,
+				"amount":i.quoted_amount, 
+				"description":i.description,
+				"qty":remaining_qty,
+				"budgetary_quotation":budgetary_quotation,
+				"uom":"Nos",
+				"stock_uom":"Nos",
+				"conversion_factor":1,
+				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
+				"income_account":"",
+				"branch":doc.branch
+			})
+	return new_doc,list_
+
+	
+@frappe.whitelist()
+def fetch_payment_details(name):
+	data = frappe.db.sql("""
+		SELECT 
+			t.parent AS payment_entry,
+			t.allocate_amount AS amount,
+			p.posting_date,
+			p.paid_to_account_currency AS currency
+		FROM `tabJob Order table` t
+		JOIN `tabPayment Entry` p
+			ON p.name = t.parent
+		WHERE 
+			t.parenttype = 'Payment Entry'
+			AND t.reference_type = 'Budgetary Quotation'
+			AND t.reference_name = %s
+			AND p.docstatus = 1
+	""", (name), as_dict=True)
+	return data

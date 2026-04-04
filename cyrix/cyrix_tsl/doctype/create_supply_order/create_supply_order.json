@@ -14,6 +14,7 @@
   "email",
   "address",
   "customer_address",
+  "column_break_fknk",
   "incharge",
   "incharge_name",
   "incharge_email",
@@ -22,6 +23,7 @@
   "sales_person",
   "sts",
   "column_break_3",
+  "document_type",
   "company",
   "branch",
   "repair_warehouse",
@@ -32,8 +34,6 @@
   "sales_person_name",
   "suggested_price",
   "customer_reference_number",
-  "is_returned_unit",
-  "supply_order_data",
   "section_break_9",
   "received_equipment"
  ],
@@ -74,6 +74,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "customer.customer_primary_address",
    "fieldname": "address",
    "fieldtype": "Link",
    "label": "Address",
@@ -141,8 +142,10 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   },
   {
    "fieldname": "branch",
@@ -200,12 +203,6 @@
    "label": "Customer REF.NO/RFQ"
   },
   {
-   "default": "0",
-   "fieldname": "is_returned_unit",
-   "fieldtype": "Check",
-   "label": "Is Returned Unit"
-  },
-  {
    "fieldname": "section_break_9",
    "fieldtype": "Section Break",
    "label": "Materials"
@@ -217,18 +214,22 @@
    "options": "Received Equipment"
   },
   {
-   "depends_on": "eval:(doc.is_returned_unit == 1);",
-   "fieldname": "supply_order_data",
-   "fieldtype": "Link",
-   "label": "Returned WOD ",
-   "options": "Supply Order Data"
+   "fieldname": "column_break_fknk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Supply",
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "label": "Document Type",
+   "options": "Supply\nTender"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-03 09:57:05.441020",
+ "modified": "2026-03-02 13:16:47.127488",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Supply Order",

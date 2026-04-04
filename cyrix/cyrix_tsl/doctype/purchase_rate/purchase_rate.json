@@ -7,12 +7,15 @@
  "engine": "InnoDB",
  "field_order": [
   "supplier",
+  "column_break_sutr",
   "item_code",
   "column_break_dwan",
   "item_name",
+  "column_break_ovgm",
   "purchase_invoice",
   "column_break_xgoe",
   "rate",
+  "column_break_pbii",
   "currency"
  ],
  "fields": [
@@ -70,13 +73,25 @@
   {
    "fieldname": "column_break_xgoe",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_sutr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ovgm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pbii",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-24 08:18:21.807822",
+ "modified": "2025-12-09 10:56:11.143271",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Purchase Rate",

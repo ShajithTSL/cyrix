@@ -12,7 +12,8 @@ def get_jo_so_details(references):
             jo_details = frappe.db.sql("""
                 SELECT DISTINCT 
                     `tabSales Invoice Item`.job_order_data AS job_order_data,
-                    `tabSales Invoice Item`.supply_order_data AS supply_order_data
+                    `tabSales Invoice Item`.supply_order_data AS supply_order_data,
+                    `tabSales Invoice Item`.budgetary_quotation AS budgetary_quotation
                 FROM `tabSales Invoice`
                 LEFT JOIN `tabSales Invoice Item` 
                     ON `tabSales Invoice`.name = `tabSales Invoice Item`.parent 
@@ -62,6 +63,28 @@ def get_jo_so_details(references):
                             "remaining_to_be_paid": remaining,
                             "paid": paid
                         })
+
+                bq_name = jo_entry.get("budgetary_quotation")
+                if bq_name:
+                    bq_doc = frappe.db.get_value(
+                        "Budgetary Quotation", bq_name,
+                        ["invoiced_value", "advance_payment_amount"],
+                        as_dict=True
+                    )
+                    if bq_doc:
+                        remaining = (bq_doc.invoiced_value or 0) - (bq_doc.advance_payment_amount or 0)
+                        paid = 0
+                        if remaining == 0:
+                            paid = 1
+                        
+                        jo_so_info.append({
+                            "reference_type": "Budgetary Quotation",
+                            "reference_name": bq_name,
+                            "invoiced_value": bq_doc.invoiced_value or 0,
+                            "advance_payment_amount": bq_doc.advance_payment_amount or 0,
+                            "remaining_to_be_paid": remaining,
+                            "paid": paid
+                        })
     return jo_so_info
 
 def update_payment_reference(self, method):
@@ -75,13 +98,12 @@ def update_payment_reference(self, method):
                 updated_amount = (doc.advance_payment_amount or 0) + row.allocate_amount
 
                 # Determine status based on updated payment
-                if doc.dn_no:
-                    if doc.invoiced_value == updated_amount:
-                        doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
-                    elif updated_amount == 0:
-                        doc.status = "Unpaid"
-                    elif doc.dn_no:
-                        doc.status = "Partially Paid"
+                if doc.invoiced_value == updated_amount:
+                    doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
+                elif updated_amount == 0:
+                    doc.status = "Unpaid"
+                else:
+                    doc.status = "Partially Paid"
 
                 # Update fields
                 doc.payment_entry = self.name
@@ -103,13 +125,12 @@ def update_payment_reference_cancel(self, method):
                 updated_amount = (doc.advance_payment_amount or 0) - row.allocate_amount
 
                 # Determine status based on updated payment
-                if doc.dn_no:
-                    if doc.invoiced_value == updated_amount:
-                        doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
-                    elif updated_amount == 0:
-                        doc.status = "Unpaid"
-                    elif doc.dn_no:
-                        doc.status = "Partially Paid"
+                if doc.invoiced_value == updated_amount:
+                    doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
+                elif updated_amount == 0:
+                    doc.status = "Unpaid" if row.reference_type == "Job Order Data" else "Invoiced"
+                else:
+                    doc.status = "Partially Paid"
 
                 # Update fields
                 doc.payment_entry = ''

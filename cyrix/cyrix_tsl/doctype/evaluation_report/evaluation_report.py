@@ -5,6 +5,16 @@ import frappe
 from frappe.model.document import Document
 import json
 from frappe.utils import add_to_date
+from cyrix.custom_py.boot import get_bootinfo as info
+from cyrix.custom_py.utils import sendmail
+
+NO_REPLY_EMAIL = "no-reply@cyrix-tsl.com"
+base_url = frappe.utils.get_url()
+warehouse_list = {
+	"Kuwait": "Kuwait - CT-K"
+}
+
+
 
 class EvaluationReport(Document):
 	@frappe.whitelist()
@@ -14,7 +24,6 @@ class EvaluationReport(Document):
 				if frappe.db.exists("Bin",{'item_code':i.part,'warehouse':self.warehouse}):
 					bin = frappe.db.get_value("Bin",{'item_code':i.part,'warehouse':self.warehouse},'actual_qty')
 					price = frappe.db.get_value("Bin", {"item_code": i.part,'warehouse':self.warehouse}, "valuation_rate") or frappe.db.get_value("Item Price", {"item_code": i.part, "buying": 1}, "price_list_rate") or 0
-
 					if float(bin) >= float(i.qty):
 						status = "Yes"
 						i.parts_availability = status
@@ -22,16 +31,16 @@ class EvaluationReport(Document):
 						total = price * i.qty
 						i.total = total
 
-						frappe.db.sql('''update `tabPart Sheet Item` set parts_availability = '{0}' ,price_ea = {1}, total = {2} where name ='{3}' '''.format(status,price,total,i.name))
-					# else:
-					# 	i.parts_availability = "No"
-					# 	frappe.db.sql('''update `tabPart Sheet Item` set parts_availability = '{0}'  '''.format("No"))
+						frappe.db.sql('''update `tabPart Sheet Item` set parts_availability = '{0}', price_ea = {1}, total = {2} where name ='{3}' '''.format(status,price,total,i.name))
+					else:
+						i.parts_availability = "No"
+						frappe.db.sql('''update `tabPart Sheet Item` set parts_availability = '{0}'  where name ='{1}' '''.format("No",i.name))
 
 
 		self.check_stock_availability() # to update the stock availability
 		self.update_job_order_status() # to update the Job Order Data status
 
-	def validate(self):
+	def validate(self):			
 		self.update_part_sheet_number()
 
 	def update_part_sheet_number(self):
@@ -49,18 +58,22 @@ class EvaluationReport(Document):
 				self.part_no = i.part_sheet_no
 				frappe.db.sql('''update `tabEvaluation Report` set part_no = %s where name = %s''',((int(i.part_sheet_no)),self.name))
 		
-		if int(self.items[-1].part_sheet_no) > int(1) and self.status in ["Spare Parts","Comparison","Extra Parts","Internal Extra Parts"] and self.ner_field != "NER-Need Evaluation Return":
-			self.status = "Internal Extra Parts"
-			frappe.db.sql('''update `tabEvaluation Report` set status = %s where name = %s ''',("Internal Extra Parts",self.name))
-			if self.document_active_status == "Yes":
-				wd = frappe.get_doc("Job Order Data",self.job_order_data)
-				wd.status = "IP-Internal Extra Parts"
-				wd.save(ignore_permissions = 1)
+			if int(self.items[-1].part_sheet_no) > int(1) and self.status in ["Spare Parts","Comparison","Extra Parts","Internal Extra Parts"] and self.ner_field != "NER-Need Evaluation Return":
+				self.status = "Internal Extra Parts"
+				frappe.db.sql('''update `tabEvaluation Report` set status = %s where name = %s ''',("Internal Extra Parts",self.name))
+				if self.document_active_status == "Yes":
+					wd = frappe.get_doc("Job Order Data",self.job_order_data)
+					wd.status = "IP-Internal Extra Parts"
+					wd.save(ignore_permissions = 1)
 			
 	def after_insert(self):		
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
 		doc.status = "UE-Under Evaluation"
 		doc.save(ignore_permissions = True)
+		check_for_shared_docs_on_evaluation(self)	
+	
+	def on_update(self):		
+		check_for_shared_docs_on_evaluation(self)
 		
 	def validate_evaluation_time(self):
 		if not self.evaluation_time or not self.estimated_repair_time:
@@ -71,13 +84,15 @@ class EvaluationReport(Document):
 		self.validate_evaluation_time()
 		
 	def on_submit(self):
-		if self.if_parts_required:
-			self.update_job_order_status() # to update the Job Order Data status
+		self.update_job_order_status() # to update the Job Order Data status
+		self.send_mail_on_status_update(action = "on_submit")
 
 	def on_update_after_submit(self):
 		self.check_stock_availability() # to update the stock availability
 		self.update_job_order_status() # to update the Job Order Data status
 		self.update_part_no()
+		check_for_shared_docs_on_evaluation(self)
+		self.send_mail_on_status_update(action = "on_update_after_submit")
 
 	def check_stock_availability(self):
 		# based on the stock availability check in child table rows, overall availability is defined
@@ -100,17 +115,19 @@ class EvaluationReport(Document):
 			for i in self.get("items"):
 				if i.parts_availability == "No" and not i.from_scrap:
 					check=1
+			doc = frappe.get_doc("Job Order Data",self.job_order_data)
 			if check == 0:
-				doc = frappe.get_doc("Job Order Data",self.job_order_data)
 				doc.status = "TR-Technician Repair"
-				doc.save(ignore_permissions=True)
+			else:
+				doc.status = "WP-Waiting Parts"
+			doc.save(ignore_permissions=True)
 
 	def update_job_order_status(self):
 		# based on the stock availability Job Order Data status will be defined
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
 
 		self.update_working_status() # if the document status is changed as Working, Need to change the JO status as Working
-		
+		self.update_board_evaluation_status() # if the document status is changed as Board Evaluation, Need to change the JO status as Board Evaluation
 		# 1. this case mostly works on initial submission
 		if self.status == "Spare Parts":
 			# if parts avaliability field is yes
@@ -123,13 +140,100 @@ class EvaluationReport(Document):
 	def update_working_status(self):
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
 		if self.status == "Working":
-			if doc.status != "W-Working":
+			if doc.status != "W-Working" and not self.check_quotation_exists(self.job_order_data):
 				doc.status = "W-Working"
 			doc.save(ignore_permissions=True)
+
 		if self.status == "Installed and Completed/Repaired":
 			if doc.status != "RS-Repaired and Shipped":
 				doc.status = "RS-Repaired and Shipped"
 			doc.save(ignore_permissions=True)
+
+		if self.status == "Return Not Repaired":
+			if doc.status != "RNR-Return Not Repaired":
+				doc.status = "RNR-Return Not Repaired"
+			doc.save(ignore_permissions=True)		
+
+	def update_board_evaluation_status(self):
+		doc = frappe.get_doc("Job Order Data",self.job_order_data)
+		if self.status == "Board Evaluation":
+			if doc.status != "Board Evaluation":
+				doc.status = "Board Evaluation"
+			doc.save(ignore_permissions=True)
+
+	def check_quotation_exists(self,jo):
+		# check whether the Customer Quotation is exists for the given Job Order Data, workflow_state should beApproved by Customer and the job_order_data is set in Quotation Item table.
+		quotation_exists = False
+		quotations = frappe.get_all("Quotation Item", filters={"job_order_data": jo, "docstatus": 1}, pluck="parent")
+		if quotations:
+			for q in quotations:
+				quotation_doc = frappe.get_doc("Quotation", q)
+				if quotation_doc.workflow_state == "Approved by Customer":
+					quotation_exists = True
+					break
+		return quotation_exists
+
+	def send_mail_on_status_update(self, action):
+		if self.status not in ["Internal Extra Parts", "Spare Parts", "Extra Parts"]:
+			return
+
+		# to check for the previous status
+		before = self.get_doc_before_save()
+
+		if not before:
+			return
+
+		if before.status == self.status and action != "on_submit":
+			return
+
+		message = f""" Dear Purchase Team,<br><br>
+						Evaluation Report - <b>{self.name}</b> has been created<br>
+						Job Order Data - <b>{self.get("job_order_data")}</b><br>
+						Status - <b>{self.get("status")}</b><br><br>
+						Please take action to release the parts.<br><br>
+						<a href="{base_url}/app/evaluation-report/{self.name}" target="_blank">Click Here</a>
+					"""
+
+		sendmail(self, 
+			message, 
+			subject = f"Evaluation Report - {self.name}", 
+			sender = NO_REPLY_EMAIL, 
+			recipients = info().get("purchase_to").get(self.company), 
+			attachments = None, 
+			cc = None 
+		)
+
+def check_for_shared_docs_on_evaluation(self):
+	jo_doc = frappe.get_doc("Job Order Data",self.job_order_data)
+	tech_user = frappe.db.get_value("Technician ID",jo_doc.technician,"user_email")
+	technicians = [tech_user]
+	if jo_doc.parent_jo:
+		parent_doc = frappe.get_doc("Job Order Data",jo_doc.parent_jo)
+		parent_tech_user = frappe.db.get_value("Technician ID",parent_doc.technician,"user_email")
+		technicians.append(parent_tech_user)
+		for pa_jo in parent_doc.multiple_technicians:
+			if pa_jo.get("email") not in technicians:
+				technicians.append(pa_jo.get("email"))
+	# self.multiple_technicians is a table_multiselect
+	for row in jo_doc.multiple_technicians:
+		if row.get("email") not in technicians:
+			technicians.append(row.get("email"))
+
+	for t_id in technicians:
+		if t_id:
+			doc = frappe.db.exists("DocShare",{
+				"user":t_id,
+				"share_doctype": self.doctype,
+				"share_name": self.name
+			})
+			if not doc:
+				doc = frappe.new_doc("DocShare")
+				doc.user = t_id
+				doc.share_doctype = self.doctype
+				doc.share_name = self.name
+				doc.read = 1
+				doc.write = 1
+				doc.save()
 
 @frappe.whitelist()
 def get_valuation_rate(item, warehouse, qty):
@@ -143,8 +247,9 @@ def get_valuation_rate(item, warehouse, qty):
 
 	return {"price": price, "status": sts}
 
+# Item creation
 @frappe.whitelist()
-def sku_creation(doc): # Item creation
+def sku_creation(doc):
 	sku_list = []
 	data_dict = frappe._dict(json.loads(doc))
 
@@ -186,12 +291,17 @@ def sku_creation(doc): # Item creation
 
 				try:
 					item_doc.save(ignore_permissions=True)
+					if not des:
+						frappe.db.set_value("Item",item_doc.name,"description",item_doc.name,update_modified = False)
+						frappe.db.set_value("Item",item_doc.name,"item_name",item_doc.name,update_modified = False)
+
+					frappe.db.set_value("Part Sheet Item",pm.get("name"),'part',item_doc.name)
 					sku_list.append(item_doc.name)
 				except Exception as e:
 					frappe.log_error(frappe.get_traceback(), "SKU Creation Error")
 			else:
 				frappe.msgprint(f"Item with model: {model}, category: {category}, sub-category: {sub_cat} already exists as <a href='/app/item/{existing_item[0].name}'>{existing_item[0].name}</a>.")
-
+				frappe.db.set_value("Part Sheet Item",pm.get("name"),'part',existing_item[0].name)
 	if sku_list:
 		links = [f"<a href='/app/item/{sku}'>{sku}</a>" for sku in sku_list]
 		frappe.msgprint("SKU Created: " + ', '.join(links))
@@ -208,10 +318,11 @@ def create_rfq(name):
 	rfq.job_order_data = doc.job_order_data
 	rfq.evaluation_report = doc.name
 	rfq.department = frappe.db.get_value("Job Order Data",doc.job_order_data,"department")
+	rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2)
 	rfq.items=[]
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
 	for i in doc.get("items"):
-		if i.parts_availability == "No" :
+		if i.parts_availability == "No" and i.from_scrap == 0:
 			rfq.append("items",{
 				"item_code":i.part,
 				"item_name":i.part_name,
@@ -238,18 +349,7 @@ def create_rfq(name):
 
 @frappe.whitelist()
 def warehouse_based_on_branch_and_company(company,branch):
-	if company == "CYRIX & TSL COMPANY - Kuwait":
-		warehouse = "Kuwait - CT"
-	if company == "CYRIX & TSL COMPANY - UAE":
-		warehouse = "Dubai - CT-UAE"
-	if company == "CYRIX & TSL COMPANY - KSA":
-		if branch == "Riyadh":
-			warehouse = "Riyadh - CT-KSA"
-		if branch == "Jeddah":
-			warehouse = "Jeddah - CT-KSA"
-		if branch == "Dammam":
-			warehouse = "Dammam - CT-KSA"
-
+	warehouse = frappe.db.get_value("Warehouse List",{"branch":branch,"parent":company},["actual_warehouse"])
 	return warehouse
 	
 @frappe.whitelist()
@@ -269,7 +369,7 @@ def release_parts(name):
 		new_doc.from_warehouse = warehouse
 
 		for i in doc.items:
-			if i.released != 1:
+			if i.released != 1 and i.from_scrap == 0:
 				new_doc.append("items", {
 					's_warehouse': warehouse,
 					'item_code': i.part,
@@ -282,7 +382,7 @@ def release_parts(name):
 				i.released = 1
 		new_doc.job_order_data = doc.job_order_data
 		new_doc.save(ignore_permissions=True)
-		# new_doc.submit()
+		new_doc.submit()
 
 		# Mark parts as released in the Evaluation Report
 		# doc.parts_released = 1
@@ -297,5 +397,176 @@ def release_parts(name):
 		return False
 
 
-def updates():
-	frappe.db.set_value("Part Sheet Item","chhdvsqtn2","released",0)
+from frappe.utils import flt
+
+
+@frappe.whitelist()
+def get_release_items(docname):
+
+	doc = frappe.get_doc("Evaluation Report", docname)
+
+	output = []
+
+	for row in doc.items:
+		if row.from_scrap == 1:
+			continue
+
+		# REQUIRED QTY
+		required_qty = flt(row.qty)
+
+		# ALREADY RELEASED (from Stock Entry)
+		released_qty = frappe.db.sql("""
+			SELECT IFNULL(SUM(sed.qty),0)
+			FROM `tabStock Entry Detail` sed
+			JOIN `tabStock Entry` se ON se.name = sed.parent
+			WHERE se.docstatus < 2
+			AND sed.item_code=%s
+			AND sed.job_order_data=%s
+			AND se.awaiting_parts = 1
+			AND sed.evaluation_row = %s
+		""", (row.part, doc.job_order_data, row.name))[0][0] or 0
+
+		# STOCK IN WAREHOUSE
+		stock_qty = frappe.db.get_value(
+			"Bin",
+			{"item_code": row.part, "warehouse": warehouse_list.get(doc.branch)},
+			["actual_qty", "awaiting_qty"],
+			as_dict=True
+		)
+		reserved_qty = 0
+		
+		available_qty = 0
+		if stock_qty:
+			available_qty = (stock_qty.actual_qty or 0) - (stock_qty.awaiting_qty or 0) - reserved_qty
+
+
+		output.append({
+			"row_name": row.name,
+			"item_code": row.part,
+			"required_qty": required_qty,
+			"released_qty": released_qty,
+			"stock_qty": available_qty
+		})
+
+	# frappe.errprint(output)
+
+	return output
+
+
+@frappe.whitelist()
+def create_stock_entry(evaluation, items):
+
+	doc = frappe.get_doc("Evaluation Report", evaluation)
+	items = frappe.parse_json(items)
+
+	# Branch Mapping
+
+	branch_map = {
+		"Kuwait": ("Kuwait - CT-K", "Kuwait - Repair - CT-K")
+	}
+
+	war, cc = branch_map.get(doc.branch, ("", ""))
+
+	if not war:
+		frappe.throw("Warehouse not configured for this branch")
+
+	new_doc = frappe.new_doc("Stock Entry")
+	new_doc.company = doc.company
+	new_doc.stock_entry_type = "Material Issue"
+	new_doc.from_warehouse = war
+
+	for item in items:
+		if item.get("qty", 0) <= 0:
+			continue
+
+		new_doc.append("items", {
+			"s_warehouse": war,
+			"item_code": item["item_code"],
+			"qty": item["qty"],
+			"serial_no": item.get("serial_no", ""),
+			"uom": item.get("uom"),
+			"stock_uom": item.get("uom"),
+			"cost_center": cc,
+			"job_order_data": doc.job_order_data,
+			"conversion_factor": 1,
+			"evaluation_row":item.get("row_name")
+			# "allow_zero_valuation_rate": 1
+		})
+
+
+	new_doc.awaiting_parts = 1
+	new_doc.save(ignore_permissions=True)
+	new_doc.submit()
+
+	frappe.msgprint("Parts Released and Material Issue is Created")
+	return new_doc.name
+
+
+def migrate_old_releases():
+	# find old entries without row reference
+	old_rows = frappe.db.sql("""
+		SELECT 
+			sed.parent,
+			sed.name, 
+			sed.item_code,
+			sed.qty, 
+			sed.job_order_data
+		FROM `tabStock Entry Detail` sed
+		JOIN `tabStock Entry` se ON se.name = sed.parent
+		WHERE se.docstatus = 1
+			# AND se.awaiting_parts = 1
+			AND se.stock_entry_type = 'Material Issue'
+			AND IFNULL(sed.job_order_data,'') != ''
+			AND IFNULL(sed.evaluation_row,'') = ''
+			ORDER BY se.posting_date, se.creation
+	""", as_dict=True)
+
+	for sed in old_rows:
+		print(sed)
+
+		remaining_qty = flt(sed.qty)
+		eval_list = frappe.db.get_all("Evaluation Report",{'job_order_data':sed.job_order_data},'name')
+		for eval in eval_list:
+			# get evaluation rows FIFO
+			eval_rows = frappe.db.sql("""
+				SELECT parent,name, part, qty
+				FROM `tabPart Sheet Item`
+				WHERE parent=%s
+				AND parenttype = 'Evaluation Report'
+				AND part=%s
+				ORDER BY idx
+			""", (eval.name, sed.item_code), as_dict=True)
+			if eval_rows:
+				print(eval_rows)
+
+			for row in eval_rows:
+
+				if remaining_qty <= 0:
+					break
+
+				# already allocated qty for this row
+				allocated = frappe.db.sql("""
+					SELECT IFNULL(SUM(qty),0)
+					FROM `tabStock Entry Detail`
+					WHERE evaluation_row=%s
+				""", row.name)[0][0] or 0
+
+				balance = flt(row.qty) - flt(allocated)
+
+				if balance <= 0:
+					continue
+
+				allocate = min(balance, remaining_qty)
+				print(allocate)
+
+				# update stock entry row
+				frappe.db.set_value(
+					"Stock Entry Detail",
+					sed.name,
+					"evaluation_row",
+					row.name
+				)
+
+				remaining_qty -= allocate
+			frappe.db.commit()
+		print("Migration completed")

@@ -9,8 +9,8 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "letterhead": null,
- "modified": "2025-09-28 13:34:09.833730",
+ "letter_head": null,
+ "modified": "2026-03-24 15:28:19.432997",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Report",
@@ -22,9 +22,6 @@
  "roles": [
   {
    "role": "System Manager"
-  },
-  {
-   "role": "Technician"
   }
  ],
  "timeout": 0

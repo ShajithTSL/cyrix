@@ -13,6 +13,7 @@
   "branch",
   "department",
   "sales_person",
+  "customer_ref",
   "section_break_0vyeu",
   "items"
  ],
@@ -32,8 +33,9 @@
   },
   {
    "fieldname": "customer_representative",
-   "fieldtype": "Data",
-   "label": "Customer Representative"
+   "fieldtype": "Link",
+   "label": "Customer Representative",
+   "options": "Contact"
   },
   {
    "fieldname": "column_break_o0qp9",
@@ -42,6 +44,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -73,8 +76,13 @@
   {
    "fieldname": "items",
    "fieldtype": "Table",
-   "options": "BQ Details",
+   "options": "Create BQ Details",
    "reqd": 1
+  },
+  {
+   "fieldname": "customer_ref",
+   "fieldtype": "Data",
+   "label": "Customer Reference / BQ "
   }
  ],
  "grid_page_length": 50,
@@ -82,7 +90,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-29 13:38:13.860027",
+ "modified": "2026-03-05 09:29:55.884242",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Budgetary Quotation",

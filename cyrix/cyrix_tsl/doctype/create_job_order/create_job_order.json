@@ -14,25 +14,29 @@
   "email",
   "address",
   "customer_address",
+  "column_break_ceox",
   "incharge",
   "incharge_name",
   "incharge_email",
   "incharge_phone_no",
-  "is_quotation_created",
-  "sts",
-  "column_break_3",
+  "sales_person",
+  "column_break_gflp",
   "company",
   "branch",
   "repair_warehouse",
   "received_date",
+  "is_quotation_created",
+  "sts",
+  "column_break_3",
   "unit_type",
-  "sales_person",
   "sales_person_name",
   "suggested_price",
   "customer_reference_number",
   "plant",
   "is_returned_unit",
   "job_order_data",
+  "in_warranty",
+  "warranty_date",
   "section_break_9",
   "received_equipment",
   "previously_quoted_item_in_repair_section",
@@ -77,6 +81,8 @@
    "read_only": 1
   },
   {
+   "fetch_from": "customer.customer_primary_address",
+   "fetch_if_empty": 1,
    "fieldname": "address",
    "fieldtype": "Link",
    "label": "Address",
@@ -137,8 +143,10 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   },
   {
    "fieldname": "branch",
@@ -149,8 +157,10 @@
   {
    "fieldname": "repair_warehouse",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Repair Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only": 1
   },
   {
    "default": "Today",
@@ -186,8 +196,10 @@
   },
   {
    "fieldname": "plant",
-   "fieldtype": "Data",
-   "label": "Plant"
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Plant",
+   "options": "Plant"
   },
   {
    "default": "0",
@@ -243,7 +255,27 @@
    "fieldname": "unit_type",
    "fieldtype": "Select",
    "label": "Unit Type",
-   "options": "Service Level Unit\nBoard Level Unit"
+   "options": "Service Level Unit\nBoard Level Unit\nCalibration"
+  },
+  {
+   "fieldname": "column_break_gflp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ceox",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "in_warranty",
+   "fieldtype": "Check",
+   "label": "Still Under Warranty"
+  },
+  {
+   "depends_on": "in_warranty",
+   "fieldname": "warranty_date",
+   "fieldtype": "Date",
+   "label": "Warranty Date"
   }
  ],
  "grid_page_length": 50,
@@ -251,7 +283,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-01 09:54:18.224594",
+ "modified": "2026-01-28 14:42:40.124018",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Job Order",

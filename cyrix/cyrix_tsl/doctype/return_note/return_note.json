@@ -264,8 +264,9 @@
   },
   {
    "fieldname": "plant",
-   "fieldtype": "Data",
-   "label": "Plant"
+   "fieldtype": "Link",
+   "label": "Plant",
+   "options": "Plant"
   },
   {
    "fieldname": "tax_id",
@@ -2075,7 +2076,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-17 10:59:42.118826",
+ "modified": "2025-12-10 11:54:34.719626",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Return Note",

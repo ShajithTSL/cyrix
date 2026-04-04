@@ -2,6 +2,22 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Invoice Request", {
+	before_workflow_action: async (frm) => {
+		if(frm.doc.workflow_state == "Draft"){
+			let promise = new Promise((resolve, reject) => {
+				if (frm.selected_workflow_action == "Send to Finance") {
+					frm.call({
+						method: 'trigger_mail_on_invoice_request',
+						args: {
+							"name": frm.doc.name,
+						},
+					})
+				}
+				resolve();
+			});
+			await promise.catch(() => frappe.throw());
+		}
+	},
     onload: function(frm) {
         // Set the query for the child table field
         frm.fields_dict['invoice_list'].grid.get_field('quotation').get_query = function(doc, cdt, cdn) {
@@ -41,6 +57,7 @@ frappe.ui.form.on('Invoice Creation', {
 			}).then(r => {
 				if (r.message) {
 					$.each(r.message, function(i,d) {
+						let child = frm.add_child('invoice_list');
 						child.job_order_data = d.job_order_data;
 					});
 					frm.refresh_field('invoice_list');		
@@ -63,6 +80,7 @@ frappe.ui.form.on('SOD IV Creation', {
 			}).then(r => {
 				if (r.message) {
 					$.each(r.message, function(i,d) {
+						let child = frm.add_child('sod_quotation');
 						child.supply_order_data = d.supply_order_data;
 					});
 					frm.refresh_field('sod_quotation');		

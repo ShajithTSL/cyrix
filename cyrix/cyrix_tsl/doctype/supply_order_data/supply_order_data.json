@@ -6,64 +6,84 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "summary_section",
+  "detail_html",
+  "section_break_hkeq",
   "naming_series",
-  "sales_rep",
   "customer",
   "customer_name",
   "incharge",
   "address",
-  "quoted_date",
-  "received_date",
-  "warranty",
-  "delivery",
-  "quotation_approved_date",
   "priority_status",
-  "customer_reference_number",
-  "supplier_name",
-  "tender_issue_date",
-  "remarks",
-  "st",
-  "old_sod_no",
-  "so_old_quoted_amt",
-  "so_old_vat",
-  "so_old_total_amt",
-  "so_currency_old",
-  "column_break_7",
-  "image",
+  "received_date",
+  "column_break_yhaq",
+  "document_type",
   "company",
   "branch",
+  "department",
+  "sales_person",
+  "warranty",
+  "delivery",
+  "column_break_7",
+  "image",
   "warehouse",
   "posting_date",
-  "department",
+  "tender_issue_date",
   "project",
+  "customer_reference_number",
   "status",
+  "remarks",
+  "column_break_rjhd",
   "reason",
   "payment_terms",
   "payment_date",
   "return_date",
   "tender_closing",
   "supplier_closing_date",
-  "notified",
   "plant",
+  "notified",
+  "st",
   "section_break_14",
   "material_list",
+  "section_break_fgbj",
+  "status_detail",
+  "section_break_rgkj",
   "quantity",
+  "supply_status",
+  "column_break_fcpg",
+  "ordered_quantity",
+  "ordered_percentage",
+  "column_break_xuus",
   "received_quantity",
+  "received_percentage",
+  "column_break_jgqf",
+  "delivered_quantity",
+  "delivered_percentage",
+  "column_break_qswu",
+  "invoiced_value",
+  "invoice_percentage",
+  "column_break_rkcy",
+  "advance_payment_amount",
+  "payment_percentage",
   "section_break_23",
   "previously_quoted",
   "links_tab",
+  "section_break_zxqm",
+  "quotation",
+  "quoted_date",
   "purchase_order_no",
   "invoice_no",
-  "invoiced_value",
   "invoice_date",
   "payment_entry",
   "column_break_mhco",
+  "quotation_approved_date",
   "po_number",
   "po_no",
   "dn_no",
   "dn_date",
-  "advance_payment_amount",
   "advance_paid_date",
+  "section_break_fmvr",
+  "delivery_details",
   "track_tab",
   "section_break_30",
   "status_duration_details",
@@ -87,15 +107,7 @@
    "fieldtype": "Select",
    "in_global_search": 1,
    "label": "Naming Series",
-   "options": "SOD-.YY.-\nST-K.YY.-\nSOD-R.YY.-\nSOD-D.YY.-\nSOD-J.YY.-\nSOD-K.YY.-\nSOD-DU.YY.-\nSOD-DU-O-.YY.-\nSOD-DU.YY.-P."
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "sales_rep",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Sales Rep",
-   "options": "Sales Person"
+   "options": "SOD-.YY.-\nST-R.YY.-\nST-D.YY.-\nST-J.YY.-\nST-K.YY.-\nST-DU.YY.-\nSO-R.YY.-\nSO-D.YY.-\nSO-J.YY.-\nSO-K.YY.-\nSO-DU.YY.-"
   },
   {
    "allow_on_submit": 1,
@@ -176,13 +188,8 @@
    "allow_on_submit": 1,
    "fieldname": "po_number",
    "fieldtype": "Data",
-   "label": "PO Number"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "supplier_name",
-   "fieldtype": "Data",
-   "label": "Supplier Name"
+   "label": "PO Number",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -201,36 +208,6 @@
    "fieldname": "st",
    "fieldtype": "Check",
    "label": "ST"
-  },
-  {
-   "fieldname": "old_sod_no",
-   "fieldtype": "Int",
-   "in_standard_filter": 1,
-   "label": "Old Sod No"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "so_old_quoted_amt",
-   "fieldtype": "Float",
-   "label": "SO Old Quoted Amt"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "so_old_vat",
-   "fieldtype": "Data",
-   "label": "SO Old Vat"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "so_old_total_amt",
-   "fieldtype": "Float",
-   "label": "SO Old Total Amt"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "so_currency_old",
-   "fieldtype": "Data",
-   "label": "SO Currency Old"
   },
   {
    "fieldname": "column_break_7",
@@ -286,7 +263,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nPartially Received\nReceived\nIn Custom\nDelivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nPartially Delivered\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid"
+   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nPending Internal Approval\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nReceived\nIn Custom\nDelivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid"
   },
   {
    "allow_on_submit": 1,
@@ -306,21 +283,21 @@
    "allow_on_submit": 1,
    "fieldname": "po_no",
    "fieldtype": "Data",
-   "label": "Po No"
+   "label": "Po No",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "purchase_order_no",
-   "fieldtype": "Link",
-   "label": "Purchase Order",
-   "options": "Purchase Order"
+   "fieldtype": "Data",
+   "label": "Purchase Order"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "dn_no",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Delivery Note",
-   "options": "Delivery Note"
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -334,8 +311,7 @@
    "allow_on_submit": 1,
    "fieldname": "invoice_no",
    "fieldtype": "Data",
-   "label": "Sales Invoice",
-   "read_only": 1
+   "label": "Invoice Number"
   },
   {
    "allow_on_submit": 1,
@@ -358,8 +334,7 @@
    "allow_on_submit": 1,
    "fieldname": "advance_payment_amount",
    "fieldtype": "Currency",
-   "label": "Advance Payment Amount",
-   "read_only": 1
+   "label": "Paid Amount"
   },
   {
    "allow_on_submit": 1,
@@ -390,8 +365,9 @@
   {
    "allow_on_submit": 1,
    "fieldname": "plant",
-   "fieldtype": "Data",
-   "label": "Plant"
+   "fieldtype": "Link",
+   "label": "Plant",
+   "options": "Plant"
   },
   {
    "fieldname": "section_break_14",
@@ -416,7 +392,8 @@
    "fieldname": "previously_quoted",
    "fieldtype": "Table",
    "label": "Previously Quoted",
-   "options": "Similar Item Repair"
+   "options": "Similar Item Repair",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_30",
@@ -450,7 +427,7 @@
   {
    "fieldname": "links_tab",
    "fieldtype": "Tab Break",
-   "label": "Links"
+   "label": "Summary"
   },
   {
    "fieldname": "column_break_mhco",
@@ -467,8 +444,7 @@
    "allow_on_submit": 1,
    "fieldname": "received_quantity",
    "fieldtype": "Int",
-   "label": "Received Quantity",
-   "read_only": 1
+   "label": "Received Quantity"
   },
   {
    "allow_on_submit": 1,
@@ -482,15 +458,158 @@
    "allow_on_submit": 1,
    "fieldname": "invoiced_value",
    "fieldtype": "Float",
-   "label": "Invoiced Value",
-   "read_only": 1
+   "label": "Invoiced Value"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "payment_entry",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Payment Entry Reference",
-   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_yhaq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rjhd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation",
+   "fieldtype": "Read Only",
+   "label": "Quotation"
+  },
+  {
+   "fieldname": "section_break_rgkj",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "column_break_xuus",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jgqf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivered_quantity",
+   "fieldtype": "Int",
+   "label": "Delivered Quantity"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "detail_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_hkeq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_fmvr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivery_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Delivery Details",
+   "options": "Delivery Details"
+  },
+  {
+   "fieldname": "section_break_zxqm",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivered_percentage",
+   "fieldtype": "Percent",
+   "label": "Delivered Percentage"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "received_percentage",
+   "fieldtype": "Percent",
+   "label": "Received Percentage"
+  },
+  {
+   "fieldname": "column_break_qswu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoice_percentage",
+   "fieldtype": "Percent",
+   "label": "Invoiced %"
+  },
+  {
+   "fieldname": "column_break_rkcy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_percentage",
+   "fieldtype": "Percent",
+   "label": "Paid %"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "supply_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supply Status",
+   "options": "\nTo Order\nPartially Ordered\nTo Receive and Deliver\nPartially Received\nTo Deliver\nPartially Delivered\nDelivered"
+  },
+  {
+   "fieldname": "column_break_fcpg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "ordered_quantity",
+   "fieldtype": "Int",
+   "label": "Ordered Quantity"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "ordered_percentage",
+   "fieldtype": "Percent",
+   "label": "Ordered Percentage"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "summary_section",
+   "fieldtype": "Section Break",
+   "label": "Summary"
+  },
+  {
+   "fieldname": "section_break_fgbj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status_detail",
+   "fieldtype": "HTML"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "label": "Document Type",
+   "options": "Supply\nTender",
    "read_only": 1
   }
  ],
@@ -498,7 +617,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 16:20:42.335937",
+ "modified": "2026-03-29 08:40:40.155918",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",
@@ -520,7 +639,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "sales_person,customer,status",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

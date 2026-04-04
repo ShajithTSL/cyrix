@@ -9,6 +9,9 @@
   "customer",
   "customer_representative",
   "mobile",
+  "customer_ref",
+  "tender_number",
+  "tender_converted_date",
   "column_break_fccdv",
   "company",
   "branch",
@@ -21,6 +24,25 @@
   "quantity",
   "column_break_ibnk",
   "received_quantity",
+  "column_break_ovyd",
+  "delivered_qty",
+  "links_tab",
+  "html",
+  "section_break_sncr",
+  "quotation",
+  "po_no",
+  "purchase_order_no",
+  "invoice_no",
+  "dn_no",
+  "dn_date",
+  "column_break_rdob",
+  "quotation_approved_date",
+  "payment_entry",
+  "invoiced_value",
+  "invoice_date",
+  "advance_payment_amount",
+  "section_break_izkz",
+  "delivery_details",
   "status_track_tab",
   "section_break_tvsc",
   "status_duration_details",
@@ -35,8 +57,9 @@
   },
   {
    "fieldname": "customer_representative",
-   "fieldtype": "Data",
-   "label": "Customer Representative"
+   "fieldtype": "Link",
+   "label": "Customer Representative",
+   "options": "Contact"
   },
   {
    "fieldname": "mobile",
@@ -69,7 +92,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Inquiry\nIn Custom\nClosed\nInvoiced\nOrdered\nPartially Received\nReceived\nPartially Delivered\nDelivered\nInitiated\nParts Priced\nPending Internal Approval\nIQ-Internally Quoted\nQ-Quoted\nA-Approved"
+   "options": "Inquiry\nIn Custom\nClosed\nInvoiced\nOrdered\nPartially Received\nReceived\nPartially Delivered\nDelivered\nInitiated\nParts Priced\nPending Internal Approval\nIQ-Internally Quoted\nQ-Quoted\nA-Approved\nPaid\nUnpaid\nPartially Paid"
   },
   {
    "fieldname": "department",
@@ -136,13 +159,144 @@
    "fieldtype": "Table",
    "label": "Status Summary",
    "options": "Status Duration Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tender_number",
+   "fieldtype": "Data",
+   "label": "Tender Number"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tender_converted_date",
+   "fieldtype": "Date",
+   "label": "Tender Converted Date"
+  },
+  {
+   "fieldname": "links_tab",
+   "fieldtype": "Tab Break",
+   "label": "Summary"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation",
+   "fieldtype": "Read Only",
+   "label": "Quotation"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "po_no",
+   "fieldtype": "Read Only",
+   "label": "PO No"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation_approved_date",
+   "fieldtype": "Date",
+   "label": "Quote Approved Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ovyd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivered_qty",
+   "fieldtype": "Int",
+   "label": "Delivered Quantity",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_entry",
+   "fieldtype": "Read Only",
+   "label": "Payment Entry"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoice_no",
+   "fieldtype": "Read Only",
+   "label": "Sales Invoice"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dn_no",
+   "fieldtype": "Read Only",
+   "label": "Delivery Note"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dn_date",
+   "fieldtype": "Date",
+   "label": "Delivery Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivery_details",
+   "fieldtype": "Table",
+   "label": "Delivery Details",
+   "options": "Delivery Details",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoiced_value",
+   "fieldtype": "Float",
+   "label": "Invoiced Value",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "advance_payment_amount",
+   "fieldtype": "Float",
+   "label": "Advance Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rdob",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_izkz",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "purchase_order_no",
+   "fieldtype": "Read Only",
+   "label": "Purchase Order"
+  },
+  {
+   "fieldname": "html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_sncr",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer_ref",
+   "fieldtype": "Data",
+   "label": "Customer Reference"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-30 11:03:47.247770",
+ "modified": "2026-03-03 10:53:21.521571",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Budgetary Quotation",
@@ -164,7 +318,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "sales_person,customer,status",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

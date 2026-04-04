@@ -4,6 +4,10 @@ frappe.listview_settings['Evaluation Report'] = {
         if (doc.status === "Installed and Completed/Repaired") {
             return [__("Installed and Completed"), "yellow", "status,=,Installed and Completed"];
         } 
+        
+        else if (doc.status === "Board Evaluation") {
+            return [__("Board Evaluation"), "red", "status,=,Board Evaluation"];
+        } 
         else if (doc.status === "Customer Testing") {
             return [__("Customer Testing"), "orange", "status,=,Customer Testing"];
         } 

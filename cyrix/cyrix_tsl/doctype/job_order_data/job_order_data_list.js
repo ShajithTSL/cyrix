@@ -89,6 +89,9 @@ frappe.listview_settings['Job Order Data'] = {
         else if (doc.status === "UTR-Under Technician Repair") {
                 return [__("UTR-Under Technician Repair"), "pink", "status,=,UTR-Under Technician Repair"];
         }
+        else if (doc.status === "Board Evaluation") {
+                return [__("Board Evaluation"), "red", "status,=,Board Evaluation"];
+        }
         else if (doc.status === "RNF-Return No Fault") {
                 return [__("RNF-Return No Fault"), "green", "status,=,RNF-Return No Fault"];
         }

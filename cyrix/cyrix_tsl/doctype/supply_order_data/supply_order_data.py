@@ -3,20 +3,109 @@
 
 import frappe
 from frappe.model.document import Document
+from cyrix.custom_py import utils
 from frappe.utils import add_to_date
 from datetime import datetime
 
 
 class SupplyOrderData(Document):	
+	def supply_order_status(self, ordered_percentage, received_percentage, delivered_percentage):
+		ordered = ordered_percentage or 0
+		received = received_percentage or 0
+		delivered = delivered_percentage or 0
+
+		if ordered == 0:
+			supply_status = "To Order"
+
+		elif 0 < ordered < 100:
+			supply_status = "Partially Ordered"
+			
+		elif received == 100 and delivered == 100:
+			supply_status = "Delivered"
+
+		elif 0 < delivered < 100:
+			supply_status = "Partially Delivered"
+
+		elif received == 100 and delivered == 0:
+			supply_status = "To Deliver"
+
+		elif 0 < received < 100:
+			supply_status = "Partially Received"
+
+		else:
+			supply_status = "To Receive and Deliver"
+
+		self.supply_status = supply_status
+		frappe.db.set_value("Supply Order Data",self.name,'supply_status',supply_status,update_modified=False)
+
 	def update_qty(self):
 		total_quantity = 0
 		for i in self.get("material_list"):
 			total_quantity += int(i.quantity)
 		self.quantity = total_quantity
 		frappe.db.set_value("Supply Order Data",self.name,'quantity',total_quantity,update_modified=False)
+	
+	def update_po_percentage(self):
+		# need to calculate the ordered %
+		if self.get("ordered_quantity") > 0:
+			ordered_percentage = (self.get("ordered_quantity")/self.get("quantity"))*100
+		else:
+			ordered_percentage = 0
+			
+		self.ordered_percentage = ordered_percentage
+		frappe.db.set_value("Supply Order Data",self.name,'ordered_percentage',float(round(ordered_percentage, 2)),update_modified=False)
+		self.supply_order_status(ordered_percentage,self.get("received_percentage"), delivered_percentage = float(round(self.delivered_percentage, 2)))
 
-	def validate(self):
+	def update_dn_percentage(self):
+		# need to calculate the delivered %
+		delivered_qty = 0
+		for i in self.get("material_list"):
+			if i.delivered_quantity:
+				delivered_qty += float(i.delivered_quantity)
+		if self.get("received_quantity") > 0:
+			delivered_percentage = (delivered_qty/self.get("received_quantity"))*100
+		else:
+			delivered_percentage = 0
+
+		self.delivered_percentage = delivered_percentage
+		frappe.db.set_value("Supply Order Data",self.name,'delivered_percentage',float(round(delivered_percentage, 2)),update_modified=False)
+		self.supply_order_status(self.get("ordered_percentage"),self.get("received_percentage"), float(round(delivered_percentage, 2)))
+
+	def update_pr_percentage(self):
+		# need to calculate the procured % based on the received_quantity field in the parent table
+		if self.get("quantity") > 0:
+			received_percentage = (self.get("received_quantity")/self.get("quantity"))*100
+		else:
+			received_percentage = 0
+			
+		self.received_percentage = received_percentage
+		frappe.db.set_value("Supply Order Data",self.name,'received_percentage',float(round(received_percentage, 2)),update_modified=False)
+		self.supply_order_status(self.get("ordered_percentage"), received_percentage, delivered_percentage = float(round(self.delivered_percentage, 2)))
+
+	def update_inv_percentage(self):
+		# need to calculate the invoiced % based on the invoiced_quantity field in the parent table
+		if self.invoice_no:
+			frappe.db.set_value("Supply Order Data",self.name,'invoice_percentage',100,update_modified=False)
+		else:
+			frappe.db.set_value("Supply Order Data",self.name,'invoice_percentage',0,update_modified=False)
+
+	def update_payment_percentage(self):
+		# need to calculate the payment % based on the advance_payment_amount field in the parent table
+		if self.invoiced_value and self.advance_payment_amount:
+			payment_percentage = (self.advance_payment_amount/self.invoiced_value)*100
+			frappe.db.set_value("Supply Order Data",self.name,'payment_percentage',float(round(payment_percentage, 2)),update_modified=False)
+		else:
+			self.payment_percentage = 0
+			frappe.db.set_value("Supply Order Data",self.name,'payment_percentage',0,update_modified=False)
+
+
+	def trigger_fn(self):
 		self.update_qty()
+		self.update_dn_percentage()
+		self.update_pr_percentage()
+		self.update_inv_percentage()
+		self.update_payment_percentage()
+		self.update_po_percentage()
 
 	def before_submit(self):		
 		now = datetime.now()
@@ -25,6 +114,7 @@ class SupplyOrderData(Document):
 			"date":now,
 		})
 		self.update_qty()
+
 		
 	def on_update_after_submit(self):
 		if self.status != self.status_duration_details[-1].status:
@@ -48,7 +138,7 @@ class SupplyOrderData(Document):
 				"date":now,
 			})
 			doc.save(ignore_permissions=True)
-		self.update_qty()
+		self.trigger_fn()
 
 @frappe.whitelist()
 def create_rfq(supply_order_data):
@@ -84,18 +174,7 @@ def create_rfq(supply_order_data):
 
 @frappe.whitelist()
 def warehouse_based_on_branch_and_company(company,branch):
-	if company == "CYRIX & TSL COMPANY - Kuwait":
-		warehouse = "Kuwait - CT"
-	if company == "CYRIX & TSL COMPANY - UAE":
-		warehouse = "Dubai - CT-UAE"
-	if company == "CYRIX & TSL COMPANY - KSA":
-		if branch == "Riyadh":
-			warehouse = "Riyadh - CT-KSA"
-		if branch == "Jeddah":
-			warehouse = "Jeddah - CT-KSA"
-		if branch == "Dammam":
-			warehouse = "Dammam - CT-KSA"
-
+	warehouse = frappe.db.get_value("Warehouse List",{"branch":branch,"parent":company},["actual_warehouse"])
 	return warehouse
 
 from cyrix.custom_py.quotation import fetch_item_price_details
@@ -103,7 +182,7 @@ from cyrix.custom_py.quotation import fetch_item_price_details
 def create_internal_quotation(supply_order_data):
 	doc = frappe.get_doc("Supply Order Data",supply_order_data)
 	new_doc= frappe.new_doc("Quotation")
-	new_doc.sales_rep = doc.sales_rep
+	new_doc.sales_person = doc.sales_person
 	if doc.branch:
 		d = {
 			"Internal Quotation - Supply":{
@@ -127,6 +206,9 @@ def create_internal_quotation(supply_order_data):
 	new_doc.party_name = doc.customer
 	new_doc.plant = doc.plant
 	new_doc.branch = doc.branch
+	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
+	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
+
 	new_doc.quotation_type = "Internal Quotation - Supply"
 	for i in doc.material_list:
 		new_doc.append("items",{
@@ -150,73 +232,53 @@ def create_delivery_note(supply_order_data):
 	new_doc = frappe.new_doc("Delivery Note")
 	new_doc.company = doc.company
 	new_doc.customer = doc.customer
-	new_doc.purchase_order_no = doc.po_number
 	new_doc.branch = doc.branch
 	new_doc.department = doc.department
 	new_doc.set_warehouse = doc.warehouse
 	new_doc.purchase_order_no = doc.po_no
 	new_doc.supply_order_data = doc.name
-	new_doc.custom_sales_person = doc.sales_rep
+	new_doc.custom_sales_person = doc.sales_person
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
 	list_ = []
 	for i in doc.get("material_list"):
-		qi_details = frappe.db.sql('''select 
-			q.name,qi.qty as qty,
-			qi.rate as rate,
-			qi.amount as amount 
-		from `tabQuotation Item` as qi 
-			inner join `tabQuotation` as q on q.name = qi.parent 
-		where qi.item_code = %s 
-			and q.workflow_state = "Approved by Customer" 
-			and qi.supply_order_data = %s 
-			and q.docstatus = 1 
-			order by q.modified desc limit 1''',(i.item_code,supply_order_data),as_dict=1)
-		r = 0
-		amt = 0
-		qty = i.quantity
-		if qi_details:
-			r = qi_details[0]['rate']
-			amt = qi_details[0]['amount']
-			qty = qi_details[0]['qty']
-
-		new_doc.append("items",{
-			"item_name":i.item_name or i.description,
-			"item_code":i.item_code,
-			"manufacturer":i.mfg,
-			"model":i.model_no,
-			"rate":r,
-			"amount":amt, 
-			"type":i.type,
-			"serial_number":i.serial_no,
-			"description":i.description,
-			"qty":qty,
-			"supply_order_data":supply_order_data,
-			"uom":"Nos",
-			"stock_uom":"Nos",
-			"conversion_factor":1,
-			"cost_center":doc.department,
-			"income_account":"",
-			"branch":doc.branch
-		})
-		list_.append({
-			"item_name":i.item_name or i.description,
-			"item_code":i.item_code,
-			"manufacturer":i.mfg,
-			"model":i.model_no,
-			"rate":r,
-			"amount":amt, 
-			"type":i.type,
-			"serial_number":i.serial_no,
-			"description":i.description,
-			"qty":qty,
-			"supply_order_data":supply_order_data,
-			"uom":"Nos",
-			"stock_uom":"Nos",
-			"conversion_factor":1,
-			"cost_center":doc.department,
-			"income_account":"",
-			"branch":doc.branch
-		})
+		remaining_qty = float(i.quantity) - float(i.delivered_quantity)
+		if remaining_qty > 0:
+			new_doc.append("items",{
+				"item_name":i.item_name or i.description,
+				"item_code":i.item_code,
+				"manufacturer":i.mfg,
+				"model":i.model_no,
+				"rate":i.quoted_price,
+				"amount":i.quoted_amount, 
+				"serial_number":i.serial_no,
+				"description":i.description,
+				"qty":remaining_qty,
+				"supply_order_data":supply_order_data,
+				"uom":"Nos",
+				"stock_uom":"Nos",
+				"conversion_factor":1,
+				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
+				"income_account":"",
+				"branch":doc.branch
+			})
+			list_.append({
+				"item_name":i.item_name or i.description,
+				"item_code":i.item_code,
+				"manufacturer":i.mfg,
+				"model":i.model_no,
+				"rate":i.quoted_price,
+				"amount":i.quoted_amount, 
+				"serial_number":i.serial_no,
+				"description":i.description,
+				"qty":remaining_qty,
+				"supply_order_data":supply_order_data,
+				"uom":"Nos",
+				"stock_uom":"Nos",
+				"conversion_factor":1,
+				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
+				"income_account":"",
+				"branch":doc.branch
+			})
 	return new_doc,list_
 
 
@@ -229,9 +291,9 @@ def create_sales_invoice(supply_order_data):
 	new_doc.branch = doc.branch
 	new_doc.department = doc.department
 	new_doc.supply_order_data = supply_order_data
-	new_doc.sales_person = doc.sales_rep
+	new_doc.sales_person = doc.sales_person
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
-	new_doc.cost_center = doc.department
+	new_doc.cost_center = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 	sales_invoice_list = []
 	for i in doc.get("material_list"):
 		qi_details = frappe.db.sql('''select 
@@ -261,7 +323,6 @@ def create_sales_invoice(supply_order_data):
 			"model":i.model_no,
 			"rate":r,
 			"amount":amt, 
-			"type":i.type,
 			"serial_number":i.serial_no,
 			"description":i.description,
 			"qty":qty,
@@ -269,7 +330,7 @@ def create_sales_invoice(supply_order_data):
 			"uom":"Nos",
 			"stock_uom":"Nos",
 			"conversion_factor":1,
-			"cost_center":frappe.db.get_value("Cost Center",{'cost_center_name':"Main",'company':doc.company}),
+			"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 			"income_account":"",
 			"branch":doc.branch
 		})
@@ -280,7 +341,6 @@ def create_sales_invoice(supply_order_data):
 			"model":i.model_no,
 			"rate":r,
 			"amount":amt, 
-			"type":i.type,
 			"serial_number":i.serial_no,
 			"description":i.description,
 			"qty":qty,
@@ -288,7 +348,7 @@ def create_sales_invoice(supply_order_data):
 			"uom":"Nos",
 			"stock_uom":"Nos",
 			"conversion_factor":1,
-			"cost_center":frappe.db.get_value("Cost Center",{'cost_center_name':"Main",'company':doc.company}),
+			"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 			"income_account":"",
 			"branch":doc.branch
 		})
@@ -301,3 +361,23 @@ def list_desk():
 	doc = frappe.get_doc("Desktop Icon","CYRIX")
 	doc.delete()
 	print(list)
+
+
+@frappe.whitelist()
+def fetch_payment_details(name):
+	data = frappe.db.sql("""
+		SELECT 
+			t.parent AS payment_entry,
+			t.allocate_amount AS amount,
+			p.posting_date,
+			p.paid_to_account_currency AS currency
+		FROM `tabJob Order table` t
+		JOIN `tabPayment Entry` p
+			ON p.name = t.parent
+		WHERE 
+			t.parenttype = 'Payment Entry'
+			AND t.reference_type = 'Supply Order Data'
+			AND t.reference_name = %s
+			AND p.docstatus = 1
+	""", (name), as_dict=True)
+	return data

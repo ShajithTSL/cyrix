@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "SC.######",
  "creation": "2025-07-29 13:49:47.813164",
@@ -14,12 +15,14 @@
  ],
  "fields": [
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "sub_category",
    "fieldtype": "Data",
    "in_preview": 1,
    "label": "Sub Category"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "category",
    "fieldtype": "Link",
    "label": "Parent Category",
@@ -35,7 +38,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-29 13:52:05.480412",
+ "modified": "2026-03-09 13:46:08.017184",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Sub Category",

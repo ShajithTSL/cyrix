@@ -12,11 +12,81 @@ frappe.ui.form.on("Job Order Data", {
 		frm.trigger("route_to_jo_creation")
 		frm.trigger("create_delivery_note")
 		frm.trigger("create_return_note")
+
+		frappe.call({
+			method:"cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.fetch_payment_details",
+			args:{
+				name: frm.doc.name
+			},
+			callback(r){
+				if(r.message){
+					const html = frappe.render_template("job_order_data", {
+						doc: frm.doc,
+						payment_details: r.message
+					});
+					frm.fields_dict.detail_html.$wrapper.html(html);
+				}
+			}
+		})
+		
+		frappe.call({
+            method: "frappe.client.get_list",
+            args: {
+                doctype: "DocShare",
+                filters: {
+                    share_doctype: frm.doctype,
+                    share_name: frm.doc.name
+                },
+                fields: ["user"]
+            },
+            callback: function (r) {
+                let description;
+
+                if (r.message && r.message.length) {
+                    const users = r.message.map(d => d.user).join(", ");
+                    description = `
+                        <span>Shared with: <b>${users}</b></span>
+                        &nbsp;•&nbsp;
+                        <a href="#" class="open-share">Manage</a>
+                    `;
+                } else {
+                    description = `
+                        <a href="#" class="open-share text-muted">
+                            Not shared with any users — Click to share
+                        </a>
+                    `;
+                }
+
+                frm.set_df_property(
+                    "multiple_technicians",
+                    "description",
+                    description
+                );
+
+                // Attach click handler AFTER description is rendered
+                setTimeout(() => {
+                    frm.fields_dict.multiple_technicians.$wrapper
+                        .find(".open-share")
+                        .off("click")
+                        .on("click", function (e) {
+                            e.preventDefault();
+							if (!frm.shared) {
+								frm.shared = new frappe.ui.form.Share({ frm: frm, parent: frm.sidebar });
+							}
+							
+							// Show the standard share dialog
+							frm.shared.show();
+                        });
+                }, 0);
+            }
+        });
+
+
 	},
     create_evaluation_report(frm){
         if(frm.doc.docstatus == 1) {
 			frm.add_custom_button(__("Evaluation Report"), function(){
-				if(frm.doc.technician.length == 0){
+				if(!frm.doc.technician && !frm.doc.multiple_technicians.length > 0){
 					frappe.msgprint("Select <b>Technician</b> to create Evaluation Report")
 					return
 				}
@@ -27,6 +97,7 @@ frappe.ui.form.on("Job Order Data", {
 					},
 					callback: function(r) {
 						if(r.message) {
+							console.log(r.message)
 							var doc = frappe.model.sync(r.message);
 							frappe.set_route("Form", doc[0].doctype, doc[0].name);
 						}

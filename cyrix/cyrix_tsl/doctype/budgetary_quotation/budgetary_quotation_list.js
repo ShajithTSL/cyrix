@@ -25,5 +25,20 @@ frappe.listview_settings['Budgetary Quotation'] = {
         else if (doc.status === "Received") {
             return [__("Received"), "yellow", "status,=,Received"];
         }
+        else if (doc.status === "Delivered") {
+            return [__("Delivered"), "cyan", "status,=,Delivered"];
+        }
+        else if (doc.status === "Partially Delivered") {
+            return [__("Partially Delivered"), "red", "status,=,Partially Delivered"];
+        }        
+        else if (doc.status === "Paid") {
+            return [__("Paid"), "green", "status,=,Paid"];
+        }
+        else if (doc.status === "Unpaid") {
+            return [__("Unpaid"), "red", "status,=,Unpaid"];
+        }
+        else if (doc.status === "Partially Paid") {
+            return [__("Partially Paid"), "yellow", "status,=,Partially Paid"];
+        }
     },
 };

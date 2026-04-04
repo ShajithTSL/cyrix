@@ -1,0 +1,218 @@
+<style>
+.supply-card {
+    width:40%;
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    font-family: Inter, Arial, sans-serif;
+}
+
+/* Title */
+.supply-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: #2d3436;
+}
+
+/* Main Grid */
+.supply-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Equal width */
+    border: 1px solid #e3e8ee;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Column */
+.supply-col {
+    padding: 18px 15px;
+    text-align: center;
+    border-right: 1px solid #e3e8ee;
+}
+
+.supply-col:last-child {
+    border-right: none;
+}
+
+/* Label */
+.supply-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 6px;
+}
+
+/* Big Number */
+.supply-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f6fe5;
+    margin-bottom: 8px;
+}
+
+/* Progress */
+.progress-bar {
+    height: 8px;
+    background: #e4ebf3;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 8px 0 4px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, #1f6fe5, #5fa8ff);
+    border-radius: 6px;
+}
+
+/* Percentage */
+.progress-text {
+    font-size: 12px;
+    color: #636e72;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #e7f6ec;
+    color: #1e8449;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+/* Amount Section */
+.amount-box {
+    border-top: 1px solid #e3e8ee;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.amount-label {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.amount-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3436;
+    margin-bottom: 8px;
+}
+</style>
+
+
+<div class="supply-card">
+
+    <div class="supply-title">
+        📦 Supply Progress Summary
+    </div>
+
+    <div class="supply-grid">
+
+        <!-- Ordered -->
+        <div class="supply-col">
+
+            <div class="supply-label">Ordered</div>
+
+            <div class="supply-value">
+                {{ doc.ordered_quantity }}
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width: {{ doc.ordered_percentage }}%;">
+                </div>
+            </div>
+
+            <div class="progress-text">
+                {{ doc.ordered_percentage }}%
+            </div>
+
+        </div>
+
+
+        <!-- Received -->
+        <div class="supply-col">
+
+            <div class="supply-label">Received</div>
+
+            <div class="supply-value">
+                {{ doc.received_quantity }}
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width: {{ doc.received_percentage }}%;">
+                </div>
+            </div>
+
+            <div class="progress-text">
+                {{ doc.received_percentage }}%
+            </div>
+
+        </div>
+
+
+        <!-- Delivered -->
+        <div class="supply-col">
+
+            <div class="supply-label">Delivered</div>
+
+            <div class="supply-value">
+                {{ doc.delivered_quantity }}
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width: {{ doc.delivered_percentage }}%;">
+                </div>
+            </div>
+
+            <div class="progress-text">
+                {{ doc.delivered_percentage }}%
+            </div>
+
+        </div>
+
+
+        <!-- Status + Amount -->
+        <div class="supply-col">
+
+            <div class="supply-label">Status</div>
+
+            <div class="status-badge">
+                {{ doc.supply_status }}
+            </div>
+
+
+            <div class="amount-box">
+
+                <div class="amount-label">
+                    Invoiced
+                </div>
+
+                <div class="amount-value">
+                    {{ doc.invoiced_value }}
+                </div>
+
+
+                <div class="amount-label">
+                    Paid
+                </div>
+
+                <div class="amount-value">
+                    {{ doc.advance_payment_amount }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

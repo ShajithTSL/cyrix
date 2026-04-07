@@ -492,761 +492,761 @@ from frappe.utils import getdate
 
 @frappe.whitelist()
 def get_sales(company, branch):
-    try:
-        today = datetime.now().date()
-        formatted_date = today.strftime("%d-%m-%Y")
-        current_year = today.year
+	try:
+		today = datetime.now().date()
+		formatted_date = today.strftime("%d-%m-%Y")
+		current_year = today.year
 
-        months = list(calendar.month_name)[1:]
-        current_month = today.month
-        last_12_months = [
-            (months[(current_month - i - 1) % 12],
-             (current_year if current_month - i > 0 else current_year - 1))
-            for i in range(11, -1, -1)
-        ]
+		months = list(calendar.month_name)[1:]
+		current_month = today.month
+		last_12_months = [
+			(months[(current_month - i - 1) % 12],
+			 (current_year if current_month - i > 0 else current_year - 1))
+			for i in range(11, -1, -1)
+		]
 
-        sales_people = frappe.get_all(
-        "Sales Person",
-        filters={"name": ["!=", "Sales Team"],"custom_branch":branch}
-        )
+		sales_people = frappe.get_all(
+		"Sales Person",
+		filters={"name": ["!=", "Sales Team"],"custom_branch":branch}
+		)
 
-        # target_sales = {
-        #     "Cyrix TSL - Kuwait": [
-        #         "Yazeed", "Jubil"
-                
-        #     ]
-        # }
+		# target_sales = {
+		#     "Cyrix TSL - Kuwait": [
+		#         "Yazeed", "Jubil"
+				
+		#     ]
+		# }
 
-        html = []
+		html = []
 
-        # ===== Header with Logo and Flag =====
-        html.append(render_header(company, formatted_date))
-        
-        # ===== Initialize cumulative totals =====
-        total_quoted_wo = 0
-        total_approved_wo = 0
-        total_days_wo = 0
-        total_quoted_so = 0
-        total_approved_so = 0
-        total_days_so = 0
-        wo_count_total = 0
-        so_count_total = 0
+		# ===== Header with Logo and Flag =====
+		html.append(render_header(company, formatted_date))
+		
+		# ===== Initialize cumulative totals =====
+		total_quoted_wo = 0
+		total_approved_wo = 0
+		total_days_wo = 0
+		total_quoted_so = 0
+		total_approved_so = 0
+		total_days_so = 0
+		wo_count_total = 0
+		so_count_total = 0
 
-        # First pass: Calculate cumulative totals
-        for sp in sales_people:
-            # if sp.name not in target_sales.get(company, []):
-            #     continue
+		# First pass: Calculate cumulative totals
+		for sp in sales_people:
+			# if sp.name not in target_sales.get(company, []):
+			#     continue
 
-            # Get totals for this salesperson
-            totals = calculate_salesperson_totals(sp, company, last_12_months)
-            
-            total_quoted_wo += totals.get('quoted_wo', 0)
-            total_approved_wo += totals.get('approved_wo', 0)
-            total_days_wo += totals.get('days_wo', 0)
-            total_quoted_so += totals.get('quoted_so', 0)
-            total_approved_so += totals.get('approved_so', 0)
-            total_days_so += totals.get('days_so', 0)
-            wo_count_total += totals.get('wo_count', 0)
-            so_count_total += totals.get('so_count', 0)
+			# Get totals for this salesperson
+			totals = calculate_salesperson_totals(sp, company, last_12_months)
+			
+			total_quoted_wo += totals.get('quoted_wo', 0)
+			total_approved_wo += totals.get('approved_wo', 0)
+			total_days_wo += totals.get('days_wo', 0)
+			total_quoted_so += totals.get('quoted_so', 0)
+			total_approved_so += totals.get('approved_so', 0)
+			total_days_so += totals.get('days_so', 0)
+			wo_count_total += totals.get('wo_count', 0)
+			so_count_total += totals.get('so_count', 0)
 
-        # Calculate cumulative percentages and averages
-        total_per_wo = (total_approved_wo / total_quoted_wo * 100) if total_quoted_wo else 0
-        total_per_so = (total_approved_so / total_quoted_so * 100) if total_quoted_so else 0
-        avg_days_wo = round(total_days_wo / wo_count_total) if wo_count_total > 0 else 0
-        avg_days_so = round(total_days_so / so_count_total) if so_count_total > 0 else 0
+		# Calculate cumulative percentages and averages
+		total_per_wo = (total_approved_wo / total_quoted_wo * 100) if total_quoted_wo else 0
+		total_per_so = (total_approved_so / total_quoted_so * 100) if total_quoted_so else 0
+		avg_days_wo = round(total_days_wo / wo_count_total) if wo_count_total > 0 else 0
+		avg_days_so = round(total_days_so / so_count_total) if so_count_total > 0 else 0
 
-        # ===== Add Cumulative Table after Header =====
-        html.append(render_cumulative_table(
-            total_quoted_wo, total_approved_wo, total_per_wo, avg_days_wo,
-            total_quoted_so, total_approved_so, total_per_so, avg_days_so
-        ))
+		# ===== Add Cumulative Table after Header =====
+		html.append(render_cumulative_table(
+			total_quoted_wo, total_approved_wo, total_per_wo, avg_days_wo,
+			total_quoted_so, total_approved_so, total_per_so, avg_days_so
+		))
 
-        # ===== Main Table Header =====
-        html.append(render_table_header(company))
+		# ===== Main Table Header =====
+		html.append(render_table_header(company))
 
-        # Reset totals for display in main table
-        total_quoted_wo = 0
-        total_approved_wo = 0
-        total_days_wo = 0
-        total_quoted_so = 0
-        total_approved_so = 0
-        total_days_so = 0
+		# Reset totals for display in main table
+		total_quoted_wo = 0
+		total_approved_wo = 0
+		total_days_wo = 0
+		total_quoted_so = 0
+		total_approved_so = 0
+		total_days_so = 0
 
-        # Second pass: Generate individual salesperson rows
-        for sp in sales_people:
-            # if sp.name not in target_sales.get(company, []):
-            #     continue
+		# Second pass: Generate individual salesperson rows
+		for sp in sales_people:
+			# if sp.name not in target_sales.get(company, []):
+			#     continue
 
-            # Generate rows and collect data
-            rows_result = generate_salesperson_rows(sp, company, last_12_months)
-            if rows_result and len(rows_result) > 1:
-                html.extend(rows_result[0])  # HTML rows
-                
-                # Get totals from the second return value
-                if len(rows_result) > 1:
-                    totals = rows_result[1]
-                    total_quoted_wo += totals.get('quoted_wo', 0)
-                    total_approved_wo += totals.get('approved_wo', 0)
-                    total_days_wo += totals.get('days_wo', 0)
-                    total_quoted_so += totals.get('quoted_so', 0)
-                    total_approved_so += totals.get('approved_so', 0)
-                    total_days_so += totals.get('days_so', 0)
+			# Generate rows and collect data
+			rows_result = generate_salesperson_rows(sp, company, last_12_months)
+			if rows_result and len(rows_result) > 1:
+				html.extend(rows_result[0])  # HTML rows
+				
+				# Get totals from the second return value
+				if len(rows_result) > 1:
+					totals = rows_result[1]
+					total_quoted_wo += totals.get('quoted_wo', 0)
+					total_approved_wo += totals.get('approved_wo', 0)
+					total_days_wo += totals.get('days_wo', 0)
+					total_quoted_so += totals.get('quoted_so', 0)
+					total_approved_so += totals.get('approved_so', 0)
+					total_days_so += totals.get('days_so', 0)
 
-        # Calculate percentages for main table
-        total_per_wo = (total_approved_wo / total_quoted_wo * 100) if total_quoted_wo else 0
-        total_per_so = (total_approved_so / total_quoted_so * 100) if total_quoted_so else 0
+		# Calculate percentages for main table
+		total_per_wo = (total_approved_wo / total_quoted_wo * 100) if total_quoted_wo else 0
+		total_per_so = (total_approved_so / total_quoted_so * 100) if total_quoted_so else 0
 
-        html.append("</table>")
+		html.append("</table>")
 
-        # ===== Second Section =====
-        # html.append(render_header2(company, formatted_date))
-        # html.append(render_table_header2(company))
-        
-        # # ===== Total Row =====
-        # html.append(f"""
-        # <tr style="font-weight:bold;background-color:#f2f2f2">
-        #     <td style="background-color:#D3D3D3"><center>{total_quoted_wo:,.0f}</center></td>
-        #     <td style="background-color:#D3D3D3"><center>{total_approved_wo:,.0f}</center></td>
-        #     <td style="background-color:#D3D3D3"><center>{round(total_per_wo)}%</center></td>
-        #     <td style="background-color:#D3D3D3"><center>{total_quoted_so:,.0f}</center></td>
-        #     <td style="background-color:#D3D3D3"><center>{total_approved_so:,.0f}</center></td>
-        #     <td style="background-color:#D3D3D3"><center>{round(total_per_so)}%</center></td>
-        # </tr>
-        # """)
-        # html.append("</table>")
+		# ===== Second Section =====
+		# html.append(render_header2(company, formatted_date))
+		# html.append(render_table_header2(company))
+		
+		# # ===== Total Row =====
+		# html.append(f"""
+		# <tr style="font-weight:bold;background-color:#f2f2f2">
+		#     <td style="background-color:#D3D3D3"><center>{total_quoted_wo:,.0f}</center></td>
+		#     <td style="background-color:#D3D3D3"><center>{total_approved_wo:,.0f}</center></td>
+		#     <td style="background-color:#D3D3D3"><center>{round(total_per_wo)}%</center></td>
+		#     <td style="background-color:#D3D3D3"><center>{total_quoted_so:,.0f}</center></td>
+		#     <td style="background-color:#D3D3D3"><center>{total_approved_so:,.0f}</center></td>
+		#     <td style="background-color:#D3D3D3"><center>{round(total_per_so)}%</center></td>
+		# </tr>
+		# """)
+		# html.append("</table>")
 
-        return "".join(html)
-    except Exception as e:
-        frappe.log_error(f"Error in get_sales_kuwait: {str(e)}", "Sales Report Error")
-        return f"<div style='color:red; padding:20px;'>Error generating report: {str(e)}</div>"
+		return "".join(html)
+	except Exception as e:
+		frappe.log_error(f"Error in get_sales_kuwait: {str(e)}", "Sales Report Error")
+		return f"<div style='color:red; padding:20px;'>Error generating report: {str(e)}</div>"
 
 def calculate_salesperson_totals(sp, company, months):
-    """Calculate totals for a salesperson without generating HTML."""
-    try:
-        total_quoted = 0
-        total_approved = 0
-        total_quoted2 = 0
-        total_approved2 = 0
-        total_days_wo = 0
-        total_days_so = 0
-        wo_count = 0
-        so_count = 0
+	"""Calculate totals for a salesperson without generating HTML."""
+	try:
+		total_quoted = 0
+		total_approved = 0
+		total_quoted2 = 0
+		total_approved2 = 0
+		total_days_wo = 0
+		total_days_so = 0
+		wo_count = 0
+		so_count = 0
 
 
-        for month_name, year in months:
-            try:
-                month_num = datetime.strptime(month_name, "%B").month
-                first_day = datetime(year, month_num, 1).date()
-                last_day = datetime(year, month_num, calendar.monthrange(year, month_num)[1]).date()
+		for month_name, year in months:
+			try:
+				month_num = datetime.strptime(month_name, "%B").month
+				first_day = datetime(year, month_num, 1).date()
+				last_day = datetime(year, month_num, calendar.monthrange(year, month_num)[1]).date()
 
-                quoted, approved, quoted2, approved2, wod_hrs, sod_hrs = get_monthly_sales(
-                    sp.name, first_day, last_day, company
-                )
+				quoted, approved, quoted2, approved2, wod_hrs, sod_hrs = get_monthly_sales(
+					sp.name, first_day, last_day, company
+				)
 
-                total_quoted += quoted or 0
-                total_approved += approved or 0
-                total_quoted2 += quoted2 or 0
-                total_approved2 += approved2 or 0
-                total_days_wo += wod_hrs or 0
-                total_days_so += sod_hrs or 0
-                
-                if wod_hrs > 0:
-                    wo_count += 1
-                if sod_hrs > 0:
-                    so_count += 1
+				total_quoted += quoted or 0
+				total_approved += approved or 0
+				total_quoted2 += quoted2 or 0
+				total_approved2 += approved2 or 0
+				total_days_wo += wod_hrs or 0
+				total_days_so += sod_hrs or 0
+				
+				if wod_hrs > 0:
+					wo_count += 1
+				if sod_hrs > 0:
+					so_count += 1
 
-            except Exception as e:
-                frappe.log_error(f"Error in calculate_salesperson_totals for {sp.name}: {str(e)}", "Totals Calculation Error")
-                continue
+			except Exception as e:
+				frappe.log_error(f"Error in calculate_salesperson_totals for {sp.name}: {str(e)}", "Totals Calculation Error")
+				continue
 
-        return {
-            'quoted_wo': total_quoted,
-            'approved_wo': total_approved,
-            'days_wo': total_days_wo,
-            'quoted_so': total_quoted2,
-            'approved_so': total_approved2,
-            'days_so': total_days_so,
-            'wo_count': wo_count,
-            'so_count': so_count
-        }
-    except Exception as e:
-        frappe.log_error(f"Error in calculate_salesperson_totals for {sp.name}: {str(e)}", "Totals Calculation Error")
-        return {}
+		return {
+			'quoted_wo': total_quoted,
+			'approved_wo': total_approved,
+			'days_wo': total_days_wo,
+			'quoted_so': total_quoted2,
+			'approved_so': total_approved2,
+			'days_so': total_days_so,
+			'wo_count': wo_count,
+			'so_count': so_count
+		}
+	except Exception as e:
+		frappe.log_error(f"Error in calculate_salesperson_totals for {sp.name}: {str(e)}", "Totals Calculation Error")
+		return {}
 
 def render_cumulative_table(q_wo, a_wo, p_wo, d_wo, q_so, a_so, p_so, d_so):
-    """Render the cumulative summary table."""
-    
-    # Determine colors based on percentages
-    color_wo = get_color(p_wo)
-    color_so = get_color(p_so)
-    
-    return f"""
-    <br>
-    <table border="1" width="100%" style="border-color:#000000; border-collapse:collapse; margin-top:10px;">
-        <tr>
-            <td colspan="10" align="center" style="background-color:#0e86d4; color:white; font-size:14px; font-weight:bold; padding:8px;">
-                CUMULATIVE SUMMARY
-            </td>
-        </tr>
-        <tr style="background-color:#145da0; color:white; font-weight:bold;">
-            <td colspan="3" style="text-align:center; padding:8px; font-size:12px; border-right:1px solid white;color:white;">WORK ORDER</td>
-            <td colspan="3" style="text-align:center; padding:8px; font-size:12px;color:white">SUPPLY ORDER</td>
-        </tr>
-        <tr style="background-color:#f0f0f0; font-weight:bold;">
-            <td style="padding:8px; text-align:center; font-size:11px;">Quoted (KWD)</td>
-            <td style="padding:8px; text-align:center; font-size:11px;">Approved (KWD)</td>
-            <td style="padding:8px; text-align:center; font-size:11px;">% Approved</td>
-            
-            
-            <td style="padding:8px; text-align:center; font-size:11px;">Quoted (KWD)</td>
-            <td style="padding:8px; text-align:center; font-size:11px;">Approved (KWD)</td>
-            <td style="padding:8px; text-align:center; font-size:11px;">% Approved</td>
-            
-        </tr>
-        <tr style="font-size:14px;">
-            <td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{q_wo:,.0f}</td>
-            <td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{a_wo:,.0f}</td>
-            <td style="padding:10px; text-align:center; background-color:{color_wo}; font-weight:bold;">{round(p_wo)}%</td>
-          
-            <td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{q_so:,.0f}</td>
-            <td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{a_so:,.0f}</td>
-            <td style="padding:10px; text-align:center; background-color:{color_so}; font-weight:bold;">{round(p_so)}%</td>
-            
-        </tr>
-    </table>
-    <br>
-    """
+	"""Render the cumulative summary table."""
+	
+	# Determine colors based on percentages
+	color_wo = get_color(p_wo)
+	color_so = get_color(p_so)
+	
+	return f"""
+	<br>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse; margin-top:10px;">
+		<tr>
+			<td colspan="10" align="center" style="background-color:#0e86d4; color:white; font-size:14px; font-weight:bold; padding:8px;">
+				CUMULATIVE SUMMARY
+			</td>
+		</tr>
+		<tr style="background-color:#145da0; color:white; font-weight:bold;">
+			<td colspan="3" style="text-align:center; padding:8px; font-size:12px; border-right:1px solid white;color:white;">WORK ORDER</td>
+			<td colspan="3" style="text-align:center; padding:8px; font-size:12px;color:white">SUPPLY ORDER</td>
+		</tr>
+		<tr style="background-color:#f0f0f0; font-weight:bold;">
+			<td style="padding:8px; text-align:center; font-size:11px;">Quoted (KWD)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">Approved (KWD)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">% Approved</td>
+			
+			
+			<td style="padding:8px; text-align:center; font-size:11px;">Quoted (KWD)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">Approved (KWD)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">% Approved</td>
+			
+		</tr>
+		<tr style="font-size:14px;">
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{q_wo:,.0f}</td>
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{a_wo:,.0f}</td>
+			<td style="padding:10px; text-align:center; background-color:{color_wo}; font-weight:bold;">{round(p_wo)}%</td>
+		  
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{q_so:,.0f}</td>
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{a_so:,.0f}</td>
+			<td style="padding:10px; text-align:center; background-color:{color_so}; font-weight:bold;">{round(p_so)}%</td>
+			
+		</tr>
+	</table>
+	<br>
+	"""
 
 def render_header(company, formatted_date):
-    """Generate the report header HTML."""
-    logo_path = "/files/TSL LOGO.png"
-    country_label = "Kuwait" if "Kuwait" in company else "UAE"
+	"""Generate the report header HTML."""
+	logo_path = "/files/TSL LOGO.png"
+	country_label = "Kuwait" if "Kuwait" in company else "UAE"
 
-    return f"""
-    <table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
-        <tr>
-            <td style="width:30%; border-color:#000000;"><img src="{logo_path}" width="250"></td>
-            <td style="width:40%; border-color:#000000; font-size:16px; color:#055c9d; text-align:center; font-weight:bold;">
-                <br>TSL Company<br>WO & SO Approval Percentage by Amount
-            </td>
-            <td style="width:30%; border-color:#000000;">
-                <center><img src="/files/kuwait flag.jpg" width="140" height="80"></center>
-            </td>
-        </tr>
-    </table>
-    <table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
-        <tr>
-            <td align="left" style="width:30%;border-right:hidden; border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
-                Branch - {country_label}
-            </td>
-            <td align="center" style="width:40%;border-right:hidden; border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
-                Currency - KWD
-            </td>
-            <td align="right" style="width:30%;border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
-                Generation Date: {formatted_date}
-            </td>
-        </tr> 
-    </table>
-    """
+	return f"""
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td style="width:30%; border-color:#000000;"><img src="{logo_path}" width="250"></td>
+			<td style="width:40%; border-color:#000000; font-size:16px; color:#055c9d; text-align:center; font-weight:bold;">
+				<br>TSL Company<br>WO & SO Approval Percentage by Amount
+			</td>
+			<td style="width:30%; border-color:#000000;">
+				<center><img src="/files/kuwait flag.jpg" width="140" height="80"></center>
+			</td>
+		</tr>
+	</table>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td align="left" style="width:30%;border-right:hidden; border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
+				Branch - {country_label}
+			</td>
+			<td align="center" style="width:40%;border-right:hidden; border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
+				Currency - KWD
+			</td>
+			<td align="right" style="width:30%;border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
+				Generation Date: {formatted_date}
+			</td>
+		</tr> 
+	</table>
+	"""
 
 def render_header2(company, formatted_date):
-    """Generate the report header HTML."""
-    return f"""
-    <br>
-    <table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
-        <tr>
-            <td colspan="7" align="center" style="border-color:#000000; background-color:#0e86d4; color:white; font-size:14px; font-weight:bold;">
-                CUMULATIVE SUMMARY
-            </td>
-        </tr> 
-    </table>
-    <table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
-    """
+	"""Generate the report header HTML."""
+	return f"""
+	<br>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td colspan="7" align="center" style="border-color:#000000; background-color:#0e86d4; color:white; font-size:14px; font-weight:bold;">
+				CUMULATIVE SUMMARY
+			</td>
+		</tr> 
+	</table>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+	"""
 
 def render_table_header(company):
-    """Render the table column headers depending on company."""
-    return f"""
-    <table border="1" width="100%" style="border-color:#000000; border-collapse:collapse; margin-top:10px;">
-        <tr>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%"></td>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%"></td>
-            <td colspan="4" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">WORK ORDER</td>
-            <td colspan="4" style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;">SUPPLY ORDER</td>
-        </tr>
-        <tr>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Sales</td>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Quoted Month</td>
-            <td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Quoted</td>
-            <td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Approved</td>
-            <td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">% of Approved</td>
-            <td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Approval Days</td>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Quoted</td>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Approved</td>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">% of Approved</td>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Approval Days</td>
-        </tr>
-    """
+	"""Render the table column headers depending on company."""
+	return f"""
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse; margin-top:10px;">
+		<tr>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%"></td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%"></td>
+			<td colspan="4" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">WORK ORDER</td>
+			<td colspan="4" style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;">SUPPLY ORDER</td>
+		</tr>
+		<tr>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Sales</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Quoted Month</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Quoted</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Approved</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">% of Approved</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Approval Days</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Quoted</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Approved</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">% of Approved</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%">Approval Days</td>
+		</tr>
+	"""
 
 def render_table_header2(company):
-    """Render the table column headers depending on company."""
-    return f"""
-    <table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
-        <tr>
-            <td colspan="3" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">WORK ORDER</td>
-            <td colspan="4" style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;">SUPPLY ORDER</td>
-        </tr>
-        <tr>
-            <td style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Quoted</td>
-            <td style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Approved</td>
-            <td style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">% of Approved</td>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Quoted</td>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Approved</td>
-            <td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">% of Approved</td>
-        </tr>
-    """
+	"""Render the table column headers depending on company."""
+	return f"""
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td colspan="3" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">WORK ORDER</td>
+			<td colspan="4" style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;">SUPPLY ORDER</td>
+		</tr>
+		<tr>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Quoted</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Approved</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">% of Approved</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Quoted</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Approved</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">% of Approved</td>
+		</tr>
+	"""
 
 def generate_salesperson_rows(sp, company, months):
-    """Generate monthly sales data for a single salesperson."""
-    try:
-        rows = []
-        total_quoted = 0
-        total_approved = 0
-        total_quoted2 = 0
-        total_approved2 = 0
-        total_days_wo = 0
-        total_days_so = 0
-        wo_count = 0
-        so_count = 0
+	"""Generate monthly sales data for a single salesperson."""
+	try:
+		rows = []
+		total_quoted = 0
+		total_approved = 0
+		total_quoted2 = 0
+		total_approved2 = 0
+		total_days_wo = 0
+		total_days_so = 0
+		wo_count = 0
+		so_count = 0
 
-        for month_name, year in months:
-            try:
-                month_num = datetime.strptime(month_name, "%B").month
-                first_day = datetime(year, month_num, 1).date()
-                last_day = datetime(year, month_num, calendar.monthrange(year, month_num)[1]).date()
+		for month_name, year in months:
+			try:
+				month_num = datetime.strptime(month_name, "%B").month
+				first_day = datetime(year, month_num, 1).date()
+				last_day = datetime(year, month_num, calendar.monthrange(year, month_num)[1]).date()
 
-                quoted, approved, quoted2, approved2, wod_hrs, sod_hrs = get_monthly_sales(
-                    sp.name, first_day, last_day, company
-                )
+				quoted, approved, quoted2, approved2, wod_hrs, sod_hrs = get_monthly_sales(
+					sp.name, first_day, last_day, company
+				)
 
-                total_quoted += quoted or 0
-                total_approved += approved or 0
-                total_quoted2 += quoted2 or 0
-                total_approved2 += approved2 or 0
-                total_days_wo += wod_hrs or 0
-                total_days_so += sod_hrs or 0
-                
-                if wod_hrs > 0:
-                    wo_count += 1
-                if sod_hrs > 0:
-                    so_count += 1
+				total_quoted += quoted or 0
+				total_approved += approved or 0
+				total_quoted2 += quoted2 or 0
+				total_approved2 += approved2 or 0
+				total_days_wo += wod_hrs or 0
+				total_days_so += sod_hrs or 0
+				
+				if wod_hrs > 0:
+					wo_count += 1
+				if sod_hrs > 0:
+					so_count += 1
 
-                # Calculate percentages
-                percent1 = round((approved / quoted) * 100) if quoted and quoted > 0 else 0
-                percent2 = round((approved2 / quoted2) * 100) if quoted2 and quoted2 > 0 else 0
+				# Calculate percentages
+				percent1 = round((approved / quoted) * 100) if quoted and quoted > 0 else 0
+				percent2 = round((approved2 / quoted2) * 100) if quoted2 and quoted2 > 0 else 0
 
-                # Set colors based on percentages
-                color4 = get_color(percent1)
-                color3 = get_color(percent2)
+				# Set colors based on percentages
+				color4 = get_color(percent1)
+				color3 = get_color(percent2)
 
-                rows.append(f"""
-                <tr>
-                    <td style="text-align:center; border-bottom:hidden; color:#145da0; font-weight:bold;">{sp.name if month_name == "June" else ''}</td>
-                    <td style="font-size:10px; text-align:center; font-weight:bold;">{month_name}</td>
-                    <td style="font-size:10px; text-align:center;">{quoted:,.0f}</td>
-                    <td style="font-size:10px; text-align:center;">{approved:,.0f}</td>
-                    <td style="font-size:10px; text-align:center; background-color:{color4}; font-weight:bold;">{percent1}%</td>
-                    <td style="font-size:10px; text-align:center;">{wod_hrs}</td>
-                    <td style="font-size:10px; text-align:center;">{quoted2:,.0f}</td>
-                    <td style="font-size:10px; text-align:center;">{approved2:,.0f}</td>
-                    <td style="font-size:10px; text-align:center; background-color:{color3}; font-weight:bold;">{percent2}%</td>
-                    <td style="font-size:10px; text-align:center;">{sod_hrs}</td>
-                </tr>
-                
-                """)
-            except Exception as e:
-                frappe.log_error(f"Error processing month {month_name} for {sp.name}: {str(e)}", "Month Processing Error")
-                continue
+				rows.append(f"""
+				<tr>
+					<td style="text-align:center; border-bottom:hidden; color:#145da0; font-weight:bold;">{sp.name if month_name == "June" else ''}</td>
+					<td style="font-size:10px; text-align:center; font-weight:bold;">{month_name}</td>
+					<td style="font-size:10px; text-align:center;">{quoted:,.0f}</td>
+					<td style="font-size:10px; text-align:center;">{approved:,.0f}</td>
+					<td style="font-size:10px; text-align:center; background-color:{color4}; font-weight:bold;">{percent1}%</td>
+					<td style="font-size:10px; text-align:center;">{wod_hrs}</td>
+					<td style="font-size:10px; text-align:center;">{quoted2:,.0f}</td>
+					<td style="font-size:10px; text-align:center;">{approved2:,.0f}</td>
+					<td style="font-size:10px; text-align:center; background-color:{color3}; font-weight:bold;">{percent2}%</td>
+					<td style="font-size:10px; text-align:center;">{sod_hrs}</td>
+				</tr>
+				
+				""")
+			except Exception as e:
+				frappe.log_error(f"Error processing month {month_name} for {sp.name}: {str(e)}", "Month Processing Error")
+				continue
 
-        # Calculate totals
-        total_percent = round((total_approved / total_quoted) * 100) if total_quoted and total_quoted > 0 else 0
-        total_percent2 = round((total_approved2 / total_quoted2) * 100) if total_quoted2 and total_quoted2 > 0 else 0
+		# Calculate totals
+		total_percent = round((total_approved / total_quoted) * 100) if total_quoted and total_quoted > 0 else 0
+		total_percent2 = round((total_approved2 / total_quoted2) * 100) if total_quoted2 and total_quoted2 > 0 else 0
 
-        # Get colors for totals
-        color1 = get_color(total_percent)
-        color2 = get_color(total_percent2)
+		# Get colors for totals
+		color1 = get_color(total_percent)
+		color2 = get_color(total_percent2)
 
-        # Calculate average days
-        avg_days_wo = round(total_days_wo / wo_count) if wo_count > 0 else 0
-        avg_days_so = round(total_days_so / so_count) if so_count > 0 else 0
+		# Calculate average days
+		avg_days_wo = round(total_days_wo / wo_count) if wo_count > 0 else 0
+		avg_days_so = round(total_days_so / so_count) if so_count > 0 else 0
 
-        rows.append(f"""
-        <tr>
-            <td></td>
-            <td><center><b>Total</b></center></td>
-            <td style="background-color:#D3D3D3"><center><b>{total_quoted:,.0f}</b></center></td>
-            <td style="background-color:#D3D3D3"><center><b>{total_approved:,.0f}</b></center></td>
-            <td style="background-color:{color1};"><center><b>{total_percent}%</b></center></td>
-            <td style="background-color:#D3D3D3"><center><b>{avg_days_wo}</b></center></td>
-            <td style="background-color:#D3D3D3"><center><b>{total_quoted2:,.0f}</b></center></td>
-            <td style="background-color:#D3D3D3"><center><b>{total_approved2:,.0f}</b></center></td>
-            <td style="background-color:{color2};"><center><b>{total_percent2}%</b></center></td>
-            <td style="background-color:#D3D3D3"><center><b>{avg_days_so}</b></center></td>
-        </tr>
-        <tr><td colspan="10"><center><b>-</b></center></td></tr>
-        """)
+		rows.append(f"""
+		<tr>
+			<td></td>
+			<td><center><b>Total</b></center></td>
+			<td style="background-color:#D3D3D3"><center><b>{total_quoted:,.0f}</b></center></td>
+			<td style="background-color:#D3D3D3"><center><b>{total_approved:,.0f}</b></center></td>
+			<td style="background-color:{color1};"><center><b>{total_percent}%</b></center></td>
+			<td style="background-color:#D3D3D3"><center><b>{avg_days_wo}</b></center></td>
+			<td style="background-color:#D3D3D3"><center><b>{total_quoted2:,.0f}</b></center></td>
+			<td style="background-color:#D3D3D3"><center><b>{total_approved2:,.0f}</b></center></td>
+			<td style="background-color:{color2};"><center><b>{total_percent2}%</b></center></td>
+			<td style="background-color:#D3D3D3"><center><b>{avg_days_so}</b></center></td>
+		</tr>
+		<tr><td colspan="10"><center><b>-</b></center></td></tr>
+		""")
 
-        # Return both rows and totals
-        totals = {
-            'quoted_wo': total_quoted,
-            'approved_wo': total_approved,
-            'days_wo': avg_days_wo,
-            'quoted_so': total_quoted2,
-            'approved_so': total_approved2,
-            'days_so': avg_days_so
-        }
-        
-        return [rows, totals]
-    except Exception as e:
-        frappe.log_error(f"Error in generate_salesperson_rows for {sp.name}: {str(e)}", "Salesperson Error")
-        return [[], {}]
+		# Return both rows and totals
+		totals = {
+			'quoted_wo': total_quoted,
+			'approved_wo': total_approved,
+			'days_wo': avg_days_wo,
+			'quoted_so': total_quoted2,
+			'approved_so': total_approved2,
+			'days_so': avg_days_so
+		}
+		
+		return [rows, totals]
+	except Exception as e:
+		frappe.log_error(f"Error in generate_salesperson_rows for {sp.name}: {str(e)}", "Salesperson Error")
+		return [[], {}]
 
 def get_color(percentage):
-    """Return color based on percentage."""
-    if percentage < 60:
-        return "#FF7074"
-    elif percentage < 80:
-        return "#FFFF8F"
-    else:
-        return "#98FB98"
+	"""Return color based on percentage."""
+	if percentage < 60:
+		return "#FF7074"
+	elif percentage < 80:
+		return "#FFFF8F"
+	else:
+		return "#98FB98"
 
 def get_monthly_sales(sales_user, from_date, to_date, company):
-    """
-    Calculates total quoted and approved amounts per distinct WOD, with correct discount handling.
-    Uses net_amount for 2026 onwards.
-    """
-    try:
-        if not sales_user:
-            return 0, 0, 0, 0, 0, 0
+	"""
+	Calculates total quoted and approved amounts per distinct WOD, with correct discount handling.
+	Uses net_amount for 2026 onwards.
+	"""
+	try:
+		if not sales_user:
+			return 0, 0, 0, 0, 0, 0
 
-        # Get WOD list
-        wod_list = frappe.db.sql("""
-            SELECT DISTINCT qi.job_order_data as jo
-            FROM `tabQuotation` q
-            INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-            WHERE q.sales_person = %s
-            AND q.company = %s
-            AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
-            AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
-            AND q.transaction_date BETWEEN %s AND %s
-            AND qi.job_order_data != ''
-        """, (sales_user,company,from_date,to_date), as_dict=True)
+		# Get WOD list
+		wod_list = frappe.db.sql("""
+			SELECT DISTINCT qi.job_order_data as jo
+			FROM `tabQuotation` q
+			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = %s
+			AND q.company = %s
+			AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
+			AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
+			AND q.transaction_date BETWEEN %s AND %s
+			AND qi.job_order_data != ''
+		""", (sales_user,company,from_date,to_date), as_dict=True)
 
-        # Get WOD count
-        w_count = frappe.db.sql("""
-            SELECT COUNT(DISTINCT qi.job_order_data) as ct
-            FROM `tabQuotation` q
-            INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-            WHERE q.sales_person = %s
-            AND q.company = %s
-            AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
-            AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
-            AND q.transaction_date BETWEEN %s AND %s
-            AND qi.job_order_data IS NOT NULL
-            AND qi.job_order_data != ''
-        """, (sales_user, company, from_date, to_date), as_dict=True)
+		# Get WOD count
+		w_count = frappe.db.sql("""
+			SELECT COUNT(DISTINCT qi.job_order_data) as ct
+			FROM `tabQuotation` q
+			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = %s
+			AND q.company = %s
+			AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
+			AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
+			AND q.transaction_date BETWEEN %s AND %s
+			AND qi.job_order_data IS NOT NULL
+			AND qi.job_order_data != ''
+		""", (sales_user, company, from_date, to_date), as_dict=True)
 
-        wod_count = w_count[0]["ct"] if w_count else 0
+		wod_count = w_count[0]["ct"] if w_count else 0
 
-        total_quoted = 0
-        total_approved = 0
-        ddf1 = 0
-        approved_count = 0
+		total_quoted = 0
+		total_approved = 0
+		ddf1 = 0
+		approved_count = 0
 
-        # Process each WOD
-        for wod in wod_list:
-            jo = wod["jo"]
+		# Process each WOD
+		for wod in wod_list:
+			jo = wod["jo"]
 
-            # Get transaction year
-            year_check = frappe.db.sql("""
-                SELECT YEAR(q.transaction_date) as trans_year
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE q.sales_person = %s
-                AND qi.job_order_data = %s
-                AND q.transaction_date BETWEEN %s AND %s
-                LIMIT 1
-            """, (sales_user, jo, from_date, to_date), as_dict=True)
+			# Get transaction year
+			year_check = frappe.db.sql("""
+				SELECT YEAR(q.transaction_date) as trans_year
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND qi.job_order_data = %s
+				AND q.transaction_date BETWEEN %s AND %s
+				LIMIT 1
+			""", (sales_user, jo, from_date, to_date), as_dict=True)
 
-            is_2026_or_later = year_check and year_check[0].get("trans_year", 0) >= 2026
+			is_2026_or_later = year_check and year_check[0].get("trans_year", 0) >= 2026
 
-            # Get Quoted Amount
-            # if is_2026_or_later:
-            quoted_rows = frappe.db.sql("""
-                SELECT SUM(qi.amount) as amount
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE q.sales_person = %s
-                AND qi.job_order_data = %s
-                AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
-                AND q.quotation_type IN ('Customer Quotation - Repair')
-                AND q.transaction_date BETWEEN %s AND %s
-            """, (sales_user,jo, from_date, to_date), as_dict=True)
-            if quoted_rows and quoted_rows[0].get("amount"):
-                total_quoted += quoted_rows[0]["amount"] or 0
+			# Get Quoted Amount
+			# if is_2026_or_later:
+			quoted_rows = frappe.db.sql("""
+				SELECT SUM(qi.amount) as amount
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND qi.job_order_data = %s
+				AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
+				AND q.quotation_type IN ('Customer Quotation - Repair')
+				AND q.transaction_date BETWEEN %s AND %s
+			""", (sales_user,jo, from_date, to_date), as_dict=True)
+			if quoted_rows and quoted_rows[0].get("amount"):
+				total_quoted += quoted_rows[0]["amount"] or 0
 
 
-            # else:
-            #     quoted_rows = frappe.db.sql("""
-            #         SELECT q.is_multiple_quotation, q.default_discount_percentage, 
-            #                q.after_discount_cost, qi.unit_price
-            #         FROM `tabQuotation` q
-            #         INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-            #         WHERE q.sales_person = %s
-            #         AND qi.job_order_data = %s
-            #         AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
-            #         AND q.quotation_type IN ('Customer Quotation - Repair')
-            #         AND q.transaction_date BETWEEN %s AND %s
-            #     """, (sales_user, jo, from_date, to_date), as_dict=True)
-            #     if quoted_rows:
-            #         row = quoted_rows[0]
-            #         if row.get("is_multiple_quotation"):
-            #             discount = row.get("default_discount_percentage") or 0
-            #             total_quoted += row.get("unit_price", 0) * (1 - discount / 100)
-            #         else:
-            #             total_quoted += row.get("after_discount_cost") or 0
+			# else:
+			#     quoted_rows = frappe.db.sql("""
+			#         SELECT q.is_multiple_quotation, q.default_discount_percentage, 
+			#                q.after_discount_cost, qi.unit_price
+			#         FROM `tabQuotation` q
+			#         INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			#         WHERE q.sales_person = %s
+			#         AND qi.job_order_data = %s
+			#         AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+			#         AND q.quotation_type IN ('Customer Quotation - Repair')
+			#         AND q.transaction_date BETWEEN %s AND %s
+			#     """, (sales_user, jo, from_date, to_date), as_dict=True)
+			#     if quoted_rows:
+			#         row = quoted_rows[0]
+			#         if row.get("is_multiple_quotation"):
+			#             discount = row.get("default_discount_percentage") or 0
+			#             total_quoted += row.get("unit_price", 0) * (1 - discount / 100)
+			#         else:
+			#             total_quoted += row.get("after_discount_cost") or 0
 
-            # Check if approved
-            rev_check = frappe.db.sql("""
-                SELECT DISTINCT qi.job_order_data
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE q.sales_person = %s
-                AND q.workflow_state IN ('Approved by Customer')
-                AND q.quotation_type IN ('Customer Quotation - Repair')
-                AND qi.job_order_data = %s
-                AND q.transaction_date BETWEEN %s AND %s
-            """, (sales_user, jo, from_date, to_date), as_dict=True)
+			# Check if approved
+			rev_check = frappe.db.sql("""
+				SELECT DISTINCT qi.job_order_data
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND q.workflow_state IN ('Approved by Customer')
+				AND q.quotation_type IN ('Customer Quotation - Repair')
+				AND qi.job_order_data = %s
+				AND q.transaction_date BETWEEN %s AND %s
+			""", (sales_user, jo, from_date, to_date), as_dict=True)
 
-            if rev_check:
-                # Get Approved Amount
-                # if is_2026_or_later:
-                approved_rows = frappe.db.sql("""
-                    SELECT SUM(qi.amount) as amount, 
-                            q.transaction_date, q.approval_date
-                    FROM `tabQuotation` q
-                    INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                    WHERE q.sales_person = %s
-                    AND qi.job_order_data = %s
-                    AND q.workflow_state = 'Approved by Customer'
-                    AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
-                    AND q.transaction_date BETWEEN %s AND %s
-                    GROUP BY q.name
-                """, (sales_user, jo, from_date, to_date), as_dict=True)
-                
-                if approved_rows:
-                    for row in approved_rows:
-                        if row.get("approval_date") and row.get("transaction_date"):
-                            date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
-                            ddf1 += date_diff
-                            approved_count += 1
-                        total_approved += row.get("amount") or 0
-                # else:
-                #     approved_rows = frappe.db.sql("""
-                #         SELECT q.is_multiple_quotation, q.default_discount_percentage,
-                #                q.after_discount_cost, qi.unit_price,
-                #                q.transaction_date, q.approval_date
-                #         FROM `tabQuotation` q
-                #         INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                #         WHERE q.sales_person = %s
-                #         AND qi.job_order_data = %s
-                #         AND q.workflow_state = 'Approved By Customer'
-                #         AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
-                #         AND q.transaction_date BETWEEN %s AND %s
-                #     """, (sales_user, jo, from_date, to_date), as_dict=True)
-                    
-                #     if approved_rows:
-                #         row = approved_rows[0]
-                #         if row.get("approval_date") and row.get("transaction_date"):
-                #             date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
-                #             ddf1 += date_diff
-                #             approved_count += 1
-                        
-                #         if row.get("is_multiple_quotation"):
-                #             discount = row.get("default_discount_percentage") or 0
-                #             total_approved += row.get("unit_price", 0) * (1 - discount / 100)
-                #         else:
-                #             total_approved += row.get("after_discount_cost") or 0
+			if rev_check:
+				# Get Approved Amount
+				# if is_2026_or_later:
+				approved_rows = frappe.db.sql("""
+					SELECT SUM(qi.amount) as amount, 
+							q.transaction_date, q.approval_date
+					FROM `tabQuotation` q
+					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+					WHERE q.sales_person = %s
+					AND qi.job_order_data = %s
+					AND q.workflow_state = 'Approved by Customer'
+					AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
+					AND q.transaction_date BETWEEN %s AND %s
+					GROUP BY q.name
+				""", (sales_user, jo, from_date, to_date), as_dict=True)
+				
+				if approved_rows:
+					for row in approved_rows:
+						if row.get("approval_date") and row.get("transaction_date"):
+							date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
+							ddf1 += date_diff
+							approved_count += 1
+						total_approved += row.get("amount") or 0
+				# else:
+				#     approved_rows = frappe.db.sql("""
+				#         SELECT q.is_multiple_quotation, q.default_discount_percentage,
+				#                q.after_discount_cost, qi.unit_price,
+				#                q.transaction_date, q.approval_date
+				#         FROM `tabQuotation` q
+				#         INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				#         WHERE q.sales_person = %s
+				#         AND qi.job_order_data = %s
+				#         AND q.workflow_state = 'Approved By Customer'
+				#         AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
+				#         AND q.transaction_date BETWEEN %s AND %s
+				#     """, (sales_user, jo, from_date, to_date), as_dict=True)
+					
+				#     if approved_rows:
+				#         row = approved_rows[0]
+				#         if row.get("approval_date") and row.get("transaction_date"):
+				#             date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
+				#             ddf1 += date_diff
+				#             approved_count += 1
+						
+				#         if row.get("is_multiple_quotation"):
+				#             discount = row.get("default_discount_percentage") or 0
+				#             total_approved += row.get("unit_price", 0) * (1 - discount / 100)
+				#         else:
+				#             total_approved += row.get("after_discount_cost") or 0
 
-        # SOD Section
-        sod_list = frappe.db.sql("""
-            SELECT DISTINCT qi.supply_order_data as sod
-            FROM `tabQuotation` q
-            INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-            WHERE q.sales_person = %s
-            AND q.company = %s
-            AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
-            AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
-            AND q.transaction_date BETWEEN %s AND %s
-            AND qi.supply_order_data IS NOT NULL
-            AND qi.supply_order_data != ''
-        """, (sales_user, company, from_date, to_date), as_dict=True)
+		# SOD Section
+		sod_list = frappe.db.sql("""
+			SELECT DISTINCT qi.supply_order_data as sod
+			FROM `tabQuotation` q
+			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = %s
+			AND q.company = %s
+			AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+			AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
+			AND q.transaction_date BETWEEN %s AND %s
+			AND qi.supply_order_data IS NOT NULL
+			AND qi.supply_order_data != ''
+		""", (sales_user, company, from_date, to_date), as_dict=True)
 
-        s_count = frappe.db.sql("""
-            SELECT COUNT(DISTINCT qi.supply_order_data) as sod
-            FROM `tabQuotation` q
-            INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-            WHERE q.sales_person = %s
-            AND q.company = %s
-            AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
-            AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
-            AND q.transaction_date BETWEEN %s AND %s
-            AND qi.supply_order_data IS NOT NULL
-            AND qi.supply_order_data != ''
-        """, (sales_user, company, from_date, to_date), as_dict=True)
+		s_count = frappe.db.sql("""
+			SELECT COUNT(DISTINCT qi.supply_order_data) as sod
+			FROM `tabQuotation` q
+			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = %s
+			AND q.company = %s
+			AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+			AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
+			AND q.transaction_date BETWEEN %s AND %s
+			AND qi.supply_order_data IS NOT NULL
+			AND qi.supply_order_data != ''
+		""", (sales_user, company, from_date, to_date), as_dict=True)
 
-        sod_count = s_count[0]["sod"] if s_count else 0
+		sod_count = s_count[0]["sod"] if s_count else 0
 
-        total_quoted2 = 0
-        total_approved2 = 0
-        ddf2 = 0
-        approved_count2 = 0
+		total_quoted2 = 0
+		total_approved2 = 0
+		ddf2 = 0
+		approved_count2 = 0
 
-        # Process each SOD
-        for s in sod_list:
-            sod_no = s["sod"]
+		# Process each SOD
+		for s in sod_list:
+			sod_no = s["sod"]
 
-            # Get transaction year
-            year_check = frappe.db.sql("""
-                SELECT YEAR(q.transaction_date) as trans_year
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE q.sales_person = %s
-                AND qi.supply_order_data = %s
-                AND q.transaction_date BETWEEN %s AND %s
-                LIMIT 1
-            """, (sales_user, sod_no, from_date, to_date), as_dict=True)
+			# Get transaction year
+			year_check = frappe.db.sql("""
+				SELECT YEAR(q.transaction_date) as trans_year
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND qi.supply_order_data = %s
+				AND q.transaction_date BETWEEN %s AND %s
+				LIMIT 1
+			""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-            is_2026_or_later = year_check and year_check[0].get("trans_year", 0) >= 2026
+			is_2026_or_later = year_check and year_check[0].get("trans_year", 0) >= 2026
 
-            # Get Quoted Amount
-            if is_2026_or_later:
-                quoted_rows2 = frappe.db.sql("""
-                    SELECT q.name, SUM(qi.net_amount) as net_amount
-                    FROM `tabQuotation` q
-                    INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                    WHERE q.sales_person = %s
-                    AND qi.supply_order_data = %s
-                    AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
-                    AND q.quotation_type IN ('Customer Quotation - Supply')
-                    AND q.transaction_date BETWEEN %s AND %s
-                    GROUP BY q.name
-                """, (sales_user, sod_no, from_date, to_date), as_dict=True)
+			# Get Quoted Amount
+			if is_2026_or_later:
+				quoted_rows2 = frappe.db.sql("""
+					SELECT q.name, SUM(qi.net_amount) as net_amount
+					FROM `tabQuotation` q
+					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+					WHERE q.sales_person = %s
+					AND qi.supply_order_data = %s
+					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+					AND q.quotation_type IN ('Customer Quotation - Supply')
+					AND q.transaction_date BETWEEN %s AND %s
+					GROUP BY q.name
+				""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-                if quoted_rows2:
-                    for row in quoted_rows2:
-                        total_quoted2 += row.get("net_amount") or 0
-            else:
-                quoted_rows2 = frappe.db.sql("""
-                    SELECT q.name, q.is_multiple_quotation, q.default_discount_percentage,
-                           q.after_discount_cost, qi.unit_price, qi.qty
-                    FROM `tabQuotation` q
-                    INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                    WHERE q.sales_person = %s
-                    AND qi.supply_order_data = %s
-                    AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
-                    AND q.quotation_type IN ('Customer Quotation - Supply')
-                    AND q.transaction_date BETWEEN %s AND %s
-                """, (sales_user, sod_no, from_date, to_date), as_dict=True)
+				if quoted_rows2:
+					for row in quoted_rows2:
+						total_quoted2 += row.get("net_amount") or 0
+			else:
+				quoted_rows2 = frappe.db.sql("""
+					SELECT q.name, q.is_multiple_quotation, q.default_discount_percentage,
+						   q.after_discount_cost, qi.unit_price, qi.qty
+					FROM `tabQuotation` q
+					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+					WHERE q.sales_person = %s
+					AND qi.supply_order_data = %s
+					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+					AND q.quotation_type IN ('Customer Quotation - Supply')
+					AND q.transaction_date BETWEEN %s AND %s
+				""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-                if quoted_rows2:
-                    for row in quoted_rows2:
-                        if row.get("is_multiple_quotation"):
-                            discount = row.get("default_discount_percentage") or 0
-                            dis_amt = (row.get("unit_price", 0) * discount) / 100
-                            amt = (row.get("unit_price", 0) - dis_amt) * (row.get("qty") or 1)
-                            total_quoted2 += amt
-                        else:
-                            total_quoted2 += row.get("after_discount_cost") or 0
+				if quoted_rows2:
+					for row in quoted_rows2:
+						if row.get("is_multiple_quotation"):
+							discount = row.get("default_discount_percentage") or 0
+							dis_amt = (row.get("unit_price", 0) * discount) / 100
+							amt = (row.get("unit_price", 0) - dis_amt) * (row.get("qty") or 1)
+							total_quoted2 += amt
+						else:
+							total_quoted2 += row.get("after_discount_cost") or 0
 
-            # Check if approved
-            rev_check2 = frappe.db.sql("""
-                SELECT DISTINCT qi.supply_order_data
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE q.sales_person = %s
-                AND q.workflow_state IN ('Approved By Customer')
-                AND q.quotation_type IN ('Customer Quotation - Supply')
-                AND qi.supply_order_data = %s
-                AND q.transaction_date BETWEEN %s AND %s
-            """, (sales_user, sod_no, from_date, to_date), as_dict=True)
+			# Check if approved
+			rev_check2 = frappe.db.sql("""
+				SELECT DISTINCT qi.supply_order_data
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND q.workflow_state IN ('Approved By Customer')
+				AND q.quotation_type IN ('Customer Quotation - Supply')
+				AND qi.supply_order_data = %s
+				AND q.transaction_date BETWEEN %s AND %s
+			""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-            if rev_check2:
-                # Get Approved Amount
-                if is_2026_or_later:
-                    approved_rows2 = frappe.db.sql("""
-                        SELECT q.name, SUM(qi.net_amount) as net_amount,
-                               q.transaction_date, q.approval_date
-                        FROM `tabQuotation` q
-                        INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                        WHERE q.sales_person = %s
-                        AND qi.supply_order_data = %s
-                        AND q.workflow_state = 'Approved By Customer'
-                        AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
-                        AND q.transaction_date BETWEEN %s AND %s
-                        GROUP BY q.name
-                    """, (sales_user, sod_no, from_date, to_date), as_dict=True)
+			if rev_check2:
+				# Get Approved Amount
+				if is_2026_or_later:
+					approved_rows2 = frappe.db.sql("""
+						SELECT q.name, SUM(qi.net_amount) as net_amount,
+							   q.transaction_date, q.approval_date
+						FROM `tabQuotation` q
+						INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+						WHERE q.sales_person = %s
+						AND qi.supply_order_data = %s
+						AND q.workflow_state = 'Approved By Customer'
+						AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
+						AND q.transaction_date BETWEEN %s AND %s
+						GROUP BY q.name
+					""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-                    if approved_rows2:
-                        for row in approved_rows2:
-                            if row.get("approval_date") and row.get("transaction_date"):
-                                date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
-                                ddf2 += date_diff
-                                approved_count2 += 1
-                            total_approved2 += row.get("net_amount") or 0
-                else:
-                    approved_rows2 = frappe.db.sql("""
-                        SELECT q.name, q.is_multiple_quotation, q.default_discount_percentage,
-                               q.after_discount_cost, qi.unit_price, qi.qty,
-                               q.transaction_date, q.approval_date
-                        FROM `tabQuotation` q
-                        INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                        WHERE q.sales_person = %s
-                        AND qi.supply_order_data = %s
-                        AND q.workflow_state = 'Approved By Customer'
-                        AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
-                        AND q.transaction_date BETWEEN %s AND %s
-                    """, (sales_user, sod_no, from_date, to_date), as_dict=True)
+					if approved_rows2:
+						for row in approved_rows2:
+							if row.get("approval_date") and row.get("transaction_date"):
+								date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
+								ddf2 += date_diff
+								approved_count2 += 1
+							total_approved2 += row.get("net_amount") or 0
+				else:
+					approved_rows2 = frappe.db.sql("""
+						SELECT q.name, q.is_multiple_quotation, q.default_discount_percentage,
+							   q.after_discount_cost, qi.unit_price, qi.qty,
+							   q.transaction_date, q.approval_date
+						FROM `tabQuotation` q
+						INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+						WHERE q.sales_person = %s
+						AND qi.supply_order_data = %s
+						AND q.workflow_state = 'Approved By Customer'
+						AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
+						AND q.transaction_date BETWEEN %s AND %s
+					""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-                    if approved_rows2:
-                        for row in approved_rows2:
-                            if row.get("approval_date") and row.get("transaction_date"):
-                                date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
-                                ddf2 += date_diff
-                                approved_count2 += 1
-                            
-                            if row.get("is_multiple_quotation"):
-                                discount = row.get("default_discount_percentage") or 0
-                                dis_amt = (row.get("unit_price", 0) * discount) / 100
-                                amt = (row.get("unit_price", 0) - dis_amt) * (row.get("qty") or 1)
-                                total_approved2 += amt
-                            else:
-                                total_approved2 += row.get("after_discount_cost") or 0
+					if approved_rows2:
+						for row in approved_rows2:
+							if row.get("approval_date") and row.get("transaction_date"):
+								date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
+								ddf2 += date_diff
+								approved_count2 += 1
+							
+							if row.get("is_multiple_quotation"):
+								discount = row.get("default_discount_percentage") or 0
+								dis_amt = (row.get("unit_price", 0) * discount) / 100
+								amt = (row.get("unit_price", 0) - dis_amt) * (row.get("qty") or 1)
+								total_approved2 += amt
+							else:
+								total_approved2 += row.get("after_discount_cost") or 0
 
-        # Calculate average days
-        wod_hrs = round(ddf1 / approved_count) if approved_count > 0 else 0
-        sod_hrs = round(ddf2 / approved_count2) if approved_count2 > 0 else 0
+		# Calculate average days
+		wod_hrs = round(ddf1 / approved_count) if approved_count > 0 else 0
+		sod_hrs = round(ddf2 / approved_count2) if approved_count2 > 0 else 0
 
-        return (
-            round(total_quoted or 0),
-            round(total_approved or 0),
-            round(total_quoted2 or 0),
-            round(total_approved2 or 0),
-            wod_hrs,
-            sod_hrs
-        )
-    except Exception as e:
-        frappe.log_error(f"Error in get_monthly_sales for {sales_user}: {str(e)}", "Monthly Sales Error")
-        return 0, 0, 0, 0, 0, 0
+		return (
+			round(total_quoted or 0),
+			round(total_approved or 0),
+			round(total_quoted2 or 0),
+			round(total_approved2 or 0),
+			wod_hrs,
+			sod_hrs
+		)
+	except Exception as e:
+		frappe.log_error(f"Error in get_monthly_sales for {sales_user}: {str(e)}", "Monthly Sales Error")
+		return 0, 0, 0, 0, 0, 0
 
 
 
@@ -1275,642 +1275,642 @@ from frappe.utils.csvutils import read_csv_content
 
 frappe.whitelist()
 def sales_summary(from_date, to_date, company):
-    import frappe
-    from datetime import datetime
-    from frappe.utils import add_days, today, getdate
-    
-    d = datetime.now().date()
-    ogdate = datetime.strptime(str(d), "%Y-%m-%d")
-    formatted_date = ogdate.strftime("%d-%m-%Y")
+	import frappe
+	from datetime import datetime
+	from frappe.utils import add_days, today, getdate
+	
+	d = datetime.now().date()
+	ogdate = datetime.strptime(str(d), "%Y-%m-%d")
+	formatted_date = ogdate.strftime("%d-%m-%Y")
 
-    data = ''
-    data += '<div class="table-container">'
-    data += '<table class="table table-bordered" style="width: 100%; border-collapse: collapse;">'
-    data += '<tr>'
-    
-    # Branch and currency mapping
-    branch_map = {
-        "TSL COMPANY - Kuwait": "Kuwait",
-        "TSL COMPANY - UAE": "UAE", 
-        "TSL COMPANY - KSA": "KSA"
-    }
-    currency_map = {
-        "TSL COMPANY - Kuwait": "KWD",
-        "TSL COMPANY - UAE": "AED",
-        "TSL COMPANY - KSA": "SAR"
-    }
-    
-    branch = branch_map.get(company, "")
-    currency = currency_map.get(company, "")
+	data = ''
+	data += '<div class="table-container">'
+	data += '<table class="table table-bordered" style="width: 100%; border-collapse: collapse;">'
+	data += '<tr>'
+	
+	# Branch and currency mapping
+	branch_map = {
+		"TSL COMPANY - Kuwait": "Kuwait",
+		"TSL COMPANY - UAE": "UAE", 
+		"TSL COMPANY - KSA": "KSA"
+	}
+	currency_map = {
+		"TSL COMPANY - Kuwait": "KWD",
+		"TSL COMPANY - UAE": "AED",
+		"TSL COMPANY - KSA": "SAR"
+	}
+	
+	branch = branch_map.get(company, "")
+	currency = currency_map.get(company, "")
 
-    # Header with logo
-    data += '<td colspan="3" style="border-color:#000000;"><img src="/files/TSL LOGO.png" align="left" width="250"></td>'
-    data += '<td colspan="5" style="border-color:#000000;"><h2><center><b style="color:#055c9d;">TSL Company<br>Branch - %s<br>Currency - %s</b></center></h2></td>' % ("Kuwait","KWD")
-    
-    
-    # Flag based on company
-    if company == "Cyrix TSL - Kuwait":
-        data += '<td colspan="3" style="border-color:#000000;"><center><img src="/files/kuwait flag.jpg" width="200"></center></td>'
-    elif company == "TSL COMPANY - UAE":
-        data += '<td colspan="3" style="border-color:#000000;"><center><br><img src="/files/Flag_of_the_United_Arab_Emirates.svg.jpg" width="140"></center></td>'
+	# Header with logo
+	data += '<td colspan="3" style="border-color:#000000;"><img src="/files/TSL LOGO.png" align="left" width="250"></td>'
+	data += '<td colspan="5" style="border-color:#000000;"><h2><center><b style="color:#055c9d;">TSL Company<br>Branch - %s<br>Currency - %s</b></center></h2></td>' % ("Kuwait","KWD")
+	
+	
+	# Flag based on company
+	if company == "Cyrix TSL - Kuwait":
+		data += '<td colspan="3" style="border-color:#000000;"><center><img src="/files/kuwait flag.jpg" width="200"></center></td>'
+	elif company == "TSL COMPANY - UAE":
+		data += '<td colspan="3" style="border-color:#000000;"><center><br><img src="/files/Flag_of_the_United_Arab_Emirates.svg.jpg" width="140"></center></td>'
 
-    data += '</tr>'
+	data += '</tr>'
 
-    # Title row
-    data += '<tr>'
-    data += '<td colspan="3" style="border-right:hidden;border-color:#000000;"><b></b></td>'
-    data += '<td colspan="5" align="center" style="border-color:#000000;"><b>QUOTED, RS, RSC & RSI SUMMARY</b></td>'
-    data += '<td colspan="3" align="right" style="border-left:hidden;border-color:#000000;"><b>Generation Date : %s</b></td>' % formatted_date
-    data += '</tr>'
+	# Title row
+	data += '<tr>'
+	data += '<td colspan="3" style="border-right:hidden;border-color:#000000;"><b></b></td>'
+	data += '<td colspan="5" align="center" style="border-color:#000000;"><b>QUOTED, RS, RSC & RSI SUMMARY</b></td>'
+	data += '<td colspan="3" align="right" style="border-left:hidden;border-color:#000000;"><b>Generation Date : %s</b></td>' % formatted_date
+	data += '</tr>'
 
-    # Column headers
-    data += '<tr>'
-    data += '<td colspan="1" style="border-color:#000000;background-color:#0e86d4;"><center><b></b></center></td>'
-    data += '<td colspan="2" style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">Quoted - Amount</b></center></td>'
-    data += '<td colspan="2" style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">RS - Amount</b></center></td>'
-    data += '<td colspan="2" style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">RSC - Amount</b></center></td>'
-    data += '<td colspan="2" style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">RSI - Amount</b></center></td>'
-    data += '<td colspan="2" style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">More than 3 Months(RSI)</b></center></td>'
-    data += '</tr>'
-    
-    # Get sales persons - use parameterized query
-    wo = frappe.db.sql(""" SELECT DISTINCT name FROM `tabSales Person` """, as_dict=1)
-    
-    # Company-specific header rows
-    header_rows = {
-        "Cyrix TSL - Kuwait": """
-        <tr>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
-        </tr>
-        """,
-        "TSL COMPANY - UAE": """
-        <tr>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
-            <td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
-            <td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
-        </tr>
-        """,
-        "TSL COMPANY - KSA": """
-        <tr>
-            <td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
-            <td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>
-            <td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>
-            <td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>
-            <td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>
-            <td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>
-            <td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>
-            <td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>  
-            <td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>	
-        </tr>
-        """
-    }
-    
-    if company in header_rows:
-        data += header_rows[company]
+	# Column headers
+	data += '<tr>'
+	data += '<td colspan="1" style="border-color:#000000;background-color:#0e86d4;"><center><b></b></center></td>'
+	data += '<td colspan="2" style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">Quoted - Amount</b></center></td>'
+	data += '<td colspan="2" style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">RS - Amount</b></center></td>'
+	data += '<td colspan="2" style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">RSC - Amount</b></center></td>'
+	data += '<td colspan="2" style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">RSI - Amount</b></center></td>'
+	data += '<td colspan="2" style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">More than 3 Months(RSI)</b></center></td>'
+	data += '</tr>'
+	
+	# Get sales persons - use parameterized query
+	wo = frappe.db.sql(""" SELECT DISTINCT name FROM `tabSales Person` """, as_dict=1)
+	
+	# Company-specific header rows
+	header_rows = {
+		"Cyrix TSL - Kuwait": """
+		<tr>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
+		</tr>
+		""",
+		"TSL COMPANY - UAE": """
+		<tr>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
+		</tr>
+		""",
+		"TSL COMPANY - KSA": """
+		<tr>
+			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>  
+			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>	
+		</tr>
+		"""
+	}
+	
+	if company in header_rows:
+		data += header_rows[company]
 
-    Week_start = from_date
-    current_date = to_date
-    today_date = today()
-    cutoff_date_90 = add_days(today_date, -90)
-    
-    # Excluded salespersons
-    excluded = {'Sales Team', 'Walkin', 'OMAR', '', 'Mazz', 'Abdullah', 'karoline', 
-                'Dilshad', 'Dhinesh', 'Karoline', 'Nour', 'Mohannad', 'Samar Moussa', 
-                'Rana Ali', 'Michael Veniston', 'Nidhin'}
-    
-    # Initialize totals
-    total_rsi = 0
-    total_rsi2 = 0
-    total_rsc = 0
-    total_rs = 0
-    total_quot = 0
-    s_invoiced = 0
-    s_invoiced2 = 0
-    s_delivered = 0
-    s_received = 0
-    sup_quoted_sod = 0
-    
-    # Department mapping
-    dept_repair = "Kuwait - Repair - CT-K" if company == "Cyrix TSL - Kuwait" else "Repair - TSL-UAE"
-    dept_supply = "Kuwait - Supply - CT-K" if company == "Cyrix TSL - Kuwait" else "Supply - TSL-UAE"
-    
-    # Batch process salespersons
-    for i in wo:
-        sp_name = i["name"]
-        if not sp_name or sp_name in excluded:
-            continue
-            
-        sales = frappe.get_value("Sales Person", sp_name, ["user", "name"], as_dict=True)
-        if not sales:
-            continue
-            
-        sales_person = sales.get('name')
-        sales_name = sales.get('name')
-        
-        # Initialize ALL variables for this salesperson with default values
-        gt = 0
-        gt2 = 0
-        st = 0
-        st2 = 0
-        # total_rsi_old = 0
-        # total_rsi_old2 = 0
-        # soinv_old = 0
-        # soinv_old2 = 0
-        # sodel_old = 0
-        # sorec_old = 0
-        # soq_old = 0  # CRITICAL: Initialize this variable
-        # rsc_old = 0
-        # rs_old = 0
-        # q_old = 0
-        q_m = 0
-        q_m_2 = 0
-        rs_am = 0
-        rs_am_2 = 0
-        quot_am = 0
-        quot_am_2 = 0
-        sp_del = 0
-        sp_del_2 = 0
-        sp_rec = 0
-        sp_rec_2 = 0
-        sp_qted = 0
-        sp_qted_2 = 0
-        
-        # Get Sales Invoices in batch
-        invoice_filters = {
-            'sales_person': sales_person,
-            'status': ['in', ['Unpaid', 'Overdue', 'Partly Paid']]
-        }
+	Week_start = from_date
+	current_date = to_date
+	today_date = today()
+	cutoff_date_90 = add_days(today_date, -90)
+	
+	# Excluded salespersons
+	excluded = {'Sales Team', 'Walkin', 'OMAR', '', 'Mazz', 'Abdullah', 'karoline', 
+				'Dilshad', 'Dhinesh', 'Karoline', 'Nour', 'Mohannad', 'Samar Moussa', 
+				'Rana Ali', 'Michael Veniston', 'Nidhin'}
+	
+	# Initialize totals
+	total_rsi = 0
+	total_rsi2 = 0
+	total_rsc = 0
+	total_rs = 0
+	total_quot = 0
+	s_invoiced = 0
+	s_invoiced2 = 0
+	s_delivered = 0
+	s_received = 0
+	sup_quoted_sod = 0
+	
+	# Department mapping
+	dept_repair = "Kuwait - Repair - CT-K" if company == "Cyrix TSL - Kuwait" else "Repair - TSL-UAE"
+	dept_supply = "Kuwait - Supply - CT-K" if company == "Cyrix TSL - Kuwait" else "Supply - TSL-UAE"
+	
+	# Batch process salespersons
+	for i in wo:
+		sp_name = i["name"]
+		if not sp_name or sp_name in excluded:
+			continue
+			
+		sales = frappe.get_value("Sales Person", sp_name, ["user", "name"], as_dict=True)
+		if not sales:
+			continue
+			
+		sales_person = sales.get('name')
+		sales_name = sales.get('name')
+		
+		# Initialize ALL variables for this salesperson with default values
+		gt = 0
+		gt2 = 0
+		st = 0
+		st2 = 0
+		# total_rsi_old = 0
+		# total_rsi_old2 = 0
+		# soinv_old = 0
+		# soinv_old2 = 0
+		# sodel_old = 0
+		# sorec_old = 0
+		# soq_old = 0  # CRITICAL: Initialize this variable
+		# rsc_old = 0
+		# rs_old = 0
+		# q_old = 0
+		q_m = 0
+		q_m_2 = 0
+		rs_am = 0
+		rs_am_2 = 0
+		quot_am = 0
+		quot_am_2 = 0
+		sp_del = 0
+		sp_del_2 = 0
+		sp_rec = 0
+		sp_rec_2 = 0
+		sp_qted = 0
+		sp_qted_2 = 0
+		
+		# Get Sales Invoices in batch
+		invoice_filters = {
+			'sales_person': sales_person,
+			'status': ['in', ['Unpaid', 'Overdue', 'Partly Paid']]
+		}
 
-        # RSI - current period
-        gr = frappe.get_all("Sales Invoice", {
-            **invoice_filters,
-            'cost_center': dept_repair,
-            'posting_date': ['between', (Week_start, current_date)]
-        }, ['outstanding_amount'])
-        if gr:
-            gt = sum(inv.outstanding_amount for inv in gr)
-        
-        # RSI - old (>90 days)
-        gr2 = frappe.get_all("Sales Invoice", {
-            **invoice_filters,
-            'cost_center': dept_repair,
-            'posting_date': ['<=', cutoff_date_90]
-        }, ['outstanding_amount'])
-        if gr2:
-            gt2 = sum(inv.outstanding_amount for inv in gr2)
-        
-        # Supply Invoices - current
-        sr = frappe.get_all("Sales Invoice", {
-            **invoice_filters,
-            'cost_center': dept_supply,
-            'posting_date': ['between', (Week_start, current_date)]
-        }, ['outstanding_amount'])
-        if sr:
-            st = sum(inv.outstanding_amount for inv in sr)
-        
-        # Supply Invoices - old
-        sr2 = frappe.get_all("Sales Invoice", {
-            **invoice_filters,
-            'cost_center': dept_supply,
-            'posting_date': ['<=', cutoff_date_90]
-        }, ['outstanding_amount'])
-        if sr2:
-            st2 = sum(inv.outstanding_amount for inv in sr2)
-        
-        # Job Order Data - batch fetch
-        wo_statuses = ['RSI-Repaired and Shipped Invoiced', 'RSC-Repaired and Shipped Client', 
-                       'RS-Repaired and Shipped', 'Q-Quoted']
-        
-        # Fetch all WO data in one go for current period
-        if wo_statuses:
-            placeholders = ','.join(['%s'] * len(wo_statuses))
-            # wo_data = frappe.db.sql(f"""
-            #     SELECT 
-            #         status,
-            #         SUM(COALESCE(old_wo_q_amount, 0) + COALESCE(old_wo_vat, 0)) as old_amount
-            #     FROM `tabJob Order Data`
-            #     WHERE sales_person = %s
-            #         AND status IN ({placeholders})
-            #         AND posting_date BETWEEN %s AND %s
-            #     GROUP BY status
-            # """, tuple([sales_name] + wo_statuses + [Week_start, current_date]), as_dict=True)
-            
-            # # Process WO data for current period
-            # for w in wo_data:
-            #     if w.status == 'RSI-Repaired and Shipped Invoiced':
-            #         total_rsi_old = w.old_amount or 0
-            #     elif w.status == 'RSC-Repaired and Shipped Client':
-            #         rsc_old = w.old_amount or 0
-            #     elif w.status == 'RS-Repaired and Shipped':
-            #         rs_old = w.old_amount or 0
-            #     elif w.status == 'Q-Quoted':
-            #         q_old = w.old_amount or 0
-        
-        # Fetch old WO data (>90 days)
-        # wo_data_old = frappe.db.sql(f"""
-        #     SELECT 
-        #         SUM(COALESCE(old_wo_q_amount, 0) + COALESCE(old_wo_vat, 0)) as old_amount
-        #     FROM `tabJob Order Data`
-        #     WHERE sales_person = %s
-        #         AND status = 'RSI-Repaired and Shipped Invoiced'
-        #         AND posting_date <= %s
-        # """, (sales_name, cutoff_date_90), as_dict=True)
-        
-        # if wo_data_old and wo_data_old[0].get('old_amount'):
-        #     total_rsi_old2 = wo_data_old[0]['old_amount'] or 0
-        
-        # Supply Order Data - batch fetch
-        so_statuses = ['Invoiced', 'Delivered', 'Received', 'Quoted']
-        
-        # Fetch old SO data with currency conversion (>90 days)
-        if so_statuses:
-            placeholders = ','.join(['%s'] * len(so_statuses))
-            # so_data_old = frappe.db.sql(f"""
-            #     SELECT 
-            #         status,
-            #         so_currency_old,
-            #         COALESCE(so_old_total_amt, 0) as so_old_total_amt
-            #     FROM `tabSupply Order Data`
-            #     WHERE sales_person = %s
-            #         AND status IN ({placeholders})
-            #         AND posting_date <= %s
-            # """, tuple([sales_name] + so_statuses + [cutoff_date_90]), as_dict=True)
-            
-            # # Process old SO data with currency conversion
-            # for s in so_data_old:
-            #     amt = s.so_old_total_amt or 0
-            #     if s.so_currency_old == "USD":
-            #         exr = get_exchange_rate("USD", "AED")
-            #         if exr:
-            #             amt = amt * exr
-                
-            #     if s.status == 'Invoiced':
-            #         soinv_old2 += amt
-        
-        # Fetch current SO data
-        # so_data = frappe.db.sql(f"""
-        #     SELECT 
-        #         status,
-        #         so_currency_old,
-        #         COALESCE(so_old_total_amt, 0) as so_old_total_amt
-        #     FROM `tabSupply Order Data`
-        #     WHERE sales_person = %s
-        #         AND status IN ({placeholders})
-        #         AND posting_date BETWEEN %s AND %s
-        # """, tuple([sales_name] + so_statuses + [Week_start, current_date]), as_dict=True)
-        
-        # Process current SO data with currency conversion
-        # for s in so_data:
-        #     amt = s.so_old_total_amt or 0
-        #     if s.so_currency_old == "USD":
-        #         exr = get_exchange_rate("USD", "AED")
-        #         if exr:
-        #             amt = amt * exr
-            
-        #     if s.status == 'Invoiced':
-        #         soinv_old += amt
-        #     elif s.status == 'Delivered':
-        #         sodel_old += amt
-        #     elif s.status == 'Received':
-        #         sorec_old += amt
-        #     elif s.status == 'Quoted':
-        #         soq_old += amt  # Now this is safe because soq_old is initialized
-        
-        # Get WOD lists for detailed calculations
-        wods_rsc = frappe.get_all("Job Order Data", {
-            "sales_person": sales_name,
-            "status": "RSC-Repaired and Shipped Client",
-            "posting_date": ["between", (Week_start, current_date)]
-        }, ["name"])
-        
-        wods_rs = frappe.get_all("Job Order Data", {
-            "sales_person": sales_name,
-            "status": "RS-Repaired and Shipped",
-            "posting_date": ["between", (Week_start, current_date)]
-        }, ["name"])
-        
-        wods_quot = frappe.get_all("Job Order Data", {
-            "sales_person": sales_name,
-            "project_1": 0,
-            "status": "Q-Quoted",
-            "posting_date": ["between", (Week_start, current_date)]
-        }, ["name"])
-        
-        # Batch process quotations for WODs
-        if wods_rsc:
-            wod_names = [w.name for w in wods_rsc]
-            placeholders = ','.join(['%s'] * len(wod_names))
-            query = f"""
-                SELECT 
-                    qi.job_order_data,
-                    q.name as q_name,
-                   
-                    q.transaction_date as td,
-                    q.workflow_state,
-                   
-                    qi.net_amount as am,
-                    qi.tax_amount as vat
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE qi.job_order_data IN ({placeholders})
-                    AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
-                    AND q.quotation_type IN ('Customer Quotation - Repair', 'Revised Quotation - Repair')
-                    AND q.transaction_date BETWEEN %s AND %s
-            """
-            params = wod_names + [Week_start, current_date]
-            quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
-            
-            # Process quotation data
-            
-            for row in quot_data:
-                amt = 0
-                amt = (row.am or 0) + (row.vat or 0)
-                if row.workflow_state == "Approved By Customer":
-                    q_m += amt
-                else:
-                    q_m_2 += amt
-        
-        # Calculate RSC total
-        rsc_total = q_m + q_m_2
-        
-        # Batch process for RS
-        if wods_rs:
-            wod_names = [w.name for w in wods_rs]
-            placeholders = ','.join(['%s'] * len(wod_names))
-            query = f"""
-                SELECT 
-                    qi.job_order_data,
-                    q.name as q_name,
-                   
-                    q.transaction_date as td,
-                    q.workflow_state,
-                   
-                    qi.net_amount as am,
-                    qi.tax_amount as vat
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE qi.job_order_data IN ({placeholders})
-                    AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
-                    AND q.quotation_type IN ('Customer Quotation - Repair', 'Revised Quotation - Repair')
-                    AND q.transaction_date BETWEEN %s AND %s
-            """
-            params = wod_names + [Week_start, current_date]
-            quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
-            
-            # Process quotation data
-            date_obj = datetime.strptime("01-03-2025", "%d-%m-%Y").date()
-            for row in quot_data:
-                amt = 0
-                amt = (row.am or 0) + (row.vat or 0)
-            
-                if row.workflow_state == "Approved By Customer":
-                    rs_am += amt
-                else:
-                    rs_am_2 += amt
-        
-        rs_total = rs_am + rs_am_2
-        
-        # Batch process for Quoted
-        if wods_quot:
-            wod_names = [w.name for w in wods_quot]
-            placeholders = ','.join(['%s'] * len(wod_names))
-            query = f"""
-                SELECT 
-                    qi.job_order_data,
-                    q.name as q_name,
-                   
-                    q.transaction_date as td,
-                    q.workflow_state,
-                  
-                    qi.net_amount as am,
-                    qi.tax_amount as vat,
-                    q.grand_total as gt
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE qi.job_order_data IN ({placeholders})
-                    AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
-                    AND q.quotation_type IN ('Customer Quotation - Repair', 'Revised Quotation - Repair')
-                    AND q.transaction_date BETWEEN %s AND %s
-            """
-            params = wod_names + [Week_start, current_date]
-            quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
-            
-            # Process quotation data
-            date_obj = datetime.strptime("01-03-2025", "%d-%m-%Y").date()
-            for row in quot_data:
-                amt = 0
-                amt = (row.am or 0) + (row.vat or 0)
-                
-                if row.workflow_state == "Approved By Customer":
-                    quot_am += amt
-                else:
-                    quot_am_2 += amt
-        
-        wd_total_quot = quot_am + quot_am_2
-        
-        # Batch process for Supply Orders
-        sods = frappe.get_all("Supply Order Data", {
-            "sales_person": sales_name,
-            "status": ["in", ["Delivered", "Received", "Quoted"]],
-            "posting_date": ["between", (Week_start, current_date)]
-        }, ["name", "status"])
-        
-        # Group by status for batch processing
-        sod_by_status = {'Delivered': [], 'Received': [], 'Quoted': []}
-        for sod in sods:
-            if sod.status in sod_by_status:
-                sod_by_status[sod.status].append(sod.name)
-        
-        # Process Delivered
-        if sod_by_status['Delivered']:
-            placeholders = ','.join(['%s'] * len(sod_by_status['Delivered']))
-            query = f"""
-                SELECT 
-                    qi.supply_order_data,
-                    q.name as q_name,
-                    q.transaction_date as td,
-                    q.workflow_state,
-                    qi.net_amount as am,
-                    qi.tax_amount as vat,
-                    qi.qty
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE qi.supply_order_data IN ({placeholders})
-                    AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
-                    AND q.quotation_type IN ('Customer Quotation - Supply', 'Revised Quotation - Supply')
-                    AND q.transaction_date BETWEEN %s AND %s
-            """
-            params = sod_by_status['Delivered'] + [Week_start, current_date]
-            quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
-            
-            date_obj = datetime.strptime("01-03-2025", "%d-%m-%Y").date()
-            for row in quot_data:
-                amt = 0
-                amt = (row.am or 0) + (row.vat or 0)
-                
-                if row.workflow_state == "Approved By Customer":
-                    sp_del += amt
-                else:
-                    sp_del_2 += amt
-        
-        # Process Received
-        if sod_by_status['Received']:
-            placeholders = ','.join(['%s'] * len(sod_by_status['Received']))
-            query = f"""
-                SELECT 
-                    qi.supply_order_data,
-                    q.name as q_name,
-                  
-                    q.transaction_date as td,
-                    q.workflow_state,
-                    
-                    qi.net_amount as am,
-                    qi.tax_amount as vat,
-                    qi.qty
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE qi.supply_order_data IN ({placeholders})
-                    AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
-                    AND q.quotation_type IN ('Customer Quotation - Supply', 'Revised Quotation - Supply')
-                    AND q.transaction_date BETWEEN %s AND %s
-            """
-            params = sod_by_status['Received'] + [Week_start, current_date]
-            quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
-            
-            date_obj = datetime.strptime("01-03-2025", "%d-%m-%Y").date()
-            for row in quot_data:
-                amt = 0
-                amt = (row.am or 0) + (row.vat or 0)
-                
-                if row.workflow_state == "Approved By Customer":
-                    sp_rec += amt
-                else:
-                    sp_rec_2 += amt
-        
-        # Process Quoted
-        if sod_by_status['Quoted']:
-            placeholders = ','.join(['%s'] * len(sod_by_status['Quoted']))
-            query = f"""
-                SELECT 
-                    qi.supply_order_data,
-                    q.name as q_name,
-                    
-                   
-                    q.transaction_date as td,
-                    q.workflow_state,
-                  
-                    qi.net_amount as am,
-                    qi.tax_amount as vat,
-                    qi.qty
-                FROM `tabQuotation` q
-                INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-                WHERE qi.supply_order_data IN ({placeholders})
-                    AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
-                    AND q.quotation_type IN ('Customer Quotation - Supply', 'Revised Quotation - Supply')
-                    AND q.transaction_date BETWEEN %s AND %s
-            """
-            params = sod_by_status['Quoted'] + [Week_start, current_date]
-            quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
-            
-            
-            for row in quot_data:
-                amt = 0
-                amt = (row.am or 0) + (row.vat or 0)
-                if row.workflow_state == "Approved By Customer":
-                    sp_qted += amt
-                else:
-                    sp_qted_2 += amt
-        
-        s_del_total = sp_del + sp_del_2
-        s_rec_total = sp_rec + sp_rec_2
-        sup_quoted_total = sp_qted + sp_qted_2 # Now soq_old is safe
+		# RSI - current period
+		gr = frappe.get_all("Sales Invoice", {
+			**invoice_filters,
+			'cost_center': dept_repair,
+			'posting_date': ['between', (Week_start, current_date)]
+		}, ['outstanding_amount'])
+		if gr:
+			gt = sum(inv.outstanding_amount for inv in gr)
+		
+		# RSI - old (>90 days)
+		gr2 = frappe.get_all("Sales Invoice", {
+			**invoice_filters,
+			'cost_center': dept_repair,
+			'posting_date': ['<=', cutoff_date_90]
+		}, ['outstanding_amount'])
+		if gr2:
+			gt2 = sum(inv.outstanding_amount for inv in gr2)
+		
+		# Supply Invoices - current
+		sr = frappe.get_all("Sales Invoice", {
+			**invoice_filters,
+			'cost_center': dept_supply,
+			'posting_date': ['between', (Week_start, current_date)]
+		}, ['outstanding_amount'])
+		if sr:
+			st = sum(inv.outstanding_amount for inv in sr)
+		
+		# Supply Invoices - old
+		sr2 = frappe.get_all("Sales Invoice", {
+			**invoice_filters,
+			'cost_center': dept_supply,
+			'posting_date': ['<=', cutoff_date_90]
+		}, ['outstanding_amount'])
+		if sr2:
+			st2 = sum(inv.outstanding_amount for inv in sr2)
+		
+		# Job Order Data - batch fetch
+		wo_statuses = ['RSI-Repaired and Shipped Invoiced', 'RSC-Repaired and Shipped Client', 
+					   'RS-Repaired and Shipped', 'Q-Quoted']
+		
+		# Fetch all WO data in one go for current period
+		if wo_statuses:
+			placeholders = ','.join(['%s'] * len(wo_statuses))
+			# wo_data = frappe.db.sql(f"""
+			#     SELECT 
+			#         status,
+			#         SUM(COALESCE(old_wo_q_amount, 0) + COALESCE(old_wo_vat, 0)) as old_amount
+			#     FROM `tabJob Order Data`
+			#     WHERE sales_person = %s
+			#         AND status IN ({placeholders})
+			#         AND posting_date BETWEEN %s AND %s
+			#     GROUP BY status
+			# """, tuple([sales_name] + wo_statuses + [Week_start, current_date]), as_dict=True)
+			
+			# # Process WO data for current period
+			# for w in wo_data:
+			#     if w.status == 'RSI-Repaired and Shipped Invoiced':
+			#         total_rsi_old = w.old_amount or 0
+			#     elif w.status == 'RSC-Repaired and Shipped Client':
+			#         rsc_old = w.old_amount or 0
+			#     elif w.status == 'RS-Repaired and Shipped':
+			#         rs_old = w.old_amount or 0
+			#     elif w.status == 'Q-Quoted':
+			#         q_old = w.old_amount or 0
+		
+		# Fetch old WO data (>90 days)
+		# wo_data_old = frappe.db.sql(f"""
+		#     SELECT 
+		#         SUM(COALESCE(old_wo_q_amount, 0) + COALESCE(old_wo_vat, 0)) as old_amount
+		#     FROM `tabJob Order Data`
+		#     WHERE sales_person = %s
+		#         AND status = 'RSI-Repaired and Shipped Invoiced'
+		#         AND posting_date <= %s
+		# """, (sales_name, cutoff_date_90), as_dict=True)
+		
+		# if wo_data_old and wo_data_old[0].get('old_amount'):
+		#     total_rsi_old2 = wo_data_old[0]['old_amount'] or 0
+		
+		# Supply Order Data - batch fetch
+		so_statuses = ['Invoiced', 'Delivered', 'Received', 'Quoted']
+		
+		# Fetch old SO data with currency conversion (>90 days)
+		if so_statuses:
+			placeholders = ','.join(['%s'] * len(so_statuses))
+			# so_data_old = frappe.db.sql(f"""
+			#     SELECT 
+			#         status,
+			#         so_currency_old,
+			#         COALESCE(so_old_total_amt, 0) as so_old_total_amt
+			#     FROM `tabSupply Order Data`
+			#     WHERE sales_person = %s
+			#         AND status IN ({placeholders})
+			#         AND posting_date <= %s
+			# """, tuple([sales_name] + so_statuses + [cutoff_date_90]), as_dict=True)
+			
+			# # Process old SO data with currency conversion
+			# for s in so_data_old:
+			#     amt = s.so_old_total_amt or 0
+			#     if s.so_currency_old == "USD":
+			#         exr = get_exchange_rate("USD", "AED")
+			#         if exr:
+			#             amt = amt * exr
+				
+			#     if s.status == 'Invoiced':
+			#         soinv_old2 += amt
+		
+		# Fetch current SO data
+		# so_data = frappe.db.sql(f"""
+		#     SELECT 
+		#         status,
+		#         so_currency_old,
+		#         COALESCE(so_old_total_amt, 0) as so_old_total_amt
+		#     FROM `tabSupply Order Data`
+		#     WHERE sales_person = %s
+		#         AND status IN ({placeholders})
+		#         AND posting_date BETWEEN %s AND %s
+		# """, tuple([sales_name] + so_statuses + [Week_start, current_date]), as_dict=True)
+		
+		# Process current SO data with currency conversion
+		# for s in so_data:
+		#     amt = s.so_old_total_amt or 0
+		#     if s.so_currency_old == "USD":
+		#         exr = get_exchange_rate("USD", "AED")
+		#         if exr:
+		#             amt = amt * exr
+			
+		#     if s.status == 'Invoiced':
+		#         soinv_old += amt
+		#     elif s.status == 'Delivered':
+		#         sodel_old += amt
+		#     elif s.status == 'Received':
+		#         sorec_old += amt
+		#     elif s.status == 'Quoted':
+		#         soq_old += amt  # Now this is safe because soq_old is initialized
+		
+		# Get WOD lists for detailed calculations
+		wods_rsc = frappe.get_all("Job Order Data", {
+			"sales_person": sales_name,
+			"status": "RSC-Repaired and Shipped Client",
+			"posting_date": ["between", (Week_start, current_date)]
+		}, ["name"])
+		
+		wods_rs = frappe.get_all("Job Order Data", {
+			"sales_person": sales_name,
+			"status": "RS-Repaired and Shipped",
+			"posting_date": ["between", (Week_start, current_date)]
+		}, ["name"])
+		
+		wods_quot = frappe.get_all("Job Order Data", {
+			"sales_person": sales_name,
+			"project_1": 0,
+			"status": "Q-Quoted",
+			"posting_date": ["between", (Week_start, current_date)]
+		}, ["name"])
+		
+		# Batch process quotations for WODs
+		if wods_rsc:
+			wod_names = [w.name for w in wods_rsc]
+			placeholders = ','.join(['%s'] * len(wod_names))
+			query = f"""
+				SELECT 
+					qi.job_order_data,
+					q.name as q_name,
+				   
+					q.transaction_date as td,
+					q.workflow_state,
+				   
+					qi.net_amount as am,
+					qi.tax_amount as vat
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE qi.job_order_data IN ({placeholders})
+					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
+					AND q.quotation_type IN ('Customer Quotation - Repair', 'Revised Quotation - Repair')
+					AND q.transaction_date BETWEEN %s AND %s
+			"""
+			params = wod_names + [Week_start, current_date]
+			quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
+			
+			# Process quotation data
+			
+			for row in quot_data:
+				amt = 0
+				amt = (row.am or 0) + (row.vat or 0)
+				if row.workflow_state == "Approved By Customer":
+					q_m += amt
+				else:
+					q_m_2 += amt
+		
+		# Calculate RSC total
+		rsc_total = q_m + q_m_2
+		
+		# Batch process for RS
+		if wods_rs:
+			wod_names = [w.name for w in wods_rs]
+			placeholders = ','.join(['%s'] * len(wod_names))
+			query = f"""
+				SELECT 
+					qi.job_order_data,
+					q.name as q_name,
+				   
+					q.transaction_date as td,
+					q.workflow_state,
+				   
+					qi.net_amount as am,
+					qi.tax_amount as vat
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE qi.job_order_data IN ({placeholders})
+					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
+					AND q.quotation_type IN ('Customer Quotation - Repair', 'Revised Quotation - Repair')
+					AND q.transaction_date BETWEEN %s AND %s
+			"""
+			params = wod_names + [Week_start, current_date]
+			quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
+			
+			# Process quotation data
+			date_obj = datetime.strptime("01-03-2025", "%d-%m-%Y").date()
+			for row in quot_data:
+				amt = 0
+				amt = (row.am or 0) + (row.vat or 0)
+			
+				if row.workflow_state == "Approved By Customer":
+					rs_am += amt
+				else:
+					rs_am_2 += amt
+		
+		rs_total = rs_am + rs_am_2
+		
+		# Batch process for Quoted
+		if wods_quot:
+			wod_names = [w.name for w in wods_quot]
+			placeholders = ','.join(['%s'] * len(wod_names))
+			query = f"""
+				SELECT 
+					qi.job_order_data,
+					q.name as q_name,
+				   
+					q.transaction_date as td,
+					q.workflow_state,
+				  
+					qi.net_amount as am,
+					qi.tax_amount as vat,
+					q.grand_total as gt
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE qi.job_order_data IN ({placeholders})
+					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
+					AND q.quotation_type IN ('Customer Quotation - Repair', 'Revised Quotation - Repair')
+					AND q.transaction_date BETWEEN %s AND %s
+			"""
+			params = wod_names + [Week_start, current_date]
+			quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
+			
+			# Process quotation data
+			date_obj = datetime.strptime("01-03-2025", "%d-%m-%Y").date()
+			for row in quot_data:
+				amt = 0
+				amt = (row.am or 0) + (row.vat or 0)
+				
+				if row.workflow_state == "Approved By Customer":
+					quot_am += amt
+				else:
+					quot_am_2 += amt
+		
+		wd_total_quot = quot_am + quot_am_2
+		
+		# Batch process for Supply Orders
+		sods = frappe.get_all("Supply Order Data", {
+			"sales_person": sales_name,
+			"status": ["in", ["Delivered", "Received", "Quoted"]],
+			"posting_date": ["between", (Week_start, current_date)]
+		}, ["name", "status"])
+		
+		# Group by status for batch processing
+		sod_by_status = {'Delivered': [], 'Received': [], 'Quoted': []}
+		for sod in sods:
+			if sod.status in sod_by_status:
+				sod_by_status[sod.status].append(sod.name)
+		
+		# Process Delivered
+		if sod_by_status['Delivered']:
+			placeholders = ','.join(['%s'] * len(sod_by_status['Delivered']))
+			query = f"""
+				SELECT 
+					qi.supply_order_data,
+					q.name as q_name,
+					q.transaction_date as td,
+					q.workflow_state,
+					qi.net_amount as am,
+					qi.tax_amount as vat,
+					qi.qty
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE qi.supply_order_data IN ({placeholders})
+					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
+					AND q.quotation_type IN ('Customer Quotation - Supply', 'Revised Quotation - Supply')
+					AND q.transaction_date BETWEEN %s AND %s
+			"""
+			params = sod_by_status['Delivered'] + [Week_start, current_date]
+			quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
+			
+			date_obj = datetime.strptime("01-03-2025", "%d-%m-%Y").date()
+			for row in quot_data:
+				amt = 0
+				amt = (row.am or 0) + (row.vat or 0)
+				
+				if row.workflow_state == "Approved By Customer":
+					sp_del += amt
+				else:
+					sp_del_2 += amt
+		
+		# Process Received
+		if sod_by_status['Received']:
+			placeholders = ','.join(['%s'] * len(sod_by_status['Received']))
+			query = f"""
+				SELECT 
+					qi.supply_order_data,
+					q.name as q_name,
+				  
+					q.transaction_date as td,
+					q.workflow_state,
+					
+					qi.net_amount as am,
+					qi.tax_amount as vat,
+					qi.qty
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE qi.supply_order_data IN ({placeholders})
+					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
+					AND q.quotation_type IN ('Customer Quotation - Supply', 'Revised Quotation - Supply')
+					AND q.transaction_date BETWEEN %s AND %s
+			"""
+			params = sod_by_status['Received'] + [Week_start, current_date]
+			quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
+			
+			date_obj = datetime.strptime("01-03-2025", "%d-%m-%Y").date()
+			for row in quot_data:
+				amt = 0
+				amt = (row.am or 0) + (row.vat or 0)
+				
+				if row.workflow_state == "Approved By Customer":
+					sp_rec += amt
+				else:
+					sp_rec_2 += amt
+		
+		# Process Quoted
+		if sod_by_status['Quoted']:
+			placeholders = ','.join(['%s'] * len(sod_by_status['Quoted']))
+			query = f"""
+				SELECT 
+					qi.supply_order_data,
+					q.name as q_name,
+					
+				   
+					q.transaction_date as td,
+					q.workflow_state,
+				  
+					qi.net_amount as am,
+					qi.tax_amount as vat,
+					qi.qty
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE qi.supply_order_data IN ({placeholders})
+					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer')
+					AND q.quotation_type IN ('Customer Quotation - Supply', 'Revised Quotation - Supply')
+					AND q.transaction_date BETWEEN %s AND %s
+			"""
+			params = sod_by_status['Quoted'] + [Week_start, current_date]
+			quot_data = frappe.db.sql(query, tuple(params), as_dict=True)
+			
+			
+			for row in quot_data:
+				amt = 0
+				amt = (row.am or 0) + (row.vat or 0)
+				if row.workflow_state == "Approved By Customer":
+					sp_qted += amt
+				else:
+					sp_qted_2 += amt
+		
+		s_del_total = sp_del + sp_del_2
+		s_rec_total = sp_rec + sp_rec_2
+		sup_quoted_total = sp_qted + sp_qted_2 # Now soq_old is safe
 
-        # Add row for this salesperson
-        data += '<tr>'
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % sales_name
-        
-        wd_total_quot = round(wd_total_quot)
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{wd_total_quot:,}" if wd_total_quot else "0")
-        sup_quoted_total = round(sup_quoted_total)
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{sup_quoted_total:,}" if sup_quoted_total else "0")
-        
-        rs_total = round(rs_total)
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{rs_total:,}" if rs_total else "0")
-        s_rec_total = round(s_rec_total)
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{s_rec_total:,}" if s_rec_total else "0")
-        
-        rsc_total = round(rsc_total)
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{rsc_total:,}" if rsc_total else "0")
-        s_del_total = round(s_del_total)
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{s_del_total:,}" if s_del_total else "0")
-        
-        gt = round(gt)
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{gt:,}" if gt else "0")
-        st = round(st)
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{st:,}" if st else "0")
+		# Add row for this salesperson
+		data += '<tr>'
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % sales_name
+		
+		wd_total_quot = round(wd_total_quot)
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{wd_total_quot:,}" if wd_total_quot else "0")
+		sup_quoted_total = round(sup_quoted_total)
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{sup_quoted_total:,}" if sup_quoted_total else "0")
+		
+		rs_total = round(rs_total)
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{rs_total:,}" if rs_total else "0")
+		s_rec_total = round(s_rec_total)
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{s_rec_total:,}" if s_rec_total else "0")
+		
+		rsc_total = round(rsc_total)
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{rsc_total:,}" if rsc_total else "0")
+		s_del_total = round(s_del_total)
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{s_del_total:,}" if s_del_total else "0")
+		
+		gt = round(gt)
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{gt:,}" if gt else "0")
+		st = round(st)
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{st:,}" if st else "0")
 
-        gt2 = round(gt2) 
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{round(gt2):,}" if gt2 else "0")
-        st2 = round(st2)
-        data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{st2:,}" if st2 else "0")
-        
-        # Update totals
-        total_rsi += gt
-        total_rsi2 += gt2
-        total_rsc += rsc_total
-        total_rs += rs_total
-        total_quot += wd_total_quot
+		gt2 = round(gt2) 
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{round(gt2):,}" if gt2 else "0")
+		st2 = round(st2)
+		data += '<td style="border-color:#000000;"><center><b>%s</b></center></td>' % (f"{st2:,}" if st2 else "0")
+		
+		# Update totals
+		total_rsi += gt
+		total_rsi2 += gt2
+		total_rsc += rsc_total
+		total_rs += rs_total
+		total_quot += wd_total_quot
 
-        s_invoiced += st
-        s_invoiced2 += st2
-        s_delivered += s_del_total
-        s_received += s_rec_total
-        sup_quoted_sod += sup_quoted_total
+		s_invoiced += st
+		s_invoiced2 += st2
+		s_delivered += s_del_total
+		s_received += s_rec_total
+		sup_quoted_sod += sup_quoted_total
 
-        data += '</tr>'
+		data += '</tr>'
 
-    # Add total row
-    data += '<tr>'
-    data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">Total</b></center></td>'
+	# Add total row
+	data += '<tr>'
+	data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">Total</b></center></td>'
 
-    data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_quot):,}" if total_quot else "0")
-    data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(sup_quoted_sod):,}" if sup_quoted_sod else "0")
+	data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_quot):,}" if total_quot else "0")
+	data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(sup_quoted_sod):,}" if sup_quoted_sod else "0")
 
-    data += '<td style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_rs):,}" if total_rs else "0")
-    data += '<td style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(s_received):,}" if s_received else "0")
+	data += '<td style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_rs):,}" if total_rs else "0")
+	data += '<td style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(s_received):,}" if s_received else "0")
 
-    data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_rsc):,}" if total_rsc else "0")
-    data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(s_delivered):,}" if s_delivered else "0")
+	data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_rsc):,}" if total_rsc else "0")
+	data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(s_delivered):,}" if s_delivered else "0")
 
-    data += '<td style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_rsi):,}" if total_rsi else "0")
-    data += '<td style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(s_invoiced):,}" if s_invoiced else "0")
+	data += '<td style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_rsi):,}" if total_rsi else "0")
+	data += '<td style="border-color:#000000;background-color:#145da0;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(s_invoiced):,}" if s_invoiced else "0")
 
-    data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_rsi2):,}" if total_rsi2 else "0")
-    data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(s_invoiced2):,}" if s_invoiced2 else "0")
-    data += '</tr>'
+	data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(total_rsi2):,}" if total_rsi2 else "0")
+	data += '<td style="border-color:#000000;background-color:#0e86d4;color:white;"><center><b style="color:white;">%s</b></center></td>' % (f"{round(s_invoiced2):,}" if s_invoiced2 else "0")
+	data += '</tr>'
 
-    data += '</table>'
-    data += '</div>'
-    
-    return data
+	data += '</table>'
+	data += '</div>'
+	
+	return data
 
 
 @frappe.whitelist()
@@ -2117,3 +2117,22 @@ def weekly_report(company,branch):
 
 	data += '</div>'
 	return data
+
+
+@frappe.whitelist()
+def get_technician_service_report(doc_name):
+	technician_names = set()
+	try:
+		doc = frappe.get_doc("Technical Report", doc_name)
+
+		for tech_row in doc.technician:
+			if tech_row.technician:
+				# Get the actual technician name from linked Technician ID
+				tech_name = frappe.db.get_value("Technician ID", tech_row.technician, "technician")
+				if tech_name:
+					technician_names.add(tech_name)
+
+		return ", ".join(sorted(technician_names)) if technician_names else "-"
+	except Exception as e:
+		frappe.log_error(frappe.get_traceback(), "Get Technicians Error")
+		return "-"

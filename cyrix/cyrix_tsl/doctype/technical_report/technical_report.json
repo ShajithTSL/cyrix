@@ -12,12 +12,14 @@
   "amended_from",
   "service_call_form",
   "company",
+  "service_type",
   "column_break_5hdl",
   "date",
   "customer_address",
   "address_display",
   "sales_person",
   "branch",
+  "technician",
   "detail_section",
   "sku",
   "column_break_gchk",
@@ -184,13 +186,24 @@
    "fieldname": "date",
    "fieldtype": "Date",
    "label": "Date"
+  },
+  {
+   "fieldname": "service_type",
+   "fieldtype": "Select",
+   "label": "Service Type",
+   "options": "Installation\nWarranty\nPMS\nOthers\nAnnual Maintenance Contract"
+  },
+  {
+   "fieldname": "technician",
+   "fieldtype": "Table MultiSelect",
+   "label": "Technician",
+   "options": "Technician List"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2026-04-07 10:50:10.457503",
+ "modified": "2026-04-07 13:19:33.305848",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",
@@ -207,7 +220,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

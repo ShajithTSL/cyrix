@@ -67,5 +67,6 @@ def create_service_report(source, row_id):
 			new_doc.model = item.model
 			new_doc.serial_number = item.serial_number
 			new_doc.description = item.description
+			new_doc.technician = doc.technician_name
 
 	return new_doc

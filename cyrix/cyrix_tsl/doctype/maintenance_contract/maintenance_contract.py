@@ -121,6 +121,8 @@ def create_service_call_form(source, target_doc=None):
 		},
 		target_doc,
 	)
+	doc.naming_series = ""
+	doc.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or ""
 
 	return doc
 

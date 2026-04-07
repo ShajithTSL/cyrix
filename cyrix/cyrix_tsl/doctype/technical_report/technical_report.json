@@ -70,6 +70,7 @@
    "options": "Company"
   },
   {
+   "fetch_from": "customer.customer_primary_address",
    "fieldname": "customer_address",
    "fieldtype": "Link",
    "label": "Address",
@@ -203,7 +204,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-07 13:19:33.305848",
+ "modified": "2026-04-07 14:20:09.513978",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",

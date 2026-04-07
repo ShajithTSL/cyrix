@@ -66,3 +66,29 @@ def update_jo_so_status_on_cancel(doc, method):
             bq.invoice_no = ''
             bq.invoice_date = ''
             bq.save(ignore_permissions = True)
+
+def update_invoice_percentage(doc,method):
+    for item in doc.get("items"):
+        if item.get("qi_reference"):
+            qi_doc = frappe.get_doc("Quotation Item", item.get("qi_reference"))
+            if qi_doc.qty:
+                frappe.db.set_value("Quotation Item", item.get("qi_reference"), "invoiced_qty", qi_doc.invoiced_qty + item.qty)
+
+            parent_qt = frappe.get_doc("Quotation", qi_doc.parent)
+            total_qty = sum([d.qty for d in parent_qt.items])
+            total_invoiced_qty = sum([d.invoiced_qty for d in parent_qt.items])
+            percentage = (total_invoiced_qty / total_qty) * 100 if total_qty else 0
+            frappe.db.set_value("Quotation", qi_doc.parent, "invoiced", percentage)
+
+def update_invoice_percentage_on_cancel(doc,method):
+    for item in doc.get("items"):
+        if item.get("qi_reference"):
+            qi_doc = frappe.get_doc("Quotation Item", item.get("qi_reference"))
+            if qi_doc.qty:
+                frappe.db.set_value("Quotation Item", item.get("qi_reference"), "invoiced_qty", qi_doc.invoiced_qty - item.qty)
+
+            parent_qt = frappe.get_doc("Quotation", qi_doc.parent)
+            total_qty = sum([d.qty for d in parent_qt.items])
+            total_invoiced_qty = sum([d.invoiced_qty for d in parent_qt.items])
+            percentage = (total_invoiced_qty / total_qty) * 100 if total_qty else 0
+            frappe.db.set_value("Quotation", qi_doc.parent, "invoiced", percentage)

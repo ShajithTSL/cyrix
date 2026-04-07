@@ -39,6 +39,15 @@ naming_series = {
 	},
 }
 class JobOrderData(Document):
+	def after_insert(self):
+		if self.get("maintenance_contract"):
+			doc = frappe.get_doc("Maintenance Contract", self.get("maintenance_contract"))
+			doc.append("reference_documents",{
+				"reference_name": self.name,
+				"ref_doctype": "Job Order Data"
+			})
+			doc.save(ignore_permissions=True)
+
 	def before_submit(self):
 		self.status = "NE-Need Evaluation"
 		now = datetime.now()
@@ -63,7 +72,7 @@ class JobOrderData(Document):
 				"date":now,
 			})
 
-	def on_update_after_submit(self):		
+	def on_update_after_submit(self):
 		check_for_shared_docs_on_jo(self)
 		if self.status != self.status_duration_details[-1].status:
 			ldate = self.status_duration_details[-1].date

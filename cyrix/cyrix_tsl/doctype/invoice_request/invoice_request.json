@@ -68,7 +68,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Request For",
-   "options": "\nJob Order\nSupply Order\nService"
+   "options": "\nJob Order\nSupply Order\nService\nBudgetary Quotation\nMaintenance Contract"
   },
   {
    "fieldname": "column_break_rkfva",
@@ -98,7 +98,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:doc.request_for == \"Job Order\" || doc.request_for == \"Service\"",
+   "depends_on": "eval:doc.request_for != \"Supply Order\"",
    "fieldname": "invoice_list",
    "fieldtype": "Table",
    "label": "Job Order Quotation",
@@ -140,7 +140,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-12 09:58:02.443011",
+ "modified": "2026-04-05 14:35:52.571494",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Invoice Request",

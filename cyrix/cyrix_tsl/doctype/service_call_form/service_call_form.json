@@ -21,6 +21,8 @@
   "technician_name",
   "reason",
   "status",
+  "section_break_yjzw",
+  "items",
   "schedule_visit_section",
   "service_call_schedule",
   "section_break_15",
@@ -58,13 +60,13 @@
    "fieldname": "document_type",
    "fieldtype": "Select",
    "label": "Document Type",
-   "options": "\nService\nJob Order Data\nSupply Order Data"
+   "options": "\nMaintenance Contract\nService\nJob Order Data\nSupply Order Data"
   },
   {
    "depends_on": "eval:doc.document_type != \"Service\" && doc.document_type",
    "fieldname": "related_doc",
    "fieldtype": "Dynamic Link",
-   "label": "Related JO/SO",
+   "label": "Reference Document",
    "options": "document_type"
   },
   {
@@ -170,6 +172,16 @@
    "fieldtype": "Table",
    "label": "Service Call Schedule",
    "options": "Service Call Schedule"
+  },
+  {
+   "fieldname": "section_break_yjzw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Service Call Item"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -184,7 +196,7 @@
    "link_fieldname": "service_call_form"
   }
  ],
- "modified": "2026-03-05 13:59:05.207931",
+ "modified": "2026-04-05 14:55:58.587961",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Service Call Form",

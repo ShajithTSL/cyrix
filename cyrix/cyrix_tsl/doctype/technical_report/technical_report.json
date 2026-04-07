@@ -1,12 +1,38 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-03-05 14:26:23.058998",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_1lpd",
-  "amended_from"
+  "naming_series",
+  "customer",
+  "amended_from",
+  "service_call_form",
+  "company",
+  "column_break_5hdl",
+  "date",
+  "customer_address",
+  "address_display",
+  "sales_person",
+  "branch",
+  "detail_section",
+  "sku",
+  "column_break_gchk",
+  "description",
+  "column_break_prdh",
+  "manufacturer",
+  "column_break_jjbc",
+  "model",
+  "column_break_ffen",
+  "serial_number",
+  "section_break_pioa",
+  "evaluation_result",
+  "status",
+  "column_break_ijur",
+  "service_performed"
  ],
  "fields": [
   {
@@ -22,16 +48,153 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "service_call_form",
+   "fieldtype": "Link",
+   "label": "Service Call Form",
+   "options": "Service Call Form"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "customer_address",
+   "fieldtype": "Link",
+   "label": "Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "column_break_5hdl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "Equipment Details"
+  },
+  {
+   "fieldname": "sku",
+   "fieldtype": "Link",
+   "label": "SKU",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "manufacturer",
+   "fieldtype": "Link",
+   "label": "Manufacturer",
+   "options": "Item Mfg",
+   "read_only": 1
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Item Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Link",
+   "label": "Serial Number",
+   "options": "Serial Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_prdh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jjbc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ffen",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_gchk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_pioa",
+   "fieldtype": "Section Break",
+   "label": "Service Details"
+  },
+  {
+   "fieldname": "evaluation_result",
+   "fieldtype": "Text Editor",
+   "label": "Evaluation Result"
+  },
+  {
+   "fieldname": "service_performed",
+   "fieldtype": "Text Editor",
+   "label": "Service Performed"
+  },
+  {
+   "fieldname": "column_break_ijur",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Under Observation",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Under Observation\nCompleted"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-05 14:26:23.058998",
+ "modified": "2026-04-07 10:50:10.457503",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

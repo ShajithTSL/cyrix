@@ -1,0 +1,340 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-04-01 10:54:37.899531",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "type",
+  "column_break_pzhg",
+  "naming_series",
+  "section_break_sshm",
+  "customer",
+  "address",
+  "customer_address",
+  "column_break_bzhz",
+  "incharge",
+  "incharge_name",
+  "incharge_email",
+  "incharge_phone_no",
+  "column_break_avsy",
+  "company",
+  "branch",
+  "sales_person",
+  "department",
+  "section_break_sszp",
+  "items",
+  "reference_documents",
+  "preventive_maintenance_tab",
+  "from_date",
+  "create_schedule",
+  "column_break_qz71",
+  "to_date",
+  "column_break_txhv",
+  "interval",
+  "section_break_dfjz",
+  "schedule",
+  "maintenance_details_tab",
+  "description",
+  "section_break_9yyg",
+  "amended_from",
+  "warranty_tab",
+  "quoted_date",
+  "column_break_jpka",
+  "warranty_expiry_date",
+  "connected_docs_tab",
+  "html"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_9yyg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Maintenance Contract",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "AMC\nCMC",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_sshm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer.customer_primary_address",
+   "fetch_if_empty": 1,
+   "fieldname": "address",
+   "fieldtype": "Link",
+   "label": "Address",
+   "options": "Address"
+  },
+  {
+   "depends_on": "eval:(doc.address);",
+   "fieldname": "customer_address",
+   "fieldtype": "HTML",
+   "label": "Customer Address"
+  },
+  {
+   "fieldname": "incharge",
+   "fieldtype": "Link",
+   "label": "Customer Representative",
+   "options": "Contact",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "incharge.first_name",
+   "fieldname": "incharge_name",
+   "fieldtype": "Data",
+   "label": "Customer Representative Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "incharge.email_id",
+   "fetch_if_empty": 1,
+   "fieldname": "incharge_email",
+   "fieldtype": "Data",
+   "label": "Customer Representative Email",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "incharge.mobile_no",
+   "fieldname": "incharge_phone_no",
+   "fieldtype": "Data",
+   "label": "Customer Representative Phone No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Person",
+   "options": "Sales Person",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_bzhz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_avsy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "preventive_maintenance_tab",
+   "fieldtype": "Tab Break",
+   "label": "Preventive Maintenance"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "column_break_qz71",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "column_break_txhv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Note: Interval time (In days) between the visit ",
+   "fieldname": "interval",
+   "fieldtype": "Int",
+   "label": "Interval"
+  },
+  {
+   "fieldname": "maintenance_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Maintenance Details"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Long Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "section_break_sszp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Maintenance Contract Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_pzhg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "AMC-R.YY.-\nAMC-K.YY.-\nCMC-R.YY.-\nCMC-K.YY.-"
+  },
+  {
+   "fieldname": "section_break_dfjz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "schedule",
+   "fieldtype": "Table",
+   "label": "Maintenance Contract Schedule",
+   "options": "Maintenance Contract Schedule"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Cost Center"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reference_documents",
+   "fieldtype": "Table",
+   "label": "Reference Documents",
+   "options": "Reference Documents"
+  },
+  {
+   "depends_on": "eval:doc.from_date && doc.to_date && doc.interval && doc.docstatus == 0",
+   "fieldname": "create_schedule",
+   "fieldtype": "Button",
+   "label": "Schedule"
+  },
+  {
+   "fieldname": "connected_docs_tab",
+   "fieldtype": "Tab Break",
+   "label": "Linked Docs"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "warranty_tab",
+   "fieldtype": "Tab Break",
+   "label": "Warranty Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quoted_date",
+   "fieldtype": "Date",
+   "label": "Quoted Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jpka",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "warranty_expiry_date",
+   "fieldtype": "Date",
+   "label": "Warranty Expiry Date",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "Quotation",
+   "link_fieldname": "maintenance_contract"
+  },
+  {
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "maintenance_contract"
+  },
+  {
+   "link_doctype": "Service Call Form",
+   "link_fieldname": "related_doc"
+  },
+  {
+   "link_doctype": "Job Order Data",
+   "link_fieldname": "maintenance_contract"
+  }
+ ],
+ "modified": "2026-04-05 15:07:15.336621",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Maintenance Contract",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "customer"
+}

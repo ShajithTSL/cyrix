@@ -381,7 +381,7 @@ def get_invoice_details(name):
 
 
 @frappe.whitelist()
-def get_pi(doc):
+def get_pi1(doc):
 	# posting_date,name,party_name,amount_in,total_allocated_amount,currency_paid,cost_center,references,remarks,company
 	data = ""
 	data+= '<tr><td colspan = 6><center><b style = "color:blue !important;font-size:15px">%s</b></center></td></tr>' %(doc.company)
@@ -484,3 +484,554 @@ def get_pi(doc):
 			data+='<tr><td>Attached With Supporting Document</td><td><b>%s</b>/ <a href="%s"><u><b style="color:red !important">Journal Entry Attachment</b></u></a></td></tr>'%(i.reference_name,je_attach)
 
 	return data
+
+
+import frappe
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+import calendar
+from frappe.utils import getdate, flt
+
+@frappe.whitelist()
+def get_sales_ksa(company, branch):
+	"""
+	Main function to generate sales report for KSA branches
+	"""
+	try:
+		now = datetime.now()
+		formatted_date = now.strftime("%d-%m-%Y")
+
+		months = get_last_twelve_months(now)
+		salespersons = get_salespersons_by_branch(company, branch)
+
+		if not salespersons:
+			return "<div style='color:red; padding:20px;'>No active salespersons found for this branch.</div>"
+
+		html = []
+		
+		# ===== Header with Logo and Flag =====
+		html.append(build_header(branch, formatted_date))
+		
+		# Get all data in bulk for better performance
+		all_sales_data = get_bulk_sales_data(salespersons, months)
+		
+		# Calculate cumulative totals
+		cum_totals = calculate_cumulative_totals(all_sales_data)
+		
+		# ===== Add Cumulative Table after Header =====
+		html.append(render_cumulative_section(
+			cum_totals['quoted_wo'], cum_totals['approved_wo'], 
+			cum_totals['percent_wo'], cum_totals['avg_days_wo'],
+			cum_totals['quoted_so'], cum_totals['approved_so'], 
+			cum_totals['percent_so'], cum_totals['avg_days_so']
+		))
+		
+		# Generate individual salesperson tables using pre-fetched data
+		for user_id in salespersons:
+			try:
+				salesperson_name = frappe.db.get_value("Sales Person", {"custom_user": user_id}, "name")
+				if salesperson_name:
+					salesperson_html = build_salesperson_table_optimized(
+						salesperson_name, user_id, months, all_sales_data
+					)
+					html.append(salesperson_html)
+			except Exception as e:
+				frappe.log_error(f"Error processing salesperson {user_id}: {str(e)}", "Sales Report Error")
+				continue
+		
+		return "\n".join(html)
+		
+	except Exception as e:
+		frappe.log_error(f"Error in get_sales_ksa: {str(e)}", "Sales Report Error")
+		return f"<div style='color:red; padding:20px;'>Error generating report: {str(e)}</div>"
+
+def get_bulk_sales_data(salespersons, months):
+	"""
+	Fetch all sales data in bulk with optimized queries
+	"""
+	all_data = {}
+	
+	# Prepare date ranges
+	date_ranges = []
+	for m in months:
+		date_ranges.append({
+			'from_date': m["first_day"].date(),
+			'to_date': m["last_day"].date(),
+			'month_name': m['month_name'],
+			'month_num': m['month_number']
+		})
+	
+	# Fetch data for each salesperson
+	for user_id in salespersons:
+		if not user_id:
+			continue
+			
+		all_data[user_id] = {}
+		
+		# Get WOD data
+		wod_data = get_bulk_wod_data(user_id, date_ranges)
+		
+		# Get SOD data
+		sod_data = get_bulk_sod_data(user_id, date_ranges)
+		
+		# Organize by month
+		for i, dr in enumerate(date_ranges):
+			month_key = f"{dr['month_name']}_{dr['month_num']}"
+			
+			wod_month = wod_data[i] if i < len(wod_data) else {}
+			sod_month = sod_data[i] if i < len(sod_data) else {}
+			
+			all_data[user_id][month_key] = {
+				'quoted_wo': flt(wod_month.get('quoted', 0)),
+				'approved_wo': flt(wod_month.get('approved', 0)),
+				'wo_days': int(wod_month.get('days', 0)),
+				'wo_count': int(wod_month.get('count', 0)),
+				'quoted_so': flt(sod_month.get('quoted', 0)),
+				'approved_so': flt(sod_month.get('approved', 0)),
+				'so_days': int(sod_month.get('days', 0)),
+				'so_count': int(sod_month.get('count', 0)),
+			}
+	
+	return all_data
+
+def get_bulk_wod_data(sales_person, date_ranges):
+	"""
+	Get WOD data for all months in a single optimized query
+	"""
+	if not date_ranges or not sales_person:
+		return [{'quoted': 0, 'approved': 0, 'days': 0, 'count': 0} for _ in range(len(date_ranges))]
+	
+	try:
+		conditions = []
+		params = []
+		
+		for i, dr in enumerate(date_ranges):
+			conditions.append(f"""
+				SUM(CASE WHEN q.transaction_date BETWEEN %s AND %s 
+						AND q.workflow_state = 'Approved By Customer' 
+						THEN COALESCE(qi.net_amount, 0) + COALESCE(qi.tax_amount, 0) 
+					ELSE 0 END) as approved_{i},
+				SUM(CASE WHEN q.transaction_date BETWEEN %s AND %s 
+						AND q.quotation_type = 'Customer Quotation - Repair' 
+						THEN COALESCE(qi.net_amount, 0) + COALESCE(qi.tax_amount, 0) 
+					ELSE 0 END) as quoted_{i},
+				COUNT(DISTINCT CASE WHEN q.transaction_date BETWEEN %s AND %s 
+									AND q.workflow_state = 'Approved By Customer' 
+									THEN qi.job_order_data END) as count_{i},
+				SUM(CASE WHEN q.transaction_date BETWEEN %s AND %s 
+						AND q.workflow_state = 'Approved By Customer' 
+						AND q.approval_date IS NOT NULL 
+						AND q.transaction_date IS NOT NULL
+						THEN DATEDIFF(q.approval_date, q.transaction_date) 
+					ELSE 0 END) as days_{i}
+			""")
+			
+			# Add parameters for this month (2 params per condition × 4 conditions = 8 params)
+			params.extend([dr['from_date'], dr['to_date']] * 4)
+		
+		query = f"""
+			SELECT 
+				{','.join(conditions)}
+			FROM `tabQuotation` q
+			LEFT JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = %s
+			AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+			AND q.quotation_type IN ('Customer Quotation - Repair', 'Revised Quotation - Repair')
+		"""
+		
+		# Add sales_person parameter
+		params.append(sales_person)
+		
+		result = frappe.db.sql(query, tuple(params), as_dict=True)
+		
+		if not result or not result[0]:
+			return [{'quoted': 0, 'approved': 0, 'days': 0, 'count': 0} for _ in date_ranges]
+		
+		# Process results
+		monthly_data = []
+		row = result[0]
+		
+		for i in range(len(date_ranges)):
+			approved = flt(row.get(f'approved_{i}', 0))
+			quoted = flt(row.get(f'quoted_{i}', 0))
+			count = int(row.get(f'count_{i}', 0) or 0)
+			days = int(row.get(f'days_{i}', 0) or 0)
+			
+			avg_days = round(days / count) if count > 0 else 0
+			
+			monthly_data.append({
+				'quoted': quoted,
+				'approved': approved,
+				'days': avg_days,
+				'count': count
+			})
+		
+		return monthly_data
+		
+	except Exception as e:
+		frappe.log_error(f"Error in get_bulk_wod_data for {sales_person}: {str(e)}", "WOD Data Error")
+		return [{'quoted': 0, 'approved': 0, 'days': 0, 'count': 0} for _ in date_ranges]
+
+def get_bulk_sod_data(sales_person, date_ranges):
+	"""
+	Get SOD data for all months in a single optimized query
+	"""
+	if not date_ranges or not sales_person:
+		return [{'quoted': 0, 'approved': 0, 'days': 0, 'count': 0} for _ in range(len(date_ranges))]
+	
+	try:
+		conditions = []
+		params = []
+		
+		for i, dr in enumerate(date_ranges):
+			conditions.append(f"""
+				SUM(CASE WHEN q.transaction_date BETWEEN %s AND %s 
+						AND q.workflow_state = 'Approved By Customer' 
+						THEN COALESCE(qi.net_amount, 0) + COALESCE(qi.tax_amount, 0) 
+					ELSE 0 END) as approved_{i},
+				SUM(CASE WHEN q.transaction_date BETWEEN %s AND %s 
+						AND q.quotation_type = 'Customer Quotation - Supply' 
+						THEN COALESCE(qi.net_amount, 0) + COALESCE(qi.tax_amount, 0) 
+					ELSE 0 END) as quoted_{i},
+				COUNT(DISTINCT CASE WHEN q.transaction_date BETWEEN %s AND %s 
+									AND q.workflow_state = 'Approved By Customer' 
+									THEN qi.supply_order_data END) as count_{i},
+				SUM(CASE WHEN q.transaction_date BETWEEN %s AND %s 
+						AND q.workflow_state = 'Approved By Customer' 
+						AND q.approval_date IS NOT NULL 
+						AND q.transaction_date IS NOT NULL
+						THEN DATEDIFF(q.approval_date, q.transaction_date) 
+					ELSE 0 END) as days_{i}
+			""")
+			
+			# Add parameters for this month
+			params.extend([dr['from_date'], dr['to_date']] * 4)
+		
+		query = f"""
+			SELECT 
+				{','.join(conditions)}
+			FROM `tabQuotation` q
+			LEFT JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = %s
+			AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+			AND q.quotation_type IN ('Customer Quotation - Supply', 'Revised Quotation - Supply')
+		"""
+		
+		# Add sales_person parameter
+		params.append(sales_person)
+		
+		result = frappe.db.sql(query, tuple(params), as_dict=True)
+		
+		if not result or not result[0]:
+			return [{'quoted': 0, 'approved': 0, 'days': 0, 'count': 0} for _ in date_ranges]
+		
+		# Process results
+		monthly_data = []
+		row = result[0]
+		
+		for i in range(len(date_ranges)):
+			approved = flt(row.get(f'approved_{i}', 0))
+			quoted = flt(row.get(f'quoted_{i}', 0))
+			count = int(row.get(f'count_{i}', 0) or 0)
+			days = int(row.get(f'days_{i}', 0) or 0)
+			
+			avg_days = round(days / count) if count > 0 else 0
+			
+			monthly_data.append({
+				'quoted': quoted,
+				'approved': approved,
+				'days': avg_days,
+				'count': count
+			})
+		
+		return monthly_data
+		
+	except Exception as e:
+		frappe.log_error(f"Error in get_bulk_sod_data for {sales_person}: {str(e)}", "SOD Data Error")
+		return [{'quoted': 0, 'approved': 0, 'days': 0, 'count': 0} for _ in date_ranges]
+
+def calculate_cumulative_totals(all_data):
+	"""
+	Calculate cumulative totals from bulk data
+	"""
+	cum_quoted_wo = cum_approved_wo = cum_quoted_so = cum_approved_so = 0
+	cum_wo_days = cum_so_days = 0
+	cum_wo_count = cum_so_count = 0
+	
+	for user_id, months_data in all_data.items():
+		for month_key, data in months_data.items():
+			cum_quoted_wo += data.get('quoted_wo', 0)
+			cum_approved_wo += data.get('approved_wo', 0)
+			cum_quoted_so += data.get('quoted_so', 0)
+			cum_approved_so += data.get('approved_so', 0)
+			cum_wo_days += data.get('wo_days', 0) * data.get('wo_count', 0)
+			cum_so_days += data.get('so_days', 0) * data.get('so_count', 0)
+			cum_wo_count += data.get('wo_count', 0)
+			cum_so_count += data.get('so_count', 0)
+	
+	cum_wo_percent = round((cum_approved_wo / cum_quoted_wo) * 100) if cum_quoted_wo else 0
+	cum_so_percent = round((cum_approved_so / cum_quoted_so) * 100) if cum_quoted_so else 0
+	avg_wo_days = round(cum_wo_days / cum_wo_count) if cum_wo_count > 0 else 0
+	avg_so_days = round(cum_so_days / cum_so_count) if cum_so_count > 0 else 0
+	
+	return {
+		'quoted_wo': cum_quoted_wo,
+		'approved_wo': cum_approved_wo,
+		'percent_wo': cum_wo_percent,
+		'avg_days_wo': avg_wo_days,
+		'quoted_so': cum_quoted_so,
+		'approved_so': cum_approved_so,
+		'percent_so': cum_so_percent,
+		'avg_days_so': avg_so_days
+	}
+
+def build_salesperson_table_optimized(salesperson_name, sales_user, months, all_data):
+	"""
+	Generate optimized salesperson table using pre-fetched data
+	"""
+	try:
+		rows = []
+		total_q1 = total_q2 = total_q3 = total_q4 = wo_days_total = so_days_total = 0
+		wo_count_total = so_count_total = 0
+
+		# Table header
+		rows.append(f"""
+		<tr style="background-color:#0e86d4; border-color:#000000;">
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">Sales</td>
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">Quoted Month</td>
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">Quoted</td>
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">Approved</td>
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">% of Approved</td>
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">Approval Days</td>
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">Quoted</td>
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">Approved</td>
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">% Approved</td>
+			<td style="font-weight:bold; text-align:center; color:white; font-size:10px; width:10%;">Approval Days</td>
+		</tr>
+		""")
+
+		# Monthly data rows
+		for m in months:
+			month_key = f"{m['month_name']}_{m['month_number']}"
+			data = all_data.get(sales_user, {}).get(month_key, {})
+			
+			quoted = flt(data.get('quoted_wo', 0))
+			approved = flt(data.get('approved_wo', 0))
+			quoted2 = flt(data.get('quoted_so', 0))
+			approved2 = flt(data.get('approved_so', 0))
+			wod_days = int(data.get('wo_days', 0))
+			sod_days = int(data.get('so_days', 0))
+			wo_count = int(data.get('wo_count', 0))
+			so_count = int(data.get('so_count', 0))
+
+			# Update totals
+			total_q1 += quoted
+			total_q2 += approved
+			total_q3 += quoted2
+			total_q4 += approved2
+			wo_days_total += wod_days * wo_count if wo_count > 0 else 0
+			so_days_total += sod_days * so_count if so_count > 0 else 0
+			wo_count_total += wo_count
+			so_count_total += so_count
+
+			# Calculate percentages
+			percent = round((approved / quoted) * 100) if quoted else 0
+			percent2 = round((approved2 / quoted2) * 100) if quoted2 else 0
+
+			# Get colors
+			color1 = get_color(percent)
+			color2 = get_color(percent2)
+
+			# Format numbers with thousand separators
+			quoted_str = f"{round(quoted):,}" if quoted else "0"
+			approved_str = f"{round(approved):,}" if approved else "0"
+			quoted2_str = f"{round(quoted2):,}" if quoted2 else "0"
+			approved2_str = f"{round(approved2):,}" if approved2 else "0"
+
+			rows.append(f"""
+			<tr>
+				<td style="text-align:center; border-bottom:hidden;">{salesperson_name if m['month_number'] == 6 else ''}</td>
+				<td>{m['month_name']}</td>
+				<td>{quoted_str}</td>
+				<td>{approved_str}</td>
+				<td style="background-color:{color1};"><b>{percent}%</b></td>
+				<td><b>{wod_days}</b></td>
+				<td>{quoted2_str}</td>
+				<td>{approved2_str}</td>
+				<td style="background-color:{color2};"><b>{percent2}%</b></td>
+				<td><b>{sod_days}</b></td>
+			</tr>
+			""")
+
+		# Calculate totals row
+		pct_total = round((total_q2 / total_q1) * 100) if total_q1 else 0
+		pct_total2 = round((total_q4 / total_q3) * 100) if total_q3 else 0
+
+		color = get_color(pct_total)
+		color2 = get_color(pct_total2)
+
+		avg_wo_days = round(wo_days_total / wo_count_total) if wo_count_total > 0 else 0
+		avg_so_days = round(so_days_total / so_count_total) if so_count_total > 0 else 0
+
+		# Format total numbers
+		total_q1_str = f"{round(total_q1):,}" if total_q1 else "0"
+		total_q2_str = f"{round(total_q2):,}" if total_q2 else "0"
+		total_q3_str = f"{round(total_q3):,}" if total_q3 else "0"
+		total_q4_str = f"{round(total_q4):,}" if total_q4 else "0"
+
+		rows.append(f"""
+		<tr style="font-weight:bold;">
+			<td></td>
+			<td>Total</td>
+			<td style="background-color:#D3D3D3;">{total_q1_str}</td>
+			<td style="background-color:#D3D3D3;">{total_q2_str}</td>
+			<td style="background-color:{color};">{pct_total}%</td>
+			<td style="background-color:#D3D3D3;"><b>{avg_wo_days}</b></td>
+			<td style="background-color:#D3D3D3;">{total_q3_str}</td>
+			<td style="background-color:#D3D3D3;">{total_q4_str}</td>
+			<td style="background-color:{color2};">{pct_total2}%</td>
+			<td style="background-color:#D3D3D3;"><b>{avg_so_days}</b></td>
+		</tr>
+		<tr><td colspan="10" style="text-align:center;">-</td></tr>
+		""")
+
+		return "<table border='1' style='text-align:center; border-color:#000000; width:100%; border-collapse:collapse; margin-bottom:10px;'>" + "\n".join(rows) + "</table>"
+		
+	except Exception as e:
+		frappe.log_error(f"Error building table for {salesperson_name}: {str(e)}", "Table Build Error")
+		return f"<div style='color:red;'>Error loading data for {salesperson_name}</div>"
+
+# ==================== Helper Functions ====================
+
+def get_last_twelve_months(now):
+	"""Get last 12 months with first and last days"""
+	months = []
+	for i in range(11, -1, -1):
+		dt = now - relativedelta(months=i)
+		first_day = dt.replace(day=1)
+		last_day = dt.replace(day=calendar.monthrange(dt.year, dt.month)[1])
+		months.append({
+			"month_name": dt.strftime("%B"),
+			"month_number": dt.month,
+			"year": dt.year,
+			"first_day": first_day,
+			"last_day": last_day,
+		})
+	return months
+
+def get_salespersons_by_branch(company, branch):
+	"""Get active salespersons for a branch"""
+	try:
+		# result = frappe.db.sql("""
+		#     SELECT DISTINCT sp.user
+		#     FROM `tabSales Person` sp
+		#     INNER JOIN `tabEmployee` e ON e.user_id = sp.user
+		#     WHERE sp.company = %s 
+		#       AND e.status = 'Active' 
+		#       AND e.branch = %s
+		#       AND sp.user IS NOT NULL
+		#       AND sp.user != ''
+		# """, (company, branch), as_dict=True)
+		
+		# return [r.user for r in result if r.get('user')]
+		return ["Yazeed","Jubil"]
+	except Exception as e:
+		frappe.log_error(f"Error fetching salespersons: {str(e)}", "Salespersons Error")
+		return []
+
+def build_header(branch, date_str):
+	"""Build report header with logo and branch info"""
+	branch_labels = {
+		"Riyadh - TSL- KSA": "Riyadh",
+		"Jeddah - TSL-SA": "Jeddah"
+	}
+	branch_label = branch_labels.get(branch, "Dammam")
+	
+	logo_path = ""
+	flag_path = ""
+	
+	return f"""
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td style="width:30%; border-color:#000000;"><img src="{logo_path}" width="220"></td>
+			<td style="width:40%; border-color:#000000; color:#055c9d; font-size:16px; font-weight:bold; text-align:center;">
+				TSL Company<br>WO & SO Approval Percentage by Amount
+			</td>
+			<td style="width:30%; border-color:#000000;">
+				<center><img src="{flag_path}" width="120" height="90"></center>
+			</td>
+		</tr>
+	</table>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td align="left" style="width:30%; border-right:hidden; border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
+				Branch - {branch_label}
+			</td>
+			<td align="center" style="width:40%; border-right:hidden; border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
+				Currency - SAR
+			</td>
+			<td align="right" style="width:30%; border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
+				Generation Date: {date_str}
+			</td>
+		</tr>
+	</table>
+	"""
+
+def render_cumulative_section(q_wo, a_wo, p_wo, d_wo, q_so, a_so, p_so, d_so):
+	"""Render cumulative summary section"""
+	color_wo = get_color(p_wo)
+	color_so = get_color(p_so)
+	
+	# Format numbers
+	q_wo_str = f"{q_wo:,.0f}" if q_wo else "0"
+	a_wo_str = f"{a_wo:,.0f}" if a_wo else "0"
+	q_so_str = f"{q_so:,.0f}" if q_so else "0"
+	a_so_str = f"{a_so:,.0f}" if a_so else "0"
+	
+	return f"""
+	<br>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td colspan="10" align="center" style="background-color:#0e86d4; color:white; font-size:14px; font-weight:bold; padding:8px;">
+				CUMULATIVE SUMMARY
+			</td>
+		</tr>
+		<tr style="background-color:#145da0; color:white; font-weight:bold;">
+			<td colspan="3" style="text-align:center; padding:8px; font-size:12px; border-right:1px solid white;color:white;">WORK ORDER</td>
+			<td colspan="3" style="text-align:center; padding:8px; font-size:12px;color:white;">SUPPLY ORDER</td>
+		</tr>
+		<tr style="background-color:#f0f0f0; font-weight:bold;">
+			<td style="padding:8px; text-align:center; font-size:11px;">Quoted (SAR)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">Approved (SAR)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">% Approved</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">Quoted (SAR)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">Approved (SAR)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">% Approved</td>
+		</tr>
+		<tr style="font-size:14px;">
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{q_wo_str}</td>
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{a_wo_str}</td>
+			<td style="padding:10px; text-align:center; background-color:{color_wo}; font-weight:bold;">{p_wo}%</td>
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{q_so_str}</td>
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{a_so_str}</td>
+			<td style="padding:10px; text-align:center; background-color:{color_so}; font-weight:bold;">{p_so}%</td>
+		</tr>
+	</table>
+	<br>
+	"""
+
+def get_color(percentage):
+	"""Return color based on percentage"""
+	if percentage < 60:
+		return "#FF7074"  # Red
+	elif percentage < 80:
+		return "#FFFF8F"  # Yellow
+	else:
+		return "#98FB98"  # Green
+
+# Remove old unused functions to avoid confusion
+# def calculate_salesperson_totals - Removed
+# def build_salesperson_table - Removed  
+# def get_monthly_amounts_exact_logic - Removed
+# def render_header2 - Removed (unused)
+# def render_table_header2 - Removed (unused)

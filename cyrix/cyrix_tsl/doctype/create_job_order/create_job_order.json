@@ -27,6 +27,7 @@
   "received_date",
   "is_quotation_created",
   "sts",
+  "maintenance_contract",
   "column_break_3",
   "unit_type",
   "sales_person_name",
@@ -48,6 +49,7 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
    "options": "UAE-"
   },
@@ -276,6 +278,11 @@
    "fieldname": "warranty_date",
    "fieldtype": "Date",
    "label": "Warranty Date"
+  },
+  {
+   "fieldname": "maintenance_contract",
+   "fieldtype": "Read Only",
+   "label": "Maintenance Contract"
   }
  ],
  "grid_page_length": 50,
@@ -283,7 +290,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-28 14:42:40.124018",
+ "modified": "2026-04-04 08:10:03.867795",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Job Order",

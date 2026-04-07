@@ -76,7 +76,7 @@ def update_job_order_data(dict):
 				else:
 					frappe.throw("Warranty Expired for the Job Order Data - "+str(doc.job_order_data))
 			else:
-				frappe.throw("No Warranty Period or Delivery Date is Mentioned In work order")
+				frappe.throw("No Warranty Period or Delivery Date is Mentioned in Job Order")
 	# frappe.delete_doc("Create Job Order", "Create Job Order")
 
 
@@ -135,6 +135,7 @@ def create_job_order_data(dict):
 
 		jo.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or ""
 		jo.customer = doc.customer
+		jo.maintenance_contract = doc.maintenance_contract
 		jo.sales_person = doc.sales_person
 		jo.incharge = doc.incharge
 		jo.priority_status = doc.sts

@@ -82,5 +82,25 @@ frappe.ui.form.on('Service Call Schedule', {
             row.day = day;
             frm.refresh_field("service_call_schedule")
         }
-	}
+	},
+})
+
+frappe.ui.form.on('Service Call Item', {
+    create_service_report: function(frm, cdt, cdn){
+        let row = locals[cdt][cdn]
+        console.log(row)
+        frappe.call({
+            method: "cyrix.cyrix_tsl.doctype.service_call_form.service_call_form.create_service_report",
+            args: {
+                "source":frm.doc.name,
+                "row_id": row.name
+            },
+            callback: function(r) {
+                if(r.message) {
+                    var doc = frappe.model.sync(r.message);
+                    frappe.set_route("Form", doc[0].doctype, doc[0].name);
+                }
+            }
+        });
+    }
 })

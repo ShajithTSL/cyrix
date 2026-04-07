@@ -93,7 +93,13 @@ jinja = {
 		"cyrix.custom_py.jinja.get_labour",
 		"cyrix.custom_py.jinja.get_material_cost",
 		"cyrix.custom_py.jinja.get_invoice_details",
-		"cyrix.custom_py.jinja.get_pi"
+		"cyrix.custom_py.jinja.get_pi",
+		"cyrix.custom_py.jinja.get_sales",
+		"cyrix.custom_py.jinja.sales_summary",
+		"cyrix.custom_py.jinja.weekly_report",
+
+		# "cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.get_sales"
+
 	]
 }
 

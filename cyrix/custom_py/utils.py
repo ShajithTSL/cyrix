@@ -64,7 +64,7 @@ def sendmail(self, message = None, subject = None, sender = None, recipients = N
 		print_letterhead=((attachments and attachments[0].get("print_letterhead")) or False),
 		communication=communication,
 	)
-  '  '
+	
 def get_reference_doctype(doc):
 	return doc.parenttype if doc.meta.istable else doc.doctype
 

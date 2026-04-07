@@ -381,7 +381,7 @@ def get_invoice_details(name):
 
 
 @frappe.whitelist()
-def get_pi1(doc):
+def get_pi(doc):
 	# posting_date,name,party_name,amount_in,total_allocated_amount,currency_paid,cost_center,references,remarks,company
 	data = ""
 	data+= '<tr><td colspan = 6><center><b style = "color:blue !important;font-size:15px">%s</b></center></td></tr>' %(doc.company)

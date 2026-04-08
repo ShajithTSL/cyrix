@@ -149,6 +149,10 @@ def update_budgetary_quotation_status(self, method):
 			doc = frappe.get_doc("Budgetary Quotation",i.budgetary_quotation)
 			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Management":
 				doc.status = "IQ-Internally Quoted"
+			
+			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Quoted to Customer":
+				doc.status = "Q-Quoted"
+
 			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Customer":
 				doc.status = "A-Approved"
 			doc.save(ignore_permissions=True)

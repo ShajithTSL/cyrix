@@ -177,7 +177,8 @@ doc_events = {
     "Quotation": {
 		"validate": [
             "cyrix.custom_py.quotation.fetch_item_price_details",
-            "cyrix.custom_py.quotation.update_job_order_status"
+            "cyrix.custom_py.quotation.update_job_order_status",
+            'cyrix.custom_py.quotation.update_budgetary_quotation_status'
 		],
         "on_submit": [
             "cyrix.custom_py.quotation.update_job_order_status",

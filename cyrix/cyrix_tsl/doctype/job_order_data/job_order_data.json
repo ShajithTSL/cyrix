@@ -374,8 +374,7 @@
    "allow_on_submit": 1,
    "fieldname": "attach_image",
    "fieldtype": "Data",
-   "label": "Attach Image",
-   "read_only": 1
+   "label": "Attach Image"
   },
   {
    "fieldname": "section_break_dc2tn",
@@ -702,7 +701,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-04 08:11:54.569970",
+ "modified": "2026-04-07 16:40:58.377957",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

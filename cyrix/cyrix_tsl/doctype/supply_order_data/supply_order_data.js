@@ -18,7 +18,7 @@ frappe.ui.form.on("Supply Order Data", {
 					}
 				});
 			},__('Create'));
-			frm.add_custom_button(__("Quotation"), function(){
+			frm.add_custom_button(__("Internal Quotation"), function(){
 				frappe.call({
 					method: "cyrix.cyrix_tsl.doctype.supply_order_data.supply_order_data.create_internal_quotation",
 					args: {

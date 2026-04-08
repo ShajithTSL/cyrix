@@ -216,6 +216,28 @@ frappe.ui.form.on("Create Job Order", {
 							}
 						);
 					}
+					else{
+						frappe.call({
+							method:"cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.create_job_order_data",
+							freeze: true,
+							freeze_message: __("Please Wait, Job Order Creation is in Progress ..."),
+							args:{
+								dict: cur_frm.doc
+							},
+							callback(r){
+								if(r){
+									// On success, reload the document to reflect changes
+									frm.set_value("customer",null)
+									frm.set_value("address",null)
+									frm.set_value("incharge",null)
+									frm.set_value("sales_person",null)
+									frm.clear_table("received_equipment")
+									frm.refresh_field("received_equipment")
+									cur_frm.reload_doc();
+								}   
+							}
+						})
+					}
 				});
 
 				// frappe.call({

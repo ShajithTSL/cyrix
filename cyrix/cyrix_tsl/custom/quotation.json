@@ -513,6 +513,7 @@
    "width": null
   },
   {
+   "allow_bulk_edit": 1,
    "_assign": null,
    "_comments": null,
    "_liked_by": null,

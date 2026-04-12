@@ -95,6 +95,19 @@ class JobOrderData(Document):
 				"date":now,
 			})
 			doc.save(ignore_permissions=True)
+		update_child_jo_status(self)
+
+# This function updates the status of child Job Orders to match the parent Job Order's status, except when the status is in a specific list of statuses.
+def update_child_jo_status(self):
+	if self.status not in ["Board Evaluation", "AP-Available Parts", "EP-Extra Parts", "NE-Need Evaluation", "SP-Searching Parts", "WP-Waiting Parts",
+						"TR-Technician Repair", "UE-Under Evaluation", "UTR-Under Technician Repair", "Parts Priced", "IP-Internal Extra Parts"]:
+		
+		child_jo_list = frappe.get_all("Job Order Data",{"parent_jo":self.name,"name":("!=",self.name)},"name")
+		if child_jo_list:
+			for jo in child_jo_list:
+				doc = frappe.get_doc("Job Order Data",jo.name)
+				doc.status = self.status
+				doc.save(ignore_permissions=True)
 
 def check_for_shared_docs_on_jo(self):
 	tech_user = frappe.db.get_value("Technician ID",self.technician,"user_email")

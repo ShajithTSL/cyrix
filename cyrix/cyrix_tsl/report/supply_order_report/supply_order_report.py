@@ -55,36 +55,41 @@ def get_data(filters):
 	for order in supply_orders:
 		materials = get_supply_order_materials(order.name)
 
+		first_row = True  # 👈 Track first occurrence
+
 		for material in materials:
 			quote = get_quotation_details(order.name, material.model_no)
 
 			rows.append({
-				"job_order": order.name,
-				"posting_date": order.posting_date,
-				"sales_person": order.sales_person,
-				"company": order.company,
-				"branch": order.branch,
+				"job_order": order.name if first_row else "",  # 👈 Only first row
+				"posting_date": order.posting_date if first_row else "",
+				"sales_person": order.sales_person if first_row else "",
+				"company": order.company if first_row else "",
+				"branch": order.branch if first_row else "",
 				"mfg": material.mfg,
 				"model_no": frappe.db.get_value("Item Model", material.model_no, "model"),
 				"item_name": material.item_name,
 				"quantity": material.quantity,
-				"customer": order.customer,
-				"customer_reference": order.customer_reference_number,
+				"customer": order.customer if first_row else "",
+				"customer_reference": order.customer_reference_number if first_row else "",
 				"quoted_date": quote.get("quoted_date"),
 				"approval_date": quote.get("approval_date"),
 				"quotation": quote.get("quote_name"),
 				"quoted_amount": quote.get("amount", 0),
-				"delivery_note": order.dn_no,
-				"delivery_date": order.dn_date,
-				"invoice_no": order.invoice_no,
-				"invoice_date": order.invoice_date,
-				"payment_entry_reference": order.payment_entry,
-				"payment_date": order.advance_paid_date,
-				"status": order.status,
-				"total_amount": quote.get("amount", 0),  # taxes can be added later,
+				"delivery_note": order.dn_no if first_row else "",
+				"delivery_date": order.dn_date if first_row else "",
+				"invoice_no": order.invoice_no if first_row else "",
+				"invoice_date": order.invoice_date if first_row else "",
+				"payment_entry_reference": order.payment_entry if first_row else "",
+				"payment_date": order.advance_paid_date if first_row else "",
+				"status": order.status if first_row else "",
+				"total_amount": quote.get("amount", 0),
 				"currency": frappe.get_value("Company", order.company, "default_currency")
 			})
 
+			
+			first_row = False  # 👈 After first row
+			
 	return rows
 
 

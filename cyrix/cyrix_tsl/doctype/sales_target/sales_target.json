@@ -1,0 +1,140 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "TAR-.YY.-.#####",
+ "creation": "2026-04-09 12:52:40.942188",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_eitw",
+  "amended_from",
+  "sales",
+  "company",
+  "column_break_lofp",
+  "from_date",
+  "to_date",
+  "branch",
+  "column_break_gvvl",
+  "select_khzs",
+  "invoice_target",
+  "collection_target",
+  "quotation_approval_target",
+  "section_break_kznp",
+  "target_table"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_eitw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Target",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Sales",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_lofp",
+   "fieldtype": "Column Break",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "column_break_gvvl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "select_khzs",
+   "fieldtype": "Select",
+   "options": "Sales Manager\nSales Person"
+  },
+  {
+   "fieldname": "invoice_target",
+   "fieldtype": "Float",
+   "label": "Invoice Target (Year)"
+  },
+  {
+   "fieldname": "collection_target",
+   "fieldtype": "Float",
+   "label": "Collection Target (Year)"
+  },
+  {
+   "fieldname": "quotation_approval_target",
+   "fieldtype": "Float",
+   "label": "Quotation Approval Target (Year)"
+  },
+  {
+   "fieldname": "section_break_kznp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "target_table",
+   "fieldtype": "Table",
+   "label": "Target Table",
+   "options": "Target"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-04-09 13:08:04.214418",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Sales Target",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

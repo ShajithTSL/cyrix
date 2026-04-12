@@ -31,6 +31,19 @@ frappe.ui.form.on("WO Approval", {
 			));
 		}
 
+		if (frm.doc.type == "Target Master"){
+			var print_format = "Target Master";
+			var f_name = "Target Master"
+			window.open(frappe.urllib.get_full_url("/api/method/frappe.utils.print_format.download_pdf?"
+				+ "doctype=" + encodeURIComponent("WO Approval")
+				+ "&name=" + encodeURIComponent(f_name)
+				+ "&trigger_print=1"
+				+ "&format=" + print_format
+				+ "&no_letterhead=0"
+			));
+		}
+
+
 
 		if (frm.doc.type == "Weekly Lab Report"){
 			var print_format ="Weekly Lab Report";

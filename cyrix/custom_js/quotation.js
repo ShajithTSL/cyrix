@@ -311,6 +311,8 @@ frappe.ui.form.on('Quotation', {
                                     frm.set_value("items",r.message[0])
                                     frm.set_value("quotation_type","Internal Quotation - Repair")
                                     frm.set_value("branch",r.message[1])
+                                    frm.set_value("technician_hours_spent",r.message[3])
+                                    frm.set_value("pre_evaluation",r.message[2])
                                     cur_frm.refresh_fields();
                                     cur_dialog.hide();
                                 }

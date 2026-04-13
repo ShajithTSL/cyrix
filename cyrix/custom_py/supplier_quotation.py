@@ -1,6 +1,18 @@
 import frappe
 import requests
 from erpnext.setup.utils import get_exchange_rate
+
+def on_cancel(self, method):
+    for i in self.get("items"):
+        eval_list = frappe.db.sql("""select name from `tabEvaluation Report` where job_order_data = '%s' and docstatus = 1 """%(i.job_order_data),as_dict=1)
+        for d in eval_list:
+            doc = frappe.get_doc("Evaluation Report",d.name)
+            for j in doc.get("items"):
+                if j.part == i.item_code and j.qty == i.qty:
+                    j.price_ea = 0
+                    j.total = 0
+            doc.save(ignore_permissions=True)
+
 def update_price(self,method):
     if self.job_order_data:
         evl = frappe.get_value("Evaluation Report",{"job_order_data":self.job_order_data})

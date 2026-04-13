@@ -182,6 +182,7 @@ from cyrix.custom_py.quotation import fetch_item_price_details
 def create_internal_quotation(supply_order_data):
 	doc = frappe.get_doc("Supply Order Data",supply_order_data)
 	new_doc= frappe.new_doc("Quotation")
+	new_doc.customer_reference_number = doc.customer_reference_number
 	new_doc.sales_person = doc.sales_person
 	if doc.branch:
 		d = {

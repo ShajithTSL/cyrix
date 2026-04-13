@@ -106,22 +106,74 @@ frappe.ui.form.on("Job Order Data", {
 			},__('Create'));
 		}
     },
+
 	create_internal_quotation(frm){
         if(frm.doc.docstatus == 1 && !frm.doc.parent_jo) {
-			frm.add_custom_button(__("Internal Quotation"), function(){
+
+			frm.add_custom_button(__("Internal Quotation"), function() {
 				frappe.call({
-					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_internal_quotation",
+					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.get_eval_list", // 👈 create this whitelisted method
 					args: {
-						"job_order_data": frm.doc.name
+						job_order_data: frm.doc.name
 					},
 					callback: function(r) {
-						if(r.message) {
-							var doc = frappe.model.sync(r.message);
-							frappe.set_route("Form", doc[0].doctype, doc[0].name);
+
+						let jo_list = r.message || [];
+
+						if (!jo_list.length) {
+							frappe.msgprint("No Job Orders found.");
+							return;
 						}
+
+						// ✅ Check if ANY evaluation exists for parent/children
+						frappe.db.get_list("Evaluation Report", {
+							filters: {
+								job_order_data: ["in", jo_list],
+								docstatus: 1
+							},
+							limit: 1
+						}).then(records => {
+
+							// ✅ If EXISTS → normal flow
+							if (records.length > 0) {
+								create_internal_quotation(0);
+							}
+
+							// ⚠️ If NOT EXISTS → confirm
+							else {
+								frappe.confirm(
+									"Evaluation not Completed for any related Job Order. Do you want to proceed with pre evaluation?",
+
+									function() { // YES
+										create_internal_quotation(1);
+									},
+
+									function() { // NO
+										frappe.msgprint("Please create Evaluation Report to proceed.");
+									}
+								);
+							}
+						});
 					}
 				});
-			},__('Create'));
+
+				function create_internal_quotation(pre_eval) {
+					frappe.call({
+						method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_internal_quotation",
+						args: {
+							job_order_data: frm.doc.name,
+							pre_evaluation: pre_eval
+						},
+						callback: function(res) {
+							if (res.message) {
+								var doc = frappe.model.sync(res.message);
+								frappe.set_route("Form", doc[0].doctype, doc[0].name);
+							}
+						}
+					});
+				}
+
+			}, __('Create'));
 		}
 	},
 	route_to_jo_creation(frm){

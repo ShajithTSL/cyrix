@@ -108,7 +108,6 @@ def update_job_order_status(self, method):
 					update_status(self,item, "RNA-Return Not Approved")
 				
 			if self.quotation_type in ["Internal Quotation - Repair","Internal Quotation - Supply"]:
-				frappe.log_error("Internal Quotation - Repair Triggered","Quotation Update Job Order Status")
 
 				if self.workflow_state == "Waiting For Approval":
 					update_status(self,item, "Pending Internal Approval")
@@ -288,7 +287,6 @@ def fetch_price_from_eval_report(self, method):
 	for item in self.get("items"):
 		child_eval_list = fetch_eval_list(eval_list, item.job_order_data)
 		eval_list.extend(child_eval_list)
-
 	for eval in  eval_list:
 		eval_report_name = frappe.db.exists("Evaluation Report", {"job_order_data": eval})
 		if not eval_report_name:
@@ -353,7 +351,7 @@ def fetch_price_from_eval_report(self, method):
 	total_price = 0
 	if self.technician_hours_spent:
 		for hour in self.technician_hours_spent:
-			total_price = hour.total_price if hour.total_price else 0
+			total_price += hour.total_price if hour.total_price else 0
 	# Append to parts_price table
 	if self.item_price_details:
 		total_material_cost = tsl_inventory_total + supplier_total + scrap_total
@@ -469,7 +467,9 @@ def fetch_supplier_details(self, method):
 def get_job_order_data(job_order_data):
 	job_order_data = json.loads(job_order_data)
 	item_list=[]
+	jo_list = []
 	for k in list(job_order_data):
+		jo_list.append(k)
 		er = 0
 		er = frappe.db.sql('''select 
 			sum(psi.total) as total_amount
@@ -495,10 +495,81 @@ def get_job_order_data(job_order_data):
 				"qty": i.quantity,
 				"rate":float(er)/float(i.quantity),
 			}))
-	return item_list,branch
+	pre_evaluation = check_for_evaluation(jo_list)
+	tech_hours = update_tech_hours(job_order_data)
+	return item_list, branch, pre_evaluation, tech_hours
 
+def update_tech_hours(job_order_data):
+	technician_hours_spent = []
+	for k in list(job_order_data):
+		eval_report = frappe.db.sql('''select 
+			status,
+			evaluation_time,
+			estimated_repair_time 
+		from `tabEvaluation Report` 
+			where docstatus = 1 
+			and job_order_data = %s 
+		order by creation desc limit 1''',k,as_dict =1)
 
+		if eval_report:
+			for report in eval_report:
+				evaluation_time = report.get('evaluation_time', 0)
+				estimated_repair_time = report.get('estimated_repair_time', 0)
+				total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
+				technician_hours_spent.append(frappe._dict({
+					"job_order_data": k,
+					"comments": report.get("status"),
+					"total_hours_spent": total_hours,
+					"value": 20,
+					"total_price": total_hours * 20
+				}))
 
+		# include child_jo
+		child_eval_report = frappe.db.sql('''select 
+			job_order_data,
+			status,
+			evaluation_time,
+			estimated_repair_time 
+		from `tabEvaluation Report` 
+			where docstatus = 1 
+			and parent_jo = %s 
+		''',k,as_dict =1)
+
+		if child_eval_report:
+			for child_report in child_eval_report:
+				evaluation_time = child_report.get('evaluation_time', 0)
+				estimated_repair_time = child_report.get('estimated_repair_time', 0)
+				total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
+				technician_hours_spent.append(frappe._dict({
+					"job_order_data": child_report.get("job_order_data"),
+					"comments": child_report.get("status"),
+					"total_hours_spent": total_hours,
+					"value": 20,
+					"total_price": total_hours * 20
+				}))
+
+	return technician_hours_spent
+
+def check_for_evaluation(jo_list):
+	count = 0
+	for jo in jo_list:
+		eval_report = frappe.db.exists("Evaluation Report", {"job_order_data": jo, "docstatus": 1})
+		if eval_report:
+			count += 1
+		
+		child_jo_list = frappe.get_all(
+			'Job Order Data',
+			filters={'parent_jo': jo, 'docstatus': 1},
+			fields=['name']
+		)
+		for child_jo in child_jo_list:
+			child_eval_report = frappe.db.exists("Evaluation Report", {"job_order_data": child_jo.name, "docstatus": 1})
+			if child_eval_report:
+				count += 1
+	if count > 0:
+		return 0
+	else:
+		return 1
 
 @frappe.whitelist()
 def get_supply_order_data(supply_order_data):

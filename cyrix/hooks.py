@@ -173,6 +173,9 @@ doc_events = {
 			"cyrix.custom_py.supplier_quotation.update_job_order_status",
 			"cyrix.custom_py.supplier_quotation.update_supply_order_data",
 			"cyrix.custom_py.supplier_quotation.update_budgetary_quotation"
+		],
+        "on_cancel": [
+			"cyrix.custom_py.supplier_quotation.on_cancel",
 		]
 	},
     "Quotation": {

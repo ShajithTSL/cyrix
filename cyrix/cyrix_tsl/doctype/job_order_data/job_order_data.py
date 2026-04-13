@@ -212,11 +212,60 @@ def create_evaluation_report(doc_no):
 
 	return new_doc
 
+
+def update_tech_hours(new_doc, job_order_data):
+	eval_report = frappe.db.sql('''select 
+		status,
+		evaluation_time,
+		estimated_repair_time 
+	from `tabEvaluation Report` 
+		where docstatus = 1 
+		and job_order_data = %s 
+	order by creation desc limit 1''',job_order_data,as_dict =1)
+
+	if eval_report:
+		for report in eval_report:
+			evaluation_time = report.get('evaluation_time', 0)
+			estimated_repair_time = report.get('estimated_repair_time', 0)
+			total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
+			new_doc.append("technician_hours_spent", {
+				"job_order_data": job_order_data,
+				"comments": report.get("status"),
+				"total_hours_spent": total_hours,
+				"value": 20,
+				"total_price": total_hours * 20
+			})
+
+	# include child_jo
+	child_eval_report = frappe.db.sql('''select 
+		job_order_data,
+		status,
+		evaluation_time,
+		estimated_repair_time 
+	from `tabEvaluation Report` 
+		where docstatus = 1 
+		and parent_jo = %s 
+	''',job_order_data,as_dict =1)
+
+	if child_eval_report:
+		for child_report in child_eval_report:
+			evaluation_time = child_report.get('evaluation_time', 0)
+			estimated_repair_time = child_report.get('estimated_repair_time', 0)
+			total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
+			new_doc.append("technician_hours_spent", {
+				"job_order_data": child_report.get("job_order_data"),
+				"comments": child_report.get("status"),
+				"total_hours_spent": total_hours,
+				"value": 20,
+				"total_price": total_hours * 20
+			})
+
 @frappe.whitelist()
-def create_internal_quotation(job_order_data):
+def create_internal_quotation(job_order_data, pre_evaluation):
 	doc = frappe.get_doc("Job Order Data",job_order_data)
 	new_doc= frappe.new_doc("Quotation")
 	new_doc.sales_person = doc.sales_person
+	new_doc.pre_evaluation = pre_evaluation
 	new_doc.naming_series = naming_series["Internal Quotation - Repair"][doc.branch]
 	new_doc.company = doc.company
 	new_doc.party_name = doc.customer
@@ -240,27 +289,7 @@ def create_internal_quotation(job_order_data):
 			"warehouse":fetch_repair_warehouse(doc.company,doc.branch)
 		})
 
-	eval_report = frappe.db.sql('''select 
-		status,
-		evaluation_time,
-		estimated_repair_time 
-	from `tabEvaluation Report` 
-		where docstatus = 1 
-		and job_order_data = %s 
-	order by creation desc limit 1''',job_order_data,as_dict =1)
-
-	if eval_report:
-		report = eval_report[0]
-		evaluation_time = report.get('evaluation_time', 0)
-		estimated_repair_time = report.get('estimated_repair_time', 0)
-		total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
-		new_doc.append("technician_hours_spent", {
-			"job_order_data": job_order_data,
-			"comments": report.get("status"),
-			"total_hours_spent": total_hours,
-			"value": 20,
-			"total_price": total_hours * 20
-		})
+	update_tech_hours(new_doc, job_order_data)
 	fetch_item_price_details(new_doc,method="validate")
 	return new_doc
 
@@ -407,3 +436,19 @@ def fetch_payment_details(name):
 			AND p.docstatus = 1
 	""", (name), as_dict=True)
 	return data
+
+
+@frappe.whitelist()
+def get_eval_list(job_order_data):
+	return fetch_eval_list([], job_order_data)
+
+
+def fetch_eval_list(eval_list, job_order_data):
+	child_jo_list = frappe.get_all(
+		'Job Order Data',
+		filters={'parent_jo': job_order_data, 'docstatus': 1},
+		fields=['name']
+	)
+
+	eval_list = [job_order_data] + [child['name'] for child in child_jo_list]
+	return eval_list

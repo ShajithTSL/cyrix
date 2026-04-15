@@ -300,7 +300,7 @@ def create_delivery_note(job_order_data):
 	new_doc.company = doc.company
 	new_doc.customer = doc.customer
 	new_doc.plant = doc.plant
-	new_doc.custom_sales_person = doc.sales_person
+	new_doc.sales_person = doc.sales_person
 	new_doc.branch = doc.branch
 	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")

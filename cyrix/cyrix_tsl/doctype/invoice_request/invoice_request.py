@@ -12,9 +12,11 @@ class InvoiceRequest(Document):
 	# pass
 	def on_submit(self):
 		if self.workflow_state == "Invoice Created":
+			manager = frappe.db.get_value("Branch", self.branch,"manager")
 			self.submitted_by = frappe.session.user
 			frappe.db.set_value("Invoice Request",self.name,"submitted_by",frappe.session.user)
 
+			cc = [self.sales_email, manager]
 			quotations = []
 
 			if self.invoice_list:
@@ -33,7 +35,7 @@ class InvoiceRequest(Document):
 								Please find the attached Invoice for your reference.<a href="{base_url}/app/invoice-request/{self.name}" target="_blank">Click Here</a>"""
 
 					subject = "Invoice Created for - %s"%(quotation)
-					sendmail(self, msg, subject, sender = self.submitted_by, recipients = self.requested_by, attachments = None, cc = self.sales_email )
+					sendmail(self, msg, subject, sender = self.submitted_by, recipients = self.requested_by, attachments = [{"file_url": self.get("attach")}], cc = cc )
 	
 
 @frappe.whitelist()

@@ -982,38 +982,20 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 			# Get Quoted Amount
 			# if is_2026_or_later:
 			quoted_rows = frappe.db.sql("""
-				SELECT SUM(qi.amount) as amount
+				SELECT qi.net_amount as amount
 				FROM `tabQuotation` q
 				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
 				WHERE q.sales_person = %s
 				AND qi.job_order_data = %s
 				AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
-				AND q.quotation_type IN ('Customer Quotation - Repair')
+				AND q.quotation_type IN ('Customer Quotation - Repair','Customer Quotation - R - Revised')
 				AND q.transaction_date BETWEEN %s AND %s
 			""", (sales_user,jo, from_date, to_date), as_dict=True)
 			if quoted_rows and quoted_rows[0].get("amount"):
 				total_quoted += quoted_rows[0]["amount"] or 0
 
 
-			# else:
-			#     quoted_rows = frappe.db.sql("""
-			#         SELECT q.is_multiple_quotation, q.default_discount_percentage, 
-			#                q.after_discount_cost, qi.unit_price
-			#         FROM `tabQuotation` q
-			#         INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-			#         WHERE q.sales_person = %s
-			#         AND qi.job_order_data = %s
-			#         AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
-			#         AND q.quotation_type IN ('Customer Quotation - Repair')
-			#         AND q.transaction_date BETWEEN %s AND %s
-			#     """, (sales_user, jo, from_date, to_date), as_dict=True)
-			#     if quoted_rows:
-			#         row = quoted_rows[0]
-			#         if row.get("is_multiple_quotation"):
-			#             discount = row.get("default_discount_percentage") or 0
-			#             total_quoted += row.get("unit_price", 0) * (1 - discount / 100)
-			#         else:
-			#             total_quoted += row.get("after_discount_cost") or 0
+			
 
 			# Check if approved
 			rev_check = frappe.db.sql("""
@@ -1021,8 +1003,8 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 				FROM `tabQuotation` q
 				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
 				WHERE q.sales_person = %s
-				AND q.workflow_state IN ('Approved by Customer')
-				AND q.quotation_type IN ('Customer Quotation - Repair')
+				AND q.workflow_state IN ('Approved by Customer',"Quoted to Customer","Rejected by Customer")
+				AND q.quotation_type IN ('Customer Quotation - Repair','Customer Quotation - R - Revised')
 				AND qi.job_order_data = %s
 				AND q.transaction_date BETWEEN %s AND %s
 			""", (sales_user, jo, from_date, to_date), as_dict=True)
@@ -1031,7 +1013,7 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 				# Get Approved Amount
 				# if is_2026_or_later:
 				approved_rows = frappe.db.sql("""
-					SELECT SUM(qi.amount) as amount, 
+					SELECT SUM(qi.net_amount) as amount, 
 							q.transaction_date, q.approval_date
 					FROM `tabQuotation` q
 					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
@@ -1129,44 +1111,44 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 			is_2026_or_later = year_check and year_check[0].get("trans_year", 0) >= 2026
 
 			# Get Quoted Amount
-			if is_2026_or_later:
-				quoted_rows2 = frappe.db.sql("""
-					SELECT q.name, SUM(qi.net_amount) as net_amount
-					FROM `tabQuotation` q
-					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-					WHERE q.sales_person = %s
-					AND qi.supply_order_data = %s
-					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
-					AND q.quotation_type IN ('Customer Quotation - Supply')
-					AND q.transaction_date BETWEEN %s AND %s
-					GROUP BY q.name
-				""", (sales_user, sod_no, from_date, to_date), as_dict=True)
+			# if is_2026_or_later:
+			quoted_rows2 = frappe.db.sql("""
+				SELECT q.name, SUM(qi.net_amount) as net_amount
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND qi.supply_order_data = %s
+				AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+				AND q.quotation_type IN ('Customer Quotation - Supply')
+				AND q.transaction_date BETWEEN %s AND %s
+				GROUP BY q.name
+			""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-				if quoted_rows2:
-					for row in quoted_rows2:
-						total_quoted2 += row.get("net_amount") or 0
-			else:
-				quoted_rows2 = frappe.db.sql("""
-					SELECT q.name, q.is_multiple_quotation, q.default_discount_percentage,
-						   q.after_discount_cost, qi.unit_price, qi.qty
-					FROM `tabQuotation` q
-					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-					WHERE q.sales_person = %s
-					AND qi.supply_order_data = %s
-					AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
-					AND q.quotation_type IN ('Customer Quotation - Supply')
-					AND q.transaction_date BETWEEN %s AND %s
-				""", (sales_user, sod_no, from_date, to_date), as_dict=True)
+			if quoted_rows2:
+				for row in quoted_rows2:
+					total_quoted2 += row.get("net_amount") or 0
+			# else:
+			# 	quoted_rows2 = frappe.db.sql("""
+			# 		SELECT q.name, q.is_multiple_quotation, q.default_discount_percentage,
+			# 			   q.after_discount_cost, qi.unit_price, qi.qty
+			# 		FROM `tabQuotation` q
+			# 		INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			# 		WHERE q.sales_person = %s
+			# 		AND qi.supply_order_data = %s
+			# 		AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+			# 		AND q.quotation_type IN ('Customer Quotation - Supply')
+			# 		AND q.transaction_date BETWEEN %s AND %s
+			# 	""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-				if quoted_rows2:
-					for row in quoted_rows2:
-						if row.get("is_multiple_quotation"):
-							discount = row.get("default_discount_percentage") or 0
-							dis_amt = (row.get("unit_price", 0) * discount) / 100
-							amt = (row.get("unit_price", 0) - dis_amt) * (row.get("qty") or 1)
-							total_quoted2 += amt
-						else:
-							total_quoted2 += row.get("after_discount_cost") or 0
+			# 	if quoted_rows2:
+			# 		for row in quoted_rows2:
+			# 			if row.get("is_multiple_quotation"):
+			# 				discount = row.get("default_discount_percentage") or 0
+			# 				dis_amt = (row.get("unit_price", 0) * discount) / 100
+			# 				amt = (row.get("unit_price", 0) - dis_amt) * (row.get("qty") or 1)
+			# 				total_quoted2 += amt
+			# 			else:
+			# 				total_quoted2 += row.get("after_discount_cost") or 0
 
 			# Check if approved
 			rev_check2 = frappe.db.sql("""
@@ -1175,62 +1157,62 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
 				WHERE q.sales_person = %s
 				AND q.workflow_state IN ('Approved By Customer')
-				AND q.quotation_type IN ('Customer Quotation - Supply')
+				AND q.quotation_type IN ('Customer Quotation - Supply','Customer Quotation - S - Revised')
 				AND qi.supply_order_data = %s
 				AND q.transaction_date BETWEEN %s AND %s
 			""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
 			if rev_check2:
 				# Get Approved Amount
-				if is_2026_or_later:
-					approved_rows2 = frappe.db.sql("""
-						SELECT q.name, SUM(qi.net_amount) as net_amount,
-							   q.transaction_date, q.approval_date
-						FROM `tabQuotation` q
-						INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-						WHERE q.sales_person = %s
-						AND qi.supply_order_data = %s
-						AND q.workflow_state = 'Approved By Customer'
-						AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
-						AND q.transaction_date BETWEEN %s AND %s
-						GROUP BY q.name
-					""", (sales_user, sod_no, from_date, to_date), as_dict=True)
+				# if is_2026_or_later:
+				approved_rows2 = frappe.db.sql("""
+					SELECT q.name, SUM(qi.net_amount) as net_amount,
+							q.transaction_date, q.approval_date
+					FROM `tabQuotation` q
+					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+					WHERE q.sales_person = %s
+					AND qi.supply_order_data = %s
+					AND q.workflow_state = 'Approved By Customer'
+					AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
+					AND q.transaction_date BETWEEN %s AND %s
+					GROUP BY q.name
+				""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-					if approved_rows2:
-						for row in approved_rows2:
-							if row.get("approval_date") and row.get("transaction_date"):
-								date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
-								ddf2 += date_diff
-								approved_count2 += 1
-							total_approved2 += row.get("net_amount") or 0
-				else:
-					approved_rows2 = frappe.db.sql("""
-						SELECT q.name, q.is_multiple_quotation, q.default_discount_percentage,
-							   q.after_discount_cost, qi.unit_price, qi.qty,
-							   q.transaction_date, q.approval_date
-						FROM `tabQuotation` q
-						INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-						WHERE q.sales_person = %s
-						AND qi.supply_order_data = %s
-						AND q.workflow_state = 'Approved By Customer'
-						AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
-						AND q.transaction_date BETWEEN %s AND %s
-					""", (sales_user, sod_no, from_date, to_date), as_dict=True)
+				if approved_rows2:
+					for row in approved_rows2:
+						if row.get("approval_date") and row.get("transaction_date"):
+							date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
+							ddf2 += date_diff
+							approved_count2 += 1
+						total_approved2 += row.get("net_amount") or 0
+				# else:
+				# 	approved_rows2 = frappe.db.sql("""
+				# 		SELECT q.name, q.is_multiple_quotation, q.default_discount_percentage,
+				# 			   q.after_discount_cost, qi.unit_price, qi.qty,
+				# 			   q.transaction_date, q.approval_date
+				# 		FROM `tabQuotation` q
+				# 		INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				# 		WHERE q.sales_person = %s
+				# 		AND qi.supply_order_data = %s
+				# 		AND q.workflow_state = 'Approved By Customer'
+				# 		AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
+				# 		AND q.transaction_date BETWEEN %s AND %s
+				# 	""", (sales_user, sod_no, from_date, to_date), as_dict=True)
 
-					if approved_rows2:
-						for row in approved_rows2:
-							if row.get("approval_date") and row.get("transaction_date"):
-								date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
-								ddf2 += date_diff
-								approved_count2 += 1
+				# 	if approved_rows2:
+				# 		for row in approved_rows2:
+				# 			if row.get("approval_date") and row.get("transaction_date"):
+				# 				date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
+				# 				ddf2 += date_diff
+				# 				approved_count2 += 1
 							
-							if row.get("is_multiple_quotation"):
-								discount = row.get("default_discount_percentage") or 0
-								dis_amt = (row.get("unit_price", 0) * discount) / 100
-								amt = (row.get("unit_price", 0) - dis_amt) * (row.get("qty") or 1)
-								total_approved2 += amt
-							else:
-								total_approved2 += row.get("after_discount_cost") or 0
+				# 			if row.get("is_multiple_quotation"):
+				# 				discount = row.get("default_discount_percentage") or 0
+				# 				dis_amt = (row.get("unit_price", 0) * discount) / 100
+				# 				amt = (row.get("unit_price", 0) - dis_amt) * (row.get("qty") or 1)
+				# 				total_approved2 += amt
+				# 			else:
+				# 				total_approved2 += row.get("after_discount_cost") or 0
 
 		# Calculate average days
 		wod_hrs = round(ddf1 / approved_count) if approved_count > 0 else 0
@@ -2999,3 +2981,75 @@ def get_technician_service_report(doc_name):
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), "Get Technicians Error")
 		return "-"
+
+@frappe.whitelist()
+def check_wo_ap():
+
+	wod_list = frappe.db.sql("""
+		SELECT DISTINCT qi.job_order_data as jo
+		FROM `tabQuotation` q
+		INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+		WHERE q.sales_person = "Yazeed"
+		AND q.company = "Cyrix TSL - Kuwait"
+		AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
+		AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
+		AND q.transaction_date BETWEEN %s AND %s
+		AND qi.job_order_data != ''
+	""", ("2026-03-01","2026-03-31"), as_dict=True)
+	
+	total_quoted = 0
+	total_approved = 0
+	for i in wod_list:
+		
+		# quoted_rows = frappe.db.sql("""
+		# SELECT qi.net_amount as amount,q.name as n
+		# FROM `tabQuotation` q
+		# INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+		# WHERE q.sales_person = %s
+		# AND qi.job_order_data = %s
+		# AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
+		# AND q.quotation_type IN ('Customer Quotation - Repair','Customer Quotation - R - Revised')
+		# AND q.transaction_date BETWEEN %s AND %s
+		# """, ("Yazeed",i["jo"],"2026-04-01","2026-04-30"), as_dict=True)
+		# if quoted_rows and quoted_rows[0].get("amount"):
+		# 	print(quoted_rows[0]["n"])
+		# 	print(quoted_rows[0]["amount"])
+		# 	total_quoted += quoted_rows[0]["amount"] or 0
+	
+		# Check if approved
+		rev_check = frappe.db.sql("""
+			SELECT DISTINCT qi.job_order_data,q.name
+			FROM `tabQuotation` q
+			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = "Yazeed"
+			AND q.workflow_state IN ('Approved by Customer',"Quoted to Customer","Rejected by Customer")
+			AND q.quotation_type IN ('Customer Quotation - Repair')
+			AND qi.job_order_data = %s
+			AND q.transaction_date BETWEEN %s AND %s
+		""", (i["jo"],"2026-03-01","2026-03-31"), as_dict=True)
+
+		if rev_check:
+			print(i["jo"])
+			# print(rev_check[0]["name"])
+
+			
+			approved_rows = frappe.db.sql("""
+				SELECT qi.net_amount as amount, 
+				q.transaction_date, q.approval_date,q.name
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = "Yazeed"
+				AND qi.job_order_data = %s
+				AND q.workflow_state = 'Approved by Customer'
+				AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
+				AND q.transaction_date BETWEEN %s AND %s
+				GROUP BY q.name
+			""", (i["jo"],"2026-03-01","2026-03-31"), as_dict=True)
+			
+			if approved_rows:
+				for row in approved_rows:
+					print( row.get("name"))
+					print( row.get("amount"))
+					total_approved += row.get("amount") or 0
+
+	print(total_approved)

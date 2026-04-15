@@ -20,6 +20,7 @@
   "sales_person",
   "submitted_by",
   "sales_email",
+  "attach",
   "section_break_nc32n",
   "invoice_list",
   "sod_quotation",
@@ -135,12 +136,19 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Note: Attached document will be shared in the mail",
+   "fieldname": "attach",
+   "fieldtype": "Attach",
+   "label": "Attach Invoice pdf"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-05 14:35:52.571494",
+ "modified": "2026-04-15 10:01:26.100732",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Invoice Request",

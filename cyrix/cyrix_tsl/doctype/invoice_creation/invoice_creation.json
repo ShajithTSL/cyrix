@@ -45,9 +45,9 @@
   {
    "fieldname": "attach_invoice",
    "fieldtype": "Attach",
-   "in_list_view": 1,
    "label": "Attach Invoice",
-   "make_attachment_public": 1
+   "make_attachment_public": 1,
+   "read_only": 1
   },
   {
    "fieldname": "job_order_data",
@@ -60,7 +60,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-09 08:14:07.592604",
+ "modified": "2026-04-15 09:54:35.125240",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Invoice Creation",

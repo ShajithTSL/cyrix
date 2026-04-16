@@ -168,6 +168,7 @@
    "options": "Yes\nNo"
   },
   {
+   "allow_on_submit": 1,
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Read Only",
@@ -217,7 +218,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-01 14:45:59.173654",
+ "modified": "2026-04-15 13:09:15.876957",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Table",

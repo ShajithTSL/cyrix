@@ -14,6 +14,7 @@
   "customer",
   "address",
   "customer_address",
+  "date",
   "column_break_bzhz",
   "incharge",
   "incharge_name",
@@ -40,6 +41,12 @@
   "description",
   "section_break_9yyg",
   "amended_from",
+  "contract",
+  "section_break_bvdk",
+  "column_break_yjti",
+  "contract_details",
+  "visits",
+  "calls",
   "warranty_tab",
   "quoted_date",
   "column_break_jpka",
@@ -287,6 +294,46 @@
    "fieldtype": "Date",
    "label": "Warranty Expiry Date",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contract_details",
+   "fieldtype": "Text Editor",
+   "label": "Contract Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contract",
+   "fieldtype": "Tab Break",
+   "label": "Contract"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "column_break_yjti",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "section_break_bvdk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "visits",
+   "fieldtype": "Data",
+   "label": "Visits"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "calls",
+   "fieldtype": "Data",
+   "label": "Break Down Calls"
   }
  ],
  "grid_page_length": 50,
@@ -310,7 +357,7 @@
    "link_fieldname": "maintenance_contract"
   }
  ],
- "modified": "2026-04-05 15:07:15.336621",
+ "modified": "2026-04-16 09:38:45.369169",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Maintenance Contract",

@@ -256,3 +256,123 @@ frappe.ui.form.on("Job Order Data", {
 		}
 	}
 });
+
+
+frappe.ui.form.on('Material List', {
+    update_sku(frm, cdt, cdn) {
+        var child = locals[cdt][cdn];
+		update_sku_dialog(frm, child);
+	},
+	update_serial(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		update_serial_dialog(frm, child);
+	}
+});
+
+function update_serial_dialog(frm, row) {
+	let dialog = new frappe.ui.Dialog({
+		title: "Change Serial Number",
+		fields: [
+			{
+				label: "Serial Number",
+				fieldname: "serial_no",
+				fieldtype: "Data",
+				default: row.serial_no || "",
+				reqd: 1
+			}
+		],
+		primary_action_label: "Proceed",
+		primary_action(values) {
+
+			frappe.call({
+				method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.change_serial_number",
+				args: {
+					job_order_data: frm.doc.name,
+					row_name: row.name,
+					new_serial_no: values.serial_no
+				},
+				freeze: true,
+				callback: function(r) {
+					if (!r.exc) {
+						frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+
+		}
+	});
+
+	dialog.show();
+}
+
+function update_sku_dialog(frm, row) {
+    let dialog = new frappe.ui.Dialog({
+        title: "Change Item Details",
+        fields: [
+            {
+                label: "Item Name",
+                fieldname: "item_name",
+                fieldtype: "Data",
+                default: row.item_name || "",
+                reqd: 1
+            },
+            {
+                label: "Item Model",
+                fieldname: "model",
+                fieldtype: "Link",
+                options: "Item Model",
+                default: row.model_no || "",
+                reqd: 1
+            },
+            {
+                label: "Manufacturer",
+                fieldname: "mfg",
+                fieldtype: "Link",
+                options: "Item Mfg",
+                default: row.mfg || "",
+                reqd: 1
+            },
+            {
+                label: "Description",
+                fieldname: "description",
+                fieldtype: "Small Text",
+                default: row.item_name || ""
+            },
+            {
+                label: "Action",
+                fieldname: "action",
+                fieldtype: "Select",
+                options: [
+                    { label: "Create New Item", value: "create" },
+                    { label: "Update Existing Item (If Not Used)", value: "update" }
+                ],
+                default: "create",
+                reqd: 1
+            }
+        ],
+        primary_action_label: "Proceed",
+        primary_action(values) {
+
+            frappe.call({
+                method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.change_or_create_item",
+                args: {
+                    job_order_data: frm.doc.name,
+                    row_name: row.name,
+                    values: values
+                },
+                freeze: true,
+                callback: function(r) {
+                    if (!r.exc) {
+                        frm.reload_doc();
+                        dialog.hide();
+                    }
+                }
+            });
+
+        }
+    });
+
+    dialog.show();
+}
+

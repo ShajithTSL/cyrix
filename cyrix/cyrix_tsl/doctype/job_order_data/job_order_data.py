@@ -452,3 +452,149 @@ def fetch_eval_list(eval_list, job_order_data):
 
 	eval_list = [job_order_data] + [child['name'] for child in child_jo_list]
 	return eval_list
+
+
+@frappe.whitelist()
+def get_or_create_item(i):
+
+	new_doc = frappe.new_doc('Item')
+	new_doc.item_name = i['item_name']
+	new_doc.item_group = "Equipments"
+	new_doc.description = i['item_name']
+	new_doc.model = i['model']
+	new_doc.is_stock_item = 1
+	new_doc.mfg = i['mfg']
+	new_doc.insert(ignore_permissions=True)
+
+	return new_doc.name
+
+@frappe.whitelist()
+def change_or_create_item(job_order_data, row_name, values):
+
+	values = frappe.parse_json(values)
+
+	jod = frappe.get_doc("Job Order Data", job_order_data)
+	row = next(d for d in jod.material_list if d.name == row_name)
+
+	old_item = row.item_code
+
+	# 1️⃣ Check if stock entry exists
+	stock_entry = frappe.db.get_value(
+		"Stock Entry",
+		{"job_order_data": jod.name, "docstatus": 1},
+		"name"
+	)
+	
+	if values.get("action") == "update":
+		# Safe to update
+		item = frappe.get_doc("Item", old_item)
+		item.model = values.get("model")
+		item.mfg = values.get("mfg")
+		item.description = values.get("description")
+		item.save(ignore_permissions=True)
+
+		frappe.msgprint("Item updated successfully.")
+		return
+
+	# -------- CREATE NEW ITEM -------- #
+
+	new_item = get_or_create_item(values)
+
+	# Cancel linked stock entry if exists
+	stock_entry = frappe.db.get_value(
+		"Stock Entry",
+		{"job_order_data": jod.name, "docstatus": 1},
+		"name"
+	)
+
+	if stock_entry:
+		se = frappe.get_doc("Stock Entry", stock_entry)
+		se.cancel()
+
+	# Update WOD row
+	row.item_code = new_item
+	row.model = values.get("model")
+	row.mfg = values.get("mfg")
+
+	jod.save(ignore_permissions=True)
+
+	
+	eval_list = frappe.db.get_list("Evaluation Report",{"job_order_data":jod.name},["name"])
+	for eval in eval_list:
+		er = frappe.get_doc("Evaluation Report",eval.name)
+		for item in er.evaluation_details:
+			if item.item == old_item:
+				item.item = new_item
+				item.model = values.get("model")
+				item.manufacturer = values.get("mfg")
+				item.serial_no = row.get("serial_no")
+		er.save(ignore_permissions=True)
+
+	
+	
+	frappe.errprint(f"Updated JOD {jod.name} row {row.name} with new item {new_item}")
+	# Recreate stock entry
+	if stock_entry:
+		create_stock_entry_jod(jod.name)
+
+	frappe.msgprint("New Item created and replaced successfully.")
+
+def create_stock_entry_jod(jod_name):
+	jod = frappe.get_doc("Job Order Data", jod_name)
+	new_doc = frappe.new_doc("Stock Entry")
+	new_doc.posting_date = jod.creation
+	new_doc.set_posting_time = 1
+	new_doc.stock_entry_type = "Material Receipt"
+	new_doc.company = jod.company
+	new_doc.branch = jod.branch
+	new_doc.job_order_data = jod.name
+	for i in jod.material_list:
+		new_doc.append("items", {
+			't_warehouse': jod.repair_warehouse,
+			'item_code': i.item_code,
+			'item_name': i.item_name,
+			'description': i.item_name,
+			# 'serial_no': i.serial_no,
+			'custom_serial_no': i.serial_no,
+			'qty': i.quantity,
+			'uom': frappe.db.get_value("Item", i.item_code, 'stock_uom'),
+			'conversion_factor': 1,
+			'allow_zero_valuation_rate': 1
+		})
+		sn_exist = frappe.db.exists("Serial Number",i.serial_no)
+		if sn_exist:
+			sn_doc = frappe.get_doc("Serial Number",i.serial_no)
+			sn_doc.serial_no = i.serial_no or ''
+			sn_doc.item_code = i.item_code
+			sn_doc.status = "Active"
+			sn_doc.save(ignore_permissions=True)
+	new_doc.save(ignore_permissions=True)
+	if new_doc.name:
+		new_doc.submit()
+
+
+@frappe.whitelist()
+def change_serial_number(job_order_data, row_name, new_serial_no):
+
+	jod = frappe.get_doc("Job Order Data", job_order_data)
+	row = next(d for d in jod.material_list if d.name == row_name)
+
+	old_serial_no = row.serial_no
+	row.serial_no = new_serial_no
+	jod.save(ignore_permissions=True)
+	if old_serial_no and old_serial_no != new_serial_no:
+		# try deleting old serial number and if not possible, update it with new serial number
+		frappe.db.delete("Serial Number", old_serial_no)
+		sn_doc = frappe.new_doc("Serial Number")
+		sn_doc.item_code = row.item_code
+		sn_doc.status = "Active"
+		sn_doc.company = jod.company
+		sn_doc.serial_no = new_serial_no
+		sn_doc.save(ignore_permissions=True)
+
+		frappe.msgprint("Serial Number updated successfully.")
+
+	
+		eval_list = frappe.db.get_list("Evaluation Report",{"job_order_data":jod.name},["name"])
+		for eval in eval_list:
+			frappe.db.set_value("Evaluation Item",{"parent":eval.name,"item":row.item_code,"serial_no":old_serial_no},"serial_no",new_serial_no)

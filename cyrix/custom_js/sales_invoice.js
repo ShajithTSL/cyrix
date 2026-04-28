@@ -53,6 +53,7 @@ frappe.ui.form.on('Sales Invoice', {
             }
             else{               
                 const naming_series = {
+         
                     "Kuwait": "INV-K.YY.-",
                     "Dammam": "INV-D.YY.-",
                     "Riyadh": "INV-R.YY.-",

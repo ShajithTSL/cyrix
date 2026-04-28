@@ -44,7 +44,7 @@
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
-   "options": "\nWO Approval\nSales Summary\nWeekly Lab Report\nTarget Master"
+   "options": "\nWO Approval\nSales Summary\nWeekly Lab Report\nTarget Master\nSales Weekly Summary\nSales Daily Summary"
   }
  ],
  "grid_page_length": 50,
@@ -52,7 +52,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-11 12:30:04.477309",
+ "modified": "2026-04-22 12:29:26.133763",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "WO Approval",

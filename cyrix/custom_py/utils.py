@@ -85,6 +85,8 @@ def update_jd():
 	""")
 
 	frappe.db.commit()
+
+	
 # @frappe.whitelist()
 # def dlt_jo():
 # 	frappe.db.sql("""

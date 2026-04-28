@@ -29,10 +29,9 @@
   {
    "columns": 2,
    "fieldname": "supplier_quotation",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Supplier Quotation",
-   "options": "Supplier Quotation"
+   "label": "Supplier Quotation"
   },
   {
    "fieldname": "supplier",
@@ -82,7 +81,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-30 09:25:08.492080",
+ "modified": "2026-04-23 09:47:07.457501",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supplier Details",

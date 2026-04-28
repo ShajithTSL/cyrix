@@ -403,7 +403,7 @@ function convert_warranty(frm) {
     if (!frm.doc.warranty_duration || !frm.doc.warranty_type){
         frm.set_value("warranty_months",0);
         return;
-    } 
+    }
 
     if (frm.doc.warranty_type === "Years") {
         frm.set_value("warranty_months", frm.doc.warranty_duration * 12);

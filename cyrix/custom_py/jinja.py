@@ -1287,14 +1287,14 @@ def sales_summary(from_date, to_date, company,brnch):
 
 	# Header with logo
 	data += '<td colspan="3" style="border-color:#000000;"><img src="/files/TSL LOGO.png" align="left" width="250"></td>'
-	data += '<td colspan="5" style="border-color:#000000;"><h2><center><b style="color:#055c9d;">TSL Company<br>Branch - %s<br>Currency - %s</b></center></h2></td>' % (brnch,"KWD")
+	data += '<td colspan="5" style="border-color:#000000;"><h2><center><b style="color:#055c9d;">Cyrix TSL<br>Branch - %s<br>Currency - %s</b></center></h2></td>' % (brnch,"KWD")
 	
 	
 	# Flag based on company
 	if company == "Cyrix TSL - Kuwait":
-		data += '<td colspan="3" style="border-color:#000000;"><center><img src="/files/kuwait flag.jpg" width="200"></center></td>'
+		data += '<td colspan="3" style="border-color:#000000;"><center><img src="/files/kuwait flag.jpg" width="150"></center></td>'
 	elif company == "TSL COMPANY - UAE":
-		data += '<td colspan="3" style="border-color:#000000;"><center><br><img src="/files/Flag_of_the_United_Arab_Emirates.svg.jpg" width="140"></center></td>'
+		data += '<td colspan="3" style="border-color:#000000;"><center><br><img src="/files/Flag_of_the_United_Arab_Emirates.svg.jpg" width="80"></center></td>'
 
 	data += '</tr>'
 
@@ -2101,130 +2101,91 @@ def weekly_report(company,branch):
 	return data
 
 
-# import frappe
+import frappe
 
-# @frappe.whitelist()
-# def get_sales_details3(company=None):
-# 	"""
-# 	Get sales persons grouped by branch for a given company
-# 	"""
+@frappe.whitelist()
+def get_sales_details3(company=None):
+	"""
+	Get sales persons grouped by branch for a given company
+	"""
+	# Sales persons to exclude from the report
+	excluded = [
+		"Sales Team", "Walkin", "Sales", "OMAR", "Abdullah",
+		"Karoline", "Nour", "Samar Moussa", "Rana Ali",
+		"Salma Zaza ", "Nidhin", "MOHAMED MOSAAD ALY DIAB",
+		"Amro Reda Emam Mohamed", "Michael Veniston",
+		"TSL", "Mazz", "Dilshad", "Dhinesh", "Hadeel Suleiman"
+	]
 
-# 	# ------------------ BRANCHES ------------------
-# 	# branch_filters = {}
-# 	# if company:
-# 	# 	branch_filters["custom_company"] = company
+	# Get all active sales persons with their branch (excluding the excluded list)
+	# Note: Add a filter for status="Active" if you have an status field
+	sales = frappe.get_all(
+		"Sales Person",
+		fields=["name", "user", "custom_branch"],
+		filters={
+			"name": ["not in", excluded],
+			# "status": "Active"  # Uncomment if you have a status field
+		},
+		order_by="name"
+	)
 
-# 	branches = frappe.get_all("Branch",{"name":})
+	# Group sales persons by branch
+	branch_map = {}
 
-# 	# ✅ Custom order (FIXED syntax)
-# 	custom_order = [
-# 		"Kuwait",
-# 		"Dubai",
-# 		"Riyadh"
-# 	]
+	for sp in sales:
+		# Skip if no branch assigned
+		if not sp.custom_branch:
+			continue
+		
+		# Get username and clean it
+		username = ""
+		if sp.user:
+			user = frappe.get_value("User", {"name": sp.user}, ["username"])
+			if user:
+				username = user
+		
+		# If username is empty, use sales person name (cleaned)
+		if not username:
+			username = sp.name
+		
+		# Remove "Mr." and "Mr " from the name
+		username = username.replace("Mr.", "").replace("Mr ", "").strip()
+		
+		# Add sales person to branch
+		if sp.custom_branch not in branch_map:
+			branch_map[sp.custom_branch] = []
+		
+		branch_map[sp.custom_branch].append({
+			"sales_name": username,
+			"name": sp.name,
+			"user_id": sp.user
+		})
 
-# 	def sort_branches_custom(branch_list):
-# 		order_dict = {name: idx for idx, name in enumerate(custom_order)}
-# 		return sorted(
-# 			branch_list,
-# 			key=lambda x: (
-# 				order_dict.get(x["name"], len(custom_order)),
-# 				x["name"]
-# 			)
-# 		)
+	# Function to get branch order priority
+	def get_branch_order(branch_name):
+		order_map = {
+			"kuwait": 1,
+			"dubai": 2,
+			"riyadh": 3,
+			"dammam": 4,
+			"jeddah": 5
+		}
+		
+		name_lower = branch_name.lower()
+		for keyword, priority in order_map.items():
+			if keyword in name_lower:
+				return priority
+		return 999  # High number for other branches
 
-# 	branches = sort_branches_custom(branches)
-# 	allowed_branches = [b.name for b in branches]
+	# Sort branches by custom order
+	sorted_branch_keys = sorted(branch_map.keys(), key=lambda x: get_branch_order(x))
 
-# 	# ------------------ EMPLOYEES ------------------
-# 	employees = frappe.get_all(
-# 		"Employee",
-# 		fields=["user_id", "branch"],
-# 		filters={"branch": ["in", allowed_branches]}
-# 	)
-
-# 	# Map user → branch
-# 	user_branch_map = {
-# 		e.user_id: e.branch
-# 		for e in employees
-# 		if e.user_id and e.branch
-# 	}
-
-# 	# ------------------ EXCLUDED SALES PERSONS ------------------
-# 	excluded = [
-# 		"Sales Team", "Walkin", "Sales", "OMAR", "Abdullah",
-# 		"Karoline", "Nour", "Samar Moussa", "Rana Ali",
-# 		"Salma Zaza ", "Nidhin", "MOHAMED MOSAAD ALY DIAB",
-# 		"Amro Reda Emam Mohamed", "Michael Veniston",
-# 		"TSL", "Mazz", "Dilshad", "Dhinesh", "Hadeel Suleiman"
-# 	]
-
-# 	# ------------------ SALES PERSON ------------------
-# 	sales = frappe.get_all(
-# 		"Sales Person",
-# 		fields=["name", "user"],  # ✅ correct field
-# 		filters={"name": ["not in", excluded]},
-# 		order_by="name"
-# 	)
-
-# 	# ------------------ GROUP BY BRANCH ------------------
-# 	branch_map = {}
-
-# 	for sp in sales:
-# 		branch = user_branch_map.get(sp.user)  # ✅ correct mapping
-# 		if not branch:
-# 			continue
-
-# 		# Get username
-# 		username = ""
-# 		if sp.user:
-# 			username = frappe.get_value("User", sp.user, "username") or ""
-
-# 		# Fallback
-# 		if not username:
-# 			username = sp.name
-
-# 		# Clean name
-# 		username = username.replace("Mr.", "").replace("Mr ", "").strip()
-
-# 		# Add to branch map
-# 		if branch not in branch_map:
-# 			branch_map[branch] = []
-
-# 		branch_map[branch].append({
-# 			"sales_name": username,
-# 			"name": sp.name,
-# 			"user_id": sp.user
-# 		})
-
-# 	# ------------------ SORT BRANCHES ------------------
-# 	def get_branch_order(branch_name):
-# 		order_map = {
-# 			"kuwait": 1,
-# 			"dubai": 2,
-# 			"riyadh": 3
-# 		}
-
-# 		name_lower = branch_name.lower()
-# 		for key, val in order_map.items():
-# 			if key in name_lower:
-# 				return val
-# 		return 999
-
-# 	sorted_branch_keys = sorted(
-# 		branch_map.keys(),
-# 		key=lambda x: get_branch_order(x)
-# 	)
-
-# 	# ------------------ FINAL OUTPUT ------------------
-# 	return [
-# 		{
-# 			"branch": branch,
-# 			"sales_persons": branch_map[branch]
-# 		}
-# 		for branch in sorted_branch_keys
-# 	]
-
+	# Return sorted list of branches with their sales persons
+	return [
+		{"branch": b, "sales_persons": branch_map[b]}
+		for b in sorted_branch_keys
+	]
+	
 @frappe.whitelist()
 def target_master(branch=None, company=None, from_date=None, to_date=None, sales_person=None):
 	from frappe.utils import get_year_start, nowdate, getdate
@@ -2258,8 +2219,6 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 		else:
 			return "color: #e74c3c; font-weight: bold;"  # Red
 
-	
-	
 	# Helper function to extract country name from branch
 	def get_country_from_branch(branch_name):
 		# Extract first word before any separator
@@ -2335,6 +2294,7 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 		.main-table-container {
 			width: 100%;
 			margin-bottom: 20px;
+			overflow-x: auto;
 		}
 		.main-table {
 			width: 100%;
@@ -2393,6 +2353,15 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 		.cumulative-bg {
 			background: #e8f4fc;
 		}
+		.branch-header-table {
+			width: 100%;
+			border: none;
+			margin-bottom: 10px;
+		}
+		.branch-header-table td {
+			border: none;
+			padding: 5px;
+		}
 	</style>
 	"""
 
@@ -2421,214 +2390,6 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 	# Get sales persons grouped by branch
 	sales_data = get_sales_details3(company)
 	
-	# Store branch summary data for cumulative table
-	branch_summary = []
-	
-	# Store overall totals across all branches
-	overall_total_app = overall_total_target_app = 0
-	overall_total_inv = overall_total_target_inv = 0
-	overall_total_col = overall_total_target_col = 0
-	
-	# First, collect all branch data for the cumulative table
-	for br in sales_data:
-		# Filter by branch if specified
-		if branch and branch != br["branch"]:
-			continue
-		
-		# Check if this branch has the selected sales person
-		has_selected_sales_person = False
-		if sales_person:
-			# Check if the selected sales person exists in this branch
-			for sp in br["sales_persons"]:
-				if sp["sales_name"] == sales_person:
-					has_selected_sales_person = True
-					break
-			# Skip this branch if it doesn't have the selected sales person
-			if not has_selected_sales_person:
-				continue
-		
-		# Extract country name from branch
-		country_name = get_country_from_branch(br["branch"])
-		
-		# Calculate totals for this branch
-		total_inv = total_target_inv = 0
-		total_app = total_target_app = 0
-		total_col = total_target_col = 0
-		
-		for sp in br["sales_persons"]:
-			# Filter by sales person if specified
-			if sales_person and sales_person != sp["sales_name"]:
-				continue
-
-			sales_person_name = sp["name"]
-			
-			# Get sales targets for this sales person
-			sales_target = frappe.db.sql("""
-				SELECT quotation_approval_target, invoice_target, collection_target
-				FROM `tabSales Target`
-				WHERE sales = %s
-			""", sales_person_name, as_dict=True)
-
-			# Calculate targets based on months range
-			if sales_target:
-				target = sales_target[0]
-				# Approval target
-				monthly_approval_target = round(((target.quotation_approval_target or 0) / 12) * months_range) if target.quotation_approval_target else 0
-				# Invoice target
-				monthly_invoice_target = round(((target.invoice_target or 0) / 12) * months_range) if target.invoice_target else 0
-				# Collection target
-				monthly_collection_target = round(((target.collection_target or 0) / 12) * months_range) if target.collection_target else 0
-			else:
-				monthly_approval_target = monthly_invoice_target = monthly_collection_target = 0
-
-			# Get actual values
-			# 1. Approval (Quotations)
-			app_result = frappe.db.sql("""
-				SELECT SUM(grand_total) as total
-				FROM `tabQuotation`
-				WHERE sales_rep=%s and workflow_state in ("Approved By Customer")
-				AND transaction_date BETWEEN %s AND %s
-			""", (sp["user_id"], from_date, to_date), as_dict=True)
-			app = app_result[0]["total"] or 0 if app_result else 0
-
-			# 2. Invoicing (Sales Invoices)
-			inv_result = frappe.db.sql("""
-				SELECT SUM(grand_total) as total
-				FROM `tabSales Invoice`
-				WHERE sales_rep=%s and status in ("Draft","Paid","Partly Paid","Unpaid","Overdue","Return","Credit Note Issued")
-				AND posting_date BETWEEN %s AND %s
-			""", (sp["user_id"], from_date, to_date), as_dict=True)
-			inv = inv_result[0]["total"] or 0 if inv_result else 0
-
-			# 3. Collection (Payments)
-			col_result = frappe.db.sql("""
-				SELECT SUM(si.grand_total) as total
-				FROM `tabSales Invoice` si
-				JOIN `tabPayment Entry Reference` per
-					ON per.reference_name = si.name
-				JOIN `tabPayment Entry` pe
-					ON pe.name = per.parent
-				WHERE si.sales_rep=%s
-				AND pe.posting_date BETWEEN %s AND %s
-			""", (sp["user_id"], from_date, to_date), as_dict=True)
-			col = col_result[0]["total"] or 0 if col_result else 0
-
-			# Update totals
-			total_app += app
-			total_target_app += monthly_approval_target
-			total_inv += inv
-			total_target_inv += monthly_invoice_target
-			total_col += col
-			total_target_col += monthly_collection_target
-		
-		# Calculate total percentages for the branch
-		total_pct_app = round((total_app / total_target_app) * 100) if total_target_app else 0
-		total_pct_inv = round((total_inv / total_target_inv) * 100) if total_target_inv else 0
-		total_pct_col = round((total_col / total_target_col) * 100) if total_target_col else 0
-		
-		# Store branch summary data
-		branch_summary.append({
-			"branch_name": country_name,
-			"full_branch_name": br["branch"],
-			"total_app": total_app,
-			"total_target_app": total_target_app,
-			"total_pct_app": total_pct_app,
-			"total_inv": total_inv,
-			"total_target_inv": total_target_inv,
-			"total_pct_inv": total_pct_inv,
-			"total_col": total_col,
-			"total_target_col": total_target_col,
-			"total_pct_col": total_pct_col
-		})
-		
-		# Update overall totals
-		overall_total_app += total_app
-		overall_total_target_app += total_target_app
-		overall_total_inv += total_inv
-		overall_total_target_inv += total_target_inv
-		overall_total_col += total_col
-		overall_total_target_col += total_target_col
-
-	# ===================================
-	# CUMULATIVE SUMMARY TABLE (All Branches) - AT THE TOP
-	# ===================================
-	if not branch and not sales_person and len(branch_summary) > 1:
-		data += f'''
-		<div class="branch-title">
-			Cumulative Summary ({company if company else "TSL Holdings"})
-		</div>
-		<div class="main-table-container">
-			<table class="main-table">
-				<tr>
-					<th rowspan="1" class="sales-person">Branch</th>
-					<th colspan="3">Approval</th>
-					<th colspan="3">Invoicing</th>
-					<th colspan="3">Collection</th>
-				</tr>
-				<tr class="section-header">
-					<td></td>
-					<td>Actual</td>
-					<td>Target</td>
-					<td>%</td>
-					<td>Actual</td>
-					<td>Target</td>
-					<td>%</td>
-					<td>Actual</td>
-					<td>Target</td>
-					<td>%</td>
-				</tr>
-		'''
-		
-		# Add rows for each branch
-		for branch_data in branch_summary:
-			# Get colors for each percentage
-			app_color = get_percentage_color(branch_data["total_pct_app"])
-			inv_color = get_percentage_color(branch_data["total_pct_inv"])
-			col_color = get_percentage_color(branch_data["total_pct_col"])
-			
-			data += f'''
-			<tr>
-				<td class="sales-person">{branch_data["branch_name"]}</td>
-				<td>{format_number(branch_data["total_app"])}</td>
-				<td>{format_number(branch_data["total_target_app"])}</td>
-				<td class="percentage-cell" style="{app_color}">{branch_data["total_pct_app"]}%</td>
-				<td>{format_number(branch_data["total_inv"])}</td>
-				<td>{format_number(branch_data["total_target_inv"])}</td>
-				<td class="percentage-cell" style="{inv_color}">{branch_data["total_pct_inv"]}%</td>
-				<td>{format_number(branch_data["total_col"])}</td>
-				<td>{format_number(branch_data["total_target_col"])}</td>
-				<td class="percentage-cell" style="{col_color}">{branch_data["total_pct_col"]}%</td>
-			</tr>
-			'''
-		
-		# Calculate overall percentages
-		overall_pct_app = round((overall_total_app / overall_total_target_app) * 100) if overall_total_target_app else 0
-		overall_pct_inv = round((overall_total_inv / overall_total_target_inv) * 100) if overall_total_target_inv else 0
-		overall_pct_col = round((overall_total_col / overall_total_target_col) * 100) if overall_total_target_col else 0
-		
-		# Get colors for overall percentages
-		overall_app_color = get_percentage_color(overall_pct_app)
-		overall_inv_color = get_percentage_color(overall_pct_inv)
-		overall_col_color = get_percentage_color(overall_pct_col)
-		
-		# Add overall total row
-		data += f'''
-		<tr class="total-row">
-			<td><strong>Overall Total</strong></td>
-			<td><strong>{format_number(overall_total_app)}</strong></td>
-			<td><strong>{format_number(overall_total_target_app)}</strong></td>
-			<td class="percentage-cell" style="{overall_app_color}"><strong>{overall_pct_app}%</strong></td>
-			<td><strong>{format_number(overall_total_inv)}</strong></td>
-			<td><strong>{format_number(overall_total_target_inv)}</strong></td>
-			<td class="percentage-cell" style="{overall_inv_color}"><strong>{overall_pct_inv}%</strong></td>
-			<td><strong>{format_number(overall_total_col)}</strong></td>
-			<td><strong>{format_number(overall_total_target_col)}</strong></td>
-			<td class="percentage-cell" style="{overall_col_color}"><strong>{overall_pct_col}%</strong></td>
-		</tr>
-		</table>
-		</div>
-		'''
-
 	# ===================================
 	# INDIVIDUAL BRANCH TABLES
 	# ===================================
@@ -2672,18 +2433,18 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 		# Add branch header with flag
 		data += f'''
 		<div>
-		<table>
-		<tr>
-		<td style="width:20%;border:none;"><img src="/files/TSL Logo.png" align="left" width="150"></td>
-		<td style="width:60%; border:none; font-size:20px; font-weight:bold; vertical-align:middle; text-align:center;">{country_name}</td>
-		<td style="width:20%;border:none;text-align:right"><img src="{flag_image}" width="110"></td>
-		</tr>
-		</table>
+			<table class="branch-header-table">
+				<tr>
+					<td style="width:20%;"><img src="/files/Cyrix Logo.png" align="left" width="150"></td>
+					<td style="width:60%; font-size:25px; font-weight:bold; vertical-align:middle; text-align:center;">Branch - {country_name}</td>
+					<td style="width:20%;text-align:right"><img src="{flag_image}" width="110"></td>
+				</tr>
+			</table>
 		</div>
 		
 		<div class="main-table-container">
 		<table class="main-table">
-		<tr>
+			<tr>
 				<td colspan="13" class="currency-header">{currency_display}</td>
 			</tr>
 			<tr>
@@ -2696,19 +2457,19 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 				<th colspan="2">Cumulative Collection</th>
 			</tr>
 			<tr class="section-header">
-				<td></td>
-				<td>Actual</td>
-				<td>Target</td>
-				<td>Actual</td>
-				<td>Target</td>
-				<td>Actual</td>
-				<td>Target</td>
-				<td class="cumulative-bg">Actual</td>
-				<td class="cumulative-bg">Target</td>
-				<td class="cumulative-bg">Actual</td>
-				<td class="cumulative-bg">Target</td>
-				<td class="cumulative-bg">Actual</td>
-				<td class="cumulative-bg">Target</td>
+				<th></th>
+				<th>Actual</th>
+				<th>Target</th>
+				<th>Actual</th>
+				<th>Target</th>
+				<th>Actual</th>
+				<th>Target</th>
+				<th class="cumulative-bg">Actual</th>
+				<th class="cumulative-bg">Target</th>
+				<th class="cumulative-bg">Actual</th>
+				<th class="cumulative-bg">Target</th>
+				<th class="cumulative-bg">Actual</th>
+				<th class="cumulative-bg">Target</th>
 			</tr>
 		'''
 
@@ -2738,10 +2499,10 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 			if sales_target:
 				target = sales_target[0]
 				
-				# Monthly targets (current month)
-				monthly_approval_target2 = round(((target.quotation_approval_target or 0) / 12)* c_month_range) if target.quotation_approval_target else 0
-				monthly_invoice_target2 = round(((target.invoice_target or 0) / 12)* c_month_range) if target.invoice_target else 0
-				monthly_collection_target2 = round(((target.collection_target or 0) / 12)* c_month_range) if target.collection_target else 0
+				# Monthly targets (current month range - year start to now)
+				monthly_approval_target2 = round(((target.quotation_approval_target or 0) / 12) * c_month_range) if target.quotation_approval_target else 0
+				monthly_invoice_target2 = round(((target.invoice_target or 0) / 12) * c_month_range) if target.invoice_target else 0
+				monthly_collection_target2 = round(((target.collection_target or 0) / 12) * c_month_range) if target.collection_target else 0
 				
 				# Cumulative targets (based on date range)
 				monthly_approval_target = round(((target.quotation_approval_target or 0) / 12) * months_range) if target.quotation_approval_target else 0
@@ -2751,21 +2512,21 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 				monthly_approval_target = monthly_invoice_target = monthly_collection_target = 0
 				monthly_approval_target2 = monthly_invoice_target2 = monthly_collection_target2 = 0
 
-			# Get actual values (current month)
+			# Get actual values (current month range - year start to now)
 			app_result2 = frappe.db.sql("""
 				SELECT SUM(grand_total) as total
 				FROM `tabQuotation`
-				WHERE sales_rep=%s and workflow_state in ("Approved By Customer")
+				WHERE sales_person=%s and workflow_state in ("Approved by Customer")
 				AND transaction_date BETWEEN %s AND %s
-			""", (sp["user_id"], start_date, end_date), as_dict=True)
+			""", (sp["name"], start_date, end_date), as_dict=True)
 			app2 = app_result2[0]["total"] or 0 if app_result2 else 0
 
 			inv_result2 = frappe.db.sql("""
 				SELECT SUM(grand_total) as total
 				FROM `tabSales Invoice`
-				WHERE sales_rep=%s and status in ("Paid","Partly Paid","Unpaid","Overdue","Return","Credit Note Issued")
+				WHERE sales_person=%s AND status != "Cancelled"
 				AND posting_date BETWEEN %s AND %s
-			""", (sp["user_id"], start_date, end_date), as_dict=True)
+			""", (sp["name"], start_date, end_date), as_dict=True)
 			inv2 = inv_result2[0]["total"] or 0 if inv_result2 else 0
 
 			col_result2 = frappe.db.sql("""
@@ -2778,49 +2539,27 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 				ON si.name = per.reference_name
 			WHERE pe.posting_date BETWEEN %s AND %s
 			AND pe.docstatus = 1
-			AND si.custom_sales_person = %s
-
-			""", (start_date,end_date,sp["name"]), as_dict=True)
-
+			AND pe.payment_type = 'Receive'
+			AND si.sales_person = %s
+			""", (start_date, end_date, sp["name"]), as_dict=True)
 			col2 = col_result2[0]["total"] or 0 if col_result2 else 0
 
 			# Get actual values (cumulative - date range)
 			app_result = frappe.db.sql("""
 				SELECT SUM(grand_total) as total
 				FROM `tabQuotation`
-				WHERE sales_rep=%s and workflow_state in ("Approved By Customer")
+				WHERE sales_person=%s and workflow_state in ("Approved by Customer")
 				AND transaction_date BETWEEN %s AND %s
-			""", (sp["user_id"], from_date, to_date), as_dict=True)
+			""", (sp["name"], from_date, to_date), as_dict=True)
 			app = app_result[0]["total"] or 0 if app_result else 0
 
 			inv_result = frappe.db.sql("""
 				SELECT SUM(grand_total) as total
 				FROM `tabSales Invoice`
-				WHERE sales_rep=%s and status in ("Paid","Partly Paid","Unpaid","Overdue","Return","Credit Note Issued")
+				WHERE sales_person=%s AND status != "Cancelled"
 				AND posting_date BETWEEN %s AND %s
-			""", (sp["user_id"], from_date, to_date), as_dict=True)
+			""", (sp["name"], from_date, to_date), as_dict=True)
 			inv = inv_result[0]["total"] or 0 if inv_result else 0
-
-			# col_result = frappe.db.sql("""
-			# SELECT 
-			# 	SUM(t.paid_amount) AS total
-			# 	FROM (
-			# 	SELECT 
-			# 		COUNT(DISTINCT si.name),
-			# 		(si.grand_total - si.outstanding_amount) AS paid_amount
-			# 	FROM 
-			# 		`tabPayment Entry` pe
-			# 	JOIN 
-			# 		`tabPayment Entry Reference` per ON pe.name = per.parent
-			# 	JOIN 
-			# 		`tabSales Invoice` si ON si.name = per.reference_name
-			# 	WHERE
-			# 		pe.payment_type = 'Receive'
-			# 		AND si.custom_sales_person = %s
-			# 		AND pe.posting_date BETWEEN %s AND %s
-			# 	GROUP BY si.name
-			# ) t
-			# """, (sp["name"], from_date, to_date), as_dict=True)
 
 			col_result = frappe.db.sql("""
 			SELECT
@@ -2832,18 +2571,12 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 				ON si.name = per.reference_name
 			WHERE pe.posting_date BETWEEN %s AND %s
 			AND pe.docstatus = 1
-			AND si.custom_sales_person = %s
-
-			""", (from_date,to_date,sp["name"]), as_dict=True)
-
-			# sr = 0
-			# is_r = frappe.get_value("Sales Invoice",{"custom_sales_person":sp["name"],"is_return":1,"posting_date": ["between", (from_date,to_date)]},["grand_total"])
-			# if is_r:
-			# 	sr = is_r
-
+			AND pe.payment_type = 'Receive'
+			AND si.sales_person = %s
+			""", (from_date, to_date, sp["name"]), as_dict=True)
 			col = col_result[0]["total"] or 0 if col_result else 0
-			col = col 
-			# Calculate percentages (current month)
+
+			# Calculate percentages (current month range)
 			pct_app2 = round((app2 / monthly_approval_target2) * 100) if monthly_approval_target2 else 0
 			pct_inv2 = round((inv2 / monthly_invoice_target2) * 100) if monthly_invoice_target2 else 0
 			pct_col2 = round((col2 / monthly_collection_target2) * 100) if monthly_collection_target2 else 0
@@ -2879,29 +2612,29 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 
 			# Add row for this sales person
 			data += f'''
-			<tr>
-				<td rowspan="2" class="sales-person">{sp["sales_name"]}</td>
-				<td>{format_number(app)}</td>
-				<td>{format_number(monthly_approval_target)}</td>
-				<td>{format_number(inv)}</td>
-				<td>{format_number(monthly_invoice_target)}</td>
-				<td>{format_number(col)}</td>
-				<td>{format_number(monthly_collection_target)}</td>
-				<td class="cumulative-bg">{format_number(app2)}</td>
-				<td class="cumulative-bg">{format_number(monthly_approval_target2)}</td>
-				<td class="cumulative-bg">{format_number(inv2)}</td>
-				<td class="cumulative-bg">{format_number(monthly_invoice_target2)}</td>
-				<td class="cumulative-bg">{format_number(col2)}</td>
-				<td class="cumulative-bg">{format_number(monthly_collection_target2)}</td>
-			</tr>
-			<tr>
-				<td colspan="2" style="{app_color}">{pct_app}%</td>
-				<td colspan="2" style="{inv_color}">{pct_inv}%</td>
-				<td colspan="2" style="{col_color}">{pct_col}%</td>
-				<td class="cumulative-bg" colspan="2" style="{app_color2}">{pct_app2}%</td>
-				<td class="cumulative-bg" colspan="2" style="{inv_color2}">{pct_inv2}%</td>
-				<td class="cumulative-bg" colspan="2" style="{col_color2}">{pct_col2}%</td>
-			</tr>
+				<tr>
+					<td rowspan="2" class="sales-person">{sp["sales_name"]}</td>
+					<td>{format_number(app)}</td>
+					<td>{format_number(monthly_approval_target)}</td>
+					<td>{format_number(inv)}</td>
+					<td>{format_number(monthly_invoice_target)}</td>
+					<td>{format_number(col)}</td>
+					<td>{format_number(monthly_collection_target)}</td>
+					<td class="cumulative-bg">{format_number(app2)}</td>
+					<td class="cumulative-bg">{format_number(monthly_approval_target2)}</td>
+					<td class="cumulative-bg">{format_number(inv2)}</td>
+					<td class="cumulative-bg">{format_number(monthly_invoice_target2)}</td>
+					<td class="cumulative-bg">{format_number(col2)}</td>
+					<td class="cumulative-bg">{format_number(monthly_collection_target2)}</td>
+				</tr>
+				<tr>
+					<td colspan="2" style="{app_color}">{pct_app}%</td>
+					<td colspan="2" style="{inv_color}">{pct_inv}%</td>
+					<td colspan="2" style="{col_color}">{pct_col}%</td>
+					<td class="cumulative-bg" colspan="2" style="{app_color2}">{pct_app2}%</td>
+					<td class="cumulative-bg" colspan="2" style="{inv_color2}">{pct_inv2}%</td>
+					<td class="cumulative-bg" colspan="2" style="{col_color2}">{pct_col2}%</td>
+				</tr>
 			'''
 
 		# Calculate total percentages for the branch
@@ -2924,32 +2657,33 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 
 		# Add total row for the branch
 		data += f'''
-		<tr class="total-row">
-			<td><strong>Total</strong></td>
-			<td><strong>{format_number(total_app)}</strong></td>
-			<td><strong>{format_number(total_target_app)}</strong></td>
-			<td><strong>{format_number(total_inv)}</strong></td>
-			<td><strong>{format_number(total_target_inv)}</strong></td>
-			<td><strong>{format_number(total_col)}</strong></td>
-			<td><strong>{format_number(total_target_col)}</strong></td>
-			<td class="cumulative-bg"><strong>{format_number(total_app2)}</strong></td>
-			<td class="cumulative-bg"><strong>{format_number(total_target_app2)}</strong></td>
-			<td class="cumulative-bg"><strong>{format_number(total_inv2)}</strong></td>
-			<td class="cumulative-bg"><strong>{format_number(total_target_inv2)}</strong></td>
-			<td class="cumulative-bg"><strong>{format_number(total_col2)}</strong></td>
-			<td class="cumulative-bg"><strong>{format_number(total_target_col2)}</strong></td>
-		</tr>
-		<tr class="total-row">
-			<td><strong></strong></td>
-			<td colspan="2" style="{total_app_color}"><strong>{total_pct_app}%</strong></td>
-			<td colspan="2" style="{total_inv_color}"><strong>{total_pct_inv}%</strong></td>
-			<td colspan="2" style="{total_col_color}"><strong>{total_pct_col}%</strong></td>
-			<td class="cumulative-bg" colspan="2" style="{total_app_color2}"><strong>{total_pct_app2}%</strong></td>
-			<td class="cumulative-bg" colspan="2" style="{total_inv_color2}"><strong>{total_pct_inv2}%</strong></td>
-			<td class="cumulative-bg" colspan="2" style="{total_col_color2}"><strong>{total_pct_col2}%</strong></td>
-		</tr>
-		</table>
+			<tr class="total-row">
+				<td><strong>Total</strong></td>
+				<td><strong>{format_number(total_app)}</strong></td>
+				<td><strong>{format_number(total_target_app)}</strong></td>
+				<td><strong>{format_number(total_inv)}</strong></td>
+				<td><strong>{format_number(total_target_inv)}</strong></td>
+				<td><strong>{format_number(total_col)}</strong></td>
+				<td><strong>{format_number(total_target_col)}</strong></td>
+				<td class="cumulative-bg"><strong>{format_number(total_app2)}</strong></td>
+				<td class="cumulative-bg"><strong>{format_number(total_target_app2)}</strong></td>
+				<td class="cumulative-bg"><strong>{format_number(total_inv2)}</strong></td>
+				<td class="cumulative-bg"><strong>{format_number(total_target_inv2)}</strong></td>
+				<td class="cumulative-bg"><strong>{format_number(total_col2)}</strong></td>
+				<td class="cumulative-bg"><strong>{format_number(total_target_col2)}</strong></td>
+			</tr>
+			<tr class="total-row">
+				<td><strong></strong></td>
+				<td colspan="2" style="{total_app_color}"><strong>{total_pct_app}%</strong></td>
+				<td colspan="2" style="{total_inv_color}"><strong>{total_pct_inv}%</strong></td>
+				<td colspan="2" style="{total_col_color}"><strong>{total_pct_col}%</strong></td>
+				<td class="cumulative-bg" colspan="2" style="{total_app_color2}"><strong>{total_pct_app2}%</strong></td>
+				<td class="cumulative-bg" colspan="2" style="{total_inv_color2}"><strong>{total_pct_inv2}%</strong></td>
+				<td class="cumulative-bg" colspan="2" style="{total_col_color2}"><strong>{total_pct_col2}%</strong></td>
+			</tr>
+			</table>
 		</div>
+		<br>
 		'''
 
 	# Show "No data found" message if no data to display
@@ -2961,8 +2695,6 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 		'''
 
 	return data
-
-
 
 @frappe.whitelist()
 def get_technician_service_report(doc_name):
@@ -2982,74 +2714,14 @@ def get_technician_service_report(doc_name):
 		frappe.log_error(frappe.get_traceback(), "Get Technicians Error")
 		return "-"
 
-@frappe.whitelist()
-def check_wo_ap():
-
-	wod_list = frappe.db.sql("""
-		SELECT DISTINCT qi.job_order_data as jo
-		FROM `tabQuotation` q
-		INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-		WHERE q.sales_person = "Yazeed"
-		AND q.company = "Cyrix TSL - Kuwait"
-		AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
-		AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
-		AND q.transaction_date BETWEEN %s AND %s
-		AND qi.job_order_data != ''
-	""", ("2026-03-01","2026-03-31"), as_dict=True)
-	
-	total_quoted = 0
-	total_approved = 0
-	for i in wod_list:
-		
-		# quoted_rows = frappe.db.sql("""
-		# SELECT qi.net_amount as amount,q.name as n
-		# FROM `tabQuotation` q
-		# INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-		# WHERE q.sales_person = %s
-		# AND qi.job_order_data = %s
-		# AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
-		# AND q.quotation_type IN ('Customer Quotation - Repair','Customer Quotation - R - Revised')
-		# AND q.transaction_date BETWEEN %s AND %s
-		# """, ("Yazeed",i["jo"],"2026-04-01","2026-04-30"), as_dict=True)
-		# if quoted_rows and quoted_rows[0].get("amount"):
-		# 	print(quoted_rows[0]["n"])
-		# 	print(quoted_rows[0]["amount"])
-		# 	total_quoted += quoted_rows[0]["amount"] or 0
-	
-		# Check if approved
-		rev_check = frappe.db.sql("""
-			SELECT DISTINCT qi.job_order_data,q.name
-			FROM `tabQuotation` q
-			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-			WHERE q.sales_person = "Yazeed"
-			AND q.workflow_state IN ('Approved by Customer',"Quoted to Customer","Rejected by Customer")
-			AND q.quotation_type IN ('Customer Quotation - Repair')
-			AND qi.job_order_data = %s
-			AND q.transaction_date BETWEEN %s AND %s
-		""", (i["jo"],"2026-03-01","2026-03-31"), as_dict=True)
-
-		if rev_check:
-			print(i["jo"])
-			# print(rev_check[0]["name"])
-
-			
-			approved_rows = frappe.db.sql("""
-				SELECT qi.net_amount as amount, 
-				q.transaction_date, q.approval_date,q.name
-				FROM `tabQuotation` q
-				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
-				WHERE q.sales_person = "Yazeed"
-				AND qi.job_order_data = %s
-				AND q.workflow_state = 'Approved by Customer'
-				AND q.quotation_type IN ('Customer Quotation - Repair', 'Customer Quotation - R - Revised')
-				AND q.transaction_date BETWEEN %s AND %s
-				GROUP BY q.name
-			""", (i["jo"],"2026-03-01","2026-03-31"), as_dict=True)
-			
-			if approved_rows:
-				for row in approved_rows:
-					print( row.get("name"))
-					print( row.get("amount"))
-					total_approved += row.get("amount") or 0
-
-	print(total_approved)
+# @frappe.whitelist()
+# def check_wo_ap():
+# 	cat = frappe.get_all("Sub Category",["*"])
+# 	count = 0
+# 	for i in cat:
+# 		# print(i.category)
+# 		item = frappe.db.exists("Item",{"sub_category":i.sub_category})
+# 		if not item:
+# 			print(i.sub_category)
+# 			count = count + 1
+# 	print(count)

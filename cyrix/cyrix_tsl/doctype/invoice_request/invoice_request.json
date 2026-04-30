@@ -14,6 +14,7 @@
   "quotation",
   "go_to",
   "request_for",
+  "customer",
   "column_break_rkfva",
   "company",
   "requested_by",
@@ -143,12 +144,18 @@
    "fieldname": "attach",
    "fieldtype": "Attach",
    "label": "Attach Invoice pdf"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-15 10:01:26.100732",
+ "modified": "2026-04-30 15:20:09.269862",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Invoice Request",

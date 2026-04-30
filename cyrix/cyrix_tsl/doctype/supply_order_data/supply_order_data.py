@@ -179,7 +179,7 @@ def warehouse_based_on_branch_and_company(company,branch):
 
 from cyrix.custom_py.quotation import fetch_item_price_details
 @frappe.whitelist()
-def create_internal_quotation(supply_order_data):
+def create_internal_quotation(supply_order_data, customer):
 	doc = frappe.get_doc("Supply Order Data",supply_order_data)
 	new_doc= frappe.new_doc("Quotation")
 	new_doc.customer_reference_number = doc.customer_reference_number
@@ -204,7 +204,10 @@ def create_internal_quotation(supply_order_data):
 	if new_doc.quotation_type:
 		new_doc.naming_series = d[new_doc.quotation_type][doc.branch]
 	new_doc.company = doc.company
-	new_doc.party_name = doc.customer
+	new_doc.party_name = customer
+	new_doc.parent_customer = frappe.db.get_value("Customer",customer,"parent_customer")
+	if doc.customer != customer:
+		new_doc.child_customer = doc.customer
 	new_doc.plant = doc.plant
 	new_doc.branch = doc.branch
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
@@ -228,11 +231,13 @@ def create_internal_quotation(supply_order_data):
 
 
 @frappe.whitelist()
-def create_delivery_note(supply_order_data):
+def create_delivery_note(supply_order_data, customer):
 	doc = frappe.get_doc("Supply Order Data",supply_order_data)
 	new_doc = frappe.new_doc("Delivery Note")
 	new_doc.company = doc.company
-	new_doc.customer = doc.customer
+	new_doc.customer = customer
+	if doc.customer != customer:
+		new_doc.child_customer = doc.customer
 	new_doc.branch = doc.branch
 	new_doc.department = doc.department
 	new_doc.set_warehouse = doc.warehouse
@@ -284,11 +289,17 @@ def create_delivery_note(supply_order_data):
 
 
 @frappe.whitelist()
-def create_sales_invoice(supply_order_data):
+def create_sales_invoice(supply_order_data, customer):
 	doc = frappe.get_doc("Supply Order Data",supply_order_data)
 	new_doc = frappe.new_doc("Sales Invoice")
 	new_doc.company = doc.company
 	new_doc.customer = doc.customer
+	new_doc.customer = customer
+
+	new_doc.parent_customer = frappe.db.get_value("Customer",customer,"parent_customer")
+	if doc.customer != customer:
+		new_doc.child_customer = doc.customer
+
 	new_doc.branch = doc.branch
 	new_doc.department = doc.department
 	new_doc.supply_order_data = supply_order_data

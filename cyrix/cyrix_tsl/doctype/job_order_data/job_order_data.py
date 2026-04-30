@@ -261,14 +261,17 @@ def update_tech_hours(new_doc, job_order_data):
 			})
 
 @frappe.whitelist()
-def create_internal_quotation(job_order_data, pre_evaluation):
+def create_internal_quotation(job_order_data, pre_evaluation, customer):
 	doc = frappe.get_doc("Job Order Data",job_order_data)
 	new_doc= frappe.new_doc("Quotation")
 	new_doc.sales_person = doc.sales_person
 	new_doc.pre_evaluation = pre_evaluation
 	new_doc.naming_series = naming_series["Internal Quotation - Repair"][doc.branch]
 	new_doc.company = doc.company
-	new_doc.party_name = doc.customer
+	new_doc.party_name = customer
+	new_doc.parent_customer = frappe.db.get_value("Customer",customer,"parent_customer")
+	if doc.customer != customer:
+		new_doc.child_customer = doc.customer
 	new_doc.plant = doc.plant
 	new_doc.branch = doc.branch
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
@@ -294,11 +297,13 @@ def create_internal_quotation(job_order_data, pre_evaluation):
 	return new_doc
 
 @frappe.whitelist()
-def create_delivery_note(job_order_data):
+def create_delivery_note(job_order_data, customer):
 	doc = frappe.get_doc("Job Order Data",job_order_data)
 	new_doc = frappe.new_doc("Delivery Note")
 	new_doc.company = doc.company
-	new_doc.customer = doc.customer
+	new_doc.customer = customer
+	if doc.customer != customer:
+		new_doc.child_customer = doc.customer
 	new_doc.plant = doc.plant
 	new_doc.sales_person = doc.sales_person
 	new_doc.branch = doc.branch

@@ -128,6 +128,29 @@ frappe.ui.form.on('Part Sheet Item', {
 			frm.script_manager.trigger('part',cdt,cdn)
 	   	}
 	},
+	create:function(frm,cdt,cdn){
+		let child = locals[cdt][cdn]
+		frappe.call({
+			method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.create_item",
+			args:{
+				model:child.model || '',
+				part_no:child.part || '',
+				category:child.category || '',
+				sub_category:child.sub_category || '',
+				description:child.part_name || '',
+				package:child.part_description || '',
+			},
+			callback(r){
+				if(r.message){
+					child.part = r.message
+					frm.refresh_field("items")
+					frm.dirty();
+					frm.save();
+					frm.save();
+				}
+			}
+		})
+	},
 });
 
 // Dialog for releasing parts

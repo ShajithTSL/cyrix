@@ -594,11 +594,11 @@ def get_supply_order_data(supply_order_data):
 	return item_list,branch,customer
 
 @frappe.whitelist()
-def create_sales_invoice(source):
+def create_sales_invoice(source, customer):
 	"""
 	Create Sales Invoice from Quotation, including only uninvoiced quantity
 	"""
-	sales_invoice = frappe.new_doc("Sales Invoice")
+	sales_invoice = frappe.new_doc("Sales Invoice")	
 
 	def filter_uninvoiced_items(source_doc):
 		# Include only items where invoiced_qty < qty
@@ -608,6 +608,19 @@ def create_sales_invoice(source):
 		# Adjust qty to be only the uninvoiced portion
 		target_doc.qty = source_doc.qty - (source_doc.invoiced_qty or 0)
 
+	def set_customer_details(source_doc, target_doc, source_parent):
+		target_doc.parent_customer = None
+		target_doc.child_customer = None
+		# Set parent customer
+		target_doc.customer = customer
+		target_doc.parent_customer = frappe.db.get_value("Customer", customer, "parent_customer")
+
+		# # If quotation customer differs from selected customer
+		if source_doc.party_name != customer and not target_doc.parent_customer:
+			target_doc.child_customer = source_doc.party_name
+		else:
+			target_doc.child_customer = source_doc.child_customer
+
 	doclist = get_mapped_doc(
 		"Quotation",
 		source,
@@ -616,9 +629,9 @@ def create_sales_invoice(source):
 				"doctype": "Sales Invoice",
 				"field_map": {
 					"name": "quotation",
-					"party_name": "customer",
 					"branch": "branch",
 				},
+				"postprocess": set_customer_details,
 			},
 			"Quotation Item": {
 				"doctype": "Sales Invoice Item",
@@ -633,6 +646,7 @@ def create_sales_invoice(source):
 	)
 
 	return doclist
+
 def update_service_call_form(doc,method):
 	if doc.service_call_form:
 		if doc. quotation_type == "Internal Quotation - Site Visit":
@@ -641,12 +655,13 @@ def update_service_call_form(doc,method):
 			frappe.db.set_value("Service Call Form",doc.service_call_form,"status","Approved")
 
 @frappe.whitelist()
-def create_invoice_request(source,user):
+def create_invoice_request(source,user, customer):
 	new_doc = frappe.new_doc("Invoice Request")
 	doc = frappe.get_doc("Quotation",source)
 	new_doc.requested_by = user
 	new_doc.branch = doc.branch
 	new_doc.company = doc.company
+	new_doc.customer = customer
 	new_doc.sales_person = doc.sales_person
 	new_doc.sales_email = frappe.db.get_value("Sales Person",doc.sales_person,"user")
 

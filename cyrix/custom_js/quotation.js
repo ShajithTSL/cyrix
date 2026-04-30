@@ -1,5 +1,14 @@
 frappe.ui.form.on('Quotation', {
 
+    type_of_approval: function(frm) {
+        if (frm.doc.type_of_approval){
+            frm.set_df_property("approval_date", "reqd", 1);
+        }
+        else{
+            frm.set_df_property("approval_date", "reqd", 0);
+        }
+    },
+
     before_workflow_action: async (frm) => {
 
         if(frm.doc.workflow_state == "Quoted to Customer"){
@@ -250,23 +259,67 @@ frappe.ui.form.on('Quotation', {
             () => {
                 if(frm.doc.docstatus == 1 && frm.doc.workflow_state == "Approved by Customer"){
 				    frm.add_custom_button(__('Invoice Request'), function(){
-                        frappe.call({
-                            method: "cyrix.custom_py.quotation.create_invoice_request",
-                            args: {
-                                "source": frm.doc.name,
-                                "user": frappe.session.user,
-                            },
-                            callback: function(r) {
-                                if(r.message) {
-                                    var doc = frappe.model.sync(r.message);
-                                    frappe.db.get_value('Customer', {'name':frm.doc.customer}, ['customer_type'], (r) => {
-                                        if(r.customer_type == "Company"){
-                                            frappe.set_route("Form", doc[0].doctype, doc[0].name);
-                                        }
-                                    });
+                        let allowed_customers = [];
+
+                        if (frm.doc.party_name) {
+                            allowed_customers.push(frm.doc.party_name);
+                        }
+
+                        if (frm.doc.child_customer) {
+                            allowed_customers.push(frm.doc.child_customer);
+                        }
+
+                        if (frm.doc.parent_customer) {
+                            allowed_customers.push(frm.doc.parent_customer);
+                        }
+
+                        let d = new frappe.ui.Dialog({
+                            title: 'Select Customer',
+                            fields: [
+                                {
+                                    label: 'Customer',
+                                    fieldname: 'customer',
+                                    fieldtype: 'Link',
+                                    options: 'Customer',
+                                    reqd: 1,
+                                    get_query: function() {
+                                        return {
+                                            filters: [
+                                                ['Customer', 'name', 'in', allowed_customers]
+                                            ]
+                                        };
+                                    }
                                 }
+                            ],
+                            primary_action_label: 'Proceed',
+                            primary_action(values) {
+                                if (!values.customer) {
+                                    frappe.msgprint('Please select a customer');
+                                    return;
+                                }
+
+                                d.hide();
+                                frappe.call({
+                                    method: "cyrix.custom_py.quotation.create_invoice_request",
+                                    args: {
+                                        "source": frm.doc.name,
+                                        "user": frappe.session.user,
+                                        "customer": values.customer
+                                    },
+                                    callback: function(r) {
+                                        if(r.message) {
+                                            var doc = frappe.model.sync(r.message);
+                                            frappe.db.get_value('Customer', {'name':frm.doc.customer}, ['customer_type'], (r) => {
+                                                if(r.customer_type == "Company"){
+                                                    frappe.set_route("Form", doc[0].doctype, doc[0].name);
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
                             }
                         });
+                        d.show();
                     }, ('Create'))
 			    }			
             }
@@ -371,22 +424,66 @@ frappe.ui.form.on('Quotation', {
     create_sales_invoice: function(frm){
         if(frm.doc.docstatus == 1 && frm.doc.workflow_state == 'Approved by Customer'){
             frm.add_custom_button(__('Sales Invoice'), function(){
-                frappe.call({
-                    method: "cyrix.custom_py.quotation.create_sales_invoice",
-                    args: {
-                        "source": frm.doc.name,
-                    },
-                    callback: function(r) {
-                        if(r.message) {
-                            var doc = frappe.model.sync(r.message);
-                            frappe.route_options = {
-                                currency: frm.doc.currency,
-                                conversion_rate: frm.doc.conversion_rate
+                let allowed_customers = [];
+
+                if (frm.doc.party_name) {
+                    allowed_customers.push(frm.doc.party_name);
+                }
+
+                if (frm.doc.child_customer) {
+                    allowed_customers.push(frm.doc.child_customer);
+                }
+
+                if (frm.doc.parent_customer) {
+                    allowed_customers.push(frm.doc.parent_customer);
+                }
+
+                let d = new frappe.ui.Dialog({
+                    title: 'Select Customer',
+                    fields: [
+                        {
+                            label: 'Customer',
+                            fieldname: 'customer',
+                            fieldtype: 'Link',
+                            options: 'Customer',
+                            reqd: 1,
+                            get_query: function() {
+                                return {
+                                    filters: [
+                                        ['Customer', 'name', 'in', allowed_customers]
+                                    ]
+                                };
                             }
-                            frappe.set_route("Form", doc[0].doctype, doc[0].name);
                         }
+                    ],
+                    primary_action_label: 'Proceed',
+                    primary_action(values) {
+                        if (!values.customer) {
+                            frappe.msgprint('Please select a customer');
+                            return;
+                        }
+
+                        d.hide();
+                        frappe.call({
+                            method: "cyrix.custom_py.quotation.create_sales_invoice",
+                            args: {
+                                "source": frm.doc.name,
+                                "customer": values.customer
+                            },
+                            callback: function(r) {
+                                if(r.message) {
+                                    var doc = frappe.model.sync(r.message);
+                                    frappe.route_options = {
+                                        currency: frm.doc.currency,
+                                        conversion_rate: frm.doc.conversion_rate
+                                    }
+                                    frappe.set_route("Form", doc[0].doctype, doc[0].name);
+                                }
+                            }
+                        });
                     }
                 });
+                d.show();
             }, ('Create'))
         }
     },

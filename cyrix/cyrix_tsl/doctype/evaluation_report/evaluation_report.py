@@ -356,6 +356,29 @@ def warehouse_based_on_branch_and_company(company,branch):
 	return warehouse
 	
 @frappe.whitelist()
+def create_item(model,part_no,category,sub_category,package,description):
+	part = frappe.db.exists("Item",{'model':model,'category':category,'sub_category':sub_category})
+	if part:
+		return part
+	else:
+		if not part_no:
+			# if frappe.session.user == "purchase@tsl-me.com" or frappe.session.user == "purchase-sa1@tsl-me.com":
+			item_doc = frappe.new_doc("Item")
+			item_doc.naming_series = "P.######"
+			item_doc.model = model
+			item_doc.category = category
+			item_doc.sub_category = sub_category
+			item_doc.package = package
+			item_doc.item_name = description
+			item_doc.item_group = "Components"
+			item_doc.save(ignore_permissions = True)
+			if not description:
+				frappe.db.set_value("Item",item_doc.name,"item_name",item_doc.name,update_modified = False)
+			return item_doc.name
+		else:
+			frappe.msgprint("SKU already there in this row")
+
+@frappe.whitelist()
 def release_parts(name):
 	try:
 		doc = frappe.get_doc('Evaluation Report', name)

@@ -9,6 +9,7 @@
  "field_order": [
   "naming_series",
   "customer",
+  "parent_customer",
   "customer_branch_name",
   "mobile",
   "email",
@@ -283,6 +284,15 @@
    "fieldname": "maintenance_contract",
    "fieldtype": "Read Only",
    "label": "Maintenance Contract"
+  },
+  {
+   "fetch_from": "customer.parent_customer",
+   "fetch_if_empty": 1,
+   "fieldname": "parent_customer",
+   "fieldtype": "Link",
+   "label": "Parent Customer",
+   "options": "Customer",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -290,7 +300,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-04 08:10:03.867795",
+ "modified": "2026-04-29 13:30:51.841183",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Job Order",

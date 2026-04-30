@@ -149,7 +149,6 @@ frappe.ui.form.on("Create Supply Order", {
 			},
 			callback(r) {
 				if (r.message) {
-                    console.log(r.message)
 					frm.set_query("incharge", function () {
 						return {
 							"filters": {

@@ -13,6 +13,7 @@
   "naming_series",
   "customer",
   "customer_name",
+  "parent_customer",
   "customer_rep",
   "customer_email",
   "address",
@@ -695,13 +696,21 @@
    "label": "Maintenance Contract",
    "options": "Maintenance Contract",
    "read_only": 1
+  },
+  {
+   "fetch_from": "customer.parent_customer",
+   "fieldname": "parent_customer",
+   "fieldtype": "Link",
+   "label": "Parent Customer",
+   "options": "Customer",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-09 12:20:22.359004",
+ "modified": "2026-04-29 13:32:18.101296",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

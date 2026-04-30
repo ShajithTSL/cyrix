@@ -11,6 +11,26 @@ frappe.ui.form.on("Create Supply Order", {
 			frm.set_value("repair_warehouse", values.name);
 		});
 	},
+	branch_trigger: function(frm){
+		const branchMap = frappe.boot.company_branches;
+
+		if (branchMap[frappe.defaults.get_default("company")]) {
+			const branches = branchMap[frappe.defaults.get_default("company")];
+
+			// If only one branch exists, auto-set it
+			if (branches.length === 1) {
+				frm.set_value("branch", branches[0]);
+				frm.set_df_property("branch", "read_only", 1);
+			}
+			frm.set_query("branch", function () {
+				return {
+					filters: [
+						["name", "in", branchMap[frappe.defaults.get_default("company")]]
+					]
+				};
+			});
+		}
+	},
     setup: function (frm) {
         // child table set_query
 		frm.fields_dict['received_equipment'].grid.get_field('item_code').get_query = function (frm, cdt, cdn) {
@@ -47,24 +67,8 @@ frappe.ui.form.on("Create Supply Order", {
 				]
 			}
 		});
-		const branchMap = frappe.boot.company_branches;
-
-		if (branchMap[frappe.defaults.get_default("company")]) {
-			const branches = branchMap[frappe.defaults.get_default("company")];
-
-			// If only one branch exists, auto-set it
-			if (branches.length === 1) {
-				frm.set_value("branch", branches[0]);
-				frm.set_df_property("branch", "read_only", 1);
-			}
-			frm.set_query("branch", function () {
-				return {
-					filters: [
-						["name", "in", branchMap[frappe.defaults.get_default("company")]]
-					]
-				};
-			});
-		}
+		
+		frm.trigger("branch_trigger")
 
 		const territoryMap = frappe.boot.company_territories;
 
@@ -114,7 +118,10 @@ frappe.ui.form.on("Create Supply Order", {
 						callback(r){
 							if(r){
 								// On success, reload the document to reflect changes
-								cur_frm.reload_doc();
+								frappe.run_serially([
+									() => cur_frm.reload_doc(),
+									() => frm.trigger("branch_trigger"),
+								])
 							}   
 						}
 					})

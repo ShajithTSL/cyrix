@@ -123,6 +123,10 @@ frappe.listview_settings['Job Order Data'] = {
         else if (doc.status === "C-Cancelled") {
                 return[__("C-Cancelled"),"red","status,=,C-Cancelled"];
                     }
+        
+        else if (doc.status === "Replace") {
+                return[__("Replace"),"red","status,=,Replace"];
+                    }
           
       },
 };

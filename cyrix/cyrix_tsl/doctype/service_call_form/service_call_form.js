@@ -138,6 +138,22 @@ frappe.ui.form.on('Service Call Form', {
                     }
                 });
 			}, ('Create'))
+
+            frm.add_custom_button(__('Service Report'), function(){
+                frappe.call({
+                    method: "cyrix.cyrix_tsl.doctype.service_call_form.service_call_form.create_service_report",
+                    args: {
+                        "source":frm.doc.name,
+                        "row_id": null
+                    },
+                    callback: function(r) {
+                        if(r.message) {
+                            var doc = frappe.model.sync(r.message);
+                            frappe.set_route("Form", doc[0].doctype, doc[0].name);
+                        }
+                    }
+                });
+            }, ('Create'))
 		}
         frm.trigger("set_query");
 	},

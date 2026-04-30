@@ -2,7 +2,36 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Job Order Data", {
+
+	
 	refresh(frm) {
+
+
+	if(frm.doc.status == "Replace"){
+    frm.add_custom_button(__('Create Replacement'), function () {
+       frappe.call({
+    		method: "cyrix.custom_py.utils.create_replacement_item",
+    		args: {
+    			"customer":frm.doc.customer,
+    			"wod":frm.doc.name,
+    			"items":frm.doc.material_list
+    			
+    		},
+    		callback: function(r) {
+    			if(r.message) {
+    			   
+    			    
+    				
+    			}
+    		}
+	});
+          
+        });
+        
+        
+        
+    
+    }
         if(frm.doc.attach_image && frm.doc.docstatus == 1){
 			cur_frm.set_df_property("image", "options","<img src="+frm.doc.attach_image+">");
 			cur_frm.refresh_fields();

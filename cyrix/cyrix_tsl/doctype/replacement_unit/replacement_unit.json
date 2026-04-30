@@ -1,8 +1,8 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2025-07-31 14:04:39.368491",
+ "autoname": "prompt",
+ "creation": "2026-04-30 10:46:10.413059",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -106,6 +106,21 @@
    "label": "Details"
   },
   {
+   "collapsible": 1,
+   "fieldname": "summary_summary_section",
+   "fieldtype": "Section Break",
+   "label": "Summary "
+  },
+  {
+   "fieldname": "detail_html",
+   "fieldtype": "HTML",
+   "label": "detail html"
+  },
+  {
+   "fieldname": "section_break_nbbx",
+   "fieldtype": "Section Break"
+  },
+  {
    "allow_on_submit": 1,
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -161,44 +176,6 @@
    "options": "Contact"
   },
   {
-   "fieldname": "quoted_date",
-   "fieldtype": "Date",
-   "label": "Quoted Date / Approved Date",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "warranty",
-   "fieldtype": "Data",
-   "label": "Warranty Period"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "delivery",
-   "fieldtype": "Date",
-   "label": "Delivered Date"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "quotation_approved_date",
-   "fieldtype": "Date",
-   "label": "Quotation Approved Date",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "returned_date",
-   "fieldtype": "Date",
-   "label": "Returned Date",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "expiry_date",
-   "fieldtype": "Date",
-   "label": "Warranty Expiry Date"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "priority_status",
    "fieldtype": "Select",
@@ -206,42 +183,8 @@
    "options": "Normal\nUrgent"
   },
   {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "mistaken_ner",
-   "fieldtype": "Check",
-   "label": "Mistaken NER"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "quotation",
-   "fieldtype": "Data",
-   "label": "Quotation",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "status_cap",
-   "fieldtype": "Data",
-   "label": "NER Cap",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "status_cap_date",
-   "fieldtype": "Date",
-   "label": "First NER Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_7",
+   "fieldname": "column_break_ljre",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "received_date",
-   "fieldtype": "Date",
-   "label": "Received Date",
-   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -260,9 +203,55 @@
    "options": "Branch"
   },
   {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
    "allow_on_submit": 1,
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "delivery",
+   "fieldtype": "Date",
+   "label": "Delivered Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status_cap",
+   "fieldtype": "Data",
+   "label": "NER Cap",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "returned_date",
+   "fieldtype": "Date",
+   "label": "Returned Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "received_date",
+   "fieldtype": "Date",
+   "label": "Received Date",
+   "read_only": 1
+  },
+  {
    "fieldname": "repair_warehouse",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Repair Warehouse",
    "options": "Warehouse"
   },
@@ -275,11 +264,16 @@
    "label": "Date"
   },
   {
-   "fieldname": "department",
-   "fieldtype": "Link",
-   "label": "Department",
-   "options": "Cost Center",
-   "read_only": 1
+   "allow_on_submit": 1,
+   "fieldname": "warranty",
+   "fieldtype": "Data",
+   "label": "Warranty Period"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Warranty Expiry Date"
   },
   {
    "allow_on_submit": 1,
@@ -289,19 +283,48 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Board Evaluation\nA-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled\nReplace"
+   "options": "Inquiry\nBoard Evaluation\nA-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled\nReplace"
   },
   {
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
-   "label": "Remarks"
+   "fieldname": "maintenance_contract",
+   "fieldtype": "Link",
+   "label": "Maintenance Contract",
+   "options": "Maintenance Contract",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cwfo",
+   "fieldtype": "Column Break"
   },
   {
    "allow_on_submit": 1,
-   "fieldname": "po_no",
-   "fieldtype": "Data",
-   "label": "Po No",
-   "read_only": 1
+   "fieldname": "unit_type",
+   "fieldtype": "Select",
+   "label": "Unit Type",
+   "options": "Service Level Unit\nBoard Level Unit\nService and Board Level Unit\nCalibration"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "technician",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Technician",
+   "options": "Technician ID"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "multiple_technicians",
+   "fieldtype": "Table MultiSelect",
+   "ignore_user_permissions": 1,
+   "label": "Multiple Technicians (Add if Multiple Technicians involved)",
+   "options": "Technician List"
+  },
+  {
+   "fieldname": "parent_jo",
+   "fieldtype": "Link",
+   "label": "Parent JO",
+   "options": "Job Order Data"
   },
   {
    "fieldname": "payment_terms",
@@ -311,54 +334,24 @@
   },
   {
    "allow_on_submit": 1,
-   "fieldname": "purchase_order_no",
-   "fieldtype": "Data",
-   "label": "Purchase Order",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "dn_no",
-   "fieldtype": "Data",
-   "label": "Delivery Note",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fetch_from": "dn_no.posting_date",
-   "fieldname": "dn_date",
-   "fieldtype": "Date",
-   "label": "Delivery Note Date",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "invoice_no",
-   "fieldtype": "Data",
-   "label": "Sales Invoice",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fetch_from": "invoice_no.posting_date",
-   "fieldname": "invoice_date",
-   "fieldtype": "Date",
-   "label": "Invoice Date",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "return_note",
-   "fieldtype": "Data",
-   "label": "Return Note",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
    "fieldname": "plant",
    "fieldtype": "Link",
    "label": "Plant",
    "options": "Plant"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status_cap_date",
+   "fieldtype": "Date",
+   "label": "First NER Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "mistaken_ner",
+   "fieldtype": "Check",
+   "label": "Mistaken NER"
   },
   {
    "fieldname": "section_break_14",
@@ -388,6 +381,127 @@
    "options": "Item"
   },
   {
+   "fieldname": "linked_docs_tab",
+   "fieldtype": "Tab Break",
+   "hidden": 1,
+   "label": "Linked Docs"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation",
+   "fieldtype": "Data",
+   "label": "Quotation",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "purchase_order_no",
+   "fieldtype": "Data",
+   "label": "Purchase Order",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "po_no",
+   "fieldtype": "Data",
+   "label": "Po No",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dn_no",
+   "fieldtype": "Data",
+   "label": "Delivery Note",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoice_no",
+   "fieldtype": "Data",
+   "label": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "return_note",
+   "fieldtype": "Data",
+   "label": "Return Note",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dwsb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quoted_date",
+   "fieldtype": "Date",
+   "label": "Quoted Date / Approved Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation_approved_date",
+   "fieldtype": "Date",
+   "label": "Quotation Approved Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "dn_no.posting_date",
+   "fieldname": "dn_date",
+   "fieldtype": "Date",
+   "label": "Delivery Note Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "invoice_no.posting_date",
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoiced_value",
+   "fieldtype": "Float",
+   "label": "Invoiced Value",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_sqor",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_entry",
+   "fieldtype": "Data",
+   "label": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3eiu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "advance_payment_amount",
+   "fieldtype": "Float",
+   "label": "Advance Payment Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_eqhg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "advance_paid_date",
+   "fieldtype": "Date",
+   "label": "Advance Paid Date",
+   "read_only": 1
+  },
+  {
    "fieldname": "section_break_36",
    "fieldtype": "Tab Break",
    "label": "Complaints"
@@ -403,12 +517,6 @@
   {
    "fieldname": "section_break_oy5vi",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "complaints",
-   "fieldtype": "Small Text",
-   "hidden": 1,
-   "label": "Complaints"
   },
   {
    "allow_on_submit": 1,
@@ -432,6 +540,10 @@
    "label": "No Display"
   },
   {
+   "fieldname": "column_break_mvnb",
+   "fieldtype": "Column Break"
+  },
+  {
    "allow_on_submit": 1,
    "default": "0",
    "fieldname": "no_communication",
@@ -453,7 +565,7 @@
    "label": "Supply Voltage"
   },
   {
-   "fieldname": "column_break_43",
+   "fieldname": "column_break_nvav",
    "fieldtype": "Column Break"
   },
   {
@@ -462,13 +574,6 @@
    "fieldname": "error_code",
    "fieldtype": "Check",
    "label": "Error Code"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "touch_keypad_not_working",
-   "fieldtype": "Check",
-   "label": "Touch Keypad Not Working"
   },
   {
    "allow_on_submit": 1,
@@ -485,11 +590,33 @@
    "label": "Burnt Components"
   },
   {
+   "fieldname": "column_break_umjh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "touch_keypad_not_working",
+   "fieldtype": "Check",
+   "label": "Touch Keypad Not Working"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "not_working",
+   "fieldtype": "Check",
+   "label": "Not Working"
+  },
+  {
    "allow_on_submit": 1,
    "default": "0",
    "fieldname": "others",
    "fieldtype": "Check",
    "label": "Others"
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
   },
   {
    "allow_on_submit": 1,
@@ -498,6 +625,21 @@
    "fieldtype": "Small Text",
    "label": "Specify",
    "mandatory_depends_on": "eval:(doc.others==1);"
+  },
+  {
+   "fieldname": "column_break_lquf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "complaints",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Complaints"
   },
   {
    "allow_on_submit": 1,
@@ -555,162 +697,25 @@
    "search_index": 1
   },
   {
-   "fieldname": "linked_docs_tab",
-   "fieldtype": "Tab Break",
-   "hidden": 1,
-   "label": "Linked Docs"
-  },
-  {
-   "fieldname": "column_break_dwsb",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "unit_type",
-   "fieldtype": "Select",
-   "label": "Unit Type",
-   "options": "Service Level Unit\nBoard Level Unit\nService and Board Level Unit\nCalibration"
-  },
-  {
-   "fieldname": "parent_jo",
+   "fieldname": "amended_from",
    "fieldtype": "Link",
-   "label": "Parent JO",
-   "options": "Job Order Data"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "invoiced_value",
-   "fieldtype": "Float",
-   "label": "Invoiced Value",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "payment_entry",
-   "fieldtype": "Data",
-   "label": "Payment Entry",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "advance_payment_amount",
-   "fieldtype": "Float",
-   "label": "Advance Payment Amount",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "advance_paid_date",
-   "fieldtype": "Date",
-   "label": "Advance Paid Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_sqor",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_3eiu",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_eqhg",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_mvnb",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_ljre",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_cwfo",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_lquf",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "detail_html",
-   "fieldtype": "HTML",
-   "label": "detail html"
-  },
-  {
-   "fieldname": "column_break_nvav",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_umjh",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "sales_person",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Sales Person",
-   "options": "Sales Person"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "technician",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Technician",
-   "options": "Technician ID"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "multiple_technicians",
-   "fieldtype": "Table MultiSelect",
-   "ignore_user_permissions": 1,
-   "label": "Multiple Technicians (Add if Multiple Technicians involved)",
-   "options": "Technician List"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "summary_summary_section",
-   "fieldtype": "Section Break",
-   "label": "Summary "
-  },
-  {
-   "fieldname": "section_break_nbbx",
-   "fieldtype": "Section Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "not_working",
-   "fieldtype": "Check",
-   "label": "Not Working"
-  },
-  {
-   "fieldname": "maintenance_contract",
-   "fieldtype": "Link",
-   "label": "Maintenance Contract",
-   "options": "Maintenance Contract",
-   "read_only": 1
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Job Order Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [
-  {
-   "link_doctype": "Replacement Unit",
-   "link_fieldname": "name"
-  }
- ],
- "modified": "2026-04-30 14:06:28.234188",
+ "links": [],
+ "modified": "2026-04-30 11:11:07.324468",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
- "name": "Job Order Data",
- "naming_rule": "By \"Naming Series\" field",
+ "name": "Replacement Unit",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {

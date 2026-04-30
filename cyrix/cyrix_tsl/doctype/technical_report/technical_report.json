@@ -105,29 +105,25 @@
    "fieldname": "sku",
    "fieldtype": "Link",
    "label": "SKU",
-   "options": "Item",
-   "read_only": 1
+   "options": "Item"
   },
   {
    "fieldname": "manufacturer",
    "fieldtype": "Link",
    "label": "Manufacturer",
-   "options": "Item Mfg",
-   "read_only": 1
+   "options": "Item Mfg"
   },
   {
    "fieldname": "model",
    "fieldtype": "Link",
    "label": "Model",
-   "options": "Item Model",
-   "read_only": 1
+   "options": "Item Model"
   },
   {
    "fieldname": "serial_number",
    "fieldtype": "Link",
    "label": "Serial Number",
-   "options": "Serial Number",
-   "read_only": 1
+   "options": "Serial Number"
   },
   {
    "fieldname": "column_break_prdh",
@@ -148,8 +144,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Small Text",
-   "label": "Description",
-   "read_only": 1
+   "label": "Description"
   },
   {
    "fieldname": "section_break_pioa",
@@ -204,7 +199,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-07 14:20:09.513978",
+ "modified": "2026-04-30 09:57:11.750936",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",

@@ -2110,7 +2110,7 @@ def get_sales_details3(company=None):
 	"""
 	# Sales persons to exclude from the report
 	excluded = [
-		"Sales Team", "Walkin", "Sales", "OMAR", "Abdullah",
+		"Sales Team", "Walkin", "Sales","Abdullah",
 		"Karoline", "Nour", "Samar Moussa", "Rana Ali",
 		"Salma Zaza ", "Nidhin", "MOHAMED MOSAAD ALY DIAB",
 		"Amro Reda Emam Mohamed", "Michael Veniston",
@@ -2488,36 +2488,50 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 
 			sales_person_name = sp["name"]
 			
-			# Get sales targets for this sales person
-			sales_target = frappe.db.sql("""
-				SELECT quotation_approval_target, invoice_target, collection_target
-				FROM `tabSales Target`
-				WHERE sales = %s
-			""", sales_person_name, as_dict=True)
+			sales_target_doc = frappe.get_value("Sales Target",{"sales":sales_person_name},"name")
 
-			# Calculate targets based on months range
-			if sales_target:
-				target = sales_target[0]
+			monthly_approval_target = 0
+			monthly_invoice_target = 0
+			monthly_collection_target = 0
+
+			monthly_approval_target2 = 0
+			monthly_invoice_target2 = 0
+			monthly_collection_target2 = 0
+
+			if sales_target_doc:
+				from_date = frappe.utils.getdate(from_date)
+				to_date = frappe.utils.getdate(to_date)
 				
-				# Monthly targets (current month range - year start to now)
-				monthly_approval_target2 = round(((target.quotation_approval_target or 0) / 12) * c_month_range) if target.quotation_approval_target else 0
-				monthly_invoice_target2 = round(((target.invoice_target or 0) / 12) * c_month_range) if target.invoice_target else 0
-				monthly_collection_target2 = round(((target.collection_target or 0) / 12) * c_month_range) if target.collection_target else 0
-				
-				# Cumulative targets (based on date range)
-				monthly_approval_target = round(((target.quotation_approval_target or 0) / 12) * months_range) if target.quotation_approval_target else 0
-				monthly_invoice_target = round(((target.invoice_target or 0) / 12) * months_range) if target.invoice_target else 0
-				monthly_collection_target = round(((target.collection_target or 0) / 12) * months_range) if target.collection_target else 0
-			else:
-				monthly_approval_target = monthly_invoice_target = monthly_collection_target = 0
-				monthly_approval_target2 = monthly_invoice_target2 = monthly_collection_target2 = 0
+				doc = frappe.get_doc("Sales Target", sales_target_doc)
+
+				for row in doc.target_table:
+					# row.from_date, row.to_date
+
+					# ✅ check if month falls inside selected range
+					if row.from_date and row.to_date:
+						if row.from_date >= from_date and row.to_date <= to_date:
+
+							monthly_approval_target += row.quotation_approval_target or 0
+							monthly_invoice_target += row.invoice_target or 0
+							monthly_collection_target += row.collection_target or 0
+
+					# ✅ current year till current month (c_month_range logic replacement)
+					# today = frappe.utils.today()
+					today = datetime.today().date()
+					month_end = frappe.utils.get_last_day(frappe.utils.getdate())
+					if row.from_date and row.to_date:
+						if row.from_date >= datetime(today.year, 1, 1).date() and row.to_date <= month_end:
+
+							monthly_approval_target2 += row.quotation_approval_target or 0
+							monthly_invoice_target2 += row.invoice_target or 0
+							monthly_collection_target2 += row.collection_target or 0
 
 			# Get actual values (current month range - year start to now)
 			app_result2 = frappe.db.sql("""
 				SELECT SUM(grand_total) as total
 				FROM `tabQuotation`
 				WHERE sales_person=%s and workflow_state in ("Approved by Customer")
-				AND transaction_date BETWEEN %s AND %s
+				AND approval_date BETWEEN %s AND %s
 			""", (sp["name"], start_date, end_date), as_dict=True)
 			app2 = app_result2[0]["total"] or 0 if app_result2 else 0
 
@@ -2549,7 +2563,7 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 				SELECT SUM(grand_total) as total
 				FROM `tabQuotation`
 				WHERE sales_person=%s and workflow_state in ("Approved by Customer")
-				AND transaction_date BETWEEN %s AND %s
+				AND approval_date BETWEEN %s AND %s
 			""", (sp["name"], from_date, to_date), as_dict=True)
 			app = app_result[0]["total"] or 0 if app_result else 0
 
@@ -2714,14 +2728,49 @@ def get_technician_service_report(doc_name):
 		frappe.log_error(frappe.get_traceback(), "Get Technicians Error")
 		return "-"
 
-# @frappe.whitelist()
-# def check_wo_ap():
-# 	cat = frappe.get_all("Sub Category",["*"])
-# 	count = 0
-# 	for i in cat:
-# 		# print(i.category)
-# 		item = frappe.db.exists("Item",{"sub_category":i.sub_category})
-# 		if not item:
-# 			print(i.sub_category)
-# 			count = count + 1
-# 	print(count)
+@frappe.whitelist()
+def check_wo_ap():
+	from_date = "2026-01-01"
+	to_date = "2026-04-30"
+	sales_person_name = "Yazeed"
+			
+	sales_target_doc = frappe.get_value("Sales Target",{"sales":sales_person_name},"name")
+
+	monthly_approval_target = 0
+	monthly_invoice_target = 0
+	monthly_collection_target = 0
+
+	monthly_approval_target2 = 0
+	monthly_invoice_target2 = 0
+	monthly_collection_target2 = 0
+
+	if sales_target_doc:
+		from_date = frappe.utils.getdate(from_date)
+		to_date = frappe.utils.getdate(to_date)
+		
+		doc = frappe.get_doc("Sales Target", sales_target_doc)
+
+		for row in doc.target_table:
+			
+			# row.from_date, row.to_date
+
+			# ✅ check if month falls inside selected range
+			if row.from_date and row.to_date:
+				if row.from_date >= from_date and row.to_date <= to_date:
+					print(row.quotation_approval_target)
+
+					monthly_approval_target += row.quotation_approval_target or 0
+					monthly_invoice_target += row.invoice_target or 0
+					monthly_collection_target += row.collection_target or 0
+
+			# ✅ current year till current month (c_month_range logic replacement)
+			# today = frappe.utils.today()
+			today = datetime.today().date()
+			if row.from_date and row.to_date:
+				if row.from_date >= datetime(today.year, 1, 1).date() and row.to_date <= today:
+
+					monthly_approval_target2 += row.quotation_approval_target or 0
+					monthly_invoice_target2 += row.invoice_target or 0
+					monthly_collection_target2 += row.collection_target or 0
+
+	# print(monthly_approval_target)

@@ -14,7 +14,7 @@ class SupplyOrderData(Document):
 		received = received_percentage or 0
 		delivered = delivered_percentage or 0
 
-		if ordered == 0:
+		if ordered == 0 and received == 0:
 			supply_status = "To Order"
 
 		elif 0 < ordered < 100:
@@ -377,19 +377,40 @@ def list_desk():
 
 @frappe.whitelist()
 def fetch_payment_details(name):
-	data = frappe.db.sql("""
+	payment = frappe.db.sql("""
 		SELECT 
 			t.parent AS payment_entry,
 			t.allocate_amount AS amount,
 			p.posting_date,
-			p.paid_to_account_currency AS currency
+			c.symbol AS currency
 		FROM `tabJob Order table` t
 		JOIN `tabPayment Entry` p
 			ON p.name = t.parent
+		JOIN `tabCurrency` c
+			ON c.name = p.paid_to_account_currency
 		WHERE 
 			t.parenttype = 'Payment Entry'
 			AND t.reference_type = 'Supply Order Data'
 			AND t.reference_name = %s
 			AND p.docstatus = 1
 	""", (name), as_dict=True)
-	return data
+
+	sales_invoice = frappe.db.sql("""
+		SELECT 
+			DISTINCT(si.parent) AS sales_invoice,
+			s.grand_total as amount,
+			s.outstanding_amount AS outstanding_amount,
+			s.posting_date AS invoice_date,
+			s.status,
+			c.symbol AS currency
+		FROM `tabSales Invoice Item` si
+		JOIN `tabSales Invoice` s
+			ON s.name = si.parent
+		JOIN `tabCurrency` c
+			ON c.name = s.currency
+		WHERE
+			si.supply_order_data = %s
+		AND s.docstatus = 1
+		""", (name), as_dict=True)
+
+	return payment, sales_invoice

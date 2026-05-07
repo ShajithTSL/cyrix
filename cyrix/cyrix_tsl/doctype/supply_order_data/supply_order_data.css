@@ -272,10 +272,27 @@
             background: #0da5de;
         }
 
+        
+        .status-success {
+            background: linear-gradient(135deg, rgba(22, 235, 29, 0.15) 0%, rgba(30, 164, 0, 0.1) 100%);
+            color: #42cf6c;
+            border: 1px solid rgba(13, 222, 27, 0.3);
+            gap: 0.5rem;
+            padding: 0.3rem 1rem;
+            border-radius: 8px;
+        }
+
+        .status-success::before {
+            background: #1ce71c;
+        }
+
         .status-pending {
             background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
-            color: #92400e;
+            color: #ed6036;
             border: 1px solid rgba(251, 191, 36, 0.3);
+            gap: 0.5rem;
+            padding: 0.3rem 1rem;
+            border-radius: 8px;
         }
 
         .status-pending::before {

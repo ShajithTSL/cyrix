@@ -1,6 +1,6 @@
 <style>
 .supply-card {
-    width:40%;
+    width:100%;
     background: #fff;
     border-radius: 14px;
     padding: 20px;
@@ -19,7 +19,7 @@
 /* Main Grid */
 .supply-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* Equal width */
+    grid-template-columns: repeat(6, 1fr); /* Equal width */
     border: 1px solid #e3e8ee;
     border-radius: 12px;
     overflow: hidden;
@@ -179,6 +179,26 @@
 
         </div>
 
+        
+        <!-- Invoiced -->
+        <div class="supply-col">
+
+            <div class="supply-label">Invoiced</div>
+            <div class="supply-value">
+                {{doc.symbol}}{{ doc.invoiced_value }}
+            </div>
+        </div>
+
+        <!-- Paid -->
+        <div class="supply-col">
+
+            <div class="supply-label">Paid</div>
+
+            <div class="supply-value">
+                {{doc.symbol}}{{ doc.advance_payment_amount }}
+            </div>
+        </div>
+
 
         <!-- Status + Amount -->
         <div class="supply-col">
@@ -188,29 +208,6 @@
             <div class="status-badge">
                 {{ doc.supply_status }}
             </div>
-
-
-            <div class="amount-box">
-
-                <div class="amount-label">
-                    Invoiced
-                </div>
-
-                <div class="amount-value">
-                    {{ doc.invoiced_value }}
-                </div>
-
-
-                <div class="amount-label">
-                    Paid
-                </div>
-
-                <div class="amount-value">
-                    {{ doc.advance_payment_amount }}
-                </div>
-
-            </div>
-
         </div>
 
     </div>

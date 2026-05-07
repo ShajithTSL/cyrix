@@ -25,6 +25,8 @@
   "sales_person",
   "warranty",
   "delivery",
+  "currency",
+  "symbol",
   "column_break_7",
   "image",
   "warehouse",
@@ -621,13 +623,29 @@
    "label": "Parent Customer",
    "options": "Customer",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "currency.symbol",
+   "fieldname": "symbol",
+   "fieldtype": "Data",
+   "label": "Symbol"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "company.default_currency",
+   "fetch_if_empty": 1,
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-30 09:47:22.370938",
+ "modified": "2026-05-06 16:30:36.819855",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

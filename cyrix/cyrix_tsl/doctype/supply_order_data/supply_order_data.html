@@ -75,7 +75,7 @@
         <br>
         {% endif %}
 
-
+        {% if sales_invoice_details %}
         {% if sales_invoice_details.length %}
         <!-- Sales Invoice Table -->
         <div class="table-wrapper">
@@ -123,9 +123,10 @@
         </div>
         <br>
         {% endif %}
+        {% endif %}
 
 
-
+        {% if payment_details %}
         {% if payment_details.length %}
         <!-- Payment Entries Table -->
         <div class="table-wrapper">
@@ -164,6 +165,7 @@
                 </table>
             </div>
         </div>
+        {% endif %}
         {% endif %}
     </div>
     <br>

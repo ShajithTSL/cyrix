@@ -88,6 +88,20 @@ frappe.ui.form.on("WO Approval", {
 
 
 
+		if (frm.doc.type == "Statement of Customer"){
+			var print_format ="Statement of Customer";
+			var f_name = "Statement of Customer"
+			window.open(frappe.urllib.get_full_url("/api/method/frappe.utils.print_format.download_pdf?"
+				+ "doctype=" + encodeURIComponent("WO Approval")
+				+ "&name=" + encodeURIComponent(f_name)
+				+ "&trigger_print=1"
+				+ "&format=" + print_format
+				+ "&no_letterhead=0"
+			));
+		}
+
+
+
 		
 			
 		

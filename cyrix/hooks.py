@@ -98,6 +98,7 @@ jinja = {
 		"cyrix.custom_py.jinja.sales_summary",
 		"cyrix.custom_py.jinja.weekly_report",
 		"cyrix.custom_py.jinja.target_master",
+		"cyrix.custom_py.jinja.get_receivable",
         "cyrix.custom_py.jinja.get_technician_service_report",
 		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.weekly_sales",
 		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.daily_sales"

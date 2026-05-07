@@ -689,7 +689,7 @@ def render_cumulative_table(q_wo, a_wo, p_wo, d_wo, q_so, a_so, p_so, d_so):
 			</td>
 		</tr>
 		<tr style="background-color:#145da0; color:white; font-weight:bold;">
-			<td colspan="3" style="text-align:center; padding:8px; font-size:12px; border-right:1px solid white;color:white;">WORK ORDER</td>
+			<td colspan="3" style="text-align:center; padding:8px; font-size:12px; border-right:1px solid white;color:white;">JOB ORDER</td>
 			<td colspan="3" style="text-align:center; padding:8px; font-size:12px;color:white">SUPPLY ORDER</td>
 		</tr>
 		<tr style="background-color:#f0f0f0; font-weight:bold;">
@@ -719,15 +719,15 @@ def render_cumulative_table(q_wo, a_wo, p_wo, d_wo, q_so, a_so, p_so, d_so):
 
 def render_header(company, formatted_date):
 	"""Generate the report header HTML."""
-	logo_path = "/files/TSL LOGO.png"
+	logo_path = "/files/Cyrix Logo.png"
 	country_label = "Kuwait" if "Kuwait" in company else "UAE"
 
 	return f"""
 	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
 		<tr>
-			<td style="width:30%; border-color:#000000;"><img src="{logo_path}" width="250"></td>
+			<td style="width:30%; border-color:#000000;"><img src="{logo_path}" width="200"></td>
 			<td style="width:40%; border-color:#000000; font-size:16px; color:#055c9d; text-align:center; font-weight:bold;">
-				<br>TSL Company<br>WO & SO Approval Percentage by Amount
+				<br>TSL Company<br>JO & SO Approval Percentage by Amount
 			</td>
 			<td style="width:30%; border-color:#000000;">
 				<center><img src="/files/kuwait flag.jpg" width="140" height="80"></center>
@@ -770,7 +770,7 @@ def render_table_header(company):
 		<tr>
 			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%"></td>
 			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="10%"></td>
-			<td colspan="4" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">WORK ORDER</td>
+			<td colspan="4" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">JOB ORDER</td>
 			<td colspan="4" style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;">SUPPLY ORDER</td>
 		</tr>
 		<tr>
@@ -792,7 +792,7 @@ def render_table_header2(company):
 	return f"""
 	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
 		<tr>
-			<td colspan="3" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">WORK ORDER</td>
+			<td colspan="3" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">JOB ORDER</td>
 			<td colspan="4" style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;">SUPPLY ORDER</td>
 		</tr>
 		<tr>
@@ -1286,7 +1286,7 @@ def sales_summary(from_date, to_date, company,brnch):
 	currency = currency_map.get(company, "")
 
 	# Header with logo
-	data += '<td colspan="3" style="border-color:#000000;"><img src="/files/TSL LOGO.png" align="left" width="250"></td>'
+	data += '<td colspan="3" style="border-color:#000000;"><img src="/files/Cyrix Logo.png" align="left" width="200"></td>'
 	data += '<td colspan="5" style="border-color:#000000;"><h2><center><b style="color:#055c9d;">Cyrix TSL<br>Branch - %s<br>Currency - %s</b></center></h2></td>' % (brnch,"KWD")
 	
 	
@@ -1323,43 +1323,43 @@ def sales_summary(from_date, to_date, company,brnch):
 		"Cyrix TSL - Kuwait": """
 		<tr>
 			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
-			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">JO</b></center></td>  
 			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>
-			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">JO</b></center></td>
 			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
-			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">JO</b></center></td>
 			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>
-			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">JO</b></center></td>
 			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
-			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">JO</b></center></td>  
 			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
 		</tr>
 		""",
 		"TSL COMPANY - UAE": """
 		<tr>
 			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
-			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">JO</b></center></td>
 			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>
-			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">JO</b></center></td>
 			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
-			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">JO</b></center></td>  
 			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
-			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">WO</b></center></td>
+			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">JO</b></center></td>
 			<td style="border-color:#000000;width:9%;background-color:#145da0;color:white;"><center><b style="color:white;">SO</b></center></td>
-			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO</b></center></td>  
+			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">JO</b></center></td>  
 			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
 		</tr>
 		""",
 		"TSL COMPANY - KSA": """
 		<tr>
 			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
-			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">JO(in SAR)</b></center></td>
 			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>
-			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">JO(in SAR)</b></center></td>
 			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>
-			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>
+			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">JO(in SAR)</b></center></td>
 			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>
-			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">WO(in SAR)</b></center></td>  
+			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">JO(in SAR)</b></center></td>  
 			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO(in SAR)</b></center></td>	
 		</tr>
 		"""
@@ -2774,3 +2774,181 @@ def check_wo_ap():
 					monthly_collection_target2 += row.collection_target or 0
 
 	# print(monthly_approval_target)
+
+
+
+import frappe
+from datetime import datetime
+
+@frappe.whitelist()
+def get_receivable(customer, from_date, to_date, company):
+
+    data = ''
+
+    # 🔹 Premium Styling (Enterprise look)
+    data += """
+    <style>
+    .table-receivable {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: #2c3e50;
+    }
+
+    .table-receivable th {
+        background-color: #1a4d8c !important;
+        color: #ffffff !important;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 10px 8px;
+        text-align: center;
+        border-bottom: 2px solid #163d6b;
+        letter-spacing: 0.3px;
+    }
+
+    .table-receivable td {
+        font-size: 11px;
+        padding: 8px 6px;
+        border-bottom: 1px solid #e6e9ef;
+    }
+
+    .table-receivable tr:nth-child(even) {
+        background-color: #fbfcfe;
+    }
+
+    .table-receivable tr:hover {
+        background-color: #f1f6ff;
+    }
+
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .bold { font-weight: 600; }
+
+    .invoice-link {
+        text-decoration: none;
+        color: #1a4d8c;
+        font-weight: 600;
+    }
+
+    .invoice-link:hover {
+        text-decoration: underline;
+    }
+
+    .total-row td {
+        border-top: 2px solid #1a4d8c;
+        background-color: #f4f7fb;
+        font-size: 12px;
+    }
+
+    .currency {
+        color: #7f8c8d;
+        font-weight: 500;
+    }
+    </style>
+    """
+
+    # 🔹 Table Start
+    data += '<table class="table-receivable">'
+
+    # 🔹 Header (INLINE color for PDF safety)
+    data += """
+    <tr>
+        <th style="color:#fff !important;">Due Date</th>
+        <th style="color:#fff !important;">Invoice No</th>
+        <th style="color:#fff !important;">Ref(WOD)</th>
+        <th style="color:#fff !important;">Ref(PO)</th>
+        <th style="color:#fff !important;">Invoiced</th>
+        <th style="color:#fff !important;">Paid</th>
+        <th style="color:#fff !important;">Outstanding</th>
+    </tr>
+    """
+
+    # 🔹 Fetch Data
+    si_list = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "company": company,
+            "status": ["in", ["Overdue", "Unpaid"]],
+            "customer": customer,
+            "posting_date": ["between", (from_date, to_date)]
+        },
+        fields=["name", "due_date", "grand_total", "outstanding_amount", "po_no"],
+        order_by="posting_date asc"
+    )
+
+    total_outstanding = 0
+
+    for i in si_list:
+
+        # Skip return invoices
+        if frappe.db.exists("Sales Invoice", {"return_against": i.name}):
+            continue
+
+        total_outstanding += i.outstanding_amount
+
+        # 🔹 Date Format
+        formatted_due_date = datetime.strptime(
+            str(i.due_date), "%Y-%m-%d"
+        ).strftime("%d-%m-%Y")
+
+        # 🔹 WOD Fetch
+        jo_data = frappe.db.sql("""
+            SELECT DISTINCT job_order_data AS jo
+            FROM `tabSales Invoice Item`
+            WHERE parent = %s
+        """, (i.name,), as_dict=1)
+
+        jods = []
+        for j in jo_data:
+            if j.get("jo"):
+                jods.append(str(j["jo"])[7:])  # trimming prefix
+
+        jod = ', '.join(jods) if jods else ''
+        po_no = i.po_no or ''
+
+        # 🔹 Amounts
+        gt = "{:,.3f}".format(i.grand_total)
+        paid = "{:,.3f}".format(i.grand_total - i.outstanding_amount)
+        outs = "{:,.3f}".format(i.outstanding_amount)
+
+        # 🔹 Default link (avoid undefined variable)
+        link = "#"
+
+        if company == "Cyrix TSL - Kuwait":
+            link = f"https://erp.cyrix-tsl.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name={i.name}&format=INV/KW/V2&no_letterhead=0&letterhead=0"
+
+        elif company == "Company Al-Halloul Faniye Medical":
+            link = f"https://erp.cyrix-tsl.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name={i.name}&format=INV/KSA&no_letterhead=0&letterhead=0"
+
+        # 🔹 Row
+        data += f"""
+        <tr>
+            <td>{formatted_due_date}</td>
+            <td class="text-center">
+                <a href="{link}" class="invoice-link" target="_blank">{i.name}</a>
+            </td>
+            <td class="text-center">{jod}</td>
+            <td class="text-center">{po_no}</td>
+            <td class="text-right">{gt}</td>
+            <td class="text-right">{paid}</td>
+            <td class="text-right bold">{outs}</td>
+        </tr>
+        """
+
+    # 🔹 Total Row
+    currency = frappe.get_value("Company", company, "default_currency")
+    total_formatted = "{:,.3f}".format(total_outstanding)
+
+    data += f"""
+    <tr class="total-row">
+        <td colspan="6" class="text-right bold">
+            Balance Due <span class="currency">({currency})</span>
+        </td>
+        <td class="text-right bold">{total_formatted}</td>
+    </tr>
+    """
+
+    data += '</table>'
+    data += '<p></p>'
+
+    return data

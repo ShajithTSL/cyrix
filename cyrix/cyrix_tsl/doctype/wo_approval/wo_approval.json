@@ -8,9 +8,11 @@
   "company",
   "branch",
   "type",
+  "download",
+  "column_break_apdi",
+  "customer",
   "from_date",
-  "to_date",
-  "download"
+  "to_date"
  ],
  "fields": [
   {
@@ -44,7 +46,18 @@
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
-   "options": "\nWO Approval\nSales Summary\nWeekly Lab Report\nTarget Master\nSales Weekly Summary\nSales Daily Summary"
+   "options": "\nWO Approval\nSales Summary\nWeekly Lab Report\nTarget Master\nSales Weekly Summary\nSales Daily Summary\nStatement of Customer"
+  },
+  {
+   "depends_on": "eval:doc.type == \"Statement of Customer\"",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "column_break_apdi",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -52,7 +65,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-22 12:29:26.133763",
+ "modified": "2026-05-04 12:23:06.828031",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "WO Approval",

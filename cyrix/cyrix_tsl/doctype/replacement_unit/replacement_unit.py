@@ -32,7 +32,7 @@ def create_rfq(docname):
 	new_doc.branch = doc.branch
 	new_doc.schedule_date = today()
 	new_doc.custom_replacement_unit = docname
-	new_doc.job_order_data = docname
+	# new_doc.job_order_data = docname
 	new_doc.department = doc.department
 	new_doc.items=[]
 
@@ -52,7 +52,8 @@ def create_rfq(docname):
 			"conversion_factor":1,
 			"stock_qty":1,
 			"qty":1,
-			"job_order_data":docname,
+			# "job_order_data":docname,
+			"custom_replacement_unit":docname,
 			# "schedule_date":add_to_date(new_doc.transaction_date,days = 2),
 			"schedule_date":today(),
 			"warehouse":warehouse,

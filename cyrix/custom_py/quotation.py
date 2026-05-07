@@ -532,7 +532,7 @@ def update_tech_hours(job_order_data):
 			estimated_repair_time 
 		from `tabEvaluation Report` 
 			where docstatus = 1 
-			and parent_jo = %s 
+			and parent_jo = %s
 		''',k,as_dict =1)
 
 		if child_eval_report:

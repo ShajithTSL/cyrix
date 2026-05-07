@@ -74,8 +74,8 @@ def get_reference_name(doc):
 	return doc.parent if doc.meta.istable else doc.name
 
 
-def delete_doc():
-	frappe.delete_doc("Stock Ledger Entry","e29229ccc0")
+# def delete_doc():
+# 	frappe.delete_doc("Stock Entry","2a15fc183a")
 
 @frappe.whitelist()
 def update_jd():
@@ -291,91 +291,191 @@ def create_replacement_item(customer,wod,items):
 	wd.submit()
 	frappe.msgprint("Replacement Unit Created")
 
-	w = frappe.get_doc("Job Order Data",wod)
-	st = frappe.new_doc("Stock Entry")
-	st.company = w.company
-	st.stock_entry_type = "Material Issue"
-	# st.custom_replacement_unit = wd.name
-	for i in w.material_list:
-		has_serial_no = frappe.db.get_value("Item", {"item_code": i.item_code}, "has_serial_no")
-		if has_serial_no:
+	# w = frappe.get_doc("Job Order Data",wod)
+	# st = frappe.new_doc("Stock Entry")
+	# st.company = w.company
+	# st.stock_entry_type = "Material Issue"
+	# # st.custom_replacement_unit = wd.name
+	# for i in w.material_list:
+	# 	has_serial_no = frappe.db.get_value("Item", {"item_code": i.item_code}, "has_serial_no")
+	# 	if has_serial_no:
 
-			st.append("items",{
-			"item_code":i.item_code,
-			"qty":i.quantity,
-			"s_warehouse":w.repair_warehouse,
-			"uom":"Nos",
-			"stock_uom":"Nos",
-			"use_serial_batch_fields":1,
-			"serial_no":i.serial_no,
-			'conversion_factor':1,
-			"allow_zero_valuation_rate": 1,
-			"custom_replacement_unit": wod,
-			"work_order_data": wod
-		})
-		else:
-			st.append("items",{
-			"item_code":i.item_code,
-			"qty":i.quantity,
-			"s_warehouse":w.repair_warehouse,
-			"uom":"Nos",
-			"stock_uom":"Nos",
-			"custom_serial_number":i.serial_no,
-			'conversion_factor':1,
-			"allow_zero_valuation_rate": 1,
-			"custom_replacement_unit": wod,
-			"work_order_data": wod
+	# 		st.append("items",{
+	# 		"item_code":i.item_code,
+	# 		"qty":i.quantity,
+	# 		"s_warehouse":w.repair_warehouse,
+	# 		"uom":"Nos",
+	# 		"stock_uom":"Nos",
+	# 		"use_serial_batch_fields":1,
+	# 		"serial_no":i.serial_no,
+	# 		'conversion_factor':1,
+	# 		"allow_zero_valuation_rate": 1,
+	# 		"custom_replacement_unit": wod,
+	# 		"work_order_data": wod
+	# 	})
+	# 	else:
+	# 		st.append("items",{
+	# 		"item_code":i.item_code,
+	# 		"qty":i.quantity,
+	# 		"s_warehouse":w.repair_warehouse,
+	# 		"uom":"Nos",
+	# 		"stock_uom":"Nos",
+	# 		"custom_serial_number":i.serial_no,
+	# 		'conversion_factor':1,
+	# 		"allow_zero_valuation_rate": 1,
+	# 		"custom_replacement_unit": wod,
+	# 		"work_order_data": wod
 					
-		})
+	# 	})
 		
-	st.save(ignore_permissions = True)
-	st.submit()
+	# st.save(ignore_permissions = True)
+	# st.submit()
 
 
-# @frappe.whitelist()
-# def item_import(import_file):
-# 	"""
-# 	import_file = File Doc name OR file URL
-# 	"""
-# 	# get file path
-# 	file_doc = get_file(import_file)
-# 	file_path = file_doc[1]
 
-# 	# read csv
-# 	data = read_csv_content(file_path)
+@frappe.whitelist()
+def create_replacement_item(customer, wod, items, release_stock=0):
 
-# 	# skip header, process first 20 rows
-# 	count = 0
-# 	for i in data[1:]:
-# 		if not i[3] == "-":
-# 			im = frappe.get_value("Item Model",{"model":i[3]})
-# 			if im:
-# 				item = frappe.db.exists("Item",{"model":im})
-# 				if not item:
-# 					it = frappe.new_doc("Item")
-# 					it.model = im
-# 					it.item_name = i[4]
-# 					it.marking_code = i[0]
-# 					it.description =i[4]
-# 					it.stock_uom = "Nos"
-# 					it.item_group = "Equipments"
-# 					it.is_stock_item = 1
-# 					it.save(ignore_permissions =1)
-# 					count = count+1
-# 	print(count)
+	from datetime import date, datetime
 
+	today = date.today()
+
+	# 🔹 Create Replacement Unit
+	wd = frappe.new_doc("Replacement Unit")
+	wd.name = wod
+
+	doclist = get_mapped_doc("Job Order Data", wod, {
+		"Job Order Data": {
+			"doctype": "Job Order Data",
+		},
+	}, wd)
+
+	wd.posting_date = today
+
+	for i in doclist.get('material_list'):
+		i.serial_no = ""
+
+	wd.status = "Inquiry"
+	wd.status_duration_details = []
+	wd.append("status_duration_details", {
+		"status": wd.status,
+		"date": datetime.now(),
+	})
+
+	wd.save(ignore_permissions=True)
+	# wd.submit()
+
+	# 🔹 Only create Stock Entry if user confirmed
+	if int(release_stock) == 1:
+
+		w = frappe.get_doc("Job Order Data", wod)
+
+		st = frappe.new_doc("Stock Entry")
+		st.company = w.company
+		st.stock_entry_type = "Material Issue"
+		st.custom_replacement_unit = wod
+
+		for i in w.material_list:
+
+			has_serial_no = frappe.db.get_value(
+				"Item", {"item_code": i.item_code}, "has_serial_no"
+			)
+
+			if has_serial_no:
+				st.append("items", {
+					"item_code": i.item_code,
+					"qty": i.quantity,
+					"s_warehouse": w.repair_warehouse,
+					"uom": "Nos",
+					"stock_uom": "Nos",
+					"use_serial_batch_fields": 1,
+					"serial_no": i.serial_no,
+					"conversion_factor": 1,
+					"allow_zero_valuation_rate": 1,
+					"custom_replacement_unit": wod,
+					"work_order_data": wod
+				})
+			else:
+				st.append("items", {
+					"item_code": i.item_code,
+					"qty": i.quantity,
+					"s_warehouse": w.repair_warehouse,
+					"uom": "Nos",
+					"stock_uom": "Nos",
+					"custom_serial_number": i.serial_no,
+					"conversion_factor": 1,
+					"allow_zero_valuation_rate": 1,
+					"custom_replacement_unit": wod,
+					"work_order_data": wod
+				})
+
+		st.save(ignore_permissions=True)
+		# st.submit()
+
+	frappe.msgprint("Replacement Unit Created")
+	return "Success"
+
+
+@frappe.whitelist()
+def item_import(import_file):
+	"""
+	import_file = File Doc name OR file URL
+	"""
+	# get file path
+	file_doc = get_file(import_file)
+	file_path = file_doc[1]
+
+	# read csv
+	data = read_csv_content(file_path)
+
+	# skip header, process first 20 rows
+	count = 0
+	for i in data[1:]:
+		if i[4]:
+			if i[4] == "0":
+				it = frappe.new_doc("Item")
+				
+				# it.item_name = i[3]
+				# it.marking_code = i[0]
+				# it.description =i[3]
+				# it.stock_uom = "Nos"
+				# it.item_group = "Equipments"
+				# it.is_stock_item = 1
+				# it.save(ignore_permissions =1)
+				count = count + 1
+				
+			else:
+				im = frappe.get_value("Item Model",{"model":i[4]})
+				if im:
+					
+					item = frappe.db.exists("Item",{"model":im})
+					if item:
+						# print("Item\tModel\tCol1\tCol2")
+						des = frappe.get_value("Item",item,"description")
+						mc = frappe.get_value("Item",item,"marking_code")
+						print(f"{item},{i[4]},{mc},{des}")
+						# it = frappe.new_doc("Item")
+						# it.model = im
+						# it.item_name = i[3]
+						# it.marking_code = i[0]
+						# it.description =i[3]
+						# it.stock_uom = "Nos"
+						# it.item_group = "Equipments"
+						# it.is_stock_item = 1
+						# it.save(ignore_permissions =1)
+						# count = count + 1
+				
+	
 
 	
 # @frappe.whitelist()
-# def dlt_jo():
+# def dlt_doc():
 # 	frappe.db.sql("""
-# 		DELETE FROM `tabItem`
-# 		WHERE owner = 'Administrator'
-# 		AND DATE(creation) = '2026-04-30'
-# 	""")
+# 		DELETE FROM `tabReplacement Unit`
+# 		WHERE name = "JO-6305" """)
 
 # 	frappe.db.commit()
-# 	return "Items deleted for 2026-03-28"
+# 	return "Items deleted"
 
 
 	

@@ -7,31 +7,45 @@ frappe.ui.form.on("Job Order Data", {
 	refresh(frm) {
 
 
-	if(frm.doc.status == "Replace"){
+	if (frm.doc.status == "Replace") {
     frm.add_custom_button(__('Create Replacement'), function () {
-       frappe.call({
-    		method: "cyrix.custom_py.utils.create_replacement_item",
-    		args: {
-    			"customer":frm.doc.customer,
-    			"wod":frm.doc.name,
-    			"items":frm.doc.material_list
-    			
-    		},
-    		callback: function(r) {
-    			if(r.message) {
-    			   
-    			    
-    				
-    			}
-    		}
-	});
-          
-        });
-        
-        
-        
-    
-    }
+
+        frappe.confirm(
+            __('Do you want to release stock for this Replacement?'),
+
+            // YES → Replacement + Stock
+            function () {
+                create_replacement(1);
+            },
+
+            // NO → Only Replacement
+            function () {
+                create_replacement(0);
+            }
+        );
+
+        function create_replacement(release_stock) {
+            frappe.call({
+                method: "cyrix.custom_py.utils.create_replacement_item",
+                freeze: true,
+                freeze_message: __("Creating Replacement..."),
+                args: {
+                    customer: frm.doc.customer,
+                    wod: frm.doc.name,
+                    items: frm.doc.material_list,
+                    release_stock: release_stock
+                },
+                callback: function (r) {
+                    if (!r.exc) {
+                        frappe.msgprint(__('Replacement Created Successfully'));
+                        frm.reload_doc();
+                    }
+                }
+            });
+        }
+
+    });
+}
         if(frm.doc.attach_image && frm.doc.docstatus == 1){
 			cur_frm.set_df_property("image", "options","<img src="+frm.doc.attach_image+">");
 			cur_frm.refresh_fields();

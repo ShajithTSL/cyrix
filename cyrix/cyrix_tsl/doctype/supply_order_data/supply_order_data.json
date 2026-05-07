@@ -629,6 +629,7 @@
    "fetch_from": "currency.symbol",
    "fieldname": "symbol",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Symbol"
   },
   {
@@ -637,6 +638,7 @@
    "fetch_if_empty": 1,
    "fieldname": "currency",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Currency",
    "options": "Currency"
   }
@@ -645,7 +647,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-06 16:30:36.819855",
+ "modified": "2026-05-07 10:13:20.390419",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

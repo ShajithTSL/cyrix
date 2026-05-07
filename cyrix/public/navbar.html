@@ -11,19 +11,23 @@
 			<ul class="nav navbar-nav d-none d-sm-flex" id="navbar-breadcrumbs"></ul>
 			<div class="collapse navbar-collapse justify-content-end">
 				<form class="form-inline fill-width justify-content-end" role="search" onsubmit="return false;">
-					{% if frappe.boot.list_companies.length > 1 %}
-					<button class="company-btn" onclick="company_change()">
-						{% if frappe.defaults.get_user_default("Company") %}
-							<span class="company-label">
-								{{ frappe.defaults.get_user_default("Company") }}
-							</span>
-						{% else %}
-							<span class="company-label company-not-set">
-								Select Company
-							</span>
-						{% endif %}
-					</button>
+					
+				<button 
+					class="company-btn {% if !frappe.defaults.get_default('company') %}company-alert{% endif %}" 
+					onclick="company_change()"
+					type="button"
+				>
+					{% if frappe.defaults.get_default("company") %}
+						<span class="company-label">
+							{{ frappe.defaults.get_default("company") }}
+						</span>
+					{% else %}
+						<span class="company-label">
+							Select Company
+						</span>
 					{% endif %}
+				</button>
+					
 					{% if (frappe.boot.read_only) { %}
 						<span class="indicator-pill yellow no-indicator-dot" title="{%= __("Your site is undergoing maintenance or being updated.") %}">
 							{%= __("Read Only Mode") %}
@@ -168,8 +172,8 @@
 </div>
 <style>
 	.company-btn {
-		background: linear-gradient(135deg, #00adef 0%, #015ca3 100%);              /* bright orange */
-		color: #fff;
+		background: linear-gradient(135deg, #00adef 0%, #015ca3 100%);
+		color: #fff !important;
 		padding: 6px 16px;
 		border-radius: 20px;
 		border: none;
@@ -179,21 +183,53 @@
 		transition: 0.2s ease;
 		display: flex;
 		align-items: center;
-	}
-
-	.company-btn:hover {
-		background: linear-gradient(135deg, #015ca3 0%,#00adef 100%);             /* darker on hover */
+		justify-content: center;
+		min-height: 34px;
+		text-align: center;
+		white-space: nowrap;
 	}
 
 	.company-label {
-		color: #fff;
+		color: #fff !important;
+		line-height: 1;
 	}
 
-	.company-not-set {
-		opacity: 0.9;
+	/* ALERT WHEN COMPANY NOT SET */
+	.company-alert {
+		background: linear-gradient(135deg, #ff4d4f 0%, #c1121f 100%);
+		animation: sirenAlert 1.2s infinite ease-in-out;
 	}
 
+	@keyframes sirenAlert {
 
+		0% {
+			background: linear-gradient(135deg, #ff4d4f 0%, #c1121f 100%);
+			box-shadow:
+				0 0 0px rgba(255, 77, 79, 0.4);
+			transform: scale(1);
+		}
+
+		50% {
+			background: linear-gradient(135deg, #c1121f 0%, #ff4d4f 100%);
+			box-shadow:
+				0 0 10px rgba(255, 77, 79, 0.9),
+				0 0 20px rgba(255, 77, 79, 0.7),
+				0 0 30px rgba(255, 77, 79, 0.5);
+			transform: scale(1.03);
+		}
+
+		100% {
+			background: linear-gradient(135deg, #ff4d4f 0%, #c1121f 100%);
+			box-shadow:
+				0 0 0px rgba(255, 77, 79, 0.4);
+			transform: scale(1);
+		}
+	}
+
+	.company-alert:hover {
+		animation-play-state: paused;
+		background: linear-gradient(135deg, #c1121f 0%, #ff4d4f 100%);
+	}
 </style>
 <script>
 window.company_change = function() {

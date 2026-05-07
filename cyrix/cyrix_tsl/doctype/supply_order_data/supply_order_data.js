@@ -256,7 +256,8 @@ frappe.ui.form.on("Supply Order Data", {
 				if(r.message){
 					const html = frappe.render_template("supply_order_data", {
 						doc: frm.doc,
-						payment_details: r.message
+						payment_details: r.message[0],
+						sales_invoice_details: r.message[1]
 					});
 					frm.fields_dict.detail_html.$wrapper.html(html);
 					

@@ -32,21 +32,12 @@
                     {% endif %}
                 </div>
                 {% endif %}
-
-                {% if doc.invoice_no %}
-                <div class="summary-item">
-                    <div class="summary-label">Sales Invoice</div>
-                    <a href="/app/sales-invoice/{{doc.invoice_no}}" class="doc-link summary-value">{{doc.invoice_no}}</a>
-                    <div class="summary-label" style="margin-top:0.5rem;">Sales Invoice Date</div>
-                    <div class="summary-value">{{frappe.datetime.str_to_user(doc.invoice_date)}}</div>
-                </div>
-                {% endif %}
             </div>
         </div>
         {% endif %}
 
         {% if doc.delivery_details.length %}
-        <!-- Payment Entries Table -->
+        <!-- Delivery Note Table -->
         <div class="table-wrapper">
             <div class="table-header">
                 <h2 style="color:rgb(255, 255, 255)">Delivery Details</h2>
@@ -83,6 +74,56 @@
         </div>
         <br>
         {% endif %}
+
+
+        {% if sales_invoice_details.length %}
+        <!-- Sales Invoice Table -->
+        <div class="table-wrapper">
+            <div class="table-header">
+                <h2 style="color:rgb(255, 255, 255)">Sales Invoices</h2>
+                
+                {% if sales_invoice_details.length == 1 %}
+                <div class="payment-count">{{sales_invoice_details.length}} Sales Invoice</div>
+                {% else %}
+                <div class="payment-count">{{sales_invoice_details.length}} Sales Invoices</div>
+                {% endif %}
+
+                
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Sales Invoice</th>
+                            <th>Invoice Date</th>
+                            <th style = "text-align: right">Amount</th>
+                            <th style = "text-align: right">Outstanding</th>
+                            <th style="text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pay in sales_invoice_details %}
+                        <tr>
+                            <td><a href="/app/sales-invoice/{{pay.sales_invoice}}" class="doc-link">{{pay.sales_invoice}}</a></td>
+                            <td class="date">{{frappe.datetime.str_to_user(pay.invoice_date)}}</td>
+                            
+                            <td class="amount"><b>{{pay.currency}} </b>{{pay.amount}}</td>
+                            <td class="amount"><b>{{pay.currency}} </b>{{pay.outstanding_amount}}</td>
+                            {% if pay.outstanding_amount == 0 %}
+                            <td style="text-align: center;"><span class="status-success">{{pay.status}}</span></td>
+                            {% else %}
+                            <td style="text-align: center;"><span class="status-pending">{{pay.status}}</span></td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+        {% endif %}
+
 
 
         {% if payment_details.length %}

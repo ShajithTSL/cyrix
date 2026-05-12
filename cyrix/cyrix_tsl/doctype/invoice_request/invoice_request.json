@@ -14,12 +14,14 @@
   "quotation",
   "go_to",
   "request_for",
+  "customer",
   "column_break_rkfva",
   "company",
   "requested_by",
   "sales_person",
   "submitted_by",
   "sales_email",
+  "attach",
   "section_break_nc32n",
   "invoice_list",
   "sod_quotation",
@@ -68,7 +70,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Request For",
-   "options": "\nJob Order\nSupply Order\nService"
+   "options": "\nJob Order\nSupply Order\nService\nBudgetary Quotation\nMaintenance Contract"
   },
   {
    "fieldname": "column_break_rkfva",
@@ -98,7 +100,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:doc.request_for == \"Job Order\" || doc.request_for == \"Service\"",
+   "depends_on": "eval:doc.request_for != \"Supply Order\"",
    "fieldname": "invoice_list",
    "fieldtype": "Table",
    "label": "Job Order Quotation",
@@ -135,12 +137,25 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Note: Attached document will be shared in the mail",
+   "fieldname": "attach",
+   "fieldtype": "Attach",
+   "label": "Attach Invoice pdf"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-12 09:58:02.443011",
+ "modified": "2026-04-30 15:20:09.269862",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Invoice Request",

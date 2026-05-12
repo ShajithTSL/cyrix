@@ -13,6 +13,9 @@ frappe.listview_settings['Budgetary Quotation'] = {
         else if (doc.status === "A-Approved") {
             return [__("A-Approved"), "green", "status,=,A-Approved"];
         }
+        else if (doc.status === "Q-Quoted") {
+            return [__("Q-Quoted"), "green", "status,=,Q-Quoted"];
+        }
         else if (doc.status === "Invoiced") {
             return[__("Invoiced"),"pink","status,=,Invoiced"];
         }

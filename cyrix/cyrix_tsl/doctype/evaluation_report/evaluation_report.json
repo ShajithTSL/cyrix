@@ -9,6 +9,7 @@
   "naming_series",
   "branch",
   "customer",
+  "parent_customer",
   "attn",
   "column_break_cilm",
   "specify_1",
@@ -609,12 +610,21 @@
    "fieldname": "not_working",
    "fieldtype": "Check",
    "label": "Not Working"
+  },
+  {
+   "fetch_from": "customer.parent_customer",
+   "fetch_if_empty": 1,
+   "fieldname": "parent_customer",
+   "fieldtype": "Link",
+   "label": "Parent Customer",
+   "options": "Customer",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-08 10:09:42.379534",
+ "modified": "2026-04-29 13:36:30.469895",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Evaluation Report",

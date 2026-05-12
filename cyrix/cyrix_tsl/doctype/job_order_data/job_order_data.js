@@ -2,7 +2,50 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Job Order Data", {
+
+	
 	refresh(frm) {
+
+
+	if (frm.doc.status == "Replace") {
+    frm.add_custom_button(__('Create Replacement'), function () {
+
+        frappe.confirm(
+            __('Do you want to release stock for this Replacement?'),
+
+            // YES → Replacement + Stock
+            function () {
+                create_replacement(1);
+            },
+
+            // NO → Only Replacement
+            function () {
+                create_replacement(0);
+            }
+        );
+
+        function create_replacement(release_stock) {
+            frappe.call({
+                method: "cyrix.custom_py.utils.create_replacement_item",
+                freeze: true,
+                freeze_message: __("Creating Replacement..."),
+                args: {
+                    customer: frm.doc.customer,
+                    wod: frm.doc.name,
+                    items: frm.doc.material_list,
+                    release_stock: release_stock
+                },
+                callback: function (r) {
+                    if (!r.exc) {
+                        frappe.msgprint(__('Replacement Created Successfully'));
+                        frm.reload_doc();
+                    }
+                }
+            });
+        }
+
+    });
+}
         if(frm.doc.attach_image && frm.doc.docstatus == 1){
 			cur_frm.set_df_property("image", "options","<img src="+frm.doc.attach_image+">");
 			cur_frm.refresh_fields();
@@ -106,22 +149,114 @@ frappe.ui.form.on("Job Order Data", {
 			},__('Create'));
 		}
     },
+
 	create_internal_quotation(frm){
         if(frm.doc.docstatus == 1 && !frm.doc.parent_jo) {
-			frm.add_custom_button(__("Internal Quotation"), function(){
+
+			frm.add_custom_button(__("Internal Quotation"), function() {
 				frappe.call({
-					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_internal_quotation",
+					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.get_eval_list", // 👈 create this whitelisted method
 					args: {
-						"job_order_data": frm.doc.name
+						job_order_data: frm.doc.name
 					},
 					callback: function(r) {
-						if(r.message) {
-							var doc = frappe.model.sync(r.message);
-							frappe.set_route("Form", doc[0].doctype, doc[0].name);
+
+						let jo_list = r.message || [];
+
+						if (!jo_list.length) {
+							frappe.msgprint("No Job Orders found.");
+							return;
 						}
+
+						// ✅ Check if ANY evaluation exists for parent/children
+						frappe.db.get_list("Evaluation Report", {
+							filters: {
+								job_order_data: ["in", jo_list],
+								docstatus: 1
+							},
+							limit: 1
+						}).then(records => {
+
+							// ✅ If EXISTS → normal flow
+							if (records.length > 0) {
+								create_internal_quotation(0);
+							}
+
+							// ⚠️ If NOT EXISTS → confirm
+							else {
+								frappe.confirm(
+									"Evaluation not Completed for any related Job Order. Do you want to proceed with pre evaluation?",
+
+									function() { // YES
+										create_internal_quotation(1);
+									},
+
+									function() { // NO
+										frappe.msgprint("Please create Evaluation Report to proceed.");
+									}
+								);
+							}
+						});
 					}
 				});
-			},__('Create'));
+
+				function create_internal_quotation(pre_eval) {
+					let allowed_customers = [];
+
+					if (frm.doc.customer) {
+						allowed_customers.push(frm.doc.customer);
+					}
+
+					if (frm.doc.parent_customer) {
+						allowed_customers.push(frm.doc.parent_customer);
+					}
+
+					let d = new frappe.ui.Dialog({
+						title: 'Select Customer',
+						fields: [
+							{
+								label: 'Customer',
+								fieldname: 'customer',
+								fieldtype: 'Link',
+								options: 'Customer',
+								reqd: 1,
+								get_query: function() {
+									return {
+										filters: [
+											['Customer', 'name', 'in', allowed_customers]
+										]
+									};
+								}
+							}
+						],
+						primary_action_label: 'Proceed',
+						primary_action(values) {
+							if (!values.customer) {
+								frappe.msgprint('Please select a customer');
+								return;
+							}
+
+							d.hide();
+							frappe.call({
+								method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_internal_quotation",
+								args: {
+									job_order_data: frm.doc.name,
+									pre_evaluation: pre_eval,
+									customer: values.customer
+								},
+								callback: function(res) {
+									if (res.message) {
+										var doc = frappe.model.sync(res.message);
+										frappe.set_route("Form", doc[0].doctype, doc[0].name);
+									}
+								}
+							});
+						}
+					});
+					d.show();
+				}
+
+			}, __('Create'));
 		}
 	},
 	route_to_jo_creation(frm){
@@ -137,49 +272,7 @@ frappe.ui.form.on("Job Order Data", {
 	create_delivery_note:function(frm){
 		if(frm.doc.docstatus == 1 && !frm.doc.parent_jo){
 			frm.add_custom_button(__("Delivery Note"), function(){
-				frappe.call({
-					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_delivery_note",
-					args: {
-						"job_order_data": frm.doc.name
-					},
-					callback: function(r) {
-						if (r.message) {
-							const dn_data = r.message[0];
-							const items_data = r.message[1];
-
-							if (!Array.isArray(items_data)) {
-								frappe.msgprint("Item data is not in expected format.");
-								return;
-							}
-
-							frappe.model.with_doctype("Delivery Note", function () {
-								const doc = frappe.model.get_new_doc("Delivery Note");
-
-								// Store custom item data temporarily
-								doc.__custom_items_to_override = items_data;
-
-								// Assign DN fields (like customer, company, etc.)
-								Object.assign(doc, dn_data);
-
-								doc.items = [];
-
-								// Add items (without setting rate yet)
-								items_data.forEach(item => {
-									let child = frappe.model.add_child(doc, "Delivery Note Item", "items");
-									child.item_code = item.item_code;
-									child.item_name = item.item_name || "";
-									child.qty = item.qty;
-									child.uom = item.uom || "Nos";
-									child.warehouse = item.warehouse;
-									child.job_order_data = item.job_order_data;
-								});
-
-								// Route to unsaved DN
-								frappe.set_route("Form", doc.doctype, doc.name);
-							});
-						}
-					}
-				});
+				show_customer_dialog_dn(frm);
 			},__('Create'));
 		}
 	},
@@ -204,3 +297,210 @@ frappe.ui.form.on("Job Order Data", {
 		}
 	}
 });
+
+
+frappe.ui.form.on('Material List', {
+    update_sku(frm, cdt, cdn) {
+        var child = locals[cdt][cdn];
+		update_sku_dialog(frm, child);
+	},
+	update_serial(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		update_serial_dialog(frm, child);
+	}
+});
+
+function show_customer_dialog_dn(frm) {
+    let allowed_customers = [];
+
+    if (frm.doc.customer) {
+        allowed_customers.push(frm.doc.customer);
+    }
+
+    if (frm.doc.parent_customer) {
+        allowed_customers.push(frm.doc.parent_customer);
+    }
+
+    let d = new frappe.ui.Dialog({
+        title: 'Select Customer',
+        fields: [
+            {
+                label: 'Customer',
+                fieldname: 'customer',
+                fieldtype: 'Link',
+                options: 'Customer',
+                reqd: 1,
+                get_query: function() {
+                    return {
+                        filters: [
+                            ['Customer', 'name', 'in', allowed_customers]
+                        ]
+                    };
+                }
+            }
+        ],
+        primary_action_label: 'Proceed',
+        primary_action(values) {
+            if (!values.customer) {
+                frappe.msgprint('Please select a customer');
+                return;
+            }
+
+            d.hide();
+			frappe.call({
+				method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_delivery_note",
+				args: {
+					"job_order_data": frm.doc.name,
+					"customer": values.customer
+				},
+				callback: function(r) {
+					if (r.message) {
+						const dn_data = r.message[0];
+						const items_data = r.message[1];
+
+						if (!Array.isArray(items_data)) {
+							frappe.msgprint("Item data is not in expected format.");
+							return;
+						}
+
+						frappe.model.with_doctype("Delivery Note", function () {
+							const doc = frappe.model.get_new_doc("Delivery Note");
+
+							// Store custom item data temporarily
+							doc.__custom_items_to_override = items_data;
+
+							// Assign DN fields (like customer, company, etc.)
+							Object.assign(doc, dn_data);
+
+							doc.items = [];
+
+							// Add items (without setting rate yet)
+							items_data.forEach(item => {
+								let child = frappe.model.add_child(doc, "Delivery Note Item", "items");
+								child.item_code = item.item_code;
+								child.item_name = item.item_name || "";
+								child.qty = item.qty;
+								child.uom = item.uom || "Nos";
+								child.warehouse = item.warehouse;
+								child.job_order_data = item.job_order_data;
+							});
+
+							// Route to unsaved DN
+							frappe.set_route("Form", doc.doctype, doc.name);
+						});
+					}
+				}
+			});
+        }
+    });
+
+    d.show();
+}
+
+function update_serial_dialog(frm, row) {
+	let dialog = new frappe.ui.Dialog({
+		title: "Change Serial Number",
+		fields: [
+			{
+				label: "Serial Number",
+				fieldname: "serial_no",
+				fieldtype: "Data",
+				default: row.serial_no || "",
+				reqd: 1
+			}
+		],
+		primary_action_label: "Proceed",
+		primary_action(values) {
+
+			frappe.call({
+				method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.change_serial_number",
+				args: {
+					job_order_data: frm.doc.name,
+					row_name: row.name,
+					new_serial_no: values.serial_no
+				},
+				freeze: true,
+				callback: function(r) {
+					if (!r.exc) {
+						frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+
+		}
+	});
+
+	dialog.show();
+}
+
+function update_sku_dialog(frm, row) {
+    let dialog = new frappe.ui.Dialog({
+        title: "Change Item Details",
+        fields: [
+            {
+                label: "Item Name",
+                fieldname: "item_name",
+                fieldtype: "Data",
+                default: row.item_name || "",
+                reqd: 1
+            },
+            {
+                label: "Item Model",
+                fieldname: "model",
+                fieldtype: "Link",
+                options: "Item Model",
+                default: row.model_no || "",
+                reqd: 1
+            },
+            {
+                label: "Manufacturer",
+                fieldname: "mfg",
+                fieldtype: "Link",
+                options: "Item Mfg",
+                default: row.mfg || "",
+                reqd: 1
+            },
+            {
+                label: "Description",
+                fieldname: "description",
+                fieldtype: "Small Text",
+                default: row.item_name || ""
+            },
+            {
+                label: "Action",
+                fieldname: "action",
+                fieldtype: "Select",
+                options: [
+                    { label: "Create New Item", value: "create" },
+                    { label: "Update Existing Item (If Not Used)", value: "update" }
+                ],
+                default: "create",
+                reqd: 1
+            }
+        ],
+        primary_action_label: "Proceed",
+        primary_action(values) {
+
+            frappe.call({
+                method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.change_or_create_item",
+                args: {
+                    job_order_data: frm.doc.name,
+                    row_name: row.name,
+                    values: values
+                },
+                freeze: true,
+                callback: function(r) {
+                    if (!r.exc) {
+                        frm.reload_doc();
+                        dialog.hide();
+                    }
+                }
+            });
+
+        }
+    });
+
+    dialog.show();
+}
+

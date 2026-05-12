@@ -18,7 +18,11 @@ frappe.ui.form.on("Invoice Request", {
 			await promise.catch(() => frappe.throw());
 		}
 	},
+	refresh: function(frm) {
+		$('[data-fieldname="attach"] button').css({'color':'white', 'background':'linear-gradient(135deg, #015ca3 0%,#00adef 100%)'});
+	},
     onload: function(frm) {
+		$('[data-fieldname="attach"] button').css({'color':'white', 'background':'linear-gradient(135deg, #015ca3 0%,#00adef 100%)'});
         // Set the query for the child table field
         frm.fields_dict['invoice_list'].grid.get_field('quotation').get_query = function(doc, cdt, cdn) {
             // Custom filter logic

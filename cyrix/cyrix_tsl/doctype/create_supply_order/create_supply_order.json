@@ -10,6 +10,7 @@
   "naming_series",
   "customer",
   "customer_branch_name",
+  "parent_customer",
   "mobile",
   "email",
   "address",
@@ -223,13 +224,22 @@
    "fieldtype": "Select",
    "label": "Document Type",
    "options": "Supply\nTender"
+  },
+  {
+   "fetch_from": "customer.parent_customer",
+   "fetch_if_empty": 1,
+   "fieldname": "parent_customer",
+   "fieldtype": "Link",
+   "label": "Parent Customer",
+   "options": "Customer",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-02 13:16:47.127488",
+ "modified": "2026-04-30 13:36:42.262230",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Supply Order",

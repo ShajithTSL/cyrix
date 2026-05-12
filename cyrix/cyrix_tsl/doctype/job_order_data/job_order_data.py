@@ -39,6 +39,15 @@ naming_series = {
 	},
 }
 class JobOrderData(Document):
+	def after_insert(self):
+		if self.get("maintenance_contract"):
+			doc = frappe.get_doc("Maintenance Contract", self.get("maintenance_contract"))
+			doc.append("reference_documents",{
+				"reference_name": self.name,
+				"ref_doctype": "Job Order Data"
+			})
+			doc.save(ignore_permissions=True)
+
 	def before_submit(self):
 		self.status = "NE-Need Evaluation"
 		now = datetime.now()
@@ -63,7 +72,7 @@ class JobOrderData(Document):
 				"date":now,
 			})
 
-	def on_update_after_submit(self):		
+	def on_update_after_submit(self):
 		check_for_shared_docs_on_jo(self)
 		if self.status != self.status_duration_details[-1].status:
 			ldate = self.status_duration_details[-1].date
@@ -86,6 +95,19 @@ class JobOrderData(Document):
 				"date":now,
 			})
 			doc.save(ignore_permissions=True)
+		update_child_jo_status(self)
+
+# This function updates the status of child Job Orders to match the parent Job Order's status, except when the status is in a specific list of statuses.
+def update_child_jo_status(self):
+	if self.status not in ["Board Evaluation", "AP-Available Parts", "EP-Extra Parts", "NE-Need Evaluation", "SP-Searching Parts", "WP-Waiting Parts",
+						"TR-Technician Repair", "UE-Under Evaluation", "UTR-Under Technician Repair", "Parts Priced", "IP-Internal Extra Parts"]:
+		
+		child_jo_list = frappe.get_all("Job Order Data",{"parent_jo":self.name,"name":("!=",self.name)},"name")
+		if child_jo_list:
+			for jo in child_jo_list:
+				doc = frappe.get_doc("Job Order Data",jo.name)
+				doc.status = self.status
+				doc.save(ignore_permissions=True)
 
 def check_for_shared_docs_on_jo(self):
 	tech_user = frappe.db.get_value("Technician ID",self.technician,"user_email")
@@ -190,14 +212,66 @@ def create_evaluation_report(doc_no):
 
 	return new_doc
 
+
+def update_tech_hours(new_doc, job_order_data):
+	eval_report = frappe.db.sql('''select 
+		status,
+		evaluation_time,
+		estimated_repair_time 
+	from `tabEvaluation Report` 
+		where docstatus = 1 
+		and job_order_data = %s 
+	order by creation desc limit 1''',job_order_data,as_dict =1)
+
+	if eval_report:
+		for report in eval_report:
+			evaluation_time = report.get('evaluation_time', 0)
+			estimated_repair_time = report.get('estimated_repair_time', 0)
+			total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
+			new_doc.append("technician_hours_spent", {
+				"job_order_data": job_order_data,
+				"comments": report.get("status"),
+				"total_hours_spent": total_hours,
+				"value": 20,
+				"total_price": total_hours * 20
+			})
+
+	# include child_jo
+	child_eval_report = frappe.db.sql('''select 
+		job_order_data,
+		status,
+		evaluation_time,
+		estimated_repair_time 
+	from `tabEvaluation Report` 
+		where docstatus = 1 
+		and parent_jo = %s 
+	''',job_order_data,as_dict =1)
+
+	if child_eval_report:
+		for child_report in child_eval_report:
+			evaluation_time = child_report.get('evaluation_time', 0)
+			estimated_repair_time = child_report.get('estimated_repair_time', 0)
+			total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
+			new_doc.append("technician_hours_spent", {
+				"job_order_data": child_report.get("job_order_data"),
+				"comments": child_report.get("status"),
+				"total_hours_spent": total_hours,
+				"value": 20,
+				"total_price": total_hours * 20
+			})
+
 @frappe.whitelist()
-def create_internal_quotation(job_order_data):
+def create_internal_quotation(job_order_data, pre_evaluation, customer):
 	doc = frappe.get_doc("Job Order Data",job_order_data)
 	new_doc= frappe.new_doc("Quotation")
 	new_doc.sales_person = doc.sales_person
+	new_doc.pre_evaluation = pre_evaluation
 	new_doc.naming_series = naming_series["Internal Quotation - Repair"][doc.branch]
 	new_doc.company = doc.company
-	new_doc.party_name = doc.customer
+	new_doc.party_name = customer
+	new_doc.parent_customer = frappe.db.get_value("Customer",customer,"parent_customer")
+	if doc.customer != customer:
+		new_doc.child_customer = doc.customer
 	new_doc.plant = doc.plant
 	new_doc.branch = doc.branch
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
@@ -218,38 +292,20 @@ def create_internal_quotation(job_order_data):
 			"warehouse":fetch_repair_warehouse(doc.company,doc.branch)
 		})
 
-	eval_report = frappe.db.sql('''select 
-		status,
-		evaluation_time,
-		estimated_repair_time 
-	from `tabEvaluation Report` 
-		where docstatus = 1 
-		and job_order_data = %s 
-	order by creation desc limit 1''',job_order_data,as_dict =1)
-
-	if eval_report:
-		report = eval_report[0]
-		evaluation_time = report.get('evaluation_time', 0)
-		estimated_repair_time = report.get('estimated_repair_time', 0)
-		total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
-		new_doc.append("technician_hours_spent", {
-			"job_order_data": job_order_data,
-			"comments": report.get("status"),
-			"total_hours_spent": total_hours,
-			"value": 20,
-			"total_price": total_hours * 20
-		})
+	update_tech_hours(new_doc, job_order_data)
 	fetch_item_price_details(new_doc,method="validate")
 	return new_doc
 
 @frappe.whitelist()
-def create_delivery_note(job_order_data):
+def create_delivery_note(job_order_data, customer):
 	doc = frappe.get_doc("Job Order Data",job_order_data)
 	new_doc = frappe.new_doc("Delivery Note")
 	new_doc.company = doc.company
-	new_doc.customer = doc.customer
+	new_doc.customer = customer
+	if doc.customer != customer:
+		new_doc.child_customer = doc.customer
 	new_doc.plant = doc.plant
-	new_doc.custom_sales_person = doc.sales_person
+	new_doc.sales_person = doc.sales_person
 	new_doc.branch = doc.branch
 	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
@@ -385,3 +441,165 @@ def fetch_payment_details(name):
 			AND p.docstatus = 1
 	""", (name), as_dict=True)
 	return data
+
+
+@frappe.whitelist()
+def get_eval_list(job_order_data):
+	return fetch_eval_list([], job_order_data)
+
+
+def fetch_eval_list(eval_list, job_order_data):
+	child_jo_list = frappe.get_all(
+		'Job Order Data',
+		filters={'parent_jo': job_order_data, 'docstatus': 1},
+		fields=['name']
+	)
+
+	eval_list = [job_order_data] + [child['name'] for child in child_jo_list]
+	return eval_list
+
+
+@frappe.whitelist()
+def get_or_create_item(i):
+
+	new_doc = frappe.new_doc('Item')
+	new_doc.item_name = i['item_name']
+	new_doc.item_group = "Equipments"
+	new_doc.description = i['item_name']
+	new_doc.model = i['model']
+	new_doc.is_stock_item = 1
+	new_doc.mfg = i['mfg']
+	new_doc.insert(ignore_permissions=True)
+
+	return new_doc.name
+
+@frappe.whitelist()
+def change_or_create_item(job_order_data, row_name, values):
+
+	values = frappe.parse_json(values)
+
+	jod = frappe.get_doc("Job Order Data", job_order_data)
+	row = next(d for d in jod.material_list if d.name == row_name)
+
+	old_item = row.item_code
+
+	# 1️⃣ Check if stock entry exists
+	stock_entry = frappe.db.get_value(
+		"Stock Entry",
+		{"job_order_data": jod.name, "docstatus": 1},
+		"name"
+	)
+	
+	if values.get("action") == "update":
+		# Safe to update
+		item = frappe.get_doc("Item", old_item)
+		item.model = values.get("model")
+		item.mfg = values.get("mfg")
+		item.description = values.get("description")
+		item.save(ignore_permissions=True)
+
+		frappe.msgprint("Item updated successfully.")
+		return
+
+	# -------- CREATE NEW ITEM -------- #
+
+	new_item = get_or_create_item(values)
+
+	# Cancel linked stock entry if exists
+	stock_entry = frappe.db.get_value(
+		"Stock Entry",
+		{"job_order_data": jod.name, "docstatus": 1},
+		"name"
+	)
+
+	if stock_entry:
+		se = frappe.get_doc("Stock Entry", stock_entry)
+		se.cancel()
+
+	# Update WOD row
+	row.item_code = new_item
+	row.model = values.get("model")
+	row.mfg = values.get("mfg")
+
+	jod.save(ignore_permissions=True)
+
+	
+	eval_list = frappe.db.get_list("Evaluation Report",{"job_order_data":jod.name},["name"])
+	for eval in eval_list:
+		er = frappe.get_doc("Evaluation Report",eval.name)
+		for item in er.evaluation_details:
+			if item.item == old_item:
+				item.item = new_item
+				item.model = values.get("model")
+				item.manufacturer = values.get("mfg")
+				item.serial_no = row.get("serial_no")
+		er.save(ignore_permissions=True)
+
+	
+	
+	frappe.errprint(f"Updated JOD {jod.name} row {row.name} with new item {new_item}")
+	# Recreate stock entry
+	if stock_entry:
+		create_stock_entry_jod(jod.name)
+
+	frappe.msgprint("New Item created and replaced successfully.")
+
+def create_stock_entry_jod(jod_name):
+	jod = frappe.get_doc("Job Order Data", jod_name)
+	new_doc = frappe.new_doc("Stock Entry")
+	new_doc.posting_date = jod.creation
+	new_doc.set_posting_time = 1
+	new_doc.stock_entry_type = "Material Receipt"
+	new_doc.company = jod.company
+	new_doc.branch = jod.branch
+	new_doc.job_order_data = jod.name
+	for i in jod.material_list:
+		new_doc.append("items", {
+			't_warehouse': jod.repair_warehouse,
+			'item_code': i.item_code,
+			'item_name': i.item_name,
+			'description': i.item_name,
+			# 'serial_no': i.serial_no,
+			'custom_serial_no': i.serial_no,
+			'qty': i.quantity,
+			'uom': frappe.db.get_value("Item", i.item_code, 'stock_uom'),
+			'conversion_factor': 1,
+			'allow_zero_valuation_rate': 1
+		})
+		sn_exist = frappe.db.exists("Serial Number",i.serial_no)
+		if sn_exist:
+			sn_doc = frappe.get_doc("Serial Number",i.serial_no)
+			sn_doc.serial_no = i.serial_no or ''
+			sn_doc.item_code = i.item_code
+			sn_doc.status = "Active"
+			sn_doc.save(ignore_permissions=True)
+	new_doc.save(ignore_permissions=True)
+	if new_doc.name:
+		new_doc.submit()
+
+
+@frappe.whitelist()
+def change_serial_number(job_order_data, row_name, new_serial_no):
+
+	jod = frappe.get_doc("Job Order Data", job_order_data)
+	row = next(d for d in jod.material_list if d.name == row_name)
+
+	old_serial_no = row.serial_no
+	row.serial_no = new_serial_no
+	jod.save(ignore_permissions=True)
+	if old_serial_no and old_serial_no != new_serial_no:
+		# try deleting old serial number and if not possible, update it with new serial number
+		frappe.db.delete("Serial Number", old_serial_no)
+		sn_doc = frappe.new_doc("Serial Number")
+		sn_doc.item_code = row.item_code
+		sn_doc.status = "Active"
+		sn_doc.company = jod.company
+		sn_doc.serial_no = new_serial_no
+		sn_doc.save(ignore_permissions=True)
+
+		frappe.msgprint("Serial Number updated successfully.")
+
+	
+		eval_list = frappe.db.get_list("Evaluation Report",{"job_order_data":jod.name},["name"])
+		for eval in eval_list:
+			frappe.db.set_value("Evaluation Item",{"parent":eval.name,"item":row.item_code,"serial_no":old_serial_no},"serial_no",new_serial_no)

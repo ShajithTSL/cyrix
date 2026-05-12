@@ -1,7 +1,20 @@
 import frappe
-from frappe.model.mapper import get_mapped_doc
 import json
+from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	date_diff,
+	flt,
+	get_first_day,
+	get_last_day,
+	get_link_to_form,
+	getdate,
+	rounded,
+	today,
+)
 naming_series = {
 	"Internal Quotation - Repair": {
 		"Kuwait": {"series": "IQR-K.YY.-", "status": "IQ-Internally Quoted"},
@@ -43,7 +56,7 @@ naming_series = {
 quotation_type = ["Customer Quotation - Repair","Customer Quotation - R - Revised",
 				"Customer Quotation - Supply","Customer Quotation - S - Revised",
 				"Customer Quotation - Site Visit","Customer Quotation - SV - Revised",
-				"Customer Quotation - BQ"]
+				"Customer Quotation - BQ", "Customer Quotation - MC", "Customer Quotation - MC - Revised"]
 
 
 def on_update_after_submit(doc,method):
@@ -60,7 +73,6 @@ def on_update_after_submit(doc,method):
 				frappe.db.set_value("Budgetary Quotation",i.budgetary_quotation,"quotation_approved_date",doc.approval_date)
 	update_quotation_reference(doc,method)
 
-
 def update_job_order_status(self, method):        
 	def update_status(self,item, status):
 		if item.job_order_data:
@@ -69,9 +81,16 @@ def update_job_order_status(self, method):
 			update.po_no = self.get("purchase_order_no")
 			update.save(ignore_permissions=True)
 
-	if method == "on_submit":        
-		if not self.type_of_approval and self.quotation_type in quotation_type and self.docstatus == 1:
+	if method == "on_submit":
+		if not self.type_of_approval and self.quotation_type in quotation_type and self.docstatus == 1 and self.workflow_state == "Approved by Customer":
 			frappe.throw("Cannot submit: 'Type of Approval' field is required.")
+
+		if self.get("maintenance_contract"):
+			mc_doc = frappe.get_doc("Maintenance Contract", self.maintenance_contract)
+			mc_doc.quoted_date = self.transaction_date
+			mc_doc.warranty_expiry_date = add_months(self.transaction_date, self.warranty_months)
+			mc_doc.save(ignore_permissions=True)
+
 		for item in self.get("items"):
 			if self.quotation_type:
 				status = naming_series.get(self.quotation_type, {}).get(self.branch, {}).get("status")
@@ -88,7 +107,6 @@ def update_job_order_status(self, method):
 					update_status(self,item, "RNA-Return Not Approved")
 				
 			if self.quotation_type in ["Internal Quotation - Repair","Internal Quotation - Supply"]:
-				frappe.log_error("Internal Quotation - Repair Triggered","Quotation Update Job Order Status")
 
 				if self.workflow_state == "Waiting For Approval":
 					update_status(self,item, "Pending Internal Approval")
@@ -129,6 +147,10 @@ def update_budgetary_quotation_status(self, method):
 			doc = frappe.get_doc("Budgetary Quotation",i.budgetary_quotation)
 			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Management":
 				doc.status = "IQ-Internally Quoted"
+			
+			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Quoted to Customer":
+				doc.status = "Q-Quoted"
+
 			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Customer":
 				doc.status = "A-Approved"
 			doc.save(ignore_permissions=True)
@@ -195,7 +217,8 @@ def fetch_previous_quotation_details(self, method):
 	quotation_type_map = {
 		"Internal Quotation - Repair": ["Customer Quotation - Repair", "Customer Quotation - R - Revised"],
 		"Internal Quotation - Supply": ["Customer Quotation - Supply", "Customer Quotation - S - Revised"],
-		"Internal Quotation - BQ": ["Customer Quotation - BQ","Customer Quotation - BQ - Revised"]
+		"Internal Quotation - BQ": ["Customer Quotation - BQ", "Customer Quotation - BQ - Revised"],
+		"Internal Quotation - MC": ["Customer Quotation - MC", "Customer Quotation - MC - Revised"]
 	}
 
 	self.previously_quoted_item = []
@@ -263,7 +286,6 @@ def fetch_price_from_eval_report(self, method):
 	for item in self.get("items"):
 		child_eval_list = fetch_eval_list(eval_list, item.job_order_data)
 		eval_list.extend(child_eval_list)
-
 	for eval in  eval_list:
 		eval_report_name = frappe.db.exists("Evaluation Report", {"job_order_data": eval})
 		if not eval_report_name:
@@ -328,7 +350,7 @@ def fetch_price_from_eval_report(self, method):
 	total_price = 0
 	if self.technician_hours_spent:
 		for hour in self.technician_hours_spent:
-			total_price = hour.total_price if hour.total_price else 0
+			total_price += hour.total_price if hour.total_price else 0
 	# Append to parts_price table
 	if self.item_price_details:
 		total_material_cost = tsl_inventory_total + supplier_total + scrap_total
@@ -444,7 +466,9 @@ def fetch_supplier_details(self, method):
 def get_job_order_data(job_order_data):
 	job_order_data = json.loads(job_order_data)
 	item_list=[]
+	jo_list = []
 	for k in list(job_order_data):
+		jo_list.append(k)
 		er = 0
 		er = frappe.db.sql('''select 
 			sum(psi.total) as total_amount
@@ -470,10 +494,81 @@ def get_job_order_data(job_order_data):
 				"qty": i.quantity,
 				"rate":float(er)/float(i.quantity),
 			}))
-	return item_list,branch
+	pre_evaluation = check_for_evaluation(jo_list)
+	tech_hours = update_tech_hours(job_order_data)
+	return item_list, branch, pre_evaluation, tech_hours
 
+def update_tech_hours(job_order_data):
+	technician_hours_spent = []
+	for k in list(job_order_data):
+		eval_report = frappe.db.sql('''select 
+			status,
+			evaluation_time,
+			estimated_repair_time 
+		from `tabEvaluation Report` 
+			where docstatus = 1 
+			and job_order_data = %s 
+		order by creation desc limit 1''',k,as_dict =1)
 
+		if eval_report:
+			for report in eval_report:
+				evaluation_time = report.get('evaluation_time', 0)
+				estimated_repair_time = report.get('estimated_repair_time', 0)
+				total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
+				technician_hours_spent.append(frappe._dict({
+					"job_order_data": k,
+					"comments": report.get("status"),
+					"total_hours_spent": total_hours,
+					"value": 20,
+					"total_price": total_hours * 20
+				}))
 
+		# include child_jo
+		child_eval_report = frappe.db.sql('''select 
+			job_order_data,
+			status,
+			evaluation_time,
+			estimated_repair_time 
+		from `tabEvaluation Report` 
+			where docstatus = 1 
+			and parent_jo = %s
+		''',k,as_dict =1)
+
+		if child_eval_report:
+			for child_report in child_eval_report:
+				evaluation_time = child_report.get('evaluation_time', 0)
+				estimated_repair_time = child_report.get('estimated_repair_time', 0)
+				total_hours = round((evaluation_time + estimated_repair_time) / 3600, 2) if evaluation_time and estimated_repair_time else 0
+				technician_hours_spent.append(frappe._dict({
+					"job_order_data": child_report.get("job_order_data"),
+					"comments": child_report.get("status"),
+					"total_hours_spent": total_hours,
+					"value": 20,
+					"total_price": total_hours * 20
+				}))
+
+	return technician_hours_spent
+
+def check_for_evaluation(jo_list):
+	count = 0
+	for jo in jo_list:
+		eval_report = frappe.db.exists("Evaluation Report", {"job_order_data": jo, "docstatus": 1})
+		if eval_report:
+			count += 1
+		
+		child_jo_list = frappe.get_all(
+			'Job Order Data',
+			filters={'parent_jo': jo, 'docstatus': 1},
+			fields=['name']
+		)
+		for child_jo in child_jo_list:
+			child_eval_report = frappe.db.exists("Evaluation Report", {"job_order_data": child_jo.name, "docstatus": 1})
+			if child_eval_report:
+				count += 1
+	if count > 0:
+		return 0
+	else:
+		return 1
 
 @frappe.whitelist()
 def get_supply_order_data(supply_order_data):
@@ -497,26 +592,57 @@ def get_supply_order_data(supply_order_data):
 			}))
 	return item_list,branch,customer
 
-
-
 @frappe.whitelist()
-def create_sales_invoice(source):
-	sales_invoice = frappe.new_doc("Sales Invoice")
-	doc = frappe.get_doc("Quotation",source)
-	doclist = get_mapped_doc("Quotation",source , {
-		"Quotation": {
-			"doctype": "Sales Invoice",
-			"field_map": {
-				"name": "quotation",
-				"party_name":"customer",
-				"branch":"branch",
+def create_sales_invoice(source, customer):
+	"""
+	Create Sales Invoice from Quotation, including only uninvoiced quantity
+	"""
+	sales_invoice = frappe.new_doc("Sales Invoice")	
+
+	def filter_uninvoiced_items(source_doc):
+		# Include only items where invoiced_qty < qty
+		return (source_doc.invoiced_qty or 0) < source_doc.qty
+
+	def update_uninvoiced_qty(source_doc, target_doc, source_parent):
+		# Adjust qty to be only the uninvoiced portion
+		target_doc.qty = source_doc.qty - (source_doc.invoiced_qty or 0)
+
+	def set_customer_details(source_doc, target_doc, source_parent):
+		target_doc.parent_customer = None
+		target_doc.child_customer = None
+		# Set parent customer
+		target_doc.customer = customer
+		target_doc.parent_customer = frappe.db.get_value("Customer", customer, "parent_customer")
+
+		# # If quotation customer differs from selected customer
+		if source_doc.party_name != customer and not target_doc.parent_customer:
+			target_doc.child_customer = source_doc.party_name
+		else:
+			target_doc.child_customer = source_doc.child_customer
+
+	doclist = get_mapped_doc(
+		"Quotation",
+		source,
+		{
+			"Quotation": {
+				"doctype": "Sales Invoice",
+				"field_map": {
+					"name": "quotation",
+					"branch": "branch",
+				},
+				"postprocess": set_customer_details,
+			},
+			"Quotation Item": {
+				"doctype": "Sales Invoice Item",
+				"field_map": {
+					"name": "qi_reference",
+				},
+				"condition": filter_uninvoiced_items,
+				"postprocess": update_uninvoiced_qty,  # adjust qty here
 			},
 		},
-		"Quotation Item": {
-			"doctype": "Sales Invoice Item",			
-		},
-
-	}, sales_invoice)
+		sales_invoice,
+	)
 
 	return doclist
 
@@ -528,12 +654,15 @@ def update_service_call_form(doc,method):
 			frappe.db.set_value("Service Call Form",doc.service_call_form,"status","Approved")
 
 @frappe.whitelist()
-def create_invoice_request(source,user):
+def create_invoice_request(source,user, customer):
 	new_doc = frappe.new_doc("Invoice Request")
 	doc = frappe.get_doc("Quotation",source)
 	new_doc.requested_by = user
 	new_doc.branch = doc.branch
 	new_doc.company = doc.company
+	new_doc.customer = customer
+	new_doc.sales_person = doc.sales_person
+	new_doc.sales_email = frappe.db.get_value("Sales Person",doc.sales_person,"user")
 
 
 	if doc.quotation_type == "Customer Quotation - Repair" or doc.quotation_type == "Customer Quotation - R - Revised":
@@ -559,28 +688,87 @@ def create_invoice_request(source,user):
 			"quotation":doc.name,
 		})
 
+	if doc.quotation_type == "Customer Quotation - BQ" or doc.quotation_type == "Customer Quotation - BQ - Revised":
+		new_doc.request_for = "Budgetary Quotation"
+
+		new_doc.append("invoice_list",{
+			"quotation":doc.name,
+		})
+	
+	if doc.quotation_type == "Customer Quotation - MC" or doc.quotation_type == "Customer Quotation - MC - Revised":
+		new_doc.request_for = "Maintenance Contract"
+
+		new_doc.append("invoice_list",{
+			"quotation":doc.name,
+		})
+
+
 	if doc.quotation_type == "Customer Quotation - Supply" or doc.quotation_type == "Customer Quotation - S - Revised":
 		new_doc.request_for = "Supply Order"
 		new_doc.append("sod_quotation",{
 			"quotation":doc.name,
 		})
 
-		sd = frappe.db.sql(""" select  `tabQuotation Item`.supply_order_data from `tabQuotation` 
+		sd = frappe.db.sql(""" select  distinct `tabQuotation Item`.supply_order_data from `tabQuotation` 
 			left join `tabQuotation Item` on `tabQuotation Item`.parent = `tabQuotation`.name
 			where `tabQuotation`.name = '%s' """ %(doc.name),as_dict = 1)
 	
 		for i in sd:
 			new_doc.append("sod_quotation",{
-			"supply_order_data":i["supply_order_data"],
-		})
+				"supply_order_data":i["supply_order_data"],
+			})
 			
 	return new_doc
 
-# def update_workflow():
-#     transitions = frappe.db.get_all("Workflow Transition",['name','condition'])
-#     for wo in transitions:
-#         print(wo)
-		
-#     frappe.db.set_value("Workflow Transition",'4tr31a70gk', 'condition', 'doc.quotation_type in ["Internal Quotation - Repair","Internal Quotation - Supply","Internal Quotation - Site Visit","Internal Quotation - BQ"]')
-#     frappe.db.set_value("Workflow Transition",'603tkifk9m', 'condition', 'doc.quotation_type not in ["Internal Quotation - Repair","Internal Quotation - Supply","Internal Quotation - Site Visit","Internal Quotation - BQ"]')
-#     frappe.db.set_value("Workflow Transition",'80cu734dfl', 'condition', 'doc.quotation_type not in ["Internal Quotation - Repair","Internal Quotation - Supply","Internal Quotation - Site Visit","Internal Quotation - BQ"]')
+
+# override _make_sales_invoice to include qi_reference
+from erpnext.selling.doctype.quotation.quotation import _make_customer
+from frappe.utils import flt, getdate, nowdate
+def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
+	customer = _make_customer(source_name, ignore_permissions)
+
+	def set_missing_values(source, target):
+		if customer:
+			target.customer = customer.name
+			target.customer_name = customer.customer_name
+
+		target.flags.ignore_permissions = ignore_permissions
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(obj, target, source_parent):
+		target.cost_center = None
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
+	doclist = get_mapped_doc(
+		"Quotation",
+		source_name,
+		{
+			"Quotation": {"doctype": "Sales Invoice", "validation": {"docstatus": ["=", 1]}},
+			"Quotation Item": {
+				"doctype": "Sales Invoice Item",
+				"field_map": {
+					"name": "qi_reference", # TODO: Overrided line
+				},
+				"postprocess": update_item,
+				"condition": lambda row: not row.is_alternative and select_item(row),
+			},
+			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
+			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
+		},
+		target_doc,
+		set_missing_values,
+		ignore_permissions=ignore_permissions,
+	)
+
+	return doclist

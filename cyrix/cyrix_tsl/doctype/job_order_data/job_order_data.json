@@ -13,6 +13,7 @@
   "naming_series",
   "customer",
   "customer_name",
+  "parent_customer",
   "customer_rep",
   "customer_email",
   "address",
@@ -24,15 +25,16 @@
   "department",
   "sales_person",
   "delivery",
-  "warranty",
-  "expiry_date",
+  "status_cap",
+  "returned_date",
   "column_break_7",
   "received_date",
   "repair_warehouse",
   "posting_date",
-  "status_cap",
+  "warranty",
+  "expiry_date",
   "status",
-  "returned_date",
+  "maintenance_contract",
   "column_break_cwfo",
   "unit_type",
   "technician",
@@ -259,9 +261,9 @@
    "options": "Branch"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "repair_warehouse",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Repair Warehouse",
    "options": "Warehouse"
   },
@@ -288,7 +290,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Board Evaluation\nA-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled"
+   "options": "Board Evaluation\nA-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled\nReplace"
   },
   {
    "fieldname": "remarks",
@@ -373,8 +375,7 @@
    "allow_on_submit": 1,
    "fieldname": "attach_image",
    "fieldtype": "Data",
-   "label": "Attach Image",
-   "read_only": 1
+   "label": "Attach Image"
   },
   {
    "fieldname": "section_break_dc2tn",
@@ -688,13 +689,33 @@
    "fieldname": "not_working",
    "fieldtype": "Check",
    "label": "Not Working"
+  },
+  {
+   "fieldname": "maintenance_contract",
+   "fieldtype": "Link",
+   "label": "Maintenance Contract",
+   "options": "Maintenance Contract",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.parent_customer",
+   "fieldname": "parent_customer",
+   "fieldtype": "Link",
+   "label": "Parent Customer",
+   "options": "Customer",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2026-03-29 08:50:57.245258",
+ "links": [
+  {
+   "link_doctype": "Replacement Unit",
+   "link_fieldname": "name"
+  }
+ ],
+ "modified": "2026-04-30 14:06:28.234188",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

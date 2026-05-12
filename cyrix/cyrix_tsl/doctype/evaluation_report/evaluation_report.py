@@ -11,7 +11,8 @@ from cyrix.custom_py.utils import sendmail
 NO_REPLY_EMAIL = "no-reply@cyrix-tsl.com"
 base_url = frappe.utils.get_url()
 warehouse_list = {
-	"Kuwait": "Kuwait - CT-K"
+	"Kuwait": "Kuwait - CT-K",
+	"Riyadh":"Riyadh - BM"
 }
 
 
@@ -129,13 +130,15 @@ class EvaluationReport(Document):
 		self.update_working_status() # if the document status is changed as Working, Need to change the JO status as Working
 		self.update_board_evaluation_status() # if the document status is changed as Board Evaluation, Need to change the JO status as Board Evaluation
 		# 1. this case mostly works on initial submission
-		if self.status == "Spare Parts":
-			# if parts avaliability field is yes
-			if self.parts_availability == "Yes":
-				doc.status = "AP-Available Parts"
-			else:
-				doc.status = "SP-Searching Parts"
-			doc.save(ignore_permissions=True)
+		if doc.status in ["NE-Need Evaluation","NER-Need Evaluation Return","UE-Under Evaluation"]:
+			if self.status == "Spare Parts":
+
+				# if parts avaliability field is yes
+				if self.parts_availability == "Yes":
+					doc.status = "AP-Available Parts"
+				else:
+					doc.status = "SP-Searching Parts"
+				doc.save(ignore_permissions=True)
 
 	def update_working_status(self):
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
@@ -353,6 +356,29 @@ def warehouse_based_on_branch_and_company(company,branch):
 	return warehouse
 	
 @frappe.whitelist()
+def create_item(model,part_no,category,sub_category,package,description):
+	part = frappe.db.exists("Item",{'model':model,'category':category,'sub_category':sub_category})
+	if part:
+		return part
+	else:
+		if not part_no:
+			# if frappe.session.user == "purchase@tsl-me.com" or frappe.session.user == "purchase-sa1@tsl-me.com":
+			item_doc = frappe.new_doc("Item")
+			item_doc.naming_series = "P.######"
+			item_doc.model = model
+			item_doc.category = category
+			item_doc.sub_category = sub_category
+			item_doc.package = package
+			item_doc.item_name = description
+			item_doc.item_group = "Components"
+			item_doc.save(ignore_permissions = True)
+			if not description:
+				frappe.db.set_value("Item",item_doc.name,"item_name",item_doc.name,update_modified = False)
+			return item_doc.name
+		else:
+			frappe.msgprint("SKU already there in this row")
+
+@frappe.whitelist()
 def release_parts(name):
 	try:
 		doc = frappe.get_doc('Evaluation Report', name)
@@ -462,7 +488,8 @@ def create_stock_entry(evaluation, items):
 	# Branch Mapping
 
 	branch_map = {
-		"Kuwait": ("Kuwait - CT-K", "Kuwait - Repair - CT-K")
+		"Kuwait": ("Kuwait - CT-K", "Kuwait - Repair - CT-K"),
+		"Riyadh": ("Riyadh - BM", "Riyadh - Repair - BM")
 	}
 
 	war, cc = branch_map.get(doc.branch, ("", ""))

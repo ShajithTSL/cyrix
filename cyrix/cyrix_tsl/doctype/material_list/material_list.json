@@ -10,6 +10,7 @@
   "item_name0",
   "model_no",
   "mfg",
+  "update_sku",
   "column_break_jhqf",
   "category",
   "serial_no",
@@ -37,7 +38,8 @@
    "fieldname": "item_name0",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -47,7 +49,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Model/Part Number",
-   "options": "Item Model"
+   "options": "Item Model",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -57,7 +60,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Mfg",
-   "options": "Item Mfg"
+   "options": "Item Mfg",
+   "read_only": 1
   },
   {
    "fetch_from": "item_code.category",
@@ -65,7 +69,8 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Type/Category",
-   "options": "Category"
+   "options": "Category",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_6",
@@ -77,12 +82,13 @@
    "fieldname": "serial_no",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Serial No"
+   "label": "Serial No",
+   "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "update_serial",
    "fieldtype": "Button",
-   "hidden": 1,
    "label": "Update Serial No"
   },
   {
@@ -92,13 +98,15 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Description and Specification"
+   "label": "Description and Specification",
+   "read_only": 1
   },
   {
    "default": "1",
    "fieldname": "quantity",
    "fieldtype": "Data",
    "label": "Quantity",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -120,18 +128,25 @@
    "fieldname": "online_price",
    "fieldtype": "Currency",
    "label": "Online Price",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_jhqf",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "update_sku",
+   "fieldtype": "Button",
+   "label": "Update SKU"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-10 10:54:36.505168",
+ "modified": "2026-04-16 12:30:43.523168",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Material List",

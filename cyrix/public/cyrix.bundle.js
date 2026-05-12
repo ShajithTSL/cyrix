@@ -170,7 +170,7 @@ frappe.views.ListView = class ListView extends frappe.views.ListView {
         super.refresh();
 
         try {
-            const default_company = frappe.defaults.get_user_default("Company");
+            const default_company = frappe.defaults.get_default("company");
             if (!default_company || frappe.ignore_company) return;
 
             // ✅ Only apply logic if doctype has company field
@@ -211,7 +211,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ReportView {
         super.refresh();
 
         try {
-            const default_company = frappe.defaults.get_user_default("Company");
+            const default_company = frappe.defaults.get_default("company");
             if (!default_company || frappe.ignore_company) return;
 
             // ✅ Only apply logic if doctype has company field
@@ -932,7 +932,7 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 		if (company_filter) {
 			frappe.query_report.set_filter_value(
 				"company",
-				frappe.defaults.get_user_default("company")
+				frappe.defaults.get_default("company")
 			);
 		}
 

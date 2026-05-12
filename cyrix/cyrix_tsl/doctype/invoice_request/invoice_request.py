@@ -12,9 +12,11 @@ class InvoiceRequest(Document):
 	# pass
 	def on_submit(self):
 		if self.workflow_state == "Invoice Created":
+			manager = frappe.db.get_value("Branch", self.branch,"manager")
 			self.submitted_by = frappe.session.user
 			frappe.db.set_value("Invoice Request",self.name,"submitted_by",frappe.session.user)
 
+			cc = [self.sales_email, manager]
 			quotations = []
 
 			if self.invoice_list:
@@ -33,12 +35,13 @@ class InvoiceRequest(Document):
 								Please find the attached Invoice for your reference.<a href="{base_url}/app/invoice-request/{self.name}" target="_blank">Click Here</a>"""
 
 					subject = "Invoice Created for - %s"%(quotation)
-					sendmail(self, msg, subject, sender = self.submitted_by, recipients = self.requested_by, attachments = None, cc = self.sales_email )
+					sendmail(self, msg, subject, sender = self.submitted_by, recipients = self.requested_by, attachments = [{"file_url": self.get("attach")}], cc = cc )
 	
 
 @frappe.whitelist()
 def trigger_mail_on_invoice_request(name):
 	self = frappe.get_doc("Invoice Request", name)
+	manager = frappe.db.get_value("Branch", self.branch,"manager")
 
 	sender = frappe.db.get_value("Branch", self.branch, "customer_support")
 
@@ -56,7 +59,7 @@ def trigger_mail_on_invoice_request(name):
 	if not quotations:
 		return
 
-	cc = [self.sales_email]
+	cc = [self.sales_email,manager]
 
 	for quotation in quotations:
 
@@ -82,7 +85,7 @@ def get_quotation_details(quotation,type):
 				from `tabQuotation` left join `tabQuotation Item` on `tabQuotation Item`.parent = `tabQuotation`.name
 				where `tabQuotation`.name = '%s' """ %(quotation),as_dict = 1)
 	else:
-		quote_details = frappe.db.sql(""" select  `tabQuotation Item`.supply_order_data 
+		quote_details = frappe.db.sql(""" select  distinct `tabQuotation Item`.supply_order_data 
 				from `tabQuotation` left join `tabQuotation Item` on `tabQuotation Item`.parent = `tabQuotation`.name
 				where `tabQuotation`.name = '%s' """ %(quotation),as_dict = 1)
 	

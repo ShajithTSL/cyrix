@@ -3,6 +3,30 @@
 
 frappe.ui.form.on("Evaluation Report", {
 
+	 
+    send(frm){
+         frappe.call({
+		method: "cyrix.custom_py.mail_notification.purchase_msg_to_info",
+		args: {
+			"com": frm.doc.company,
+			"branch":frm.doc.branch,
+			"ev":frm.doc.name,
+			"sender":frappe.session.user
+		},
+		
+		callback: function(r) {
+			if(r.message) {
+		
+				
+			}
+		}
+				
+		})
+        
+    },
+
+
+	
 	// Once all the materials were received, Release Parts button will be visible
 	release_parts: function(frm){
 		var s = 0 
@@ -127,6 +151,29 @@ frappe.ui.form.on('Part Sheet Item', {
 		if(row.qty && row.part){
 			frm.script_manager.trigger('part',cdt,cdn)
 	   	}
+	},
+	create:function(frm,cdt,cdn){
+		let child = locals[cdt][cdn]
+		frappe.call({
+			method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.create_item",
+			args:{
+				model:child.model || '',
+				part_no:child.part || '',
+				category:child.category || '',
+				sub_category:child.sub_category || '',
+				description:child.part_name || '',
+				package:child.part_description || '',
+			},
+			callback(r){
+				if(r.message){
+					child.part = r.message
+					frm.refresh_field("items")
+					frm.dirty();
+					frm.save();
+					frm.save();
+				}
+			}
+		})
 	},
 });
 

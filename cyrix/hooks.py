@@ -93,7 +93,16 @@ jinja = {
 		"cyrix.custom_py.jinja.get_labour",
 		"cyrix.custom_py.jinja.get_material_cost",
 		"cyrix.custom_py.jinja.get_invoice_details",
-		"cyrix.custom_py.jinja.get_pi"
+		"cyrix.custom_py.jinja.get_pi",
+		"cyrix.custom_py.jinja.get_sales",
+		"cyrix.custom_py.jinja.sales_summary",
+		"cyrix.custom_py.jinja.weekly_report",
+		"cyrix.custom_py.jinja.target_master",
+		"cyrix.custom_py.jinja.get_receivable",
+        "cyrix.custom_py.jinja.get_technician_service_report",
+		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.weekly_sales",
+		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.daily_sales"
+
 	]
 }
 
@@ -165,12 +174,16 @@ doc_events = {
 			"cyrix.custom_py.supplier_quotation.update_job_order_status",
 			"cyrix.custom_py.supplier_quotation.update_supply_order_data",
 			"cyrix.custom_py.supplier_quotation.update_budgetary_quotation"
+		],
+        "on_cancel": [
+			"cyrix.custom_py.supplier_quotation.on_cancel",
 		]
 	},
     "Quotation": {
 		"validate": [
             "cyrix.custom_py.quotation.fetch_item_price_details",
-            "cyrix.custom_py.quotation.update_job_order_status"
+            "cyrix.custom_py.quotation.update_job_order_status",
+            'cyrix.custom_py.quotation.update_budgetary_quotation_status'
 		],
         "on_submit": [
             "cyrix.custom_py.quotation.update_job_order_status",
@@ -222,10 +235,12 @@ doc_events = {
 	"Sales Invoice": {
         "on_submit": [
             "cyrix.custom_py.sales_invoice.update_jo_so_status",
-            "cyrix.custom_py.sales_invoice.update_service_call_form"			
+            "cyrix.custom_py.sales_invoice.update_service_call_form",
+            "cyrix.custom_py.sales_invoice.update_invoice_percentage"		
 		],
 		"on_cancel": [
-			"cyrix.custom_py.sales_invoice.update_jo_so_status_on_cancel"			
+			"cyrix.custom_py.sales_invoice.update_jo_so_status_on_cancel",
+			"cyrix.custom_py.sales_invoice.update_invoice_percentage_on_cancel"			
 		]
 	},
     
@@ -299,8 +314,14 @@ core.get_bootinfo = custom.get_bootinfo
 #
 override_whitelisted_methods = {
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_journal_entry_bts",
-	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_payment_entry_bts"
+	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_payment_entry_bts",
 }
+
+
+from erpnext.selling.doctype.quotation import quotation
+from cyrix.custom_py import quotation as custom_quotation
+quotation._make_sales_invoice = custom_quotation._make_sales_invoice
+
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

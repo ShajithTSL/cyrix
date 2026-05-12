@@ -73,7 +73,6 @@ def on_update_after_submit(doc,method):
 				frappe.db.set_value("Budgetary Quotation",i.budgetary_quotation,"quotation_approved_date",doc.approval_date)
 	update_quotation_reference(doc,method)
 
-
 def update_job_order_status(self, method):        
 	def update_status(self,item, status):
 		if item.job_order_data:

@@ -216,6 +216,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "allow_on_submit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
@@ -358,7 +359,7 @@
    "link_fieldname": "maintenance_contract"
   }
  ],
- "modified": "2026-05-04 12:42:58.870607",
+ "modified": "2026-05-10 12:39:59.210524",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Maintenance Contract",

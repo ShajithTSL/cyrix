@@ -264,6 +264,32 @@ def preview_custom_pdf(doctype, name, print_format="Standard", no_letterhead=0):
 	frappe.local.response.filecontent = pdf
 	frappe.local.response.type = "pdf"
 
+@frappe.whitelist()
+def get_sales_team(party):
+	s = frappe.get_doc("Customer",party)
+	sales = []
+	if s:
+		if len(s.sales_team) == 1:
+			for i in s.sales_team:
+				sales.append(i.sales_person)
+		
+	return sales
+
+
+
+@frappe.whitelist()
+def get_sales_team_multiple(party):
+	s = frappe.get_doc("Customer",party)
+	sales = []
+	if s:
+		if len(s.sales_team) > 1:
+			for i in s.sales_team:
+				sales.append(i.sales_person)
+		
+	return sales
+
+
+
 
 @frappe.whitelist()
 def create_replacement_item(customer,wod,items):

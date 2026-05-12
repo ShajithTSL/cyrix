@@ -41,6 +41,7 @@ class InvoiceRequest(Document):
 @frappe.whitelist()
 def trigger_mail_on_invoice_request(name):
 	self = frappe.get_doc("Invoice Request", name)
+	manager = frappe.db.get_value("Branch", self.branch,"manager")
 
 	sender = frappe.db.get_value("Branch", self.branch, "customer_support")
 
@@ -58,7 +59,7 @@ def trigger_mail_on_invoice_request(name):
 	if not quotations:
 		return
 
-	cc = [self.sales_email]
+	cc = [self.sales_email,manager]
 
 	for quotation in quotations:
 

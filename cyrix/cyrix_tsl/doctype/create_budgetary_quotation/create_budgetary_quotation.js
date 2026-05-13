@@ -75,7 +75,15 @@ frappe.ui.form.on("Create Budgetary Quotation", {
 		]);
 	},
 
+	onload: function (frm) {
+		frm.trigger("setup_query");
+	},
+
 	setup: function (frm) {
+		frm.trigger("setup_query");
+	},
+	
+    setup_query: function (frm) {
 		const branchMap = frappe.boot.company_branches;
 
 		if (branchMap[frappe.defaults.get_default("company")]) {

@@ -215,49 +215,71 @@ def create_job_order_data(dict):
 	return False
 
 def check_for_item(i,bg_less_image):
-	# If item_code is not provided, try to fetch or create Item based on model and manufacturer
-	if not 'item_code' in i and (i.get('model') or i.get('manufacturer')):
-		item = frappe.db.get_value("Item", {"model": i.get('model'), "mfg": i.get('manufacturer')}, "name")
-		if item:
-			i['item_code'] = item
-			i['item_name'] = frappe.db.get_value("Item", item, "item_name")
-		else:
-			if not 'item_name' in i:
-				i['item_name'] = ""
-			new_doc = frappe.new_doc('Item')
-			new_doc.naming_series = '.######'
-			new_doc.item_name = i.get('item_name')
-			if 'item_group' in i:
-				new_doc.item_group = i.get('item_group')
-			else:
-				new_doc.item_group = "Equipments"
-			new_doc.description = i.get('item_name')
-			new_doc.model = i.get('model')
-			new_doc.stock_uom = i.get('uom')
-			new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
-			new_doc.is_stock_item = 1
-			new_doc.mfg = i.get('manufacturer')
-			new_doc.save(ignore_permissions=True)
-			if new_doc.name:
-				i['item_code'] = new_doc.name
 
-	elif 'item_name' in i and not 'item_code' in i:
+	if i.get("ignore"):
+		if not 'item_name' in i:
+			i['item_name'] = ""
 		new_doc = frappe.new_doc('Item')
 		new_doc.naming_series = '.######'
-		new_doc.item_name = i.get('item_name', "")
+		new_doc.combination_ignored = 1
+		new_doc.item_name = i.get('item_name')
 		if 'item_group' in i:
 			new_doc.item_group = i.get('item_group')
 		else:
 			new_doc.item_group = "Equipments"
-		new_doc.description = i.get('item_name', "")
-		new_doc.model = i.get('model', "")
-		new_doc.stock_uom = i.get('uom', "")
+		new_doc.description = i.get('item_name')
+		new_doc.model = i.get('model')
+		new_doc.stock_uom = i.get('uom')
 		new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
 		new_doc.is_stock_item = 1
-		new_doc.mfg = i.get('manufacturer', "")
+		new_doc.mfg = i.get('manufacturer')
 		new_doc.save(ignore_permissions=True)
 		if new_doc.name:
 			i['item_code'] = new_doc.name
+	else:
+		# If item_code is not provided, try to fetch or create Item based on model and manufacturer
+		if not 'item_code' in i and (i.get('model') or i.get('manufacturer')):
+			item = frappe.db.get_value("Item", {"model": i.get('model'), "mfg": i.get('manufacturer')}, "name")
+			if item:
+				i['item_code'] = item
+				i['item_name'] = frappe.db.get_value("Item", item, "item_name")
+			else:
+				if not 'item_name' in i:
+					i['item_name'] = ""
+				new_doc = frappe.new_doc('Item')
+				new_doc.naming_series = '.######'
+				new_doc.item_name = i.get('item_name')
+				if 'item_group' in i:
+					new_doc.item_group = i.get('item_group')
+				else:
+					new_doc.item_group = "Equipments"
+				new_doc.description = i.get('item_name')
+				new_doc.model = i.get('model')
+				new_doc.stock_uom = i.get('uom')
+				new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
+				new_doc.is_stock_item = 1
+				new_doc.mfg = i.get('manufacturer')
+				new_doc.save(ignore_permissions=True)
+				if new_doc.name:
+					i['item_code'] = new_doc.name
+
+		elif 'item_name' in i and not 'item_code' in i:
+			new_doc = frappe.new_doc('Item')
+			new_doc.naming_series = '.######'
+			new_doc.item_name = i.get('item_name', "")
+			if 'item_group' in i:
+				new_doc.item_group = i.get('item_group')
+			else:
+				new_doc.item_group = "Equipments"
+			new_doc.description = i.get('item_name', "")
+			new_doc.model = i.get('model', "")
+			new_doc.stock_uom = i.get('uom', "")
+			new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
+			new_doc.is_stock_item = 1
+			new_doc.mfg = i.get('manufacturer', "")
+			new_doc.save(ignore_permissions=True)
+			if new_doc.name:
+				i['item_code'] = new_doc.name
 
 def check_for_shared_docs_on_sub_jo(jo):
 	jo_doc = frappe.get_doc("Job Order Data",jo.parent_jo)

@@ -76,15 +76,55 @@ class CreateBudgetaryQuotation(Document):
 		return l
 		
 def check_for_item(i):
-	# If sku is not provided, try to fetch or create Item based on model and mfg
-	if not i.get('sku') and (i.get('model') or i.get('mfg')):
-		item = frappe.db.get_value("Item", {"model": i.get('model'), "mfg": i.get('mfg')}, "name")
-		if item:
-			i.sku = item
-			i.description = frappe.db.get_value("Item", item, "item_name")
+	if i.get('ignore') == 1:
+		if not i.get("description"):
+			i.description = ""
+		new_doc = frappe.new_doc('Item')
+
+		new_doc.combination_ignored = 1 # to denote it is ignored at the time of creation
+		
+		new_doc.naming_series = '.######'
+		new_doc.item_name = i.get('description')
+		if i.get('item_group'):
+			new_doc.item_group = i.get('item_group')
 		else:
-			if not i.get("description"):
-				i.description = ""
+			new_doc.item_group = "Equipments"
+		new_doc.description = i.get('description')
+		new_doc.model = i.get('model')
+		new_doc.stock_uom = i.get('uom')
+		new_doc.is_stock_item = 1
+		new_doc.mfg = i.get('mfg')
+		new_doc.save(ignore_permissions=True)
+		if new_doc.name:
+			i.sku = new_doc.name
+	
+	else:
+		# If sku is not provided, try to fetch or create Item based on model and mfg
+		if not i.get('sku') and (i.get('model') or i.get('mfg')):
+			item = frappe.db.get_value("Item", {"model": i.get('model'), "mfg": i.get('mfg')}, "name")
+			if item:
+				i.sku = item
+				i.description = frappe.db.get_value("Item", item, "item_name")
+			else:
+				if not i.get("description"):
+					i.description = ""
+				new_doc = frappe.new_doc('Item')
+				new_doc.naming_series = '.######'
+				new_doc.item_name = i.get('description')
+				if i.get('item_group'):
+					new_doc.item_group = i.get('item_group')
+				else:
+					new_doc.item_group = "Equipments"
+				new_doc.description = i.get('description')
+				new_doc.model = i.get('model')
+				new_doc.stock_uom = i.get('uom')
+				new_doc.is_stock_item = 1
+				new_doc.mfg = i.get('mfg')
+				new_doc.save(ignore_permissions=True)
+				if new_doc.name:
+					i.sku = new_doc.name
+		
+		elif i.get("description") and not i.get('sku'):
 			new_doc = frappe.new_doc('Item')
 			new_doc.naming_series = '.######'
 			new_doc.item_name = i.get('description')
@@ -99,21 +139,4 @@ def check_for_item(i):
 			new_doc.mfg = i.get('mfg')
 			new_doc.save(ignore_permissions=True)
 			if new_doc.name:
-				i.sku = new_doc.name
-	
-	elif i.get("description") and not i.get('sku'):
-		new_doc = frappe.new_doc('Item')
-		new_doc.naming_series = '.######'
-		new_doc.item_name = i.get('description')
-		if i.get('item_group'):
-			new_doc.item_group = i.get('item_group')
-		else:
-			new_doc.item_group = "Equipments"
-		new_doc.description = i.get('description')
-		new_doc.model = i.get('model')
-		new_doc.stock_uom = i.get('uom')
-		new_doc.is_stock_item = 1
-		new_doc.mfg = i.get('mfg')
-		new_doc.save(ignore_permissions=True)
-		if new_doc.name:
-			i.sku = new_doc.name		
+				i.sku = new_doc.name		

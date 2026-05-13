@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+import json
 
 
 class CreateBudgetaryQuotation(Document):
@@ -62,6 +63,10 @@ class CreateBudgetaryQuotation(Document):
 		s.save()
 		s.submit()
 		link.append(s.name)
+		
+		# for creating Document Log
+		create_document_log(self, s.doctype, s.name)
+		
 		if link:
 			frappe.msgprint("Budgetary Quotation is created: <a href='/app/budgetary-quotation/{0}'>{0}</a>".format(s.name,s.name))
 			return True
@@ -75,6 +80,13 @@ class CreateBudgetaryQuotation(Document):
 			l.append(frappe.db.get_value("Contact",i.name1,'first_name')or i.name1)
 		return l
 		
+def create_document_log(self, doctype, name):
+	doc = frappe.new_doc("Document Log")
+	doc.document_type = doctype
+	doc.document_reference = name
+	doc.data = json.dumps(self.as_dict(), indent=4)
+	doc.save(ignore_permissions=True)
+
 def check_for_item(i):
 	if i.get('ignore') == 1:
 		if not i.get("description"):

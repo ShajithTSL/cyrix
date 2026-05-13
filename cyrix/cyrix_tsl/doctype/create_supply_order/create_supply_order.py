@@ -116,6 +116,9 @@ def create_supply_order_data(dict):
 	# append the Supply Order names for message popup
 	link.append(so.name)
 
+	# for creating Document Log
+	create_document_log(dict, so.doctype, so.name)
+
 	if link:
 		# frappe.delete_doc("Create Supply Order", "Create Supply Order")
 		links_list = []
@@ -124,6 +127,16 @@ def create_supply_order_data(dict):
 		frappe.msgprint("Supply Order created: "+', '.join(links_list))
 		return True
 	return False
+
+def create_document_log(i, doctype, name):
+	doc = frappe.new_doc("Document Log")
+	doc.document_type = doctype
+	doc.document_reference = name
+	if isinstance(i, str):
+		i = json.loads(i)
+
+	doc.data = json.dumps(i, indent=4, ensure_ascii=False)
+	doc.save(ignore_permissions=True)
 
 def check_for_item(i):
 	if i.get("ignore") == 1:

@@ -18,6 +18,7 @@ naming_series = {
 }
 @frappe.whitelist()
 def update_job_order_data(dict):
+	create_document_log(dict)
 	doc = frappe._dict(json.loads(dict))
 	# Proceed only if job_order_data reference exists
 	if doc.job_order_data:
@@ -204,7 +205,10 @@ def create_job_order_data(dict):
 
 		if doc.job_order_data:
 			check_for_shared_docs_on_sub_jo(jo)
-
+		
+		# for creating Document Log
+		create_document_log(dict, jo.doctype, jo.name)
+		
 	if link:
 		# frappe.delete_doc("Create Job Order", "Create Job Order")
 		links_list = []
@@ -213,6 +217,16 @@ def create_job_order_data(dict):
 		frappe.msgprint("Job Order created: "+', '.join(links_list))
 		return True
 	return False
+
+def create_document_log(i, doctype, name):
+	doc = frappe.new_doc("Document Log")
+	doc.document_type = doctype
+	doc.document_reference = name
+	if isinstance(i, str):
+		i = json.loads(i)
+
+	doc.data = json.dumps(i, indent=4, ensure_ascii=False)
+	doc.save(ignore_permissions=True)
 
 def check_for_item(i,bg_less_image):
 

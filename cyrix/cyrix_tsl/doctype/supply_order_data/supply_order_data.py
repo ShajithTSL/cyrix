@@ -148,7 +148,7 @@ def create_rfq(supply_order_data):
 	rfq.branch = frappe.db.get_value("Supply Order Data",supply_order_data,"branch")
 	rfq.supply_order_data = supply_order_data
 	rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2),
-	rfq.department = doc.department
+	rfq.cost_center = doc.department
 	rfq.items=[]
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
 	for i in doc.get("material_list"):
@@ -167,7 +167,7 @@ def create_rfq(supply_order_data):
 			"warehouse":warehouse,
 			"branch":rfq.branch,
 			"supply_order_data":supply_order_data,
-			"department":frappe.db.get_value("Supply Order Data",supply_order_data,"department")
+			"cost_center":frappe.db.get_value("Supply Order Data",supply_order_data,"department")
 		})
 
 	return rfq
@@ -239,7 +239,7 @@ def create_delivery_note(supply_order_data, customer):
 	if doc.customer != customer:
 		new_doc.child_customer = doc.customer
 	new_doc.branch = doc.branch
-	new_doc.department = doc.department
+	new_doc.cost_center = doc.department
 	new_doc.set_warehouse = doc.warehouse
 	new_doc.purchase_order_no = doc.po_no
 	new_doc.supply_order_data = doc.name
@@ -301,7 +301,6 @@ def create_sales_invoice(supply_order_data, customer):
 		new_doc.child_customer = doc.customer
 
 	new_doc.branch = doc.branch
-	new_doc.department = doc.department
 	new_doc.supply_order_data = supply_order_data
 	new_doc.sales_person = doc.sales_person
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")

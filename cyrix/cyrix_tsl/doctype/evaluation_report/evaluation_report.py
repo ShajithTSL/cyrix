@@ -77,7 +77,7 @@ class EvaluationReport(Document):
 		check_for_shared_docs_on_evaluation(self)
 		
 	def validate_evaluation_time(self):
-		if not self.evaluation_time or not self.estimated_repair_time:
+		if (not self.evaluation_time or not self.estimated_repair_time) and self.status not in ["Return Not Repaired"]:
 			frappe.throw("Note: Evaluation Time and Estimated Repair Time is not given.")
 		self.check_stock_availability() # to update the stock availability
 
@@ -320,7 +320,7 @@ def create_rfq(name):
 	rfq.branch = frappe.db.get_value("Job Order Data",doc.job_order_data,"branch")
 	rfq.job_order_data = doc.job_order_data
 	rfq.evaluation_report = doc.name
-	rfq.department = frappe.db.get_value("Job Order Data",doc.job_order_data,"department")
+	rfq.cost_center = frappe.db.get_value("Job Order Data",doc.job_order_data,"department")
 	rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2)
 	rfq.items=[]
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
@@ -345,7 +345,7 @@ def create_rfq(name):
 				"branch":rfq.branch,
 				"parent_jo":doc.parent_jo,
 				"job_order_data":doc.job_order_data,
-				"department":frappe.db.get_value("Job Order Data",doc.job_order_data,"department")
+				"cost_center":frappe.db.get_value("Job Order Data",doc.job_order_data,"department")
 			})
 
 	return rfq

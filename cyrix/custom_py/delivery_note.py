@@ -19,7 +19,7 @@ from frappe.utils import (
 def update_job_order_status(doc,method):
     if doc.get("job_order_data"):
         jo = frappe.get_doc("Job Order Data",doc.get("job_order_data"))
-        if jo.status != "RSC-Repaired and Shipped Client" and not jo.payment_entry:
+        if jo.status not in ["RSC-Repaired and Shipped Client","RSI-Repaired and Shipped Invoiced"] and not jo.payment_entry:
             jo.status = "RSC-Repaired and Shipped Client"        
         jo.dn_no=doc.name
         jo.dn_date=doc.posting_date

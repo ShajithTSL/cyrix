@@ -309,7 +309,7 @@ def create_delivery_note(job_order_data, customer):
 	new_doc.branch = doc.branch
 	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
-	new_doc.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
+	new_doc.cost_center = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
 	new_doc.set_warehouse = fetch_repair_warehouse(doc.company,doc.branch)
 	new_doc.customer_address = doc.address
 	new_doc.contact_person = doc.incharge
@@ -388,7 +388,7 @@ def create_return_note(job_order_data):
 		"Dubai": "RE-DU-.YY.-"
 	}
 	new_doc.naming_series = branch_series_map.get(doc.branch, "")
-	new_doc.department = doc.department
+	new_doc.cost_center = doc.department
 	new_doc.warehouse = fetch_repair_warehouse(doc.company, doc.branch)
 	new_doc.customer_address = doc.address
 	new_doc.contact_person = doc.incharge

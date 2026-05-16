@@ -320,7 +320,7 @@ def create_rfq(name):
 	rfq.branch = frappe.db.get_value("Job Order Data",doc.job_order_data,"branch")
 	rfq.job_order_data = doc.job_order_data
 	rfq.evaluation_report = doc.name
-	rfq.cost_center = frappe.db.get_value("Job Order Data",doc.job_order_data,"department")
+	rfq.cost_center = frappe.db.get_value("Job Order Data",doc.job_order_data,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1})
 	rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2)
 	rfq.items=[]
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
@@ -345,7 +345,7 @@ def create_rfq(name):
 				"branch":rfq.branch,
 				"parent_jo":doc.parent_jo,
 				"job_order_data":doc.job_order_data,
-				"cost_center":frappe.db.get_value("Job Order Data",doc.job_order_data,"department")
+				"cost_center":frappe.db.get_value("Job Order Data",doc.job_order_data,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1})
 			})
 
 	return rfq

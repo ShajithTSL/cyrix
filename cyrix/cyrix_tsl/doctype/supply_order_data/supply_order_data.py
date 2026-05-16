@@ -263,7 +263,7 @@ def create_delivery_note(supply_order_data, customer):
 				"uom":"Nos",
 				"stock_uom":"Nos",
 				"conversion_factor":1,
-				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
+				"cost_center":doc.department or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 				"income_account":"",
 				"branch":doc.branch
 			})
@@ -281,7 +281,7 @@ def create_delivery_note(supply_order_data, customer):
 				"uom":"Nos",
 				"stock_uom":"Nos",
 				"conversion_factor":1,
-				"cost_center":frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
+				"cost_center": doc.department or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or "",
 				"income_account":"",
 				"branch":doc.branch
 			})

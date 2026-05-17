@@ -171,13 +171,15 @@
    "allow_on_submit": 1,
    "fieldname": "warranty",
    "fieldtype": "Data",
-   "label": "Warranty Period"
+   "label": "Warranty Period",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "delivery",
    "fieldtype": "Date",
-   "label": "Delivered Date"
+   "label": "Delivered Date",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -197,7 +199,8 @@
    "allow_on_submit": 1,
    "fieldname": "expiry_date",
    "fieldtype": "Date",
-   "label": "Warranty Expiry Date"
+   "label": "Warranty Expiry Date",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -250,7 +253,9 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -258,7 +263,9 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Branch",
-   "options": "Branch"
+   "options": "Branch",
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -280,7 +287,8 @@
    "fieldtype": "Link",
    "label": "Department",
    "options": "Cost Center",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -715,7 +723,7 @@
    "link_fieldname": "name"
   }
  ],
- "modified": "2026-04-30 14:06:28.234188",
+ "modified": "2026-05-16 09:20:52.887688",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

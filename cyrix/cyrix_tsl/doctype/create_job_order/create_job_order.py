@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 import json
 from datetime import datetime
-
+from frappe.utils import cint, flt
 class CreateJobOrder(Document):
 	pass
 
@@ -127,88 +127,89 @@ def create_job_order_data(dict):
 
 		if i.get("ignore") == 1 and not i.get("item_name"):
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Description and Specification")
-
-		jo = frappe.new_doc("Job Order Data")
-		if doc.job_order_data:
-			jo.naming_series = naming_series[doc.branch]["updated"]
-		else:
-			jo.naming_series = naming_series[doc.branch]["normal"]
-
-		jo.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or ""
-		jo.customer = doc.customer
-		jo.maintenance_contract = doc.maintenance_contract
-		jo.sales_person = doc.sales_person
-		jo.incharge = doc.incharge
-		jo.priority_status = doc.sts
-		jo.branch = doc.branch
-		jo.repair_warehouse = doc.repair_warehouse
-		jo.received_date = doc.received_date
-		jo.unit_type = doc.unit_type
-		jo.plant = doc.plant
-		jo.company = doc.company
-		jo.sec = doc.sec
-		jo.address = doc.address
-		jo.customer_rep = doc.incharge
-		if doc.job_order_data:
-			jo.parent_jo = doc.job_order_data
-		if doc.warranty_date:
-			jo.expiry_date = doc.warranty_date
-		jo.status = "NE-Need Evaluation"
-		
+					
 		if 'attach_image' in i and i['attach_image']:
 			bg_less_image = i["attach_image"]
 		else:
 			bg_less_image = ""
-		jo.attach_image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
-		
 
 		# check whether item_code exists or create new Item if needed
 		check_for_item(i,bg_less_image)
 		create_serial_no(i, doc)
+		qty = cint(i.get("qty") or 1)
+		for n in range(qty):
+			jo = frappe.new_doc("Job Order Data")
+			if doc.job_order_data:
+				jo.naming_series = naming_series[doc.branch]["updated"]
+			else:
+				jo.naming_series = naming_series[doc.branch]["normal"]
 
-		jo.append("material_list",{
-			"item_code": i.get('item_code', ""),
-			"item_name":i.get('item_name', ""),
-			"model_no":i.get('model', ""),
-			"mfg":i.get('manufacturer', ""),
-			"quantity":i.get('qty', 0),
-			"serial_no":i.get('serial_no', "")
-		})
-		if i.get("no_power"): jo.no_power = 1
-		if i.get("no_output"): jo.no_output = 1
-		if i.get("not_working"): jo.not_working = 1
-		if i.get("no_display"): jo.no_display = 1
-		if i.get("no_communication"): jo.no_communication = 1
-		if i.get("supply_voltage"): jo.supply_voltage = 1
-		if i.get("touchkeypad_not_working"): jo.touch_keypad_not_working = 1
-		if i.get("no_backlight"): jo.no_backlight = 1
-		if i.get("error_code"): jo.error_code = 1
-		if i.get("short_circuit"): jo.short_circuit = 1
-		if i.get("overloadovercurrent"): jo.overload_overcurrent = 1
-		if i.get("other"):
-			jo.others = 1
-			jo.specify = i.get("specify", "")
+			jo.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or ""
+			jo.customer = doc.customer
+			jo.maintenance_contract = doc.maintenance_contract
+			jo.sales_person = doc.sales_person
+			jo.incharge = doc.incharge
+			jo.priority_status = doc.sts
+			jo.branch = doc.branch
+			jo.repair_warehouse = doc.repair_warehouse
+			jo.received_date = doc.received_date
+			jo.unit_type = doc.unit_type
+			jo.plant = doc.plant
+			jo.company = doc.company
+			jo.sec = doc.sec
+			jo.address = doc.address
+			jo.customer_rep = doc.incharge
+			if doc.job_order_data:
+				jo.parent_jo = doc.job_order_data
+			if doc.warranty_date:
+				jo.expiry_date = doc.warranty_date
+			jo.status = "NE-Need Evaluation"
 
-		jo.save(ignore_permissions = True)
+			jo.attach_image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
 
-		# Update the File record if image was uploaded
-		if jo.name and "attach_image" in i:
-			frappe.db.sql('''update `tabFile` set attached_to_name = %s where file_url = %s ''',(jo.name,bg_less_image))
-		jo.submit()
-		
-		# Create stock entry for the received item
-		if not doc.job_order_data or doc.is_returned_unit:
-			create_stock_entry(i, doc, jo)
+			jo.append("material_list",{
+				"item_code": i.get('item_code', ""),
+				"item_name":i.get('item_name', ""),
+				"model_no":i.get('model', ""),
+				"mfg":i.get('manufacturer', ""),
+				"quantity":1,
+				"serial_no":i.get('serial_no', "")
+			})
+			if i.get("no_power"): jo.no_power = 1
+			if i.get("no_output"): jo.no_output = 1
+			if i.get("not_working"): jo.not_working = 1
+			if i.get("no_display"): jo.no_display = 1
+			if i.get("no_communication"): jo.no_communication = 1
+			if i.get("supply_voltage"): jo.supply_voltage = 1
+			if i.get("touchkeypad_not_working"): jo.touch_keypad_not_working = 1
+			if i.get("no_backlight"): jo.no_backlight = 1
+			if i.get("error_code"): jo.error_code = 1
+			if i.get("short_circuit"): jo.short_circuit = 1
+			if i.get("overloadovercurrent"): jo.overload_overcurrent = 1
+			if i.get("other"):
+				jo.others = 1
+				jo.specify = i.get("specify", "")
 
-		# append the Job Order names for message popup
-		link.append(jo.name)
+			jo.save(ignore_permissions = True)
 
-		if doc.job_order_data:
-			check_for_shared_docs_on_sub_jo(jo)
-		
-		# for creating Document Log
-		create_document_log(dict, jo.doctype, jo.name)
-		
+			# Update the File record if image was uploaded
+			if jo.name and "attach_image" in i:
+				frappe.db.sql('''update `tabFile` set attached_to_name = %s where file_url = %s ''',(jo.name,bg_less_image))
+			jo.submit()
+			
+			# Create stock entry for the received item
+			if not doc.job_order_data or doc.is_returned_unit:
+				create_stock_entry(i, doc, jo)
+
+			# append the Job Order names for message popup
+			link.append(jo.name)
+
+			if doc.job_order_data:
+				check_for_shared_docs_on_sub_jo(jo)
+			
+			# for creating Document Log
+			create_document_log(dict, jo.doctype, jo.name)
+			
 	if link:
 		# frappe.delete_doc("Create Job Order", "Create Job Order")
 		links_list = []
@@ -356,7 +357,7 @@ def create_stock_entry(i, doc, jo):
 			'item_name':i['item_name'],
 			'description':i['item_name'],
 			'serial_number':i.get('serial_no', ""),
-			'qty':i['qty'],
+			'qty':1,
 			'uom':frappe.db.get_value("Item",i['item_code'],'stock_uom') or "Nos",
 			'branch':doc.branch,
 			'cost_center':frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",

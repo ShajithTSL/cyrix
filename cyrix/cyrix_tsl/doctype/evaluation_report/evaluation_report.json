@@ -7,21 +7,21 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "branch",
   "customer",
   "parent_customer",
   "attn",
+  "ner_field",
+  "priority_status",
   "column_break_cilm",
-  "specify_1",
+  "date",
   "hours_spent",
   "technician",
   "document_active_status",
   "ratehour",
   "column_break_3",
-  "ner_field",
   "company",
-  "date",
-  "priority_status",
+  "branch",
+  "specify_1",
   "column_break_obvw",
   "job_order_data",
   "parent_jo",
@@ -103,14 +103,16 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Branch",
-   "options": "Branch"
+   "options": "Branch",
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "reqd": 1
   },
   {
    "fieldname": "attn",
@@ -168,7 +170,9 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "default": "Today",
@@ -539,7 +543,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Job Order",
-   "options": "Job Order Data"
+   "options": "Job Order Data",
+   "reqd": 1
   },
   {
    "fieldname": "warehouse",
@@ -624,7 +629,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-29 13:36:30.469895",
+ "modified": "2026-05-16 14:48:29.498751",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Evaluation Report",

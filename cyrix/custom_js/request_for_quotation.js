@@ -34,6 +34,68 @@ frappe.ui.form.on('Request for Quotation', {
     },
     refresh: function(frm){
         frm.trigger("schedule_date")
+        frm.trigger("fetch_jo")
+    },
+
+    fetch_jo: function(frm){
+        if(frm.doc.docstatus == 0){
+            frm.add_custom_button(__("Job Order Data"), function () {
+                let dialog;  // Declare in outer scope
+
+                dialog = new frappe.ui.form.MultiSelectDialog({
+                    doctype: "Job Order Data",
+                    target: frm,
+                    setters: {
+                        customer:frm.doc.party_name,
+                        status: ""
+                    },
+                    add_filters_group: 1,
+                    get_query() {
+                        return {
+                            filters: {
+                                company: frm.doc.company,
+                                docstatus: 1
+                            }
+                        };
+                    },
+                    action(selections) {
+                        frappe.call({
+                            method: "cyrix.custom_py.purchase_order.get_job_order_data",
+                            args: {
+                                "job_order_data": selections
+                            },
+                            callback: function(r) {
+                                if(r.message) {
+                                    cur_frm.clear_table("items");
+                                    $.each(r.message, function(i,v){
+                                        if(v.part){
+                                            var item_child = cur_frm.add_child("items");
+                                            item_child.schedule_date = frm.doc.schedule_date,
+                                            item_child.item_code = v.part,
+                                            item_child.item_name = v.part_name,
+                                            item_child.mfg = v.manufacturer,
+                                            item_child.model = v.model,
+                                            item_child.description = v.part_name,
+                                            item_child.qty = v.qty,
+                                            item_child.uom = "Nos",
+                                            item_child.branch =  frm.doc.branch,
+                                            item_child.job_order_data =  v.job_order_data,
+                                            item_child.conversion_factor =1,
+                                            item_child.department = frm.doc.department
+                                            
+                                            frm.refresh_field("items");
+                                            frm.refresh();
+                                        }
+                                    })
+                                }
+                            }
+                        });
+                        
+                        cur_dialog.hide();
+                    }
+                });
+            },__("Get Items From"));
+        }
     },
     schedule_date: function(frm){
         frm.fields_dict.schedule_date.datepicker.update({

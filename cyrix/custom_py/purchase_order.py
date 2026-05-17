@@ -67,7 +67,21 @@ def make_po_from_job_order(job_orders, target_doc=None):
 
 	return base_po
 
-
+@frappe.whitelist()
+def get_job_order_data(job_order_data):
+	job_order_data = json.loads(job_order_data)
+	l = []
+	for i in list(job_order_data):
+		er =  frappe.db.sql('''select name from `tabEvaluation Report` where docstatus = 1 and job_order_data = %s and parts_availability = "No" ''',i,as_dict=1)
+		for j in er:
+			doc = frappe.get_doc("Evaluation Report",j['name'])
+			for k in doc.items:
+				if k.parts_availability == "No":
+					d = frappe._dict((k.as_dict()))
+					d["job_order_data"] = i
+					# d["part_sheet"] = j["name"]
+					l.append(d)
+	return l
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):

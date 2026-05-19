@@ -21,20 +21,22 @@
   "branch",
   "technician",
   "detail_section",
-  "sku",
-  "column_break_gchk",
   "description",
-  "column_break_prdh",
+  "column_break_gchk",
+  "sku",
   "manufacturer",
-  "column_break_jjbc",
   "model",
-  "column_break_ffen",
+  "column_break_prdh",
   "serial_number",
   "section_break_pioa",
   "evaluation_result",
   "status",
   "column_break_ijur",
-  "service_performed"
+  "service_performed",
+  "section_break_dhow",
+  "customer_remarks",
+  "column_break_emox",
+  "customer_signature"
  ],
  "fields": [
   {
@@ -54,8 +56,10 @@
   {
    "fieldname": "customer",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "reqd": 1
   },
   {
    "fieldname": "service_call_form",
@@ -66,8 +70,10 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fetch_from": "customer.customer_primary_address",
@@ -89,8 +95,10 @@
   {
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Branch",
-   "options": "Branch"
+   "options": "Branch",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_5hdl",
@@ -104,6 +112,7 @@
   {
    "fieldname": "sku",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "SKU",
    "options": "Item"
   },
@@ -121,20 +130,11 @@
   },
   {
    "fieldname": "serial_number",
-   "fieldtype": "Link",
-   "label": "Serial Number",
-   "options": "Serial Number"
+   "fieldtype": "Small Text",
+   "label": "Serial Number"
   },
   {
    "fieldname": "column_break_prdh",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_jjbc",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_ffen",
    "fieldtype": "Column Break"
   },
   {
@@ -184,22 +184,41 @@
    "label": "Date"
   },
   {
+   "default": "Service",
    "fieldname": "service_type",
    "fieldtype": "Select",
    "label": "Service Type",
-   "options": "Installation\nWarranty\nPMS\nOthers\nAnnual Maintenance Contract"
+   "options": "Service\nInstallation\nWarranty\nPMS\nOthers\nAnnual Maintenance Contract"
   },
   {
    "fieldname": "technician",
    "fieldtype": "Table MultiSelect",
    "label": "Technician",
    "options": "Technician List"
+  },
+  {
+   "fieldname": "section_break_dhow",
+   "fieldtype": "Section Break",
+   "label": "For Customer Use"
+  },
+  {
+   "fieldname": "customer_remarks",
+   "fieldtype": "Long Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "column_break_emox",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_signature",
+   "fieldtype": "Signature"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-30 09:57:11.750936",
+ "modified": "2026-05-19 16:19:32.722918",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",

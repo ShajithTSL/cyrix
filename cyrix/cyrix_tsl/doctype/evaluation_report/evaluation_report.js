@@ -85,6 +85,57 @@ frappe.ui.form.on("Evaluation Report", {
 		}
 	},
 	refresh: function(frm){
+		
+
+		frm.add_custom_button(__("Request for Purchaser"), function(){
+		let email_list = [
+        "purchase-uae@cyrix-tsl.com",
+        "purchase@tsl-me.com",
+        "lab-uae@tsl-me.com",
+		"purchase-sa1@tsl-me.com"
+   	 ];
+
+			let d = new frappe.ui.Dialog({
+				title: "Send Email",
+				fields: [
+					{
+						fieldtype: "Select",
+						fieldname: "email",
+						label: "Email",
+						options: email_list.join("\n"),
+						reqd: 1
+					}
+				],
+
+				primary_action_label: "Send",
+
+				primary_action(values) {
+
+					frappe.call({
+						method: "cyrix.custom_py.mail_notification.to_purchaser",
+						args: {
+						
+						"com": frm.doc.company,
+						"branch":frm.doc.branch,
+						"ev":frm.doc.name,
+						"sender":frappe.session.user,
+						"recipients": values.email,
+						},
+
+						callback: function(r) {
+
+							frappe.msgprint("Mail Sent");
+							d.hide();
+						}
+					});
+				}
+			});
+
+			d.show();
+					},__('Create'));
+							
+						
+			
 		frm.trigger("release_parts")
 		frm.fields_dict['items'].grid.get_field('part').get_query = function(frm, cdt, cdn) {
 			var child = locals[cdt][cdn];

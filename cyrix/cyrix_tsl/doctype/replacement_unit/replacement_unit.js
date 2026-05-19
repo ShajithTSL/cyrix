@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Replacement Unit", {
 	refresh(frm) {
-        if(frm.doc.docstatus == 0){
+        if(frm.doc.docstatus == 1){
 			frm.add_custom_button(__("Request for Quotation"), function(){
 				frappe.call({
 					method: "cyrix.cyrix_tsl.doctype.replacement_unit.replacement_unit.create_rfq",

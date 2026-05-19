@@ -1,6 +1,5 @@
 
     <div class="container">
-        {% if doc.quotation || doc.purchase_order_no %}
         <!-- Document Summary Section -->
         <div class="summary-section">
             <h3>Document Summary</h3>
@@ -59,7 +58,6 @@
                 {% endif %}
             </div>
         </div>
-        {% endif %}
 
         {% if payment_details.length %}
         <!-- Payment Entries Table -->

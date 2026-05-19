@@ -196,7 +196,7 @@
    "link_fieldname": "service_call_form"
   }
  ],
- "modified": "2026-04-05 14:55:58.587961",
+ "modified": "2026-05-19 13:37:45.860081",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Service Call Form",
@@ -219,5 +219,7 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_views": 1
 }

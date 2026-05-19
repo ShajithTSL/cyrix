@@ -9,21 +9,35 @@ class WOApproval(Document):
 	pass
 
 def weekly_sales(self):
+
     company = self.company
     from_date = self.from_date
     to_date = self.to_date
     brnch = self.branch
     sales_person = getattr(self, "sales_person", None)
     department = getattr(self, "cost_center", None)
+
     REPAIR_QT = ["Customer Quotation - Repair"]
     SUPPLY_QT = ["Customer Quotation - Supply"]
+
     def init_weeks():
-        return {"Week 1": 0, "Week 2": 0, "Week 3": 0, "Week 4": 0, "Week 5": 0}
+        return {
+            "Week 1": 0,
+            "Week 2": 0,
+            "Week 3": 0,
+            "Week 4": 0,
+            "Week 5": 0
+        }
 
     data = {}
 
+    # ---------------------------------
+    # INITIALIZE SALES PERSON
+    # ---------------------------------
     def ensure_sales_person(person):
+
         if person not in data:
+
             data[person] = {
                 "PO Count Repair": init_weeks(),
                 "PO Count Supply": init_weeks(),
@@ -35,33 +49,37 @@ def weekly_sales(self):
                 "Collection Supply": init_weeks(),
             }
 
-    # -------------------------
+    # ---------------------------------
     # COMMON ADD FUNCTION
-    # -------------------------
+    # ---------------------------------
     def add_data(rows, count_key=None, amount_key=None):
+
         for row in rows:
+
             person = row.get("sales_person") or "Unassigned"
             week = row.get("week_name")
             qt = row.get("quotation_type") or ""
 
             ensure_sales_person(person)
 
-            # =========================
-            # PO → based on quotation_type ONLY
-            # =========================
+            # -----------------------------
+            # PO DATA
+            # -----------------------------
             if count_key and amount_key:
 
                 if qt in REPAIR_QT:
+
                     data[person]["PO Count Repair"][week] += row.get(count_key, 0)
                     data[person]["PO Repair Amount"][week] += row.get(amount_key, 0)
 
                 elif qt in SUPPLY_QT:
+
                     data[person]["PO Count Supply"][week] += row.get(count_key, 0)
                     data[person]["PO Supply Amount"][week] += row.get(amount_key, 0)
 
-    # -------------------------
-    # PO (Quotation)
-    # -------------------------
+    # ---------------------------------
+    # PO DATA
+    # ---------------------------------
     po_condition = ""
     po_values = [company, from_date, to_date]
 
@@ -74,32 +92,43 @@ def weekly_sales(self):
         po_values.append(sales_person)
 
     po_data = frappe.db.sql(f"""
-    SELECT
-        q.sales_person,
-        q.quotation_type,
-     
-        CASE
-            WHEN DAY(q.approval_date) BETWEEN 1 AND 7 THEN 'Week 1'
-            WHEN DAY(q.approval_date) BETWEEN 8 AND 14 THEN 'Week 2'
-            WHEN DAY(q.approval_date) BETWEEN 15 AND 21 THEN 'Week 3'
-            WHEN DAY(q.approval_date) BETWEEN 22 AND 28 THEN 'Week 4'
-            ELSE 'Week 5'
-        END AS week_name,
-        COUNT(DISTINCT q.name) AS total_count,
-        SUM(q.grand_total) AS total_amount
-    FROM `tabQuotation` q
-    WHERE q.company = %s
-        AND q.approval_date BETWEEN %s AND %s
-        AND q.docstatus = 1
-        AND IFNULL(q.sales_person,'') NOT IN ('Jubil')
-        {po_condition}
-    GROUP BY q.sales_person, q.quotation_type,  week_name
-""", po_values, as_dict=True)
+
+        SELECT
+
+            q.sales_person,
+            q.quotation_type,
+
+            CASE
+                WHEN DAY(q.approval_date) BETWEEN 1 AND 7 THEN 'Week 1'
+                WHEN DAY(q.approval_date) BETWEEN 8 AND 14 THEN 'Week 2'
+                WHEN DAY(q.approval_date) BETWEEN 15 AND 21 THEN 'Week 3'
+                WHEN DAY(q.approval_date) BETWEEN 22 AND 28 THEN 'Week 4'
+                ELSE 'Week 5'
+            END AS week_name,
+
+            COUNT(DISTINCT q.name) AS total_count,
+            SUM(q.grand_total) AS total_amount
+
+        FROM `tabQuotation` q
+
+        WHERE q.company = %s
+            AND q.approval_date BETWEEN %s AND %s
+            AND q.docstatus = 1
+            AND IFNULL(q.sales_person,'') NOT IN ('Jubil')
+            {po_condition}
+
+        GROUP BY
+            q.sales_person,
+            q.quotation_type,
+            week_name
+
+    """, po_values, as_dict=True)
+
     add_data(po_data, "total_count", "total_amount")
 
-    # -------------------------
+    # ---------------------------------
     # SALES INVOICE
-    # -------------------------
+    # ---------------------------------
     si_condition = ""
     si_values = [company, from_date, to_date]
 
@@ -116,9 +145,12 @@ def weekly_sales(self):
         si_values.append(department)
 
     si_data = frappe.db.sql(f"""
+
         SELECT
+
             si.sales_person,
             si.cost_center AS department,
+
             CASE
                 WHEN DAY(si.posting_date) BETWEEN 1 AND 7 THEN 'Week 1'
                 WHEN DAY(si.posting_date) BETWEEN 8 AND 14 THEN 'Week 2'
@@ -126,18 +158,27 @@ def weekly_sales(self):
                 WHEN DAY(si.posting_date) BETWEEN 22 AND 28 THEN 'Week 4'
                 ELSE 'Week 5'
             END AS week_name,
+
             SUM(si.grand_total) AS total_amount
+
         FROM `tabSales Invoice` si
+
         WHERE si.company = %s
             AND si.posting_date BETWEEN %s AND %s
             AND si.docstatus = 1
             AND si.is_return = 0
             AND IFNULL(si.sales_person,'') NOT IN ('Jubil')
             {si_condition}
-        GROUP BY si.sales_person, si.cost_center, week_name
+
+        GROUP BY
+            si.sales_person,
+            si.cost_center,
+            week_name
+
     """, si_values, as_dict=True)
 
     for row in si_data:
+
         person = row.get("sales_person") or "Unassigned"
         dept = (row.get("department") or "").lower()
         week = row.get("week_name")
@@ -146,12 +187,13 @@ def weekly_sales(self):
 
         if "repair" in dept:
             data[person]["Invoice Repair"][week] += row.get("total_amount", 0)
+
         elif "supply" in dept:
             data[person]["Invoice Supply"][week] += row.get("total_amount", 0)
 
-    # -------------------------
+    # ---------------------------------
     # COLLECTION
-    # -------------------------
+    # ---------------------------------
     col_condition = ""
     col_values = [company, from_date, to_date]
 
@@ -168,9 +210,12 @@ def weekly_sales(self):
         col_values.append(department)
 
     col_data = frappe.db.sql(f"""
+
         SELECT
+
             si.sales_person,
             si.cost_center AS department,
+
             CASE
                 WHEN DAY(pe.posting_date) BETWEEN 1 AND 7 THEN 'Week 1'
                 WHEN DAY(pe.posting_date) BETWEEN 8 AND 14 THEN 'Week 2'
@@ -178,19 +223,32 @@ def weekly_sales(self):
                 WHEN DAY(pe.posting_date) BETWEEN 22 AND 28 THEN 'Week 4'
                 ELSE 'Week 5'
             END AS week_name,
+
             SUM(per.allocated_amount) AS total_amount
+
         FROM `tabPayment Entry` pe
-        INNER JOIN `tabPayment Entry Reference` per ON per.parent = pe.name
-        INNER JOIN `tabSales Invoice` si ON si.name = per.reference_name
+
+        INNER JOIN `tabPayment Entry Reference` per
+            ON per.parent = pe.name
+
+        INNER JOIN `tabSales Invoice` si
+            ON si.name = per.reference_name
+
         WHERE pe.company = %s
             AND pe.posting_date BETWEEN %s AND %s
             AND pe.docstatus = 1
             AND IFNULL(si.sales_person,'') NOT IN ('Jubil')
             {col_condition}
-        GROUP BY si.sales_person, si.cost_center, week_name
+
+        GROUP BY
+            si.sales_person,
+            si.cost_center,
+            week_name
+
     """, col_values, as_dict=True)
 
     for row in col_data:
+
         person = row.get("sales_person") or "Unassigned"
         dept = (row.get("department") or "").lower()
         week = row.get("week_name")
@@ -199,85 +257,170 @@ def weekly_sales(self):
 
         if "repair" in dept:
             data[person]["Collection Repair"][week] += row.get("total_amount", 0)
+
         elif "supply" in dept:
             data[person]["Collection Supply"][week] += row.get("total_amount", 0)
-    # -------------------------
+
+    # ---------------------------------
     # HTML OUTPUT
-    # -------------------------
+    # ---------------------------------
     html = ""
 
     for person, metrics in data.items():
+
         html += f"""
-        <table border="1" style="width:100%; border-collapse:collapse; margin-bottom:30px;">
+
+        <table border="1"
+            style="
+                width:100%;
+                border-collapse:collapse;
+                margin-bottom:30px;
+                font-size:12px;
+            ">
+
             <tr style="background-color:#F0F8FF;">
-                <th style='text-align:center' colspan="6">{person}</th>
+                <th style="text-align:center;" colspan="7">
+                    {person}
+                </th>
             </tr>
+
             <tr style="background-color:#F0F8FF;">
+
                 <th>Metrics</th>
                 <th>Week 1</th>
                 <th>Week 2</th>
                 <th>Week 3</th>
                 <th>Week 4</th>
                 <th>Week 5</th>
+                <th>Total</th>
+
             </tr>
+
         """
 
         po_repair = metrics["PO Repair Amount"]
         po_supply = metrics["PO Supply Amount"]
+
         inv_repair = metrics["Invoice Repair"]
         inv_supply = metrics["Invoice Supply"]
+
         col_repair = metrics["Collection Repair"]
         col_supply = metrics["Collection Supply"]
 
         for label, weeks in metrics.items():
+
+            total = (
+                weeks["Week 1"] +
+                weeks["Week 2"] +
+                weeks["Week 3"] +
+                weeks["Week 4"] +
+                weeks["Week 5"]
+            )
+
             html += f"""
+
             <tr>
-                <td><b>{label}</b></td>
+
+                <td>
+                    <b>{label}</b>
+                </td>
+
                 <td>{weeks['Week 1']:,.0f}</td>
                 <td>{weeks['Week 2']:,.0f}</td>
                 <td>{weeks['Week 3']:,.0f}</td>
                 <td>{weeks['Week 4']:,.0f}</td>
                 <td>{weeks['Week 5']:,.0f}</td>
+
+                <td style="font-weight:bold;">
+                    {total:,.0f}
+                </td>
+
             </tr>
+
             """
 
-            # PO Subtotal
+            # ---------------------------------
+            # PO SUBTOTAL
+            # ---------------------------------
             if label == "PO Supply Amount":
+
+                po_total = (
+                    sum(po_repair.values()) +
+                    sum(po_supply.values())
+                )
+
                 html += f"""
+
                 <tr style="background:#e6e6e6;font-weight:bold;">
+
                     <td>PO Subtotal</td>
+
                     <td>{po_repair['Week 1'] + po_supply['Week 1']:,.0f}</td>
                     <td>{po_repair['Week 2'] + po_supply['Week 2']:,.0f}</td>
                     <td>{po_repair['Week 3'] + po_supply['Week 3']:,.0f}</td>
                     <td>{po_repair['Week 4'] + po_supply['Week 4']:,.0f}</td>
                     <td>{po_repair['Week 5'] + po_supply['Week 5']:,.0f}</td>
+
+                    <td>{po_total:,.0f}</td>
+
                 </tr>
+
                 """
 
-            # Invoice Subtotal
+            # ---------------------------------
+            # INVOICE SUBTOTAL
+            # ---------------------------------
             if label == "Invoice Supply":
+
+                inv_total = (
+                    sum(inv_repair.values()) +
+                    sum(inv_supply.values())
+                )
+
                 html += f"""
+
                 <tr style="background:#e6e6e6;font-weight:bold;">
+
                     <td>Invoice Subtotal</td>
+
                     <td>{inv_repair['Week 1'] + inv_supply['Week 1']:,.0f}</td>
                     <td>{inv_repair['Week 2'] + inv_supply['Week 2']:,.0f}</td>
                     <td>{inv_repair['Week 3'] + inv_supply['Week 3']:,.0f}</td>
                     <td>{inv_repair['Week 4'] + inv_supply['Week 4']:,.0f}</td>
                     <td>{inv_repair['Week 5'] + inv_supply['Week 5']:,.0f}</td>
+
+                    <td>{inv_total:,.0f}</td>
+
                 </tr>
+
                 """
 
-            # Collection Subtotal
+            # ---------------------------------
+            # COLLECTION SUBTOTAL
+            # ---------------------------------
             if label == "Collection Supply":
+
+                col_total = (
+                    sum(col_repair.values()) +
+                    sum(col_supply.values())
+                )
+
                 html += f"""
+
                 <tr style="background:#e6e6e6;font-weight:bold;">
+
                     <td>Collection Subtotal</td>
+
                     <td>{col_repair['Week 1'] + col_supply['Week 1']:,.0f}</td>
                     <td>{col_repair['Week 2'] + col_supply['Week 2']:,.0f}</td>
                     <td>{col_repair['Week 3'] + col_supply['Week 3']:,.0f}</td>
                     <td>{col_repair['Week 4'] + col_supply['Week 4']:,.0f}</td>
                     <td>{col_repair['Week 5'] + col_supply['Week 5']:,.0f}</td>
+
+                    <td>{col_total:,.0f}</td>
+
                 </tr>
+
                 """
 
         html += "</table>"
@@ -364,6 +507,24 @@ def daily_sales(self):
         }
 
     # -------------------------
+    # SO DATA
+    # -------------------------
+    so_data = frappe.db.sql("""
+        SELECT
+            COALESCE(sales_person, 'Unassigned') AS sales_person,
+            COUNT(name) AS total_so
+        FROM `tabSupply Order Data`
+        WHERE DATE(received_date) BETWEEN %s AND %s
+        GROUP BY sales_person
+    """, (from_date, to_date), as_dict=True)
+
+    so_map = {}
+
+    for row in so_data:
+        so_map[row["sales_person"]] = {
+            "so": row.get("total_so", 0)
+        }
+    # -------------------------
     # PO DATA
     # -------------------------
     po_condition, po_extra = build_conditions("q")
@@ -386,7 +547,7 @@ def daily_sales(self):
         WHERE q.company = %s
         AND q.approval_date BETWEEN %s AND %s
         AND q.docstatus = 1
-        AND IFNULL(q.sales_person,'') NOT IN ('Michael Veniston','Dhinesh','MOHAMED MOSAAD ALY DIAB','MUHAMMAD UMAR')
+        AND IFNULL(q.sales_person,'') NOT IN ('Jubil')
         {po_condition}
         GROUP BY q.sales_person, date
     """, [company, from_date, to_date] + po_extra, as_dict=True)
@@ -486,6 +647,7 @@ def daily_sales(self):
 
     for person, metrics in data.items():
         wo_info = wo_map.get(person, {"wo": 0, "ner": 0})
+        so_info = so_map.get(person, {"so": 0, "ner": 0})
 
         po_repair = metrics["PO Repair Amount"]
         po_supply = metrics["PO Supply Amount"]
@@ -511,11 +673,18 @@ def daily_sales(self):
 
         # ---------------- WO ROW ----------------
         html += "<tr style='background:#f9f9f9;'>"
-        html += "<td><b>WO</b></td>"
+        html += "<td><b>JO</b></td>"
         for d in sorted_dates:
             html += f"<td>{wo_info['wo']}</td>"
         html += "</tr>"
+        # ---------------- SO ROW ----------------
+        html += "<tr style='background:#f9f9f9;'>"
+        html += "<td><b>SO</b></td>"
 
+        for d in sorted_dates:
+            html += f"<td>{so_info['so']}</td>"
+
+        html += "</tr>"
         # ---------------- NER ROW ----------------
         html += "<tr style='background:#f9f9f9;'>"
         html += "<td><b>NER</b></td>"

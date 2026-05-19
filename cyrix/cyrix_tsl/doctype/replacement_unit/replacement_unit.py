@@ -35,12 +35,12 @@ def create_rfq(docname):
 	# new_doc.job_order_data = docname
 	new_doc.department = doc.department
 	new_doc.items=[]
-
+	warehouse = ""
 	if new_doc.company == "Cyrix TSL - Kuwait":
 		warehouse = "Kuwait - CT-K"
-	if new_doc.branch == "Cyrix TSL - UAE":
+	if new_doc.company == "Cyrix TSL - UAE":
 		warehouse = "Dubai - CT-UAE"
-	if new_doc.branch == "Company Al-Halloul Faniye Medical":
+	if new_doc.company == "Company Al-Halloul Faniye Medical":
 		warehouse = "Riyadh - BM"
 		
 	for i in doc.get("material_list"):

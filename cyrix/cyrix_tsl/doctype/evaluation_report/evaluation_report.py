@@ -616,6 +616,8 @@ def create_technical_report(name):
 		new_doc.model = item.model_no
 		new_doc.serial_number = item.serial_no
 		new_doc.description = item.item_name
-		# new_doc.technician = doc.technician_name
+	new_doc.append("technician",{
+		"technician": doc.technician,
+	})
 
 	return new_doc

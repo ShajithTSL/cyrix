@@ -58,7 +58,8 @@ def create_service_report(source, row_id):
 	new_doc.customer_address = frappe.db.get_value("Customer",doc.customer,"customer_primary_address")
 	new_doc.address_display = frappe.db.get_value("Customer",doc.customer,"primary_address")
 	new_doc.sales_person = doc.sales_person
-	new_doc.service_call_form = doc.name
+	new_doc.document_type = doc.doctype
+	new_doc.document_reference = doc.name
 	new_doc.branch = doc.branch
 	for item in doc.items:
 		if item.name == row_id:

@@ -85,15 +85,29 @@ frappe.ui.form.on("Evaluation Report", {
 		}
 	},
 	refresh: function(frm){
-		
+
+		frm.add_custom_button(__("Technical Report"), function(){
+			frappe.call({
+				method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.create_technical_report",
+				args: {
+					name: frm.doc.job_order_data
+				},
+				callback: function(r) {
+					if(r.message) {
+						var doc = frappe.model.sync(r.message);
+						frappe.set_route("Form", doc[0].doctype, doc[0].name);
+					}
+				}
+			});
+		},__('Create'));
 
 		frm.add_custom_button(__("Request for Purchaser"), function(){
-		let email_list = [
-        "purchase-uae@cyrix-tsl.com",
-        "purchase@tsl-me.com",
-        "lab-uae@tsl-me.com",
-		"purchase-sa1@tsl-me.com"
-   	 ];
+			let email_list = [
+				"purchase-uae@cyrix-tsl.com",
+				"purchase@tsl-me.com",
+				"lab-uae@tsl-me.com",
+				"purchase-sa1@tsl-me.com"
+			];
 
 			let d = new frappe.ui.Dialog({
 				title: "Send Email",
@@ -132,7 +146,7 @@ frappe.ui.form.on("Evaluation Report", {
 			});
 
 			d.show();
-					},__('Create'));
+		},__('Create'));
 							
 						
 			

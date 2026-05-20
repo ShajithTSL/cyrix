@@ -597,3 +597,25 @@ def migrate_old_releases():
 				remaining_qty -= allocate
 			frappe.db.commit()
 		print("Migration completed")
+
+
+@frappe.whitelist()
+def create_technical_report(name):
+	doc = frappe.get_doc("Job Order Data", name)
+	new_doc = frappe.new_doc("Technical Report")
+	new_doc.company = doc.company
+	new_doc.customer = doc.customer
+	new_doc.customer_address = frappe.db.get_value("Customer", doc.customer, "customer_primary_address")
+	new_doc.address_display = frappe.db.get_value("Customer",doc.customer,"primary_address")
+	new_doc.sales_person = doc.sales_person
+	new_doc.document_type = doc.doctype
+	new_doc.document_reference = doc.name
+	new_doc.branch = doc.branch
+	for item in doc.material_list:
+		new_doc.manufacturer = item.mfg
+		new_doc.model = item.model_no
+		new_doc.serial_number = item.serial_no
+		new_doc.description = item.item_name
+		# new_doc.technician = doc.technician_name
+
+	return new_doc

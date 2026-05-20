@@ -9,17 +9,19 @@
   "section_break_1lpd",
   "naming_series",
   "customer",
-  "amended_from",
-  "service_call_form",
-  "company",
-  "service_type",
-  "column_break_5hdl",
-  "date",
   "customer_address",
-  "address_display",
-  "sales_person",
+  "document_type",
+  "document_reference",
+  "column_break_iuuf",
+  "company",
   "branch",
+  "sales_person",
+  "date",
+  "column_break_5hdl",
+  "service_type",
+  "report_type",
   "technician",
+  "amended_from",
   "detail_section",
   "description",
   "column_break_gchk",
@@ -62,12 +64,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "service_call_form",
-   "fieldtype": "Link",
-   "label": "Service Call Form",
-   "options": "Service Call Form"
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -81,10 +77,6 @@
    "fieldtype": "Link",
    "label": "Address",
    "options": "Address"
-  },
-  {
-   "fieldname": "address_display",
-   "fieldtype": "HTML"
   },
   {
    "fieldname": "sales_person",
@@ -213,12 +205,36 @@
   {
    "fieldname": "customer_signature",
    "fieldtype": "Signature"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "label": "Document Type",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"Job Order Data\",\"Supply Order Data\",\"Service Call Form\"]]]",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "document_reference",
+   "fieldtype": "Dynamic Link",
+   "label": "Document Reference",
+   "options": "document_type"
+  },
+  {
+   "fieldname": "column_break_iuuf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Service Report",
+   "fieldname": "report_type",
+   "fieldtype": "Select",
+   "label": "Report Type",
+   "options": "Service Report\nEvaluation Report"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-19 16:19:32.722918",
+ "modified": "2026-05-20 10:44:49.347954",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",

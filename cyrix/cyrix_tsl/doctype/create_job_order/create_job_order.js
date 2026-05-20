@@ -162,11 +162,12 @@ frappe.ui.form.on("Create Job Order", {
         }
         else{
             // If job_order_data does not exist Create a New Job Order
-            frm.add_custom_button(__("Create Job Order"), function () {
-				let proceed = true;
+			frm.add_custom_button(__("Create Job Order"), function () {
+
+				let has_empty_complaint = false;
 
 				(frm.doc.received_equipment || []).forEach(row => {
-					// Check if ALL fields are empty / false
+
 					let is_empty =
 						!row.no_power &&
 						!row.no_output &&
@@ -182,79 +183,52 @@ frappe.ui.form.on("Create Job Order", {
 						!row.other;
 
 					if (is_empty) {
-						proceed = false;
-
-						frappe.confirm(
-							__('<b>Row {0}:</b> Complaints not given.Are you sure to Continue?', [row.idx]),
-							function() {
-								// YES → continue save
-								proceed = true;
-								frappe.call({
-									method:"cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.create_job_order_data",
-									freeze: true,
-									freeze_message: __("Please Wait, Job Order Creation is in Progress ..."),
-									args:{
-										dict: cur_frm.doc
-									},
-									callback(r){
-										if(r){
-											// On success, reload the document to reflect changes
-											frm.set_value("customer",null)
-											frm.set_value("address",null)
-											frm.set_value("incharge",null)
-											frm.set_value("sales_person",null)
-											frm.clear_table("received_equipment")
-											frm.refresh_field("received_equipment")
-											cur_frm.reload_doc();
-										}   
-									}
-								})
-							},
-							function() {
-								// NO → stop save
-								frappe.validated = false;
-							}
-						);
-					}
-					else{
-						frappe.call({
-							method:"cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.create_job_order_data",
-							freeze: true,
-							freeze_message: __("Please Wait, Job Order Creation is in Progress ..."),
-							args:{
-								dict: cur_frm.doc
-							},
-							callback(r){
-								if(r){
-									// On success, reload the document to reflect changes
-									frm.set_value("customer",null)
-									frm.set_value("address",null)
-									frm.set_value("incharge",null)
-									frm.set_value("sales_person",null)
-									frm.clear_table("received_equipment")
-									frm.refresh_field("received_equipment")
-									cur_frm.reload_doc();
-								}   
-							}
-						})
+						has_empty_complaint = true;
 					}
 				});
 
-				// frappe.call({
-                //     method:"cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.create_job_order_data",
-				// 	freeze: true,
-				// 	freeze_message: __("Please Wait, Job Order Creation is in Progress ..."),
-                //     args:{
-                //         dict: cur_frm.doc
-                //     },
-                //     callback(r){
-                //         if(r){
-                //             // On success, reload the document to reflect changes
-                //             cur_frm.reload_doc();
-                //         }   
-                //     }
-                // })
-            })
+				let create_job_order = function () {
+
+					frappe.call({
+						method: "cyrix.cyrix_tsl.doctype.create_job_order.create_job_order.create_job_order_data",
+						freeze: true,
+						freeze_message: __("Please Wait, Job Order Creation is in Progress ..."),
+						args: {
+							dict: cur_frm.doc
+						},
+						callback(r) {
+
+							if (r.message) {
+
+								frm.set_value("customer", null);
+								frm.set_value("address", null);
+								frm.set_value("incharge", null);
+								frm.set_value("sales_person", null);
+
+								frm.clear_table("received_equipment");
+								frm.refresh_field("received_equipment");
+
+								cur_frm.reload_doc();
+							}
+						}
+					});
+				};
+
+				if (has_empty_complaint) {
+
+					frappe.confirm(
+						__("Some rows do not have complaints specified. Are you sure to continue?"),
+						function () {
+							create_job_order();
+						}
+					);
+
+				} else {
+
+					create_job_order();
+				}
+
+			});
 			frm.remove_custom_button(__("Update Job Order")); // Remove the "Update Job Order" button since it's not applicable yet
         }
 	},

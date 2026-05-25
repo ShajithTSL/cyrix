@@ -17,8 +17,8 @@ naming_series = {
 	"Dubai": {"normal":"JO-DU.YY.-", "updated": "SB-JO-DU.YY.-"},
 }
 @frappe.whitelist()
-def update_job_order_data(dict):
-	create_document_log(dict)
+def update_job_order_data(dict, doc_type, doc_name):
+	create_document_log(dict, doc_type, doc_name)
 	doc = frappe._dict(json.loads(dict))
 	# Proceed only if job_order_data reference exists
 	if doc.job_order_data:

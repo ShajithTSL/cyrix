@@ -39,6 +39,24 @@ naming_series = {
 	},
 }
 class JobOrderData(Document):
+
+	def set_unit_status(self):
+
+		if not self.delivery:
+			unit_status = "In Lab"
+
+		elif not self.returned_date:
+			unit_status = "With Customer"
+
+		elif self.delivery >= self.returned_date:
+			unit_status = "With Customer"
+
+		else:
+			unit_status = "In Lab"
+
+		self.unit_status = unit_status
+		frappe.db.set_value("Job Order Data", self.name, "unit_status", unit_status, update_modified=False)
+
 	def after_insert(self):
 		if self.get("maintenance_contract"):
 			doc = frappe.get_doc("Maintenance Contract", self.get("maintenance_contract"))
@@ -73,6 +91,7 @@ class JobOrderData(Document):
 			})
 
 	def on_update_after_submit(self):
+		self.set_unit_status()
 		check_for_shared_docs_on_jo(self)
 		if self.status != self.status_duration_details[-1].status:
 			ldate = self.status_duration_details[-1].date
@@ -603,3 +622,23 @@ def change_serial_number(job_order_data, row_name, new_serial_no):
 		eval_list = frappe.db.get_list("Evaluation Report",{"job_order_data":jod.name},["name"])
 		for eval in eval_list:
 			frappe.db.set_value("Evaluation Item",{"parent":eval.name,"item":row.item_code,"serial_no":old_serial_no},"serial_no",new_serial_no)
+
+
+
+def update_jo_state():
+	jo_list = frappe.get_all("Job Order Data",{"docstatus":1},["name"])
+	for jo in jo_list:
+		self = frappe.get_doc("Job Order Data", jo.name)
+
+		if not self.delivery:
+			unit_status = "In Lab"
+
+		elif not self.returned_date:
+			unit_status = "With Customer"
+
+		elif self.delivery >= self.returned_date:
+			unit_status = "With Customer"
+
+		else:
+			unit_status = "In Lab"
+		frappe.db.set_value("Job Order Data", self.name, "unit_status", unit_status, update_modified=False)

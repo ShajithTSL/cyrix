@@ -113,7 +113,9 @@ frappe.ui.form.on("Create Job Order", {
 						freeze: true,
 						freeze_message: __("Please Wait, Job Order Updation is in Progress ..."),
 						args:{
-							dict: cur_frm.doc
+							dict: cur_frm.doc,
+							doc_type: "Job Order Data",
+							doc_name: cur_frm.doc.job_order_data
 						},
 						callback(r){
 							if(r){

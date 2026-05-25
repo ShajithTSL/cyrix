@@ -68,6 +68,11 @@ def make_po_from_job_order(job_orders, target_doc=None):
 	return base_po
 
 @frappe.whitelist()
+def warehouse_based_on_branch_and_company(company,branch):
+	warehouse = frappe.db.get_value("Warehouse List",{"branch":branch,"parent":company},["actual_warehouse"])
+	return warehouse
+	
+@frappe.whitelist()
 def get_job_order_data(job_order_data):
 	job_order_data = json.loads(job_order_data)
 	l = []
@@ -78,6 +83,7 @@ def get_job_order_data(job_order_data):
 			for k in doc.items:
 				if k.parts_availability == "No":
 					d = frappe._dict((k.as_dict()))
+					d["warehouse"] = warehouse_based_on_branch_and_company(doc.company,doc.branch)
 					d["job_order_data"] = i
 					# d["part_sheet"] = j["name"]
 					l.append(d)

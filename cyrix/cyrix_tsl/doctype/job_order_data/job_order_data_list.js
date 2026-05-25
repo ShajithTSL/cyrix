@@ -1,5 +1,5 @@
 frappe.listview_settings['Job Order Data'] = {
-        add_fields: ["status","name"],
+        add_fields: ["status","name","unit_status"],
 	refresh:function(){
 		cur_list.page.clear_primary_action()
         },
@@ -127,6 +127,10 @@ frappe.listview_settings['Job Order Data'] = {
         else if (doc.status === "Replace") {
                 return[__("Replace"),"red","status,=,Replace"];
                     }
+
+        else if (doc.unit_status === "In Lab") {
+                return[__("In Lab"),"red","unit_status,=,In Lab"];
+        }
           
       },
 };

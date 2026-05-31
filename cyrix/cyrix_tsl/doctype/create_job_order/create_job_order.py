@@ -17,8 +17,8 @@ naming_series = {
 	"Dubai": {"normal":"JO-DU.YY.-", "updated": "SB-JO-DU.YY.-"},
 }
 @frappe.whitelist()
-def update_job_order_data(dict):
-	create_document_log(dict)
+def update_job_order_data(dict, doc_type, doc_name):
+	create_document_log(dict, doc_type, doc_name)
 	doc = frappe._dict(json.loads(dict))
 	# Proceed only if job_order_data reference exists
 	if doc.job_order_data:
@@ -89,8 +89,10 @@ def create_job_order_data(dict):
 	if not doc.customer:
 		frappe.throw("Please Mention the Customer Name")
 	if not doc.incharge:
-		frappe.throw("Please Mention the Customer Representative")
-
+		customer_type = frappe.db.get_value("Customer", doc.customer, "customer_type")
+		if customer_type == "Company":
+			frappe.throw("Please Mention the Customer Representative")
+	
 	# Ensure Address is linked to the Customer
 	if doc.address:
 		if not frappe.db.get_value("Dynamic Link", {"parent": doc.address, "link_doctype": "Customer"}, "link_name"):

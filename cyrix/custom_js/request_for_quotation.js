@@ -82,6 +82,7 @@ frappe.ui.form.on('Request for Quotation', {
                                             item_child.job_order_data =  v.job_order_data,
                                             item_child.conversion_factor =1,
                                             item_child.department = frm.doc.department
+                                            item_child.warehouse = v.warehouse
                                             
                                             frm.refresh_field("items");
                                             frm.refresh();

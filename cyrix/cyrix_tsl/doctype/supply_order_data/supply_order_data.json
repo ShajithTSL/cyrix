@@ -78,6 +78,7 @@
   "invoice_no",
   "invoice_date",
   "payment_entry",
+  "supplier_quotation",
   "column_break_mhco",
   "quotation_approved_date",
   "po_number",
@@ -266,7 +267,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nPending Internal Approval\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nReceived\nIn Custom\nDelivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid"
+   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nPending Internal Approval\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nReceived\nIn Custom\nDelivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid\nSupplier Quoted"
   },
   {
    "allow_on_submit": 1,
@@ -641,13 +642,18 @@
    "hidden": 1,
    "label": "Currency",
    "options": "Currency"
+  },
+  {
+   "fieldname": "supplier_quotation",
+   "fieldtype": "Data",
+   "label": "Supplier Quotation"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-07 10:13:20.390419",
+ "modified": "2026-05-24 13:57:32.698889",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

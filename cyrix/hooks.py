@@ -168,7 +168,8 @@ doc_events = {
 	"Supplier Quotation": {
 		"validate": [
 			"cyrix.custom_py.supplier_quotation.update_eval_report_status",
-			"cyrix.custom_py.supplier_quotation.update_price"
+			"cyrix.custom_py.supplier_quotation.update_price",
+			# "cyrix.custom_py.supplier_quotation.update_price_for_replacement"
 		],
 		"on_submit": [
 			"cyrix.custom_py.supplier_quotation.update_job_order_status",

@@ -49,6 +49,17 @@ def update_job_order_status(doc,method):
             jo.status = "Parts Priced"
             jo.save()
 
+    if doc.custom_replacement_unit:
+        rep = frappe.get_doc("Job Order Data",doc.custom_replacement_unit)
+        rep.status = "Parts Priced"
+        rep.save()
+
+    
+        r = frappe.get_doc("Replacement Unit",doc.custom_replacement_unit)
+        r.status = "Parts Priced"
+        r.save()
+        
+
 def update_supply_order_data(self,method):
     for i in self.get('items'):
         if i.supply_order_data:
@@ -70,3 +81,40 @@ def update_budgetary_quotation(self,method):
                     j.rate = i.base_net_rate
             doc.status = "Parts Priced"
             doc.save(ignore_permissions=True)
+
+
+def update_price_for_replacement(self,method):
+    frappe.errprint(self.custom_replacement_unit)
+    sq_item = frappe.db.sql("""
+    SELECT 
+        sqi.base_rate,
+        sqi.base_amount,
+        sq.custom_replacement_unit
+    FROM `tabSupplier Quotation Item` sqi
+    LEFT JOIN `tabSupplier Quotation` sq
+        ON sq.name = sqi.parent
+    WHERE sq.custom_replacement_unit = %s
+    """, (self.custom_replacement_unit), as_dict=True)
+
+    if sq_item:
+        print(sq_item)
+
+        # base_rate = sq_item[0].base_rate or 0
+        # base_amount = sq_item[0].base_amount or 0
+        # replacement_unit = sq_item[0].custom_replacement_unit
+
+        # frappe.db.sql("""
+        #     UPDATE `tabItem Price Details`
+        #     SET
+        #         price = %s,
+        #         amount = %s
+        #     WHERE parent = %s
+        #      """, (
+        #     base_rate,
+        #     base_amount,
+        #     replacement_unit
+        # ))
+
+        # frappe.db.commit()
+
+         

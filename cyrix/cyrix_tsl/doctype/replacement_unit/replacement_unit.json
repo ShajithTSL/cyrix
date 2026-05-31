@@ -710,8 +710,25 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2026-04-30 11:11:07.324468",
+ "links": [
+  {
+   "link_doctype": "Request for Quotation",
+   "link_fieldname": "custom_replacement_unit"
+  },
+  {
+   "link_doctype": "Supplier Quotation",
+   "link_fieldname": "custom_replacement_unit"
+  },
+  {
+   "link_doctype": "Purchase Order",
+   "link_fieldname": "custom_replacement_unit"
+  },
+  {
+   "link_doctype": "Purchase Invoice",
+   "link_fieldname": "custom_replacement_unit"
+  }
+ ],
+ "modified": "2026-05-25 12:22:21.753526",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Replacement Unit",

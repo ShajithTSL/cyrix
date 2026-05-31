@@ -405,7 +405,7 @@ def get_pi(doc):
 			cur = frappe.get_value("Company",{"name":doc.company},"default_currency")
 
 			if i.reference_doctype == "Purchase Invoice":
-				pat = frappe.get_value("Purchase Invoice",{"name":i.reference_name},"supplier_invoice_attach")
+				pat = frappe.get_value("Purchase Invoice",{"name":i.reference_name},"custom_supplier_invoice_attach")
 				cr = frappe.get_value("Purchase Invoice",{"name":i.reference_name},"currency")
 				conv_amt = frappe.get_value("Purchase Invoice",{"name":i.reference_name},"grand_total")
 

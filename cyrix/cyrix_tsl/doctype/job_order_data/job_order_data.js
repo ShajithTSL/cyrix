@@ -6,6 +6,31 @@ frappe.ui.form.on("Job Order Data", {
 	
 	refresh(frm) {
 
+	// frm.set_df_property('item_price_details', 'hidden', 1);
+
+
+	 frappe.db.get_value(
+            'Replacement Unit',
+            { name: frm.doc.name },
+            ['name']
+        ).then((r) => {
+
+            let replacement_unit_exists = 0;
+
+            if (r.message && r.message.name) {
+                replacement_unit_exists = 1;
+            }
+
+            // Hide child table
+            if (replacement_unit_exists == 1) {
+                frm.set_df_property('item_price_details', 'hidden', 0);
+            } else {
+                frm.set_df_property('item_price_details', 'hidden', 1);
+            }
+
+            frm.refresh_field('items');
+        });
+
 
 	if (frm.doc.status == "Replace") {
     frm.add_custom_button(__('Create Replacement'), function () {

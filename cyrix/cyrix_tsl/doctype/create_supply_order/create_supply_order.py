@@ -40,7 +40,9 @@ def create_supply_order_data(dict):
 	if not doc.customer:
 		frappe.throw("Please Mention the Customer Name")
 	if not doc.incharge:
-		frappe.throw("Please Mention the Customer Representative")
+		customer_type = frappe.db.get_value("Customer", doc.customer, "customer_type")
+		if customer_type == "Company":
+			frappe.throw("Please Mention the Customer Representative")
 
 	so = frappe.new_doc("Supply Order Data")
 	so.naming_series = naming_series[doc.branch][doc.document_type]

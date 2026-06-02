@@ -37,6 +37,7 @@
   "maintenance_contract",
   "column_break_cwfo",
   "unit_type",
+  "unit_status",
   "technician",
   "multiple_technicians",
   "parent_jo",
@@ -720,6 +721,16 @@
    "fieldtype": "Table",
    "label": "Item Price Details",
    "options": "Item Price Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "In Lab",
+   "fieldname": "unit_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Unit Status",
+   "options": "\nIn Lab\nWith Customer",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -731,7 +742,8 @@
    "link_fieldname": "name"
   }
  ],
- "modified": "2026-05-25 15:25:56.406975",
+ "make_attachments_public": 1,
+ "modified": "2026-05-31 16:16:12.506175",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

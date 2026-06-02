@@ -1,5 +1,17 @@
 frappe.ui.form.on('Quotation', {
-
+    transaction_date: function(frm) {
+        if (frappe.boot.sysdefaults.quotation_valid_till) {
+            frm.set_value(
+                "valid_till",
+                frappe.datetime.add_days(
+                    frm.doc.transaction_date,
+                    frappe.boot.sysdefaults.quotation_valid_till
+                )
+            );
+        } else {
+            frm.set_value("valid_till", frappe.datetime.add_months(frm.doc.transaction_date, 1));
+        }
+    },
     type_of_approval: function(frm) {
         if (frm.doc.type_of_approval){
             frm.set_df_property("approval_date", "reqd", 1);

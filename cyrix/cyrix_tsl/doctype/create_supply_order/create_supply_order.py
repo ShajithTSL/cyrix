@@ -108,6 +108,18 @@ def create_supply_order_data(dict):
 			"quantity":i.get('qty'),
 		})
 
+	for i in doc.get("reference_parts"):
+		# check whether item_code exists or create new Item if needed
+		check_for_item(i)
+		
+		so.append("reference_parts",{
+			"item_code": i.get('item_code'),
+			"item_name":i.get('item_name'),
+			"model_no":i.get('model'),
+			"mfg":i.get('manufacturer'),
+			"quantity":i.get('qty'),
+		})
+
 	so.save(ignore_permissions = True)
 
 	# Update the File record if image was uploaded

@@ -12,6 +12,18 @@ def update_job_order_status(self, method):
 			update.purchase_order_no = self.name
 			update.save(ignore_permissions=True)
 
+		if item.custom_replacement_unit:
+			update = frappe.get_doc("Job Order Data", item.custom_replacement_unit)
+			update.status = "WP-Waiting Parts"
+			update.purchase_order_no = self.name
+			update.save(ignore_permissions=True)
+
+			update = frappe.get_doc("Replacement Unit",item.custom_replacement_unit)
+			update.status = "WP-Waiting Parts"
+			update.purchase_order_no = self.name
+			update.save(ignore_permissions=True)
+		
+
 def update_supply_order_status(self, method):
 	for item in self.get("items"):
 		if item.supply_order_data:

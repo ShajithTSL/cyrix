@@ -27,6 +27,7 @@
   "delivery",
   "currency",
   "symbol",
+  "purchaser",
   "column_break_7",
   "image",
   "warehouse",
@@ -48,6 +49,7 @@
   "st",
   "section_break_14",
   "material_list",
+  "reference_parts",
   "section_break_fgbj",
   "status_detail",
   "section_break_rgkj",
@@ -647,13 +649,27 @@
    "fieldname": "supplier_quotation",
    "fieldtype": "Data",
    "label": "Supplier Quotation"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reference_parts",
+   "fieldtype": "Table",
+   "label": "Reference(Equipment's)",
+   "options": "Supply Order Table"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "purchaser",
+   "fieldtype": "Link",
+   "label": "Purchaser",
+   "options": "Purchaser"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-24 13:57:32.698889",
+ "modified": "2026-06-01 15:46:56.802446",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

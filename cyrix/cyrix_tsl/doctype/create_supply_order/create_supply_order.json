@@ -36,7 +36,9 @@
   "suggested_price",
   "customer_reference_number",
   "section_break_9",
-  "received_equipment"
+  "received_equipment",
+  "reference_required",
+  "reference_parts"
  ],
  "fields": [
   {
@@ -233,13 +235,26 @@
    "label": "Parent Customer",
    "options": "Customer",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reference_required",
+   "fieldtype": "Check",
+   "label": "Reference Required"
+  },
+  {
+   "depends_on": "eval:doc.reference_required",
+   "fieldname": "reference_parts",
+   "fieldtype": "Table",
+   "label": "Reference",
+   "options": "Received Equipment"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-30 13:36:42.262230",
+ "modified": "2026-05-31 08:59:10.976781",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Supply Order",

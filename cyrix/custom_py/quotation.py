@@ -81,6 +81,12 @@ def update_job_order_status(self, method):
 			update.po_no = self.get("purchase_order_no")
 			update.save(ignore_permissions=True)
 
+		if item.custom_replacement_unit:
+			update = frappe.get_doc("Replacement Unit",item.custom_replacement_unit)
+			update.status = status
+			update.po_no = self.get("purchase_order_no")
+			update.save(ignore_permissions=True)
+
 	if method == "on_submit":
 		if not self.type_of_approval and self.quotation_type in quotation_type and self.docstatus == 1 and self.workflow_state == "Approved by Customer":
 			frappe.throw("Cannot submit: 'Type of Approval' field is required.")
@@ -274,7 +280,9 @@ def fetch_price_from_eval_report(self, method):
 	eval_list = []
 
 	# Clear existing tables and totals
-	self.item_price_details = []
+	if not self.item_price_details:
+		self.item_price_details = []
+
 	self.parts_price = []
 	self.shipping_cost = 0.0
 
@@ -353,16 +361,32 @@ def fetch_price_from_eval_report(self, method):
 			total_price += hour.total_price if hour.total_price else 0
 	# Append to parts_price table
 	if self.item_price_details:
-		total_material_cost = tsl_inventory_total + supplier_total + scrap_total
+		s_amount = 0
+		if self.custom_replacement:
+			for i in self.item_price_details:
+				s_amount = s_amount + i.amount
 
-		self.append("parts_price", {
-			"tsl_inventory": float(round(tsl_inventory_total, 2)),
-			"supplier": float(round(supplier_total, 2)),
-			"scrap": float(round(scrap_total, 2)),
-			"total_material_cost": float(round(total_material_cost, 2))
-		})
+			total_material_cost = s_amount
+		
+			self.append("parts_price", {
+				"tsl_inventory": "",
+				"supplier": float(round(s_amount, 2)),
+				"scrap": float(round(scrap_total, 2)),
+				"total_material_cost": float(round(total_material_cost, 2))
+			})
 
-		self.total_actual_cost = float(round(total_material_cost + self.get("shipping_cost"), 2)) + total_price
+			self.total_actual_cost = float(round(total_material_cost + self.shipping_cost, 2))
+		else:
+			total_material_cost = tsl_inventory_total + supplier_total + scrap_total
+		
+			self.append("parts_price", {
+				"tsl_inventory": float(round(tsl_inventory_total, 2)),
+				"supplier": float(round(supplier_total, 2)),
+				"scrap": float(round(scrap_total, 2)),
+				"total_material_cost": float(round(total_material_cost, 2))
+			})
+
+			self.total_actual_cost = float(round(total_material_cost + self.get("shipping_cost"), 2)) + total_price
 
 
 def fetch_supplier_details(self, method):
@@ -772,3 +796,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 	)
 
 	return doclist
+
+from datetime import datetime
+def test():
+	print(datetime.now())

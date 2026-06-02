@@ -174,11 +174,24 @@ doc_events = {
 		"on_submit": [
 			"cyrix.custom_py.supplier_quotation.update_job_order_status",
 			"cyrix.custom_py.supplier_quotation.update_supply_order_data",
-			"cyrix.custom_py.supplier_quotation.update_budgetary_quotation"
+			"cyrix.custom_py.supplier_quotation.update_budgetary_quotation",
+			"cyrix.custom_py.supplier_quotation.update_price_for_replacement"
 		],
         "on_cancel": [
 			"cyrix.custom_py.supplier_quotation.on_cancel",
-		]
+		],
+
+
+		"after_insert": [
+		"cyrix.custom_py.supplier_quotation.update_so_status",
+			
+		],
+        
+
+		"on_update": [
+			"cyrix.custom_py.supplier_quotation.update_so",
+			
+		],
 	},
     "Quotation": {
 		"validate": [

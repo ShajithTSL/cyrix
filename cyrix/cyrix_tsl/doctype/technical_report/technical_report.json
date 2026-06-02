@@ -36,6 +36,7 @@
   "column_break_ijur",
   "service_performed",
   "section_break_dhow",
+  "remarks_needed",
   "customer_remarks",
   "column_break_emox",
   "customer_signature"
@@ -194,6 +195,7 @@
    "label": "For Customer Use"
   },
   {
+   "depends_on": "remarks_needed",
    "fieldname": "customer_remarks",
    "fieldtype": "Long Text",
    "label": "Remarks"
@@ -229,12 +231,18 @@
    "fieldtype": "Select",
    "label": "Report Type",
    "options": "Service Report\nEvaluation Report"
+  },
+  {
+   "default": "0",
+   "fieldname": "remarks_needed",
+   "fieldtype": "Check",
+   "label": "Remarks Needed"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-20 10:44:49.347954",
+ "modified": "2026-06-02 11:21:57.728888",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",

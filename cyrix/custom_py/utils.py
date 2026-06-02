@@ -495,13 +495,20 @@ def item_import(import_file):
 
 	
 # @frappe.whitelist()
-# def dlt_doc():
-# 	frappe.db.sql("""
-# 		DELETE FROM `tabReplacement Unit`
-# 		WHERE name = "JO-6305" """)
+# def up_doc():
+# 	# frappe.db.sql("""
+# 	# 	DELETE FROM `tabReplacement Unit`
+# 	# 	WHERE name = "JO-6305" """)
 
+# 	# frappe.db.commit()
+# 	# return "Items deleted"
+
+# 	frappe.db.sql("""
+#     UPDATE `tabSupplier Quotation`
+#     SET workflow_state = 'Cancelled'
+#     WHERE name = 'SQTN-K26-00143'
+# 	""")
 # 	frappe.db.commit()
-# 	return "Items deleted"
 
 
 	

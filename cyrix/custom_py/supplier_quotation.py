@@ -1,6 +1,9 @@
 import frappe
 import requests
 from erpnext.setup.utils import get_exchange_rate
+from frappe.core.doctype.communication.email import make
+from frappe.utils import now
+from frappe import _
 
 def on_cancel(self, method):
     for i in self.get("items"):
@@ -49,13 +52,13 @@ def update_job_order_status(doc,method):
             jo.status = "Parts Priced"
             jo.save()
 
-    if doc.custom_replacement_unit:
-        rep = frappe.get_doc("Job Order Data",doc.custom_replacement_unit)
+    if doc.get("custom_replacement_unit"):
+        rep = frappe.get_doc("Job Order Data",doc.get("custom_replacement_unit"))
         rep.status = "Parts Priced"
         rep.save()
 
     
-        r = frappe.get_doc("Replacement Unit",doc.custom_replacement_unit)
+        r = frappe.get_doc("Replacement Unit",doc.get("custom_replacement_unit"))
         r.status = "Parts Priced"
         r.save()
         
@@ -84,37 +87,212 @@ def update_budgetary_quotation(self,method):
 
 
 def update_price_for_replacement(self,method):
-    frappe.errprint(self.custom_replacement_unit)
-    sq_item = frappe.db.sql("""
-    SELECT 
-        sqi.base_rate,
-        sqi.base_amount,
-        sq.custom_replacement_unit
-    FROM `tabSupplier Quotation Item` sqi
-    LEFT JOIN `tabSupplier Quotation` sq
-        ON sq.name = sqi.parent
-    WHERE sq.custom_replacement_unit = %s
-    """, (self.custom_replacement_unit), as_dict=True)
+    if self.custom_replacement_unit:
+        rp = frappe.get_doc("Replacement Unit",self.get("custom_replacement_unit"))
+        rp.status =  "Parts Priced"
+        rp.save(ignore_permissions = 1)
 
-    if sq_item:
-        print(sq_item)
+        
+        so = frappe.get_doc("Job Order Data",self.get("custom_replacement_unit"))
+        so.unit_status = ""
+        so.status = "Parts Priced"
+        for i in self.items:
+            so.append("item_price_details",{
+            "supplier":self.supplier,
+            "price": i.base_rate,
+            "amount":i.base_amount,
+            "job_order_data":self.get("custom_replacement_unit"),
+            "item":i.item_code,
+            "model":i.model_number,
+            "item_source":"Supplier",
+            "supplier_quotation":self.name
+            })
+        so.save(ignore_permissions = 1)
 
-        # base_rate = sq_item[0].base_rate or 0
-        # base_amount = sq_item[0].base_amount or 0
-        # replacement_unit = sq_item[0].custom_replacement_unit
 
-        # frappe.db.sql("""
-        #     UPDATE `tabItem Price Details`
-        #     SET
-        #         price = %s,
-        #         amount = %s
-        #     WHERE parent = %s
-        #      """, (
-        #     base_rate,
-        #     base_amount,
-        #     replacement_unit
-        # ))
 
-        # frappe.db.commit()
+@frappe.whitelist()
+def get_sq_details(so):
+
+    data = frappe.db.sql("""
+    SELECT
+        sq.name,
+        sq.currency,
+        sq.supplier,
+        sq.shipping_cost,
+        sq.grand_total,
+
+        sqi.item_code,
+        sqi.qty,
+        sqi.rate,
+        sqi.amount,
+        sqi.model_number AS  model,
+        sqi.item_name,
+
+        ptc.description,
+        ptc.tax_amount
+
+        FROM `tabSupplier Quotation` sq
+
+        LEFT JOIN `tabSupplier Quotation Item` sqi
+            ON sqi.parent = sq.name
+
+        LEFT JOIN `tabPurchase Taxes and Charges` ptc
+            ON ptc.parent = sq.name
+
+        WHERE sq.supply_order_data = %s
+
+        ORDER BY sq.name, ptc.idx
+        """, (so,), as_dict=True)
+    
+
+    return data
+
+def get_sq_details1():
+
+    data = frappe.db.sql("""
+    SELECT
+        sq.name,
+        sq.currency,
+        sq.supplier,
+        sq.shipping_cost,
+        sq.grand_total,
+
+        sqi.item_code,
+        sqi.qty,
+        sqi.rate,
+        sqi.amount,
+        sqi.model_number  model,
+        sqi.item_name,
+
+        ptc.description,
+        ptc.tax_amount
+
+        FROM `tabSupplier Quotation` sq
+
+        LEFT JOIN `tabSupplier Quotation Item` sqi
+            ON sqi.parent = sq.name
+
+        LEFT JOIN `tabPurchase Taxes and Charges` ptc
+            ON ptc.parent = sq.name
+
+        WHERE sq.supply_order_data = %s
+
+        ORDER BY sq.name, ptc.idx
+        """, ('SO-R26-11468',), as_dict=True)
+    
+
+    print(data)
+
+
+@frappe.whitelist()
+def update_so_status(self,method):
+    info = ""
+    if self.branch:
+        br_info = frappe.get_value("Branch",self.branch,"customer_support")
+        if br_info:
+            info = br_info
+    if self.supply_order_data and self.workflow_state == "On Review":
+        so = frappe.get_doc("Supply Order Data",self.supply_order_data)
+        so.status = "Supplier Quoted"
+        so.save(ignore_permissions = 1)
+
+        
+       
+        subject = f"Supplier Quotation Created - {self.name}"
+
+        message = f"""
+        Dear Info,
+
+        <br><br>
+
+        Supplier Quotation <b>{self.name}</b> has been created successfully.
+
+        <br><br>
+
+        <b>Supplier :</b> {self.supplier}<br>
+        <b>Grand Total :</b> {self.grand_total}<br>
+        <b>Currency :</b> {self.currency}
+
+        <br><br>
+
+        Regards,<br>
+        ERP System
+        """
+        
+        # Create Communication
+        frappe.get_doc({
+            "doctype": "Communication",
+            "communication_type": "Communication",
+            "communication_medium": "Email",
+            "sent_or_received": "Sent",
+            "subject": subject,
+            "content": message,
+            "reference_doctype": self.doctype,
+            "reference_name": self.name,
+            "sender": frappe.session.user,
+            "recipients": "support@cyrix-tsl.com"
+        }).insert(ignore_permissions=True)
+
+        # Send Email
+        frappe.sendmail(
+            recipients=[info],
+            subject=subject,
+            message=message
+        )
+
+        frappe.msgprint("Purchaser notified successfully")
+   
+@frappe.whitelist()
+def update_so(self,method):
+    info = ""
+    if self.branch:
+        br_info = frappe.get_value("Branch",self.branch,"customer_support")
+        if br_info:
+            info = br_info
+
+    if self.supply_order_data and self.workflow_state == "Notified":
+        so = frappe.get_doc("Supply Order Data",self.supply_order_data)
+        
+        message = f"""
+            Dear Info,
+
+            <br><br>
+
+            Supplier quotation <b>{self.name}</b> has been created.
+
+            <br><br>
+
+            <b>Supplier :</b> {self.supplier}<br>
+            <b>Grand Total :</b> {self.grand_total}
+
+            <br><br>
+
+            Regards,<br>
+            ERP System
+        """
+
+        make_communication(
+            communication_type="Communication",
+            communication_medium="Email",
+            sent_or_received="Sent",
+            subject=subject,
+            content=message,
+            sender=frappe.session.user,
+            recipients="support@cyrix-tsl.com",
+            reference_doctype=self.doctype,
+            reference_name=self.name
+        )
+
+        frappe.sendmail(
+            recipients=[info],
+            subject=subject,
+            message=message
+        )
+        frappe.msgprint("Purchaser notified successfully")
+
+
+
+    
 
          

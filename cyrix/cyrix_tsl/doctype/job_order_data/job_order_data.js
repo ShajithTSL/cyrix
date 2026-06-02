@@ -193,39 +193,96 @@ frappe.ui.form.on("Job Order Data", {
 							return;
 						}
 
-						// ✅ Check if ANY evaluation exists for parent/children
-						frappe.db.get_list("Evaluation Report", {
-							filters: {
-								job_order_data: ["in", jo_list],
-								docstatus: 1
-							},
-							limit: 1
-						}).then(records => {
+						// // ✅ Check if ANY evaluation exists for parent/children
+						// frappe.db.get_list("Evaluation Report", {
+						// 	filters: {
+						// 		job_order_data: ["in", jo_list],
+						// 		docstatus: 1
+						// 	},
+						// 	limit: 1
+						// }).then(records => {
 
-							// ✅ If EXISTS → normal flow
-							if (records.length > 0) {
-								create_internal_quotation(0);
-							}
+						// 	// ✅ If EXISTS → normal flow
+						// 	if (records.length > 0) {
+						// 		create_internal_quotation(0);
+						// 	}
 
-							// ⚠️ If NOT EXISTS → confirm
-							else {
-								frappe.confirm(
-									"Evaluation not Completed for any related Job Order. Do you want to proceed with pre evaluation?",
+						// 	// ⚠️ If NOT EXISTS → confirm
+						// 	else {
+						// 		frappe.confirm(
+						// 			"Evaluation not Completed for any related Job Order. Do you want to proceed with pre evaluation?",
 
-									function() { // YES
-										create_internal_quotation(1);
-									},
+						// 			function() { // YES
+						// 				create_internal_quotation(1);
+						// 			},
 
-									function() { // NO
-										frappe.msgprint("Please create Evaluation Report to proceed.");
-									}
-								);
-							}
-						});
+						// 			function() { // NO
+						// 				frappe.msgprint("Please create Evaluation Report to proceed.");
+						// 			}
+						// 		);
+						// 	}
+						// });
+
+
+						// Check Evaluation Report
+					frappe.db.get_list("Evaluation Report", {
+						filters: {
+							job_order_data: ["in", jo_list],
+							docstatus: 1
+						},
+						limit: 1
+					}).then(eval_records => {
+
+						if (eval_records.length > 0) {
+							// Evaluation completed
+							create_internal_quotation(0,0);
+						} else {
+
+							// Check Replacement Unit
+							frappe.db.get_list("Replacement Unit", {
+								filters: {
+									parent_jo: frm.doc.name
+								},
+								limit: 1
+							}).then(rep_records => {
+
+								if (rep_records.length > 0) {
+
+									frappe.confirm(
+										"Replacement Unit has been created for this Job Order. Do you want to proceed with creating the quotation?",
+
+										function () { // YES
+											create_internal_quotation(0,1);
+										},
+
+										function () { // NO
+											frappe.msgprint("Quotation creation cancelled.");
+										}
+									);
+
+								} else {
+
+									frappe.confirm(
+										"Evaluation not completed for any related Job Order. Do you want to proceed with pre-evaluation?",
+
+										function () { // YES
+											create_internal_quotation(1,0);
+										},
+
+										function () { // NO
+											frappe.msgprint("Please create an Evaluation Report to proceed.");
+										}
+									);
+
+								}
+							});
+
+						}
+					});
 					}
 				});
 
-				function create_internal_quotation(pre_eval) {
+				function create_internal_quotation(pre_eval,rp) {
 					let allowed_customers = [];
 
 					if (frm.doc.customer) {
@@ -267,7 +324,8 @@ frappe.ui.form.on("Job Order Data", {
 								args: {
 									job_order_data: frm.doc.name,
 									pre_evaluation: pre_eval,
-									customer: values.customer
+									customer: values.customer,
+									replacement:rp
 								},
 								callback: function(res) {
 									if (res.message) {

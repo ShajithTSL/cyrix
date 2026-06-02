@@ -389,8 +389,8 @@ def get_pi(doc):
 	data+= '<tr><td>Date</td><td>%s</td></tr>' %(doc.get_formatted("posting_date"))
 	data+='<tr><td>REF NO</td><td>%s</td></tr>' %(doc.name)
 	data+='<tr>  <td>Supplier Name</td><td>%s</td></tr>' %(doc.party_name)
-	data+='<tr> <td>Amount</td><td>%s</td></tr>' %("{:,.2f}".format(doc.total_allocated_amount))
-	data+='<tr><td>Currency</td><td>%s</td></tr>' %(doc.paid_from_account_currency)
+	data+='<tr> <td>Amount</td><td>%s</td></tr>' %("{:,.2f}".format(doc.amount_in or doc.total_allocated_amount))
+	data+='<tr><td>Currency</td><td>%s</td></tr>' %(doc.currency_paid)
 	data+='<tr><td>Department</td><td>%s</td></tr>' %(doc.cost_center)
 	data+='<tr><td >Remarks</td><td>%s</td></tr>' %(doc.remarks or "")
 

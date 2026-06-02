@@ -280,11 +280,12 @@ def update_tech_hours(new_doc, job_order_data):
 			})
 
 @frappe.whitelist()
-def create_internal_quotation(job_order_data, pre_evaluation, customer):
+def create_internal_quotation(job_order_data, pre_evaluation, customer,replacement):
 	doc = frappe.get_doc("Job Order Data",job_order_data)
 	new_doc= frappe.new_doc("Quotation")
 	new_doc.sales_person = doc.sales_person
 	new_doc.pre_evaluation = pre_evaluation
+	new_doc.custom_replacement = replacement
 	new_doc.naming_series = naming_series["Internal Quotation - Repair"][doc.branch]
 	new_doc.company = doc.company
 	new_doc.party_name = customer
@@ -295,6 +296,10 @@ def create_internal_quotation(job_order_data, pre_evaluation, customer):
 	new_doc.branch = doc.branch
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
 	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
+	
+	rp_unit = ""
+	if replacement == 1:
+		rp_unit = doc.name
 
 	new_doc.quotation_type = "Internal Quotation - Repair"
 	for i in doc.material_list:
@@ -308,11 +313,28 @@ def create_internal_quotation(job_order_data, pre_evaluation, customer):
 			"model":i.model_no,
 			"mfg":i.mfg,
 			"job_order_data":doc.name,
+			"custom_replacement_unit":rp_unit,
+			
 			"warehouse":fetch_repair_warehouse(doc.company,doc.branch)
 		})
-
+	
+	
+	
 	update_tech_hours(new_doc, job_order_data)
 	fetch_item_price_details(new_doc,method="validate")
+	# if replacement:
+	# 	for i in doc.item_price_details:
+	# 		new_doc.append("item_price_details",{
+	# 		"supplier":i.supplier,
+	# 		"price": i.price,
+	# 		"amount":i.amount,
+	# 		"job_order_data":i.job_order_data,
+	# 		"item":i.item,
+	# 		"model":i.model,
+	# 		"item_source":i.item_source,
+	# 		"supplier_quotation":i.supplier_quotation
+	# 		})
+
 	return new_doc
 
 @frappe.whitelist()
@@ -642,3 +664,16 @@ def update_jo_state():
 		else:
 			unit_status = "In Lab"
 		frappe.db.set_value("Job Order Data", self.name, "unit_status", unit_status, update_modified=False)
+
+def updates():
+	jo_list = frappe.get_all("Job Order Data",{"company":"Company Al-Halloul Faniye Medical","docstatus":2,"technician":["is", "not set"]},["name"])
+	for jo in jo_list:
+		print(jo.name)
+		# dl = frappe.get_doc("Document Log", {"document_reference":jo.name})
+		# dl.delete()
+		frappe.db.set_value("Stock Entry Detail", {"job_order_data": jo.name}, "job_order_data", None, update_modified=False)
+		frappe.db.set_value("Stock Entry", {"job_order_data": jo.name}, "job_order_data", None, update_modified=False)
+		frappe.db.set_value("Stock Entry", {"job_order_data": jo.name}, "job_order_data", None, update_modified=False)
+		self = frappe.get_doc("Job Order Data", jo.name)
+		self.delete()
+		frappe.db.commit()

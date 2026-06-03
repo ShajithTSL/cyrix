@@ -121,6 +121,7 @@ def get_sq_details(so):
         sq.supplier,
         sq.shipping_cost,
         sq.grand_total,
+        sq.terms,
 
         sqi.item_code,
         sqi.qty,

@@ -103,6 +103,7 @@ def create_supply_order_data(dict):
 		so.append("material_list",{
 			"item_code": i.get('item_code'),
 			"item_name":i.get('item_name'),
+			"description":i.get('description', ""),
 			"model_no":i.get('model'),
 			"mfg":i.get('manufacturer'),
 			"quantity":i.get('qty'),
@@ -115,6 +116,7 @@ def create_supply_order_data(dict):
 		so.append("reference_parts",{
 			"item_code": i.get('item_code'),
 			"item_name":i.get('item_name'),
+			"description":i.get('description', ""),
 			"model_no":i.get('model'),
 			"mfg":i.get('manufacturer'),
 			"quantity":i.get('qty'),
@@ -164,7 +166,7 @@ def check_for_item(i):
 			new_doc.item_group = i.get('item_group')
 		else:
 			new_doc.item_group = "Equipments"
-		new_doc.description = i.get('item_name', "")
+		new_doc.description = i.get('description', "")
 		new_doc.model = i.get('model', "")
 		new_doc.image = (i.get('attach_image', "")).replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
 		new_doc.is_stock_item = 1
@@ -190,7 +192,7 @@ def check_for_item(i):
 					new_doc.item_group = i.get('item_group')
 				else:
 					new_doc.item_group = "Equipments"
-				new_doc.description = i.get('item_name', "")
+				new_doc.description = i.get('description', "")
 				new_doc.model = i.get('model', "")
 				new_doc.image = (i.get('attach_image', "")).replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
 				new_doc.is_stock_item = 1
@@ -207,7 +209,7 @@ def check_for_item(i):
 				new_doc.item_group = i.get('item_group')
 			else:
 				new_doc.item_group = "Equipments"
-			new_doc.description = i.get('item_name', "")
+			new_doc.description = i.get('description', "")
 			new_doc.model = i.get('model', "")
 			new_doc.stock_uom = i.get('uom', "")
 			new_doc.image = (i.get('attach_image', "")).replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""

@@ -2,7 +2,9 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Job Order Data", {
-
+	custom_status: function(frm) {
+		frm.set_value("status", frm.doc.custom_status);
+	},
 	
 	refresh(frm) {
 

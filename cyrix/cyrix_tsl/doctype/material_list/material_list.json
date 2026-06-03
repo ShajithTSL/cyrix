@@ -18,9 +18,14 @@
   "item_name",
   "quantity",
   "column_break_6",
+  "description",
   "price",
   "amount",
-  "online_price"
+  "online_price",
+  "section_break_gwsa",
+  "equipment_model",
+  "column_break_fvfl",
+  "equipment_name"
  ],
  "fields": [
   {
@@ -98,7 +103,7 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Description and Specification",
+   "label": "Item Short Name",
    "read_only": 1
   },
   {
@@ -140,13 +145,38 @@
    "fieldname": "update_sku",
    "fieldtype": "Button",
    "label": "Update SKU"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Long Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "section_break_gwsa",
+   "fieldtype": "Section Break",
+   "label": "Equipment Reference"
+  },
+  {
+   "fieldname": "equipment_model",
+   "fieldtype": "Link",
+   "label": "Equipment Model",
+   "options": "Item Model"
+  },
+  {
+   "fieldname": "column_break_fvfl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "equipment_name",
+   "fieldtype": "Data",
+   "label": "Equipment Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-16 12:30:43.523168",
+ "modified": "2026-06-03 09:08:02.280943",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Material List",

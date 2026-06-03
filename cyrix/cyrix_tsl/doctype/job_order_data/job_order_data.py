@@ -665,15 +665,28 @@ def update_jo_state():
 			unit_status = "In Lab"
 		frappe.db.set_value("Job Order Data", self.name, "unit_status", unit_status, update_modified=False)
 
-def updates():
-	jo_list = frappe.get_all("Job Order Data",{"company":"Company Al-Halloul Faniye Medical","docstatus":2,"technician":["is", "not set"]},["name"])
-	for jo in jo_list:
-		print(jo.name)
-		# dl = frappe.get_doc("Document Log", {"document_reference":jo.name})
-		# dl.delete()
-		frappe.db.set_value("Stock Entry Detail", {"job_order_data": jo.name}, "job_order_data", None, update_modified=False)
-		frappe.db.set_value("Stock Entry", {"job_order_data": jo.name}, "job_order_data", None, update_modified=False)
-		frappe.db.set_value("Stock Entry", {"job_order_data": jo.name}, "job_order_data", None, update_modified=False)
-		self = frappe.get_doc("Job Order Data", jo.name)
-		self.delete()
-		frappe.db.commit()
+# def updates():
+# 	jo_list = frappe.get_all("Job Order Data",{"company":"Company Al-Halloul Faniye Medical","docstatus":2,"technician":["is", "not set"]},["name"])
+# 	for jo in jo_list:
+# 		print(jo.name)
+# 		# dl = frappe.get_doc("Document Log", {"document_reference":jo.name})
+# 		# dl.delete()
+# 		frappe.db.set_value("Stock Entry Detail", {"job_order_data": jo.name}, "job_order_data", None, update_modified=False)
+# 		frappe.db.set_value("Stock Entry", {"job_order_data": jo.name}, "job_order_data", None, update_modified=False)
+# 		frappe.db.set_value("Stock Entry", {"job_order_data": jo.name}, "job_order_data", None, update_modified=False)
+# 		self = frappe.get_doc("Job Order Data", jo.name)
+# 		self.delete()
+# 		frappe.db.commit()
+
+def update_rfq():
+	rfq_list = frappe.get_all("Purchase Order Item",{"branch": ["is", "not set"]},["name","parent","supply_order_data","job_order_data"])
+	for rfq in rfq_list:
+		# if rfq.job_order_data:
+		# 	jo_doc = frappe.get_doc("Job Order Data", rfq.job_order_data)
+		branch = frappe.db.get_value("Purchase Order", rfq.parent, "branch")
+		print(branch)
+		frappe.db.set_value("Purchase Order Item", rfq.name, "branch",branch, update_modified=False)
+		# elif rfq.supply_order_data:
+		# 	so_doc = frappe.get_doc("Supply Order Data", rfq.supply_order_data)
+		# 	frappe.db.set_value("Purchase Order Item", rfq.name, "branch", so_doc.branch, update_modified=False)
+		# frappe.db.set_value("Request for Quotation", rfq.name, "branch", "Kuwait", update_modified=False)

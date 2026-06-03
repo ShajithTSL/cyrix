@@ -10,16 +10,22 @@
   "item_group",
   "item_number",
   "has_serial_no",
+  "serial_no",
   "column_break_avnk",
   "model",
   "manufacturer",
   "item_name",
+  "column_break_nvmx",
+  "description",
   "column_break_5",
-  "serial_no",
   "uom",
   "qty",
   "suggested_price",
   "ignore",
+  "equipment_referenece_section",
+  "equipment_model",
+  "column_break_colq",
+  "equipment_name",
   "complaint_section",
   "no_power",
   "no_output",
@@ -94,7 +100,7 @@
    "fieldname": "item_name",
    "fieldtype": "Small Text",
    "in_list_view": 1,
-   "label": "Description and Specification"
+   "label": "Item Short Name"
   },
   {
    "fieldname": "column_break_5",
@@ -334,12 +340,42 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Ignore Existing Combination"
+  },
+  {
+   "depends_on": "eval:doc.parent == \"Create Job Order\"",
+   "fieldname": "equipment_referenece_section",
+   "fieldtype": "Section Break",
+   "label": "Equipment Referenece"
+  },
+  {
+   "fieldname": "equipment_model",
+   "fieldtype": "Link",
+   "label": "Equipment Model",
+   "options": "Item Model"
+  },
+  {
+   "fieldname": "column_break_colq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "equipment_name",
+   "fieldtype": "Data",
+   "label": "Equipment Name"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Long Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_nvmx",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-30 11:00:00.118257",
+ "modified": "2026-06-03 10:16:01.075563",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Received Equipment",

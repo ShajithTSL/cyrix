@@ -57,6 +57,7 @@ frappe.ui.form.on("Supply Order Data", {
 						currency: row.currency,
 						grand_total: row.grand_total,
 						shipping_cost: row.shipping_cost,
+						terms: row.terms,
 						items: {}
 					};
 				}
@@ -309,6 +310,10 @@ else {
 						${item ? format_currency(item.amount || 0, s.currency) : "-"}
 					</span>
 				</div>
+				<div style="font-size:11px;color:#666;margin-bottom:8px;white-space:normal;">
+				
+					${item ? (item.terms || "") : ""}
+				</div>
 
 			</div>
 		`;
@@ -317,8 +322,18 @@ else {
 		// summary
 		html += `
 			<div style="padding:10px;background:#f9fafb;">
-				<div><b>Shipping:</b> ${format_currency(s.shipping_cost || 0, s.currency)}</div>
-				<div><b>Grand:</b> ${format_currency(s.grand_total || 0, s.currency)}</div>
+			<div><b>Shipping:</b> ${format_currency(s.shipping_cost || 0, s.currency)}</div>
+			<div><b>Grand:</b> ${format_currency(s.grand_total || 0, s.currency)}</div>
+
+			<div style="
+				margin-top:10px;
+				padding-top:10px;
+				border-top:1px solid #ddd;
+				white-space:pre-line;
+				font-size:11px;
+			">
+				<b>Terms & Conditions</b><br>
+				${s.terms || ""}
 			</div>
 		</div>
 		`;

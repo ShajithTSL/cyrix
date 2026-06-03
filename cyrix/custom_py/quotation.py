@@ -618,10 +618,14 @@ def get_supply_order_data(supply_order_data):
 
 @frappe.whitelist()
 def create_sales_invoice(source, customer):
+	
 	"""
 	Create Sales Invoice from Quotation, including only uninvoiced quantity
 	"""
 	sales_invoice = frappe.new_doc("Sales Invoice")	
+	
+	# PO NO Quotation to Sales Invoice #
+	sales_invoice.po_no = frappe.get_value("Quotation", source, "purchase_order_no") or ""
 
 	def filter_uninvoiced_items(source_doc):
 		# Include only items where invoiced_qty < qty

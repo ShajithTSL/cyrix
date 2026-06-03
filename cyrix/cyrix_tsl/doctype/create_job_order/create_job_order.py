@@ -137,6 +137,7 @@ def create_job_order_data(dict):
 
 		# check whether item_code exists or create new Item if needed
 		check_for_item(i,bg_less_image)
+		check_for_equipment(i) # check for equipment model and name
 		create_serial_no(i, doc)
 		qty = cint(i.get("qty") or 1)
 		for n in range(qty):
@@ -172,10 +173,13 @@ def create_job_order_data(dict):
 			jo.append("material_list",{
 				"item_code": i.get('item_code', ""),
 				"item_name":i.get('item_name', ""),
+				"description":i.get('description', ""),
 				"model_no":i.get('model', ""),
 				"mfg":i.get('manufacturer', ""),
 				"quantity":1,
-				"serial_no":i.get('serial_no', "")
+				"serial_no":i.get('serial_no', ""),
+				"equipment_model": i.get('equipment_model', ""),
+				"equipment_name": i.get('equipment_name', "")
 			})
 			if i.get("no_power"): jo.no_power = 1
 			if i.get("no_output"): jo.no_output = 1
@@ -231,6 +235,20 @@ def create_document_log(i, doctype, name):
 	doc.data = json.dumps(i, indent=4, ensure_ascii=False)
 	doc.save(ignore_permissions=True)
 
+def check_for_equipment(i):
+	if i.get("equipment_model") and i.get("manufacturer"):
+		equipment = frappe.db.exists("Item", {"model": i.get("equipment_model"), "mfg": i.get("manufacturer")})
+		if not equipment:
+			new_doc = frappe.new_doc("Item")
+			new_doc.model = i.get("equipment_model")
+			new_doc.mfg = i.get("manufacturer")
+			new_doc.item_name = i.get("equipment_name", "") or i.get("equipment_model")
+			new_doc.description = i.get("equipment_name", "") or i.get("equipment_model")
+			new_doc.item_group = "Equipments"
+			new_doc.stock_uom = "Nos"
+			new_doc.is_stock_item = 1
+			new_doc.save(ignore_permissions=True)
+
 def check_for_item(i,bg_less_image):
 
 	if i.get("ignore"):
@@ -244,7 +262,7 @@ def check_for_item(i,bg_less_image):
 			new_doc.item_group = i.get('item_group')
 		else:
 			new_doc.item_group = "Equipments"
-		new_doc.description = i.get('item_name')
+		new_doc.description = i.get('description', "")
 		new_doc.model = i.get('model')
 		new_doc.stock_uom = i.get('uom')
 		new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
@@ -270,7 +288,7 @@ def check_for_item(i,bg_less_image):
 					new_doc.item_group = i.get('item_group')
 				else:
 					new_doc.item_group = "Equipments"
-				new_doc.description = i.get('item_name')
+				new_doc.description = i.get('description', "")
 				new_doc.model = i.get('model')
 				new_doc.stock_uom = i.get('uom')
 				new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
@@ -288,7 +306,7 @@ def check_for_item(i,bg_less_image):
 				new_doc.item_group = i.get('item_group')
 			else:
 				new_doc.item_group = "Equipments"
-			new_doc.description = i.get('item_name', "")
+			new_doc.description = i.get('description', "")
 			new_doc.model = i.get('model', "")
 			new_doc.stock_uom = i.get('uom', "")
 			new_doc.image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i.get('attach_image') else ""
@@ -357,7 +375,7 @@ def create_stock_entry(i, doc, jo):
 			't_warehouse': doc.repair_warehouse,
 			'item_code':i['item_code'],
 			'item_name':i['item_name'],
-			'description':i['item_name'],
+			'description':i['description'],
 			'serial_number':i.get('serial_no', ""),
 			'qty':1,
 			'uom':frappe.db.get_value("Item",i['item_code'],'stock_uom') or "Nos",
@@ -393,6 +411,7 @@ def get_jo_details(jo):
 			"model_no": i.model_no,
 			"serial_no": i.serial_no,
 			"qty": i.quantity,
+			"description": i.description,
 			"sales_person": doc.sales_person,
 			"customer": doc.customer,
 			"incharge": doc.incharge,

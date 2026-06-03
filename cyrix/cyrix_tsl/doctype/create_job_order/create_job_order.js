@@ -352,3 +352,13 @@ frappe.ui.form.on("Create Job Order", {
 		});
 	},
 });
+
+frappe.ui.form.on("Received Equipment", {	
+	item_name: function(frm, cdt, cdn){
+		let row = locals[cdt][cdn]
+        if(row.item_name){
+            row.description = row.item_name
+            frm.refresh_field("received_equipment")
+        }
+    },
+})

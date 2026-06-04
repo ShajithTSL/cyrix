@@ -69,6 +69,7 @@ quotation_type = ["Customer Quotation - Repair","Customer Quotation - R - Revise
 				"Customer Quotation - Site Visit","Customer Quotation - SV - Revised",
 				"Customer Quotation - BQ", "Customer Quotation - MC", "Customer Quotation - MC - Revised"]
 
+
 def after_insert(doc,method):
 	if doc.quotation_type in internal_quotation_type:
 		doc.workflow_state = "Waiting For Approval"

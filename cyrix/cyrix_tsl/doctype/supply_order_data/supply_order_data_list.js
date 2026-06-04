@@ -66,9 +66,6 @@ frappe.listview_settings['Supply Order Data'] = {
         else if (doc.status === "Lost") {
                 return [__("Lost"), "green", "status,=,Lost"];
         }
-        else if (doc.priority_status == "Not Urgent") {
-                return [__("Not Urgent"), "gray", "priority_status=Not Urgent"];
-        }
         else if (doc.supply_status == "To Deliver") {
                 return [__("To Deliver"), "green", "supply_status=To Deliver"];
         }

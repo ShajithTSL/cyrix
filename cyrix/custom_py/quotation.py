@@ -800,7 +800,3 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 	)
 
 	return doclist
-
-from datetime import datetime
-def test():
-	print(datetime.now())

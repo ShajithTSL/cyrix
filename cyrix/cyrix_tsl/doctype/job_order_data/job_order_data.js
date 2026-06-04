@@ -7,6 +7,22 @@ frappe.ui.form.on("Job Order Data", {
 	},
 	
 	refresh(frm) {
+			if(frm.doc.docstatus == 1 ){
+			frm.add_custom_button(__("Request for Quotation"), function(){
+				frappe.call({
+					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_rfq_from_jo",
+					args: {
+						name: frm.doc.name
+					},
+					callback: function(r) {
+						if(r.message) {
+							var doc = frappe.model.sync(r.message);
+							frappe.set_route("Form", doc[0].doctype, doc[0].name);
+						}
+					}
+				});
+			},__('Create'));
+		}
 
 	// frm.set_df_property('item_price_details', 'hidden', 1);
 
@@ -72,6 +88,9 @@ frappe.ui.form.on("Job Order Data", {
         }
 
     });
+	// Request for Quotation option
+	
+
 }
         if(frm.doc.attach_image && frm.doc.docstatus == 1){
 			cur_frm.set_df_property("image", "options","<img src="+frm.doc.attach_image+">");

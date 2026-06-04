@@ -237,7 +237,7 @@ frappe.ui.form.on('Quotation', {
                     if (["Customer Quotation - S - Revised","Customer Quotation - Supply"].includes(frm.doc.quotation_type)){
                         var rev_type = "Customer Quotation - S - Revised"
                     }
-                    if(frm.doc.quotation_type == "Customer Quotation - Site Visit"){
+                    if (["Customer Quotation - Site Visit","Customer Quotation - SV - Revised"].includes(frm.doc.quotation_type)){
                         var rev_type = "Customer Quotation - SV - Revised"
                     }
                     if (["Customer Quotation - BQ","Customer Quotation - BQ - Revised"].includes(frm.doc.quotation_type)){

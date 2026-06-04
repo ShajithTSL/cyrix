@@ -194,6 +194,11 @@ doc_events = {
 		],
 	},
     "Quotation": {
+        "after_insert": [
+            "cyrix.custom_py.quotation.after_insert",
+            "cyrix.custom_py.quotation.update_job_order_status",
+            'cyrix.custom_py.quotation.update_budgetary_quotation_status'
+		],
 		"validate": [
             "cyrix.custom_py.quotation.fetch_item_price_details",
             "cyrix.custom_py.quotation.update_job_order_status",

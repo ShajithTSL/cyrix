@@ -53,11 +53,30 @@ naming_series = {
 	},
 }
 
+internal_quotation_type = ["Internal Quotation - Repair",
+						   "Internal Quotation - Supply",
+						   "Internal Quotation - BQ",
+						   "Internal Quotation - MC"]
+
+customer_quotation_type = ["Customer Quotation - Repair", "Customer Quotation - R - Revised",
+						   "Customer Quotation - Supply", "Customer Quotation - S - Revised",
+						   "Customer Quotation - Site Visit", "Customer Quotation - SV - Revised",
+						   "Customer Quotation - BQ", "Customer Quotation - BQ - Revised",
+						   "Customer Quotation - MC", "Customer Quotation - MC - Revised"]
+
 quotation_type = ["Customer Quotation - Repair","Customer Quotation - R - Revised",
 				"Customer Quotation - Supply","Customer Quotation - S - Revised",
 				"Customer Quotation - Site Visit","Customer Quotation - SV - Revised",
 				"Customer Quotation - BQ", "Customer Quotation - MC", "Customer Quotation - MC - Revised"]
 
+def after_insert(doc,method):
+	if doc.quotation_type in internal_quotation_type:
+		doc.workflow_state = "Waiting For Approval"
+		frappe.db.set_value(doc.doctype, doc.name, "workflow_state", "Waiting For Approval", update_modified=False)
+
+	if doc.quotation_type in customer_quotation_type:
+		doc.workflow_state = "Quoted to Customer"
+		frappe.db.set_value(doc.doctype, doc.name, "workflow_state", "Quoted to Customer", update_modified=False)
 
 def on_update_after_submit(doc,method):
 	if not doc.type_of_approval and doc.quotation_type in quotation_type and doc.docstatus == 1:
@@ -98,13 +117,13 @@ def update_job_order_status(self, method):
 			mc_doc.save(ignore_permissions=True)
 
 		for item in self.get("items"):
-			if self.quotation_type:
+			if self.quotation_type and self.workflow_state in ["Approved by Customer", "Approved by Management"]:
 				status = naming_series.get(self.quotation_type, {}).get(self.branch, {}).get("status")
 				if status:
 					update_status(self,item, status)
 		update_quotation_reference(self,method)
 
-	if method == "validate":
+	if method in ["validate", "after_insert"]:
 		for item in self.get("items"):
 			if self.quotation_type in ["Customer Quotation - Repair","Customer Quotation - R - Revised"]:
 				if self.workflow_state == "Quoted to Customer":
@@ -159,6 +178,9 @@ def update_budgetary_quotation_status(self, method):
 
 			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Customer":
 				doc.status = "A-Approved"
+
+			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Rejected by Customer":
+				doc.status = "Rejected"
 			doc.save(ignore_permissions=True)
 
 
@@ -679,7 +701,11 @@ def update_service_call_form(doc,method):
 		if doc. quotation_type == "Internal Quotation - Site Visit":
 			frappe.db.set_value("Service Call Form",doc.service_call_form,"status","Internally Quoted")
 		if doc. quotation_type in ["Customer Quotation - Site Visit","Customer Quotation - SV - Revised"]:
-			frappe.db.set_value("Service Call Form",doc.service_call_form,"status","Approved")
+			if doc.workflow_state == "Approved by Customer":
+				frappe.db.set_value("Service Call Form",doc.service_call_form,"status","Approved")
+			elif doc.workflow_state == "Rejected by Customer":
+				frappe.db.set_value("Service Call Form",doc.service_call_form,"status","Rejected")
+			# frappe.db.set_value("Service Call Form",doc.service_call_form,"status","Approved")
 
 @frappe.whitelist()
 def create_invoice_request(source,user, customer):

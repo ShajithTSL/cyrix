@@ -25,6 +25,9 @@ frappe.listview_settings['Budgetary Quotation'] = {
         else if (doc.status === "Partially Received") {
             return [__("Partially Received"), "red", "status,=,Partially Received"];
         }
+        else if (doc.status === "Rejected") {
+            return [__("Rejected"), "red", "status,=,Rejected"];
+        }
         else if (doc.status === "Received") {
             return [__("Received"), "yellow", "status,=,Received"];
         }

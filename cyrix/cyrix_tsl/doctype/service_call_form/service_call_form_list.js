@@ -23,7 +23,7 @@ frappe.listview_settings['Service Call Form'] = {
             return [__("Invoiced"), "green", "status,=,Invoiced"];
     	}
         else if (doc.status === "Rejected") {
-            return [__("Rejected"), "green", "status,=,Rejected"];
+            return [__("Rejected"), "red", "status,=,Rejected"];
         }
 		else if (doc.status === "Cancelled") {
             return [__("Cancelled"), "red", "status,=,Cancelled"];

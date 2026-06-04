@@ -294,7 +294,8 @@ def fetch_item_price_details(self, method=None):
 	fetch_previous_quotation_details(self, method)
 	fetch_price_from_eval_report(self, method)
 	fetch_supplier_details(self, method)
-
+	fetch_price_from_sq(self, method)
+	
 def fetch_price_from_eval_report(self, method):
 	if self.quotation_type != "Internal Quotation - Repair":
 		return
@@ -410,7 +411,96 @@ def fetch_price_from_eval_report(self, method):
 
 			self.total_actual_cost = float(round(total_material_cost + self.get("shipping_cost"), 2)) + total_price
 
+def fetch_price_from_sq(self, method):
+	if self.quotation_type != "Internal Quotation - Repair":
+		return
 
+	if not self.item_price_details:
+		self.item_price_details = []
+
+	self.item_price_details = []
+	self.parts_price = []
+	self.shipping_cost = 0.0
+
+	supplier_total = 0.0
+	total_price = 0.0
+
+	eval_list = []
+
+	for item in self.get("items"):
+		child_eval_list = fetch_eval_list(eval_list, item.job_order_data)
+		eval_list.extend(child_eval_list)
+
+	for job_order in set(eval_list):
+
+		sq_items = frappe.db.sql("""
+			SELECT
+				sqi.item_code,
+				sqi.qty,
+				sqi.rate,
+				sqi.amount,
+				sq.name AS supplier_quotation,
+				sq.supplier,
+				sq.shipping_cost,
+				sq.currency
+			FROM `tabSupplier Quotation Item` sqi
+			INNER JOIN `tabSupplier Quotation` sq
+				ON sq.name = sqi.parent
+			WHERE sq.docstatus = 1
+				AND sqi.job_order_data = %s
+			ORDER BY sq.modified DESC
+		""", (job_order), as_dict=True)
+
+		for row in sq_items:
+
+			# Add shipping cost
+			try:
+				exchange_rate = get_exchange_rate(
+					row.currency,
+					self.currency
+				)
+
+				self.shipping_cost += (
+					(row.shipping_cost or 0)
+					* exchange_rate
+				)
+
+			except Exception as e:
+				frappe.log_error(
+					f"Exchange rate fetch failed: {e}",
+					"Quotation Fetch Error"
+				)
+
+			self.append("item_price_details", {
+				"job_order_data": job_order,
+				"item": row.item_code,
+				"item_source": "Supplier",
+				"price": row.rate,
+				"amount": row.amount,
+				"supplier_quotation": row.supplier_quotation,
+				"supplier": row.supplier
+			})
+
+			supplier_total += row.amount or 0
+
+	# Technician Cost
+	if self.technician_hours_spent:
+		for hour in self.technician_hours_spent:
+			total_price += hour.total_price or 0
+
+	total_material_cost = supplier_total
+
+	self.append("parts_price", {
+		"tsl_inventory": 0,
+		"supplier": round(supplier_total, 2),
+		"scrap": 0,
+		"total_material_cost": round(total_material_cost, 2)
+	})
+
+	self.total_actual_cost = (
+		round(total_material_cost + self.shipping_cost, 2)
+		+ total_price
+	)
 def fetch_supplier_details(self, method):
 	if self.quotation_type == "Internal Quotation - Repair":
 		return

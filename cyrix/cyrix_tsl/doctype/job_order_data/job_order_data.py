@@ -690,3 +690,45 @@ def update_rfq():
 		# 	so_doc = frappe.get_doc("Supply Order Data", rfq.supply_order_data)
 		# 	frappe.db.set_value("Purchase Order Item", rfq.name, "branch", so_doc.branch, update_modified=False)
 		# frappe.db.set_value("Request for Quotation", rfq.name, "branch", "Kuwait", update_modified=False)
+
+@frappe.whitelist()
+def create_rfq_from_jo(name):
+	doc = frappe.get_doc("Job Order Data",name)
+	rfq = frappe.new_doc("Request for Quotation")
+	rfq.company = doc.company
+	rfq.branch = frappe.db.get_value("Job Order Data",doc.name,"branch")
+	rfq.job_order_data = doc.name
+	rfq.cost_center = frappe.db.get_value("Job Order Data",doc.name,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1})
+	# rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2)
+	rfq.items=[]
+	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
+	for i in doc.get("material_list"):
+		item = frappe.db.get_value(
+			"Item",
+			{"name": i.item_code},
+			["item_name", "description"],
+			as_dict=True
+		)
+
+		item_name = item.item_name if item else ""
+		description = item.description if item else ""			
+		rfq.append("items",{
+				"item_code":i.item_code,
+				"item_name":item_name,
+				"description":description,
+				'model':i.model_no,
+				"mfg":i.mfg,
+				"uom":"Nos",
+				"stock_uom":"Nos",
+				"conversion_factor":1,
+				"stock_qty":1,
+				"qty":1,
+				# "schedule_date":add_to_date(rfq.transaction_date,days = 2),
+				"warehouse":warehouse,
+				"branch":rfq.branch,
+				"parent_jo":doc.parent_jo,
+				"job_order_data":doc.name,
+				"cost_center":frappe.db.get_value("Job Order Data",doc.name,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1})
+			})
+
+	return rfq

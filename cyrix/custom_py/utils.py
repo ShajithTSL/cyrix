@@ -533,12 +533,13 @@ def item_import(import_file):
 # 			cus = frappe.db.exists("Customer", customer_name)
 
 # 			if not cus:
-# 				# similar = frappe.db.sql("""
-# 				# 	SELECT name
-# 				# 	FROM `tabCustomer`
-# 				# 	WHERE name LIKE %s
-# 				# 	LIMIT 300
-# 				# """, (f"%{customer_name}%",), as_dict=True)
+
+				# similar = frappe.db.sql("""
+				# 	SELECT name
+				# 	FROM `tabCustomer`
+				# 	WHERE name LIKE %s
+				# 	LIMIT 300
+				# """, (f"%{customer_name}%",), as_dict=True)
 
 # 				# if similar:
 # 				# 	for d in similar:

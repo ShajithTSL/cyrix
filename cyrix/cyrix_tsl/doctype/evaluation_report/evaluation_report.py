@@ -155,6 +155,11 @@ class EvaluationReport(Document):
 		if self.status == "Return Not Repaired":
 			if doc.status != "RNR-Return Not Repaired":
 				doc.status = "RNR-Return Not Repaired"
+			doc.save(ignore_permissions=True)	
+
+		if self.status == "RNP-Return No Parts":
+			if doc.status != "RNP-Return No Parts":
+				doc.status = "RNP-Return No Parts"
 			doc.save(ignore_permissions=True)		
 
 	def update_board_evaluation_status(self):

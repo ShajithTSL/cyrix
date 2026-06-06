@@ -645,6 +645,16 @@ def change_serial_number(job_order_data, row_name, new_serial_no):
 		for eval in eval_list:
 			frappe.db.set_value("Evaluation Item",{"parent":eval.name,"item":row.item_code,"serial_no":old_serial_no},"serial_no",new_serial_no)
 
+	# if there is no old serial number, just create a new one
+	elif new_serial_no:
+		sn_doc = frappe.new_doc("Serial Number")
+		sn_doc.item_code = row.item_code
+		sn_doc.status = "Active"
+		sn_doc.company = jod.company
+		sn_doc.serial_no = new_serial_no
+		sn_doc.save(ignore_permissions=True)
+
+		frappe.msgprint("Serial Number created successfully.")
 
 
 def update_jo_state():

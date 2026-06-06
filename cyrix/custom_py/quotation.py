@@ -327,6 +327,28 @@ def fetch_price_from_eval_report(self, method):
 		if not eval_doc:
 			continue
 
+		shipping_costs = frappe.db.sql("""
+			SELECT DISTINCT
+				sq.name,
+				sq.shipping_cost,
+				sq.currency
+			FROM `tabSupplier Quotation` sq
+			INNER JOIN `tabSupplier Quotation Item` sqi
+				ON sq.name = sqi.parent
+			WHERE sq.docstatus = 1
+			AND sqi.job_order_data = %s
+		""", (eval_doc.job_order_data,), as_dict=True)
+
+		for sq in shipping_costs:
+			try:
+				exchange_rate = get_exchange_rate(sq.currency, self.currency)
+				self.shipping_cost += (sq.shipping_cost or 0) * exchange_rate
+			except Exception as e:
+				frappe.log_error(
+					f"Exchange rate fetch failed: {e}",
+					"Quotation Fetch Error"
+				)
+
 		for eval_item in eval_doc.get("items"):
 			# Get full model name
 			eval_item.model = frappe.get_value("Item Model", {"name": eval_item.model}, "model")
@@ -351,13 +373,6 @@ def fetch_price_from_eval_report(self, method):
 					sq = sq_data[0]
 					supplier_quotation = sq.sq or ""
 					supplier = sq.supplier or ""
-
-					try:
-						exchange_rate = get_exchange_rate(sq.currency, self.currency)
-						if sq.spc:
-							self.shipping_cost += sq.spc * exchange_rate
-					except Exception as e:
-						frappe.log_error(f"Exchange rate fetch failed: {e}", "Quotation Fetch Error")
 
 			# Add to item_price_details
 			self.append("item_price_details", {
@@ -433,13 +448,42 @@ def fetch_price_from_sq(self, method):
 		eval_list.extend(child_eval_list)
 
 	for job_order in set(eval_list):
+		shipping_costs = frappe.db.sql("""
+			SELECT DISTINCT
+				sq.name,
+				sq.shipping_cost,
+				sq.currency
+			FROM `tabSupplier Quotation` sq
+			INNER JOIN `tabSupplier Quotation Item` sqi
+				ON sq.name = sqi.parent
+			WHERE sq.docstatus = 1
+			AND sqi.job_order_data = %s
+		""", (job_order,), as_dict=True)
+
+		for ship in shipping_costs:
+			try:
+				exchange_rate = get_exchange_rate(
+					ship.currency,
+					self.currency
+				)
+
+				self.shipping_cost += (
+					(ship.shipping_cost or 0)
+					* exchange_rate
+				)
+
+			except Exception as e:
+				frappe.log_error(
+					f"Exchange rate fetch failed for {ship.name}: {e}",
+					"Quotation Fetch Error"
+				)
 
 		sq_items = frappe.db.sql("""
 			SELECT
 				sqi.item_code,
 				sqi.qty,
-				sqi.rate,
-				sqi.amount,
+				sqi.base_rate,
+				sqi.base_amount,
 				sq.name AS supplier_quotation,
 				sq.supplier,
 				sq.shipping_cost,
@@ -454,35 +498,18 @@ def fetch_price_from_sq(self, method):
 
 		for row in sq_items:
 
-			# Add shipping cost
-			try:
-				exchange_rate = get_exchange_rate(
-					row.currency,
-					self.currency
-				)
-
-				self.shipping_cost += (
-					(row.shipping_cost or 0)
-					* exchange_rate
-				)
-
-			except Exception as e:
-				frappe.log_error(
-					f"Exchange rate fetch failed: {e}",
-					"Quotation Fetch Error"
-				)
-
 			self.append("item_price_details", {
 				"job_order_data": job_order,
 				"item": row.item_code,
 				"item_source": "Supplier",
-				"price": row.rate,
-				"amount": row.amount,
+				"model": frappe.db.get_value("Item", row.item_code, "model_num"),
+				"price": row.base_rate,
+				"amount": row.base_amount,
 				"supplier_quotation": row.supplier_quotation,
 				"supplier": row.supplier
 			})
 
-			supplier_total += row.amount or 0
+			supplier_total += row.base_amount or 0
 
 	# Technician Cost
 	if self.technician_hours_spent:

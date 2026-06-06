@@ -7,6 +7,12 @@
  "engine": "InnoDB",
  "field_order": [
   "details_tab",
+  "section_break_yt2d",
+  "quotation_status",
+  "column_break_uqdw",
+  "supplier_quotation_status",
+  "column_break_frpt",
+  "equipment_status",
   "summary_summary_section",
   "detail_html",
   "section_break_nbbx",
@@ -741,6 +747,41 @@
    "label": "Custom Status",
    "options": "\nUE-Under Evaluation\nUTR-Under Technician Repair\nRNA-Return Not Approved\nQ-Quoted\nA-Approved",
    "read_only_depends_on": "eval:!frappe.user.has_role(\"Info\")"
+  },
+  {
+   "fieldname": "section_break_yt2d",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "quotation_status",
+   "fieldtype": "Select",
+   "label": "Quotation Status",
+   "options": "\nPending Internal Approval\nIQ-Internally Quoted\nQ-Quoted\nA-Approved"
+  },
+  {
+   "fieldname": "column_break_uqdw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Not Priced",
+   "fieldname": "supplier_quotation_status",
+   "fieldtype": "Select",
+   "label": "Supplier Quotation Status",
+   "options": "\nNot Priced\nParts Priced"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "To Order",
+   "fieldname": "equipment_status",
+   "fieldtype": "Select",
+   "label": "Equipment Status",
+   "options": "\nTo Order\nPartially Ordered\nTo Receive and Deliver\nPartially Received\nTo Deliver\nPartially Delivered\nDelivered"
+  },
+  {
+   "fieldname": "column_break_frpt",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -753,7 +794,7 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2026-06-03 12:02:08.076589",
+ "modified": "2026-06-04 16:40:11.555984",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

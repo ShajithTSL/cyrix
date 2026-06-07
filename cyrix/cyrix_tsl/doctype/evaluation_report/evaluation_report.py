@@ -241,7 +241,7 @@ def check_for_shared_docs_on_evaluation(self):
 				doc.share_name = self.name
 				doc.read = 1
 				doc.write = 1
-				doc.save()
+				doc.save(ignore_permissions=True)
 
 @frappe.whitelist()
 def get_valuation_rate(item, warehouse, qty):

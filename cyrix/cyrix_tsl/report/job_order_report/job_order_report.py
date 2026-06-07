@@ -105,14 +105,50 @@ def get_quote_details(job_order_name):
 		return quote_details[0]
 	return {"quote_name": "", "quoted_date": "", "approval_type": "", "approval_date": "", "amount": 0}
 
+# def get_technician_names(job_order_name):
+# 	technicians = frappe.db.sql('''
+# 		SELECT t.technician AS technician_name
+# 		FROM `tabTechnician List` tl
+# 		JOIN `tabTechnician ID` t ON tl.technician = t.name
+# 		WHERE tl.parenttype = 'Job Order Data' AND tl.parent = %s
+# 	''', job_order_name, as_dict=True)
+# 	return ", ".join([tech.technician_name for tech in technicians])
+
 def get_technician_names(job_order_name):
-	technicians = frappe.db.sql('''
+	names = []
+
+	# Technician from Job Order Data
+	technician_id = frappe.db.get_value(
+		"Job Order Data",
+		job_order_name,
+		"technician"
+	)
+
+	if technician_id:
+		technician_name = frappe.db.get_value(
+			"Technician ID",
+			technician_id,
+			"technician"
+		)
+		if technician_name:
+			names.append(technician_name)
+
+	# Technicians from child table
+	technicians = frappe.db.sql("""
 		SELECT t.technician AS technician_name
 		FROM `tabTechnician List` tl
-		JOIN `tabTechnician ID` t ON tl.technician = t.name
-		WHERE tl.parenttype = 'Job Order Data' AND tl.parent = %s
-	''', job_order_name, as_dict=True)
-	return ", ".join([tech.technician_name for tech in technicians])
+		JOIN `tabTechnician ID` t
+			ON tl.technician = t.name
+		WHERE tl.parenttype = 'Job Order Data'
+		AND tl.parent = %s
+	""", job_order_name, as_dict=True)
+
+	names.extend([tech.technician_name for tech in technicians])
+
+	# Remove duplicates while preserving order
+	names = list(dict.fromkeys(filter(None, names)))
+
+	return ", ".join(names)
 
 def get_status_dates(job_order_name):
 	status_dates = {}

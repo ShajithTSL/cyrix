@@ -61,5 +61,9 @@ def get_data():
                 'label': _('Boards'),
                 'items': ['Job Order Data']
             },
+			{
+				'label': _(''),
+				'items': ['Supply Order Data']
+			}
 		]
 	}

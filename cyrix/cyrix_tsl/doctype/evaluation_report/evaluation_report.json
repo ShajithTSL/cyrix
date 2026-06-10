@@ -15,17 +15,17 @@
   "column_break_cilm",
   "date",
   "hours_spent",
-  "technician",
   "document_active_status",
   "ratehour",
+  "warehouse",
   "column_break_3",
   "company",
   "branch",
   "specify_1",
   "column_break_obvw",
+  "technician",
   "job_order_data",
   "parent_jo",
-  "warehouse",
   "section_break_7",
   "evaluation_details",
   "section_break_9",
@@ -133,11 +133,12 @@
    "label": "Hours Spent"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "technician",
    "fieldtype": "Link",
    "label": "Technician",
    "options": "Technician ID",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -630,7 +631,7 @@
  "is_submittable": 1,
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-06-02 15:15:26.615793",
+ "modified": "2026-06-10 08:35:34.478859",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Evaluation Report",

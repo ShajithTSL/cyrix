@@ -3,8 +3,12 @@
 
 frappe.ui.form.on("Evaluation Report", {
 
-	 
-    send(frm){
+	technician: function(frm){
+		if(frm.doc.technician){
+			frm.set_value("technician_id",frm.doc.technician)
+		}
+	},
+	send(frm){
          frappe.call({
 		method: "cyrix.custom_py.mail_notification.purchase_msg_to_info",
 		args: {

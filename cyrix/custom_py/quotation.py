@@ -543,7 +543,7 @@ def fetch_supplier_details(self, method):
 					`tabSupplier Quotation`.name,
 					`tabSupplier Quotation Item`.base_amount,
 					`tabSupplier Quotation Item`.supply_order_data AS reference,
-					`tabSupplier Quotation`.shipping_cost 
+					`tabSupplier Quotation`.base_total_taxes_and_charges
 				from `tabSupplier Quotation` 
 				join `tabSupplier Quotation Item` 
 				on `tabSupplier Quotation Item`.parent = `tabSupplier Quotation`.name 
@@ -557,7 +557,7 @@ def fetch_supplier_details(self, method):
 				if not cur:
 					frappe.throw("Please set the Default Currency for the Supplier")
 				exr = get_exchange_rate(cur, self.currency)
-				cost = sup[0]["shipping_cost"] * exr
+				cost = sup[0]["base_total_taxes_and_charges"]
 				total_cost += sup[0]["base_amount"]
 				row = {
 					'reference_type': "Supply Order Data",
@@ -576,19 +576,19 @@ def fetch_supplier_details(self, method):
 					`tabSupplier Quotation`.name,
 					`tabSupplier Quotation Item`.base_amount,
 					`tabSupplier Quotation Item`.budgetary_quotation AS reference,
-					`tabSupplier Quotation`.shipping_cost 
+					`tabSupplier Quotation`.base_total_taxes_and_charges
 				from `tabSupplier Quotation` 
 				join `tabSupplier Quotation Item` 
 				on `tabSupplier Quotation Item`.parent = `tabSupplier Quotation`.name 
 				where `tabSupplier Quotation Item`.budgetary_quotation = %s 
 				and `tabSupplier Quotation Item`.item_code = %s 
 				and `tabSupplier Quotation`.docstatus = 1
-			""", (j.budgetary_quotation, j.item_code), as_dict=1)
+			""", (j.budgetary_quotation,j.item_code), as_dict=1)
 
 			if sup_budgetary:
 				cur = frappe.get_value("Supplier", {"name": sup_budgetary[0]["supplier"]}, ["default_currency"])
 				exr = get_exchange_rate(cur, self.currency)
-				cost = sup_budgetary[0]["shipping_cost"] * exr
+				cost = sup_budgetary[0]["base_total_taxes_and_charges"]
 				total_cost += sup_budgetary[0]["base_amount"]
 				row = {
 					'reference_type': "Budgetary Quotation",
@@ -825,6 +825,12 @@ def update_service_call_form(doc,method):
 				frappe.db.set_value("Service Call Form",doc.service_call_form,"status","Rejected")
 			# frappe.db.set_value("Service Call Form",doc.service_call_form,"status","Approved")
 
+
+# def update_mc(doc,method):
+	# if doc.service_call_form:
+		# if doc.quotation_type == "Customer Quotation - MC":
+			# if doc.maintenance_contract:
+				
 @frappe.whitelist()
 def create_invoice_request(source,user, customer):
 	new_doc = frappe.new_doc("Invoice Request")

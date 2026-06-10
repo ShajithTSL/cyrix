@@ -372,8 +372,22 @@ frappe.ui.form.on('Quotation', {
                             },
                             callback: function(r) {
                                 if(r.message) {
-                                    console.log(r.message)
-                                    frm.set_value("items",r.message[0])
+                                    $.each(r.message[0], function(i, j) {
+                                        let row = frm.add_child("items");
+
+                                        row.item_code = j.item_code;
+                                        row.description = j.description;
+                                        row.item_name = j.item_name;
+                                        row.job_order_data = j.job_order_data;
+                                        row.mfg = j.mfg;
+                                        row.model = j.model;
+
+                                        // Add other fields as needed
+                                        row.qty = j.qty;
+                                        row.uom = j.uom;
+                                    });
+
+                                    frm.refresh_field("items");
                                     frm.set_value("quotation_type","Internal Quotation - Repair")
                                     frm.set_value("branch",r.message[1])
                                     frm.set_value("technician_hours_spent",r.message[3])

@@ -171,7 +171,7 @@ def create_evaluation_report(doc_no):
 		"sales_person": "attn",
 		"name": "job_order_data",
 		"attach_image": "attach_image",
-		"technician": "technician",
+		# "technician": "technician",
 		"parent_jo": "parent_jo",
 		"branch": "branch",
 		"repair_warehouse": "warehouse",
@@ -322,18 +322,7 @@ def create_internal_quotation(job_order_data, pre_evaluation, customer,replaceme
 	
 	update_tech_hours(new_doc, job_order_data)
 	fetch_item_price_details(new_doc,method="validate")
-	# if replacement:
-	# 	for i in doc.item_price_details:
-	# 		new_doc.append("item_price_details",{
-	# 		"supplier":i.supplier,
-	# 		"price": i.price,
-	# 		"amount":i.amount,
-	# 		"job_order_data":i.job_order_data,
-	# 		"item":i.item,
-	# 		"model":i.model,
-	# 		"item_source":i.item_source,
-	# 		"supplier_quotation":i.supplier_quotation
-	# 		})
+	
 
 	return new_doc
 
@@ -742,3 +731,59 @@ def create_rfq_from_jo(name):
 			})
 
 	return rfq
+
+# Create Supply Order Data from Job Order Data
+@frappe.whitelist()
+def create_supply_order_data(job_order_data):
+	
+	so_naming_series = {
+		"Dammam": {
+			"Supply":"SO-D.YY.-",
+			"tender":"ST-D.YY.-"
+		},
+		"Riyadh": {
+			"Supply":"SO-R.YY.-",
+			"tender":"ST-R.YY.-"
+		},
+		"Jeddah": {
+			"Supply":"SO-J.YY.-",
+			"Tender":"ST-J.YY.-"
+		},
+		"Kuwait": {
+			"Supply":"SO-K.YY.-",
+			"Tender":"ST-K.YY.-"
+		},
+		"Dubai": {
+			"Supply":"SO-DU.YY.-",
+			"Tender":"ST-DU.YY.-"
+		},
+	}
+	doc = frappe.get_doc("Job Order Data", job_order_data)
+	so = frappe.new_doc("Supply Order Data")
+	so.naming_series = so_naming_series[doc.branch]["Supply"]
+	so.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_supply":1}) or ""
+	so.customer = doc.customer
+	so.customer_name = doc.customer_name
+	so.document_type = "Supply"
+	so.sales_person = doc.sales_person
+	so.incharge = doc.incharge
+	if doc.priority_status == "Normal":
+		so.priority_status = "Not Urgent"
+	else:
+		so.priority_status = doc.priority_status
+	so.branch = doc.branch
+	so.job_order_data = doc.name
+	so.warehouse = frappe.db.get_value('Warehouse', {'is_repair_warehouse':0,'company':doc.company,"name":["like","%"+doc.branch+"%"]}, 'name')
+	for i in doc.get("material_list"):
+		so.append("material_list",{
+			"item_code": i.get('item_code'),
+			"item_name":i.get('item_name'),
+			"item_group":frappe.db.get_value("Item",i.get('item_code'),"item_group"),
+			"unit": frappe.db.get_value("Item",i.get('item_code'),"stock_uom"),
+			"description":i.get('description') or i.get('item_name'),
+			"model_no":i.get('model_no', ""),
+			"mfg":i.get('mfg'),
+			"quantity":i.get('quantity', 0),
+		})
+
+	return so

@@ -45,13 +45,14 @@ def update_supply_order_status(doc, method):
 
         if not found:
             frappe.throw(f"Item {i.item_code} not found in Supply Order Table for {i.supply_order_data}")
+
         if supply_order_doc.payment_entry and supply_order_doc.invoice_no:
             status = "Paid"
         elif not supply_order_doc.payment_entry and not supply_order_doc.invoice_no:
             if supply_order_doc.quantity == supply_order_doc.delivered_quantity:
                 status = "Delivered"
-            # else:
-            #     status = "Partially Delivered"
+            else:
+                status = "Partially Delivered"
         elif supply_order_doc.invoice_no:
             status = "Invoiced"
         else:

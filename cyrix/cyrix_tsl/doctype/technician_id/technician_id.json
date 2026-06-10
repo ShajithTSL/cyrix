@@ -11,7 +11,8 @@
   "technician",
   "user_email",
   "column_break_adoo",
-  "id"
+  "id",
+  "branch"
  ],
  "fields": [
   {
@@ -41,12 +42,18 @@
    "in_standard_filter": 1,
    "label": "User Email",
    "options": "User"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-26 09:42:16.676910",
+ "modified": "2026-06-10 08:53:41.138213",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technician ID",

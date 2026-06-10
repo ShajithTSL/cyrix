@@ -291,31 +291,31 @@ def get_sales_team_multiple(party):
 
 
 
-@frappe.whitelist()
-def create_replacement_item(customer,wod,items):
-	from datetime import date
-	today = date.today()
-	wd = frappe.new_doc("Replacement Unit")
-	wd.name = wod
+# @frappe.whitelist()
+# def create_replacement_item(customer,wod,items):
+# 	from datetime import date
+# 	today = date.today()
+# 	wd = frappe.new_doc("Replacement Unit")
+# 	wd.name = wod
 	
-	doclist = get_mapped_doc("Job Order Data",wod, {
-	"Job Order Data": {
-		"doctype": "Job Order Data",	
-	},
-	},wd)
+# 	doclist = get_mapped_doc("Job Order Data",wod, {
+# 	"Job Order Data": {
+# 		"doctype": "Job Order Data",	
+# 	},
+# 	},wd)
 	
-	wd.posting_date = today
-	for i in doclist.get('material_list'):		
-		i.serial_no = ""
-	wd.status = "Inquiry"
-	wd.status_duration_details = []
-	wd.append("status_duration_details",{
-		"status":wd.status,
-		"date":datetime.now(),
-	})
-	wd.save(ignore_permissions =True)
-	wd.submit()
-	frappe.msgprint("Replacement Unit Created")
+# 	wd.posting_date = today
+# 	for i in doclist.get('material_list'):		
+# 		i.serial_no = ""
+# 	wd.status = "Inquiry"
+# 	wd.status_duration_details = []
+# 	wd.append("status_duration_details",{
+# 		"status":wd.status,
+# 		"date":datetime.now(),
+# 	})
+# 	wd.save(ignore_permissions =True)
+# 	wd.submit()
+# 	frappe.msgprint("Replacement Unit Created")
 
 	# w = frappe.get_doc("Job Order Data",wod)
 	# st = frappe.new_doc("Stock Entry")
@@ -389,7 +389,7 @@ def create_replacement_item(customer, wod, items, release_stock=0):
 	})
 
 	wd.save(ignore_permissions=True)
-	# wd.submit()
+	wd.submit()
 
 	# 🔹 Only create Stock Entry if user confirmed
 	if int(release_stock) == 1:
@@ -436,7 +436,7 @@ def create_replacement_item(customer, wod, items, release_stock=0):
 				})
 
 		st.save(ignore_permissions=True)
-		# st.submit()
+		st.submit()
 
 	frappe.msgprint("Replacement Unit Created")
 	return "Success"

@@ -4,6 +4,8 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.core.doctype.communication.email import make
 from frappe.utils import now
 from frappe import _
+from frappe.core.doctype.communication.email import _make as make_communication
+
 
 def on_cancel(self, method):
     for i in self.get("items"):
@@ -151,39 +153,54 @@ def get_sq_details(so):
 
 def get_sq_details1():
 
-    data = frappe.db.sql("""
-    SELECT
-        sq.name,
-        sq.currency,
-        sq.supplier,
-        sq.shipping_cost,
-        sq.grand_total,
+    sq_data = frappe.db.sql("""
+        SELECT
+            sq.name,
+            sq.currency,
+            sq.supplier,
+            sq.shipping_cost,
+            sq.grand_total,
 
-        sqi.item_code,
-        sqi.qty,
-        sqi.rate,
-        sqi.amount,
-        sqi.model_number  model,
-        sqi.item_name,
-
-        ptc.description,
-        ptc.tax_amount
+            sqi.item_code,
+            sqi.qty,
+            sqi.rate,
+            sqi.amount,
+            sqi.model_number AS model,
+            sqi.item_name
 
         FROM `tabSupplier Quotation` sq
-
         LEFT JOIN `tabSupplier Quotation Item` sqi
             ON sqi.parent = sq.name
-
-        LEFT JOIN `tabPurchase Taxes and Charges` ptc
-            ON ptc.parent = sq.name
-
         WHERE sq.supply_order_data = %s
+        ORDER BY sq.name
+    """, ('SO-DU26-02839',), as_dict=True)
 
-        ORDER BY sq.name, ptc.idx
-        """, ('SO-R26-11468',), as_dict=True)
-    
+    tax_data = frappe.db.sql("""
+        SELECT
+            parent,
+            charge_type,
+            account_head,
+            description,
+            rate,
+            tax_amount,
+            total,
+            base_tax_amount,
+            base_total
+        FROM `tabPurchase Taxes and Charges`
+        WHERE parent IN (
+            SELECT name
+            FROM `tabSupplier Quotation`
+            WHERE supply_order_data = %s
+        )
+        ORDER BY parent, idx
+    """, ('SO-DU26-02839',), as_dict=True)
 
-    print(data)
+    frappe.errprint(tax_data)
+
+    return {
+        "items": sq_data,
+        "taxes": tax_data
+    }
 
 
 @frappe.whitelist()
@@ -194,9 +211,28 @@ def update_so_status(self,method):
         if br_info:
             info = br_info
     if self.supply_order_data and self.workflow_state == "On Review":
-        so = frappe.get_doc("Supply Order Data",self.supply_order_data)
-        so.status = "Supplier Quoted"
-        so.save(ignore_permissions = 1)
+
+        quotation_exists = frappe.db.sql("""
+        SELECT q.name
+        FROM `tabQuotation Item` qi
+        INNER JOIN `tabQuotation` q
+            ON q.name = qi.parent
+        WHERE qi.supply_order_data = %s
+          AND q.quotation_type IN ('Customer Quotation - Supply')
+        LIMIT 1
+        """, (self.supply_order_data,))
+
+        if not quotation_exists:
+            so = frappe.get_doc("Supply Order Data", self.supply_order_data)
+            so.status = "Supplier Quoted"
+            so.save(ignore_permissions=True)
+
+
+
+        # so = frappe.get_doc("Supply Order Data",self.supply_order_data)
+        
+        # so.status = "Supplier Quoted"
+        # so.save(ignore_permissions = 1)
 
         
        
@@ -244,56 +280,113 @@ def update_so_status(self,method):
 
         frappe.msgprint("Purchaser notified successfully")
    
+# @frappe.whitelist()
+# def update_so(self,method):
+#     info = ""
+#     if self.branch:
+#         br_info = frappe.get_value("Branch",self.branch,"customer_support")
+#         if br_info:
+#             info = br_info
+
+#     if self.supply_order_data and self.workflow_state == "Notified":
+#         so = frappe.get_doc("Supply Order Data",self.supply_order_data)
+#         subject = f"Supplier Quotation Created - {self.name}"
+#         message = f"""
+#             Dear Info,
+
+#             <br><br>
+
+#             Supplier quotation <b>{self.name}</b> has been created.
+
+#             <br><br>
+
+#             <b>Supplier :</b> {self.supplier}<br>
+#             <b>Grand Total :</b> {self.grand_total}
+
+#             <br><br>
+
+#             Regards,<br>
+#             ERP System
+#         """
+
+#         make_communication(
+#             communication_type="Communication",
+#             communication_medium="Email",
+#             sent_or_received="Sent",
+#             subject=subject,
+#             content=message,
+#             sender=frappe.session.user,
+#             recipients="support@cyrix-tsl.com",
+#             reference_doctype=self.doctype,
+#             reference_name=self.name
+#         )
+
+#         frappe.sendmail(
+#             recipients=[info],
+#             subject=subject,
+#             message=message
+#         )
+#         frappe.msgprint("Purchaser notified successfully")
+
+
+import frappe
+from frappe.core.doctype.communication.email import make
+
 @frappe.whitelist()
-def update_so(self,method):
+def update_so(self, method):
     info = ""
+
     if self.branch:
-        br_info = frappe.get_value("Branch",self.branch,"customer_support")
+        br_info = frappe.get_value("Branch", self.branch, "customer_support")
         if br_info:
             info = br_info
 
     if self.supply_order_data and self.workflow_state == "Notified":
-        so = frappe.get_doc("Supply Order Data",self.supply_order_data)
-        
+
+        subject = f"Supplier Quotation Created - {self.name}"
+
         message = f"""
-            Dear Info,
+        Dear Info,
 
-            <br><br>
+        <br><br>
 
-            Supplier quotation <b>{self.name}</b> has been created.
+        Supplier quotation <b>{self.name}</b> has been created.
 
-            <br><br>
+        <br><br>
 
-            <b>Supplier :</b> {self.supplier}<br>
-            <b>Grand Total :</b> {self.grand_total}
+        <b>Supplier :</b> {self.supplier}<br>
+        <b>Grand Total :</b> {self.grand_total}
 
-            <br><br>
+        <br><br>
 
-            Regards,<br>
-            ERP System
+        Regards,<br>
+        ERP System
         """
 
-        make_communication(
-            communication_type="Communication",
-            communication_medium="Email",
-            sent_or_received="Sent",
-            subject=subject,
-            content=message,
-            sender=frappe.session.user,
-            recipients="support@cyrix-tsl.com",
-            reference_doctype=self.doctype,
-            reference_name=self.name
-        )
+        # Create Communication
+        comm = frappe.get_doc({
+            "doctype": "Communication",
+            "communication_type": "Communication",
+            "communication_medium": "Email",
+            "sent_or_received": "Sent",
+            "subject": subject,
+            "content": message,
+            "sender": frappe.session.user,
+            "recipients": info,
+            "reference_doctype": self.doctype,
+            "reference_name": self.name
+        })
+        comm.insert(ignore_permissions=True)
 
-        frappe.sendmail(
-            recipients=[info],
-            subject=subject,
-            message=message
-        )
-        frappe.msgprint("Purchaser notified successfully")
+        # Send Email
+        if info:
+            frappe.sendmail(
+                recipients=[info],
+                subject=subject,
+                message=message
+            )
 
-
-
+        frappe.msgprint("Notified successfully")
     
 
          

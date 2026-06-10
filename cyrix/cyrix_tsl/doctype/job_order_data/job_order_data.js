@@ -8,6 +8,20 @@ frappe.ui.form.on("Job Order Data", {
 	
 	refresh(frm) {
 			if(frm.doc.docstatus == 1 ){
+					frm.add_custom_button(__("Technical Report"), function(){
+						frappe.call({
+							method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.create_technical_report",
+							args: {
+								name: frm.doc.name
+							},
+							callback: function(r) {
+								if(r.message) {
+									var doc = frappe.model.sync(r.message);
+									frappe.set_route("Form", doc[0].doctype, doc[0].name);
+								}
+							}
+						});
+					},__('Create'));
 			frm.add_custom_button(__("Request for Quotation"), function(){
 				frappe.call({
 					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_rfq_from_jo",
@@ -50,8 +64,25 @@ frappe.ui.form.on("Job Order Data", {
         });
 
 
-	if (frm.doc.status == "Replace") {
-    frm.add_custom_button(__('Create Replacement'), function () {
+	if (frm.doc.status == "Replace" || frm.doc.status == "RNR-Return Not Repaired" || frm.doc.status == "RNP-Return No Parts") {
+		
+		// create Supply Order Data button
+		frm.add_custom_button(__("Supply Order Data"), function(){
+			frappe.call({
+				method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_supply_order_data",
+				args: {
+					"job_order_data": frm.doc.name
+				},
+				callback: function(r) {
+					if(r.message) {
+						var doc = frappe.model.sync(r.message);
+						frappe.set_route("Form", doc[0].doctype, doc[0].name);
+					}
+				}
+			});
+		},__('Create'));
+
+	frm.add_custom_button(__('Replacement Unit'), function () {
 
         frappe.confirm(
             __('Do you want to release stock for this Replacement?'),
@@ -87,7 +118,7 @@ frappe.ui.form.on("Job Order Data", {
             });
         }
 
-    });
+    },__('Create'));
 	// Request for Quotation option
 	
 

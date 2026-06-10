@@ -58,10 +58,28 @@ frappe.ui.form.on("Supply Order Data", {
 						grand_total: row.grand_total,
 						shipping_cost: row.shipping_cost,
 						terms: row.terms,
-						items: {}
+						items: {},
+						taxes: []
 					};
 				}
-
+				if (row.description) {
+						suppliers[row.name].taxes.push({
+							description: row.description,
+							tax_amount: row.tax_amount
+						});
+					}
+				if (
+					row.description &&
+					!suppliers[row.name].taxes.some(
+						t => t.description === row.description &&
+							t.tax_amount === row.tax_amount
+					)
+				) {
+					suppliers[row.name].taxes.push({
+						description: row.description,
+						tax_amount: row.tax_amount
+					});
+				}
 				// Store item against supplier
 					suppliers[row.name].items[row.item_code] = {
 					qty: row.qty,
@@ -318,7 +336,32 @@ else {
 			</div>
 		`;
 		});
+		// Tax Table
+		if (s.taxes && s.taxes.length) {
 
+			html += `
+				<div style="padding:10px;border-top:1px solid #ddd;">
+					<div style="font-weight:600;margin-bottom:6px;">
+						Taxes & Charges
+					</div>
+			`;
+
+			s.taxes.forEach(tax => {
+				html += `
+					<div style="
+						display:flex;
+						justify-content:space-between;
+						font-size:12px;
+						margin-bottom:4px;
+					">
+						<span>${tax.description || ""}</span>
+						<span>${format_currency(tax.tax_amount || 0, s.currency)}</span>
+					</div>
+				`;
+			});
+
+			html += `</div>`;
+		}
 		// summary
 		html += `
 			<div style="padding:10px;background:#f9fafb;">

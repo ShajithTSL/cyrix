@@ -12,7 +12,8 @@ NO_REPLY_EMAIL = "no-reply@cyrix-tsl.com"
 base_url = frappe.utils.get_url()
 warehouse_list = {
 	"Kuwait": "Kuwait - CT-K",
-	"Riyadh":"Riyadh - BM"
+	"Riyadh":"Riyadh - BM",
+	"Jeddah":"Jeddah - BM"
 }
 
 
@@ -494,7 +495,8 @@ def create_stock_entry(evaluation, items):
 
 	branch_map = {
 		"Kuwait": ("Kuwait - CT-K", "Kuwait - Repair - CT-K"),
-		"Riyadh": ("Riyadh - BM", "Riyadh - Repair - BM")
+		"Riyadh": ("Riyadh - BM", "Riyadh - Repair - BM"),
+		"Jeddah": ("Jeddah - BM", "Jeddah - Repair - BM")
 	}
 
 	war, cc = branch_map.get(doc.branch, ("", ""))

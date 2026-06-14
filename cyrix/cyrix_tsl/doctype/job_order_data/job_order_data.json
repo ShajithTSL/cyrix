@@ -39,6 +39,7 @@
   "column_break_cwfo",
   "unit_type",
   "unit_status",
+  "receive_unit",
   "technician",
   "multiple_technicians",
   "parent_jo",
@@ -730,7 +731,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Unit Status",
-   "options": "\nIn Lab\nWith Customer",
+   "options": "\nYet to be Received\nIn Lab\nWith Customer",
    "read_only": 1
   },
   {
@@ -740,6 +741,12 @@
    "label": "Custom Status",
    "options": "\nUE-Under Evaluation\nUTR-Under Technician Repair\nRNA-Return Not Approved\nQ-Quoted\nA-Approved\nReplace\nRNR-Return Not Repaired\nC-Cancelled",
    "read_only_depends_on": "eval:!frappe.user.has_role(\"Info\")"
+  },
+  {
+   "depends_on": "eval:doc.unit_status == \"Yet to be Received\"",
+   "fieldname": "receive_unit",
+   "fieldtype": "Button",
+   "label": "Receive Unit"
   }
  ],
  "grid_page_length": 50,

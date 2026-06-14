@@ -42,20 +42,22 @@ class JobOrderData(Document):
 
 	def set_unit_status(self):
 
-		if not self.delivery:
-			unit_status = "In Lab"
+		if self.unit_status not in ["Yet to be Received"]:
 
-		elif not self.returned_date:
-			unit_status = "With Customer"
+			if not self.delivery:
+				unit_status = "In Lab"
 
-		elif self.delivery >= self.returned_date:
-			unit_status = "With Customer"
+			elif not self.returned_date:
+				unit_status = "With Customer"
 
-		else:
-			unit_status = "In Lab"
+			elif self.delivery >= self.returned_date:
+				unit_status = "With Customer"
 
-		self.unit_status = unit_status
-		frappe.db.set_value("Job Order Data", self.name, "unit_status", unit_status, update_modified=False)
+			else:
+				unit_status = "In Lab"
+
+			self.unit_status = unit_status
+			frappe.db.set_value("Job Order Data", self.name, "unit_status", unit_status, update_modified=False)
 
 	def after_insert(self):
 		if self.get("maintenance_contract"):
@@ -789,3 +791,55 @@ def create_supply_order_data(job_order_data):
 		})
 
 	return so
+
+@frappe.whitelist()
+def create_received_unit(job_order_data, serial_number, attach_image):
+	if attach_image:
+		frappe.db.set_value("Job Order Data", job_order_data,"attach_image",attach_image.replace(" ","%20"), update_modified = False)
+	doc = frappe.get_doc("Job Order Data",job_order_data)
+	se_doc = frappe.new_doc("Stock Entry")
+	se_doc.stock_entry_type = "Material Receipt"
+	se_doc.company = doc.company
+	se_doc.branch = doc.branch
+	se_doc.to_warehouse = doc.repair_warehouse
+	se_doc.job_order_data = doc.name
+	for i in doc.material_list:
+		if serial_number:
+			s_number = frappe.db.exists("Serial Number",{"name":serial_number})
+			if s_number:
+				sn_doc = frappe.get_doc("Serial Number",serial_number)
+				sn_doc.item_code = i.item_code
+				sn_doc.status = "Active"
+				sn_doc.save()
+				
+			else:
+				sn_doc = frappe.new_doc("Serial Number")
+				sn_doc.serial_no = serial_number
+				sn_doc.item_code = i.item_code
+				sn_doc.company = doc.company
+				sn_doc.status = "Active"
+				sn_doc.save(ignore_permissions=True)
+				frappe.db.set_value('Material List',{'name':i.name,"parenttype":"Job Order Data"},"serial_no",sn_doc.name, update_modified = False)
+
+		se_doc.append("items",{
+			't_warehouse': doc.repair_warehouse,
+			'item_code':i.item_code,
+			'item_name':i.item_name,
+			'description':i.description,
+			'serial_number':i.get('serial_no') or serial_number,
+			'qty':1,
+			'uom':frappe.db.get_value("Item",i.item_code,'stock_uom') or "Nos",
+			'branch':doc.branch,
+			'cost_center':frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or "",
+			'job_order_data':doc.name,
+			'conversion_factor':1,
+			'allow_zero_valuation_rate':1
+		})
+	se_doc.save(ignore_permissions = True)
+	if se_doc.name:
+		try:
+			se_doc.submit()
+			frappe.db.set_value("Job Order Data",job_order_data,"unit_status","In Lab", update_modified = False)
+		except Exception as e:
+			frappe.log_error(frappe.get_traceback())
+		pass

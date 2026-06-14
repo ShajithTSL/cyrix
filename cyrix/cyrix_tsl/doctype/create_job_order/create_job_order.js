@@ -165,7 +165,6 @@ frappe.ui.form.on("Create Job Order", {
         else{
             // If job_order_data does not exist Create a New Job Order
 			frm.add_custom_button(__("Create Job Order"), function () {
-
 				let has_empty_complaint = false;
 
 				(frm.doc.received_equipment || []).forEach(row => {
@@ -177,7 +176,7 @@ frappe.ui.form.on("Create Job Order", {
 						!row.no_display &&
 						!row.no_communication &&
 						!row.supply_voltage &&
-						!row.touch_keypad_not_working &&
+						!row.touchkeypad_not_working &&
 						!row.no_backlight &&
 						!row.error_code &&
 						!row.short_circuit &&
@@ -229,7 +228,6 @@ frappe.ui.form.on("Create Job Order", {
 
 					create_job_order();
 				}
-
 			});
 			frm.remove_custom_button(__("Update Job Order")); // Remove the "Update Job Order" button since it's not applicable yet
         }

@@ -757,6 +757,23 @@ def get_supply_order_data(supply_order_data):
 	return item_list,branch,customer
 
 @frappe.whitelist()
+def get_approved_internal_quote(quotation):
+	quotation = frappe.parse_json(quotation)
+
+	item_list = []
+
+	for quotation_name in quotation:
+		doc = frappe.get_doc("Quotation", quotation_name)
+
+		item_list.extend([frappe._dict(row.as_dict()) for row in doc.items])
+
+	return {
+		"items": item_list,
+		"branch": doc.branch,
+		"customer": doc.party_name
+	}
+
+@frappe.whitelist()
 def create_sales_invoice(source, customer):
 	
 	"""

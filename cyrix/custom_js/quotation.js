@@ -334,6 +334,41 @@ frappe.ui.form.on('Quotation', {
                         d.show();
                     }, ('Create'))
 			    }			
+            },
+            () => {
+                if (frm.doc.docstatus === 0 && ["Customer Quotation - Repair", "Customer Quotation - R - Revised",
+						   "Customer Quotation - Supply", "Customer Quotation - S - Revised",
+						   "Customer Quotation - Site Visit", "Customer Quotation - SV - Revised",
+						   "Customer Quotation - BQ", "Customer Quotation - BQ - Revised",
+						   "Customer Quotation - MC", "Customer Quotation - MC - Revised"].includes(frm.doc.quotation_type)) {
+                    frm.add_custom_button(__('Approved Internal'),function() {
+                        new frappe.ui.form.MultiSelectDialog({
+                            doctype: "Quotation",
+                            target: frm,
+                            setters: {
+                                party_name:frm.doc.party_name,
+                                workflow_state:'Approved By Management'
+                            },
+                            
+                            add_filters_group: 1,
+                            action(selections) {
+                                frappe.call({
+                                    method: "cyrix.custom_py.quotation.get_approved_internal_quote",
+                                    args: {
+                                        "quotation": selections
+                                    },
+                                    callback: function(r) {
+                                        if(r.message) {
+                                            console.log(r.message.items)
+                                            frm.set_value("items",r.message.items)
+                                        }
+                                    }
+                                });
+                                cur_dialog.hide();
+                            }
+                        });
+                    }, __("Get Items From"), "btn-default");
+                }
             }
         ]);
     },

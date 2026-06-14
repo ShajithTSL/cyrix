@@ -31,6 +31,7 @@
   "maintenance_contract",
   "column_break_3",
   "unit_type",
+  "unit_status",
   "sales_person_name",
   "suggested_price",
   "customer_reference_number",
@@ -293,6 +294,13 @@
    "label": "Parent Customer",
    "options": "Customer",
    "read_only": 1
+  },
+  {
+   "description": "Note: If the Unit is not received. Select <b style=\"color:red;\">Yet to be Received</b>",
+   "fieldname": "unit_status",
+   "fieldtype": "Select",
+   "label": "Unit Status",
+   "options": "In Lab\nYet to be Received"
   }
  ],
  "grid_page_length": 50,
@@ -300,7 +308,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-31 08:15:58.275860",
+ "modified": "2026-06-14 15:59:25.005328",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Job Order",

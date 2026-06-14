@@ -28,6 +28,8 @@ def get_columns():
 		{"label": _("MFG"), "fieldname": "mfg", "fieldtype": "Data", "width": 100},
 		{"label": _("Model No"), "fieldname": "model_no", "fieldtype": "Data", "width": 140},
 		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 180},
+		{"label": _("Equipment Model"), "fieldname": "equipment_model", "fieldtype": "Data", "width": 180},
+		{"label": _("Equipment Name"), "fieldname": "equipment_name", "fieldtype": "Data", "width": 180},
 		{"label": _("Quantity"), "fieldname": "quantity", "fieldtype": "Float", "width": 100},
 		{"label": _("Customer"), "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 100},
 		{"label": _("Customer Reference"), "fieldname": "customer_reference", "fieldtype": "Data", "width": 200},
@@ -69,6 +71,8 @@ def get_data(filters):
 				"mfg": material.mfg,
 				"model_no": frappe.db.get_value("Item Model", material.model_no, "model"),
 				"item_name": material.item_name,
+				"equipment_model": material.equipment_model,
+				"equipment_name": material.equipment_name,
 				"quantity": material.quantity,
 				"customer": order.customer if first_row else "",
 				"customer_reference": order.customer_reference_number if first_row else "",
@@ -109,7 +113,7 @@ def get_supply_order_materials(order_name):
 	"""Fetch materials linked to a Supply Order."""
 	return frappe.db.sql(
 		"""
-		SELECT mfg, model_no, quantity, item_name, parent as quote_name
+		SELECT mfg, model_no, quantity, item_name, parent as quote_name,equipment_model,equipment_name
 		FROM `tabSupply Order Table`
 		WHERE parent = %s
 		""",

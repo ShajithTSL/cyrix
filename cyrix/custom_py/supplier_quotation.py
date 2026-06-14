@@ -258,7 +258,7 @@ def update_so_status(self,method):
         INNER JOIN `tabQuotation` q
             ON q.name = qi.parent
         WHERE qi.supply_order_data = %s
-          AND q.quotation_type IN ('Customer Quotation - Supply')
+          AND q.quotation_type IN ('Customer Quotation - Supply','Internal Quotation - Supply')
         LIMIT 1
         """, (self.supply_order_data,))
 
@@ -301,7 +301,7 @@ def update_so_status(self,method):
             "reference_doctype": self.doctype,
             "reference_name": self.name,
             "sender": frappe.session.user,
-            "recipients": "support@cyrix-tsl.com"
+            "recipients": info
         }).insert(ignore_permissions=True)
 
         # Send Email
@@ -311,14 +311,76 @@ def update_so_status(self,method):
             message=message
         )
 
-        frappe.msgprint("Purchaser notified successfully")
+        frappe.msgprint("Notified successfully")
 
 @frappe.whitelist()
 def update_bq_status(self,method):
+    info = ""
+    if self.branch:
+        br_info = frappe.get_value("Branch",self.branch,"customer_support")
+        if br_info:
+            info = br_info
     if self.budgetary_quotation and self.workflow_state == "On Review":
-        bq = frappe.get_doc("Budgetary Quotation",self.budgetary_quotation)
-        bq.status = "Supplier Quoted"
-        bq.save(ignore_permissions=True)
+        quotation_exists = frappe.db.sql("""
+        SELECT q.name
+        FROM `tabQuotation Item` qi
+        INNER JOIN `tabQuotation` q
+        ON q.name = qi.parent
+        WHERE qi.budgetary_quotation = %s
+        AND q.quotation_type IN ('Customer Quotation - BQ','Internal Quotation - BQ')
+        LIMIT 1
+        """, (self.budgetary_quotation,))
+
+        if not quotation_exists:
+            bq = frappe.get_doc("Budgetary Quotation",self.budgetary_quotation)
+            bq.status = "Supplier Quoted"
+            bq.save(ignore_permissions=True)
+
+        
+        subject = f"Supplier Quotation Created - {self.name}"
+
+        message = f"""
+        Dear Info,
+
+        <br><br>
+
+        Supplier Quotation <b>{self.name}</b> has been created successfully.
+
+        <br><br>
+
+        <b>Supplier :</b> {self.supplier}<br>
+        <b>Grand Total :</b> {self.grand_total}<br>
+        <b>Currency :</b> {self.currency}
+
+        <br><br>
+
+        Regards,<br>
+        ERP System
+        """
+        
+        # Create Communication
+        frappe.get_doc({
+            "doctype": "Communication",
+            "communication_type": "Communication",
+            "communication_medium": "Email",
+            "sent_or_received": "Sent",
+            "subject": subject,
+            "content": message,
+            "reference_doctype": self.doctype,
+            "reference_name": self.name,
+            "sender": frappe.session.user,
+            "recipients": info
+        }).insert(ignore_permissions=True)
+
+        # Send Email
+        frappe.sendmail(
+            recipients=[info],
+            subject=subject,
+            message=message
+        )
+
+        frappe.msgprint("Notified successfully")
+
         
    
 # @frappe.whitelist()

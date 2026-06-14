@@ -654,6 +654,7 @@
    "allow_on_submit": 1,
    "fieldname": "reference_parts",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Reference(Equipment's)",
    "options": "Supply Order Table"
   },
@@ -674,7 +675,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-09 09:03:07.326589",
+ "modified": "2026-06-14 13:09:19.574273",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

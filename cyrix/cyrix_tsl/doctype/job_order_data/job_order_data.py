@@ -337,6 +337,8 @@ def create_delivery_note(job_order_data, customer):
 	new_doc.plant = doc.plant
 	new_doc.sales_person = doc.sales_person
 	new_doc.branch = doc.branch
+	new_doc.po_no = doc.po_no
+	new_doc.customer_reference_number = (frappe.db.get_value("Quotation", doc.quotation, "customer_reference_number")if doc.quotation else None)
 	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
 	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
 	new_doc.cost_center = doc.department

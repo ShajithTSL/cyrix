@@ -342,7 +342,6 @@
    "label": "Ignore Existing Combination"
   },
   {
-   "depends_on": "eval:doc.parent == \"Create Job Order\"",
    "fieldname": "equipment_referenece_section",
    "fieldtype": "Section Break",
    "label": "Equipment Referenece"
@@ -375,7 +374,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-03 10:16:01.075563",
+ "modified": "2026-06-14 12:35:41.102571",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Received Equipment",

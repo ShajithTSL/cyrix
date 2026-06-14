@@ -240,12 +240,14 @@
    "default": "0",
    "fieldname": "reference_required",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Reference Required"
   },
   {
    "depends_on": "eval:doc.reference_required",
    "fieldname": "reference_parts",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Reference",
    "options": "Received Equipment"
   }
@@ -254,7 +256,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-31 08:59:10.976781",
+ "modified": "2026-06-14 13:10:52.506110",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Supply Order",

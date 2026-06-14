@@ -99,7 +99,7 @@ def create_supply_order_data(dict):
 		
 		# check whether item_code exists or create new Item if needed
 		check_for_item(i)
-
+		check_for_equipment(i)
 		so.append("material_list",{
 			"item_code": i.get('item_code'),
 			"item_name":i.get('item_name'),
@@ -107,6 +107,8 @@ def create_supply_order_data(dict):
 			"model_no":i.get('model'),
 			"mfg":i.get('manufacturer'),
 			"quantity":i.get('qty'),
+			"equipment_model": i.get('equipment_model', ""),
+			"equipment_name": i.get('equipment_name', "")
 		})
 
 	for i in doc.get("reference_parts"):
@@ -143,6 +145,23 @@ def create_supply_order_data(dict):
 		frappe.msgprint("Supply Order created: "+', '.join(links_list))
 		return True
 	return False
+
+
+
+def check_for_equipment(i):
+	if i.get("equipment_model") and i.get("manufacturer"):
+		equipment = frappe.db.exists("Item", {"model": i.get("equipment_model"), "mfg": i.get("manufacturer")})
+		if not equipment:
+			new_doc = frappe.new_doc("Item")
+			new_doc.model = i.get("equipment_model")
+			new_doc.mfg = i.get("manufacturer")
+			new_doc.item_name = i.get("equipment_name", "") or i.get("equipment_model")
+			new_doc.description = i.get("equipment_name", "") or i.get("equipment_model")
+			new_doc.item_group = "Equipments"
+			new_doc.stock_uom = "Nos"
+			new_doc.is_stock_item = 1
+			new_doc.save(ignore_permissions=True)
+
 
 def create_document_log(i, doctype, name):
 	doc = frappe.new_doc("Document Log")

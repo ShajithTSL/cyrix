@@ -2,26 +2,63 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Job Order Data", {
+	
+	receive_unit: function(frm){
+		let d = new frappe.ui.Dialog({
+			title: 'Receive Unit',
+			fields: [
+				{
+					label: 'Serial Number',
+					fieldname: 'serial_number',
+					default:frm.doc.material_list[0].serial_no,
+					description:"<b style = 'color:red'>Note: If needed, mention the Serial Number and Click Proceed</b>",
+					fieldtype: 'Data'
+				},
+				{
+					label: 'Attach',
+					fieldname: 'attach_image',
+					fieldtype: 'Attach Image'
+				}
+			],
+			primary_action_label: '',
+			primary_action(values) {
+				d.hide();
+				frappe.call({
+					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_received_unit",
+					args: {
+						job_order_data: frm.doc.name,
+						serial_number: values.serial_number ||  null,
+						attach_image: values.attach_image || null
+					},
+					callback: function(res) {
+						window.location.reload();
+					}
+				});
+			}
+		});
+		d.show();
+	},
+
 	custom_status: function(frm) {
 		frm.set_value("status", frm.doc.custom_status);
 	},
 	
 	refresh(frm) {
-			if(frm.doc.docstatus == 1 ){
-					frm.add_custom_button(__("Technical Report"), function(){
-						frappe.call({
-							method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.create_technical_report",
-							args: {
-								name: frm.doc.name
-							},
-							callback: function(r) {
-								if(r.message) {
-									var doc = frappe.model.sync(r.message);
-									frappe.set_route("Form", doc[0].doctype, doc[0].name);
-								}
-							}
-						});
-					},__('Create'));
+		if(frm.doc.docstatus == 1 ){
+			frm.add_custom_button(__("Technical Report"), function(){
+				frappe.call({
+					method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.create_technical_report",
+					args: {
+						name: frm.doc.name
+					},
+					callback: function(r) {
+						if(r.message) {
+							var doc = frappe.model.sync(r.message);
+							frappe.set_route("Form", doc[0].doctype, doc[0].name);
+						}
+					}
+				});
+			},__('Create'));
 			frm.add_custom_button(__("Request for Quotation"), function(){
 				frappe.call({
 					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_rfq_from_jo",

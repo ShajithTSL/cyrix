@@ -124,7 +124,7 @@ def create_job_order_data(dict):
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Manufacturer for the Received Equipment")
 		if not i.get("uom"):
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
-		if not i.get("attach_image"):
+		if not i.get("attach_image") and doc.get("unit_status") == "In Lab":
 			frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Attach Image for the Item")
 
 		if i.get("ignore") == 1 and not i.get("item_name"):
@@ -167,6 +167,7 @@ def create_job_order_data(dict):
 			if doc.warranty_date:
 				jo.expiry_date = doc.warranty_date
 			jo.status = "NE-Need Evaluation"
+			jo.unit_status = doc.unit_status
 
 			jo.attach_image = bg_less_image.replace(" ","%20") if 'attach_image' in i and i['attach_image'] else ""
 
@@ -205,7 +206,8 @@ def create_job_order_data(dict):
 			
 			# Create stock entry for the received item
 			if not doc.job_order_data or doc.is_returned_unit:
-				create_stock_entry(i, doc, jo)
+				if doc.unit_status == "In Lab":
+					create_stock_entry(i, doc, jo)
 
 			# append the Job Order names for message popup
 			link.append(jo.name)

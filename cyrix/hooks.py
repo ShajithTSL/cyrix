@@ -184,6 +184,7 @@ doc_events = {
 
 		"after_insert": [
 		"cyrix.custom_py.supplier_quotation.update_so_status",
+		"cyrix.custom_py.supplier_quotation.update_bq_status",
 			
 		],
         

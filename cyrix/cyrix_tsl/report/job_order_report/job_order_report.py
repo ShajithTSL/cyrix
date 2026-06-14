@@ -27,13 +27,15 @@ def get_columns(filters):
 		{"fieldname": "mfg", "label": _("MFG"), "fieldtype": "Data", "width": 100},
 		{"fieldname": "model_no", "label": _("Model No"), "fieldtype": "Data", "width": 140},
 		{"fieldname": "item_name", "label": _("Item Name"), "fieldtype": "Data", "width": 180},
+		{"fieldname": "equipment_model", "label": _("Equipment Model"), "fieldtype": "Data", "width": 180},
+		{"fieldname": "equipment_name", "label": _("Equipment Name"), "fieldtype": "Data", "width": 180},
 		{"fieldname": "quantity", "label": _("Quantity"), "fieldtype": "Float", "width": 100},
 		{"fieldname": "customer", "label": _("Customer"), "fieldtype": "Link", "options": "Customer", "width": 100},
 		{"fieldname": "contact_name", "label": _("Contact Person"), "fieldtype": "Data", "width": 200},
 		{"fieldname": "email", "label": _("Contact Email"), "fieldtype": "Data", "width": 200},
 		{"fieldname": "phone_number", "label": _("Contact Number"), "fieldtype": "Data", "width": 150},
 		{"fieldname": "technician", "label": _("Technician"), "fieldtype": "Data", "width": 150},
-		{"fieldname": "quoted_price", "label": _("Quoted Price"), "fieldtype": "Currency", "options":"currency", "width": 150},
+		# {"fieldname": "quoted_price", "label": _("Quoted Price"), "fieldtype": "Currency", "options":"currency", "width": 150},
 		{"fieldname": "quoted_date", "label": _("Quoted Date"), "fieldtype": "Date", "width": 150},
 		{"fieldname": "approval_type", "label": _("Approval Type"), "fieldtype": "Data", "width": 150},
 		{"fieldname": "purchase_order", "label": _("Purchase Order"), "fieldtype": "Data", "width": 140},
@@ -98,7 +100,7 @@ def get_quote_details(job_order_name):
 			q.approval_date as approval_date, qi.net_amount as amount
 		FROM `tabQuotation` q
 		JOIN `tabQuotation Item` qi ON q.name = qi.parent
-		WHERE qi.job_order_data = %s AND q.workflow_state = "Approved By Customer"
+		WHERE qi.job_order_data = %s AND q.workflow_state in ("Approved By Customer","Quoted to Customer")
 	''', job_order_name, as_dict=True)
 
 	if quote_details:
@@ -185,7 +187,7 @@ def get_contact_details(customer_name):
 
 def get_material_list(job_order_name):
 	return frappe.db.sql('''
-		SELECT mfg, model_no, quantity, item_name
+		SELECT mfg, model_no,quantity,item_name,equipment_model,equipment_name
 		FROM `tabMaterial List`
 		WHERE parent = %s
 	''', job_order_name, as_dict=True)
@@ -201,6 +203,9 @@ def create_rows(jo, material_list_data, quote_details, technician_names, status_
 			"branch": jo.branch,
 			"mfg": material.mfg,
 			"model_no": frappe.db.get_value("Item Model", material.model_no, "model"),
+			"item_name": material.item_name,
+			"equipment_model": material.equipment_model,
+			"equipment_name": material.equipment_name,
 			"item_name": material.item_name,
 			"quantity": material.quantity,
 			"customer": jo.customer,

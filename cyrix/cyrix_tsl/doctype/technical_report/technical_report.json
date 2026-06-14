@@ -39,7 +39,8 @@
   "remarks_needed",
   "customer_remarks",
   "column_break_emox",
-  "customer_signature"
+  "customer_signature",
+  "tech_sign"
  ],
  "fields": [
   {
@@ -163,7 +164,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Under Observation\nCompleted"
+   "options": "Under Observation\nCompleted\nPending"
   },
   {
    "fieldname": "naming_series",
@@ -237,12 +238,18 @@
    "fieldname": "remarks_needed",
    "fieldtype": "Check",
    "label": "Remarks Needed"
+  },
+  {
+   "fieldname": "tech_sign",
+   "fieldtype": "Link",
+   "label": "Tech Sign",
+   "options": "Signature"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-02 11:21:57.728888",
+ "modified": "2026-06-10 15:50:11.646920",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",

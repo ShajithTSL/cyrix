@@ -60,7 +60,7 @@ frappe.ui.form.on("Technical Report", {
                     + "doctype=" + encodeURIComponent(frm.doc.doctype)
                     + "&name=" + encodeURIComponent(f_name)
                     + "&trigger_print=1"
-                    + "&format=" + encodeURIComponent("Service Report")
+                    + "&format=" + encodeURIComponent("Service Report - V2")
                     + "&no_letterhead=0"
                 )
             );

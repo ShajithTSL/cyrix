@@ -82,6 +82,7 @@
    "label": "Branch"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "sales_person",
    "fieldtype": "Link",
    "label": "Sales Person",
@@ -92,7 +93,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Inquiry\nIn Custom\nClosed\nInvoiced\nOrdered\nPartially Received\nReceived\nPartially Delivered\nDelivered\nInitiated\nParts Priced\nPending Internal Approval\nIQ-Internally Quoted\nQ-Quoted\nA-Approved\nRejected\nPaid\nUnpaid\nPartially Paid"
+   "options": "Inquiry\nIn Custom\nClosed\nInvoiced\nOrdered\nPartially Received\nReceived\nPartially Delivered\nDelivered\nInitiated\nParts Priced\nPending Internal Approval\nIQ-Internally Quoted\nQ-Quoted\nA-Approved\nRejected\nPaid\nUnpaid\nPartially Paid\nSupplier Quoted"
   },
   {
    "fieldname": "department",
@@ -296,7 +297,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-04 11:33:49.628700",
+ "modified": "2026-06-13 07:56:09.485275",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Budgetary Quotation",

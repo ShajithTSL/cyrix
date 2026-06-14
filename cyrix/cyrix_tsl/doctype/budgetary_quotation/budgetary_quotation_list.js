@@ -46,5 +46,9 @@ frappe.listview_settings['Budgetary Quotation'] = {
         else if (doc.status === "Partially Paid") {
             return [__("Partially Paid"), "yellow", "status,=,Partially Paid"];
         }
+
+        else if (doc.status === "Supplier Quoted") {
+            return [__("Supplier Quoted"), "green", "status,=,Supplier Quoted"];
+        }
     },
 };

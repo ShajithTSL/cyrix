@@ -151,6 +151,46 @@ def get_sq_details(so):
 
     return data
 
+
+
+@frappe.whitelist()
+def get_sq_details_for_bq(bq):
+
+    data = frappe.db.sql("""
+    SELECT
+        sq.name,
+        sq.currency,
+        sq.supplier,
+        sq.shipping_cost,
+        sq.grand_total,
+        sq.terms,
+
+        sqi.item_code,
+        sqi.qty,
+        sqi.rate,
+        sqi.amount,
+        sqi.model_number AS  model,
+        sqi.item_name,
+
+        ptc.description,
+        ptc.tax_amount
+
+        FROM `tabSupplier Quotation` sq
+
+        LEFT JOIN `tabSupplier Quotation Item` sqi
+            ON sqi.parent = sq.name
+
+        LEFT JOIN `tabPurchase Taxes and Charges` ptc
+            ON ptc.parent = sq.name
+
+        WHERE sq.budgetary_quotation = %s
+
+        ORDER BY sq.name, ptc.idx
+        """, (bq,), as_dict=True)
+    
+
+    return data
+
 def get_sq_details1():
 
     sq_data = frappe.db.sql("""
@@ -227,15 +267,8 @@ def update_so_status(self,method):
             so.status = "Supplier Quoted"
             so.save(ignore_permissions=True)
 
-
-
-        # so = frappe.get_doc("Supply Order Data",self.supply_order_data)
         
-        # so.status = "Supplier Quoted"
-        # so.save(ignore_permissions = 1)
-
-        
-       
+               
         subject = f"Supplier Quotation Created - {self.name}"
 
         message = f"""
@@ -279,6 +312,14 @@ def update_so_status(self,method):
         )
 
         frappe.msgprint("Purchaser notified successfully")
+
+@frappe.whitelist()
+def update_bq_status(self,method):
+    if self.budgetary_quotation and self.workflow_state == "On Review":
+        bq = frappe.get_doc("Budgetary Quotation",self.budgetary_quotation)
+        bq.status = "Supplier Quoted"
+        bq.save(ignore_permissions=True)
+        
    
 # @frappe.whitelist()
 # def update_so(self,method):

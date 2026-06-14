@@ -27,6 +27,7 @@
   "set_posting_time",
   "due_date",
   "return_against",
+  "sales_person",
   "accounting_dimensions_section",
   "project",
   "warehouse",
@@ -2070,13 +2071,20 @@
    "fieldtype": "Link",
    "label": "Job Order Data",
    "options": "Job Order Data"
+  },
+  {
+   "fetch_from": "job_order_data.sales_person",
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 11:54:34.719626",
+ "modified": "2026-06-11 15:10:32.680700",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Return Note",

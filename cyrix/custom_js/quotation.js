@@ -347,7 +347,8 @@ frappe.ui.form.on('Quotation', {
                             target: frm,
                             setters: {
                                 party_name:frm.doc.party_name,
-                                workflow_state:'Approved By Management'
+                                workflow_state:'Approved By Management',
+                                company:frm.doc.company
                             },
                             
                             add_filters_group: 1,

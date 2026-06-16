@@ -278,6 +278,7 @@ frappe.ui.form.on("Create Job Order", {
 								var childTable = cur_frm.add_child("received_equipment");
 								childTable.item_code = r.message[i]['item_code']
 								childTable.item_name = r.message[i]["item_name"]
+								childTable.description = r.message[i]["description"] || r.message[i]["item_name"]
 								childTable.manufacturer = r.message[i]["mfg"]
 								childTable.serial_no = r.message[i]["serial_no"]
 								childTable.uom = r.message[i]["uom"]

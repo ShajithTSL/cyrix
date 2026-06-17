@@ -39,6 +39,7 @@
   "remarks",
   "column_break_rjhd",
   "job_order_data",
+  "is_approved",
   "reason",
   "payment_terms",
   "payment_date",
@@ -669,13 +670,21 @@
    "fieldname": "job_order_data",
    "fieldtype": "Read Only",
    "label": "Job Order Data "
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_approved",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Approved"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-14 13:09:19.574273",
+ "modified": "2026-06-17 10:44:11.419275",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

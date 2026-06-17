@@ -48,6 +48,9 @@ class BudgetaryQuotation(Document):
 			})
 			doc.save(ignore_permissions=True)
 		self.update_qty()
+		if self.status == "A-Approved":
+			frappe.db.set_value("Budgetary Quotation", self.name, "is_approved", 1, update_modified=False)
+
 
 	@frappe.whitelist()
 	def create_quotation(self):

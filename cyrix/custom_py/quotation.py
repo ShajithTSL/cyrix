@@ -167,24 +167,26 @@ def update_supply_order_status(self, method):
 
 		if status:
 			if doc.status not in ["Paid", "Partially Paid", "Invoiced"]:
-				doc.status = status
+				if doc.is_approved == 0:
+					doc.status = status
 				doc.save(ignore_permissions=True)
 
 def update_budgetary_quotation_status(self, method):
 	for i in self.get("items"):
 		if i.budgetary_quotation and self.quotation_type in ["Internal Quotation - BQ","Customer Quotation - BQ","Customer Quotation - BQ - Revised"]:
 			doc = frappe.get_doc("Budgetary Quotation",i.budgetary_quotation)
-			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Management":
-				doc.status = "IQ-Internally Quoted"
-			
-			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Quoted to Customer":
-				doc.status = "Q-Quoted"
+			if doc.is_approved == 0:
+				if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Management":
+					doc.status = "IQ-Internally Quoted"
+				
+				if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Quoted to Customer":
+					doc.status = "Q-Quoted"
 
-			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Customer":
-				doc.status = "A-Approved"
+				if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Customer":
+					doc.status = "A-Approved"
 
-			if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Rejected by Customer":
-				doc.status = "Rejected"
+				if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Rejected by Customer":
+					doc.status = "Rejected"
 			doc.save(ignore_permissions=True)
 
 

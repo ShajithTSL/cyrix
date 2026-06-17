@@ -139,6 +139,8 @@ class SupplyOrderData(Document):
 			})
 			doc.save(ignore_permissions=True)
 		self.trigger_fn()
+		if self.status in ["Approved"]:
+			frappe.db.set_value("Supply Order Data", self.name, "is_approved", 1, update_modified=False)
 
 @frappe.whitelist()
 def create_rfq(supply_order_data):

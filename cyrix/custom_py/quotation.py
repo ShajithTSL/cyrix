@@ -2,6 +2,8 @@ import frappe
 import json
 from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
+from frappe.utils import now_datetime, format_datetime
+from frappe.utils import flt
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -54,15 +56,15 @@ naming_series = {
 }
 
 internal_quotation_type = ["Internal Quotation - Repair",
-						   "Internal Quotation - Supply",
-						   "Internal Quotation - BQ",
-						   "Internal Quotation - MC"]
+						"Internal Quotation - Supply",
+						"Internal Quotation - BQ",
+						"Internal Quotation - MC"]
 
 customer_quotation_type = ["Customer Quotation - Repair", "Customer Quotation - R - Revised",
-						   "Customer Quotation - Supply", "Customer Quotation - S - Revised",
-						   "Customer Quotation - Site Visit", "Customer Quotation - SV - Revised",
-						   "Customer Quotation - BQ", "Customer Quotation - BQ - Revised",
-						   "Customer Quotation - MC", "Customer Quotation - MC - Revised"]
+						"Customer Quotation - Supply", "Customer Quotation - S - Revised",
+						"Customer Quotation - Site Visit", "Customer Quotation - SV - Revised",
+						"Customer Quotation - BQ", "Customer Quotation - BQ - Revised",
+						"Customer Quotation - MC", "Customer Quotation - MC - Revised"]
 
 quotation_type = ["Customer Quotation - Repair","Customer Quotation - R - Revised",
 				"Customer Quotation - Supply","Customer Quotation - S - Revised",
@@ -97,7 +99,8 @@ def update_job_order_status(self, method):
 	def update_status(self,item, status):
 		if item.job_order_data:
 			update = frappe.get_doc("Job Order Data", item.job_order_data)
-			update.status = status
+			if update.is_approved == 0:
+				update.status = status
 			update.po_no = self.get("purchase_order_no")
 			update.save(ignore_permissions=True)
 
@@ -482,8 +485,8 @@ def fetch_price_from_sq(self, method):
 			SELECT
 				sqi.item_code,
 				sqi.qty,
-				sqi.base_rate,
-				sqi.base_amount,
+				sq.grand_total as base_rate,
+				sq.grand_total as base_amount,
 				sq.name AS supplier_quotation,
 				sq.supplier,
 				sq.shipping_cost,
@@ -967,3 +970,49 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 	)
 
 	return doclist
+
+# @frappe.whitelist()
+# def update_discount(quotation, apply_discount_on, approved_by, discount_percentage=None, discount_amount=None):
+# 	doc = frappe.get_doc("Quotation", quotation)
+
+# 	if discount_percentage and flt(discount_percentage) > 0:
+# 		doc.additional_discount_percentage = flt(discount_percentage)
+# 		doc.discount_amount = 0
+# 		discount_text = f"{discount_percentage}%"
+
+# 	elif flt(discount_amount) > 0:
+# 		doc.additional_discount_percentage = 0
+# 		doc.discount_amount = flt(discount_amount)
+# 		discount_text = f"{discount_amount}"
+
+# 	doc.apply_discount_on = apply_discount_on
+
+# 	doc.calculate_taxes_and_totals()
+# 	from datetime import datetime
+
+# 	# Add history row
+# 	doc.append("discount_history", {
+# 		"datetime": datetime.now(),
+# 		"approved_by": approved_by,
+# 		"apply_discount_on": apply_discount_on,
+# 		"discount_percentage": discount_percentage or 0,
+# 		"discount_amount": discount_amount or 0,
+# 		"updated_by": frappe.session.user
+# 	})
+
+# 	# update after submit logic
+# 	doc.flags.ignore_validate_update_after_submit = True
+# 	doc.save()
+
+# 	comment = f"""
+# 		Discount updated on {format_datetime(now_datetime())}.
+# 		Approved by: @{approved_by}
+# 		Discount Applied: {discount_text}
+# 	"""
+
+# 	doc.add_comment(
+# 		comment_type="Comment",
+# 		text=comment
+# 	)
+
+# 	return doc.name

@@ -58,6 +58,10 @@ class JobOrderData(Document):
 
 			self.unit_status = unit_status
 			frappe.db.set_value("Job Order Data", self.name, "unit_status", unit_status, update_modified=False)
+		
+		if self.status in ["A-Approved"]:
+			frappe.db.set_value("Job Order Data", self.name, "is_approved", 1, update_modified=False)
+
 
 	def after_insert(self):
 		if self.get("maintenance_contract"):

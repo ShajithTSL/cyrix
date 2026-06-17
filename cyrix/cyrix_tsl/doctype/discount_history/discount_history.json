@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-06-16 15:28:31.684902",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "datetime",
+  "column_break_bmvy",
+  "approved_by",
+  "column_break_dxru",
+  "apply_discount_on",
+  "column_break_szlq",
+  "discount_percentage",
+  "column_break_ilmt",
+  "discount_amount",
+  "column_break_bxxm",
+  "updated_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "datetime",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Datetime"
+  },
+  {
+   "fieldname": "column_break_bmvy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_dxru",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "apply_discount_on",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Discount Applied On"
+  },
+  {
+   "fieldname": "column_break_szlq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "discount_percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Discount %"
+  },
+  {
+   "fieldname": "column_break_ilmt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Discount"
+  },
+  {
+   "fieldname": "column_break_bxxm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "updated_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Updated By",
+   "options": "User"
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Approved By",
+   "options": "User"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-16 16:00:20.430362",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Discount History",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

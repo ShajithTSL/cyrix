@@ -193,6 +193,117 @@ frappe.ui.form.on('Quotation', {
         frm.remove_custom_button("Sales Invoice")
     },
     refresh:function(frm){
+
+	    if (frm.doc.docstatus === 1) {
+            // frm.add_custom_button(__('Update'), () => {
+            //     let d = new frappe.ui.Dialog({
+            //         title: 'Update Discount',
+            //         fields: [
+            //             {
+            //                 label: "Apply Additional Discount On",
+            //                 fieldname: "apply_discount_on",
+            //                 fieldtype: "Select",
+            //                 options: "Grand Total\nNet Total",
+            //                 default: "Net Total"
+            //             },
+            //             {
+            //                 label: 'Discount %',
+            //                 fieldname: 'discount_percentage',
+            //                 fieldtype: 'Percent',
+            //                 default: frm.doc.additional_discount_percentage || 0
+            //             },
+            //             {
+            //                 fieldname: "discount_amount",
+            //                 label: "Discount Amount",
+            //                 fieldtype: "Currency",
+            //                 default: frm.doc.discount_amount || 0
+            //             },
+            //             {
+            //                 fieldname: "approved_by",
+            //                 label: "Approved By",
+            //                 fieldtype: "Link",
+            //                 options: "User",
+            //                 reqd: 1
+            //             }
+            //         ],
+            //         primary_action(values) {
+            //             frappe.call({
+            //                 method: 'cyrix.custom_py.quotation.update_discount',
+            //                 args: {
+            //                     quotation: frm.doc.name,
+            //                     apply_discount_on:values.apply_discount_on,
+            //                     discount_percentage: values.discount_percentage,
+            //                     discount_amount: values.discount_amount,
+            //                     approved_by: values.approved_by
+            //                 },
+            //                 callback() {
+            //                     frm.reload_doc();
+            //                 }
+            //             });
+            //             d.hide();
+            //         }
+            //     });
+            //     d.show();
+            // }, ("Discount"));
+            // frm.add_custom_button(__('History'), function() {
+
+            //     let rows = frm.doc.discount_history || [];
+
+            //     if (!rows.length) {
+            //         frappe.msgprint(__('No discount history found.'));
+            //         return;
+            //     }
+
+            //     let html = `
+            //         <div style="max-height:400px; overflow-y:auto;">
+            //             <table class="table table-bordered">
+            //                 <thead>
+            //                     <tr>
+            //                         <th>Date Time</th>
+            //                         <th>Approved By</th>
+            //                         <th>Apply Discount On</th>
+            //                         <th>Discount %</th>
+            //                         <th>Discount Amount</th>
+            //                         <th>Updated By</th>
+            //                     </tr>
+            //                 </thead>
+            //                 <tbody>
+            //     `;
+
+            //     rows.forEach(row => {
+            //         html += `
+            //             <tr>
+            //                 <td>${frappe.datetime.str_to_user(row.datetime || '')}</td>
+            //                 <td>${row.approved_by || ''}</td>
+            //                 <td>${row.apply_discount_on || ''}</td>
+            //                 <td>${row.discount_percentage || 0}</td>
+            //                 <td>${format_currency(row.discount_amount || 0)}</td>
+            //                 <td>${row.updated_by || ''}</td>
+            //             </tr>
+            //         `;
+            //     });
+
+            //     html += `
+            //                 </tbody>
+            //             </table>
+            //         </div>
+            //     `;
+
+            //     let d = new frappe.ui.Dialog({
+            //         title: __('Discount History'),
+            //         size: 'extra-large',
+            //         fields: [
+            //             {
+            //                 fieldtype: 'HTML',
+            //                 fieldname: 'history_html'
+            //             }
+            //         ]
+            //     });
+
+            //     d.fields_dict.history_html.$wrapper.html(html);
+            //     d.show();
+            // }, ("Discount"));
+        }
         frappe.run_serially([
             () => {
                 if(frm.doc.workflow_state == "Approved by Management"){

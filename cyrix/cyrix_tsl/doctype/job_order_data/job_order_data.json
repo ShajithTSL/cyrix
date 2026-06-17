@@ -37,6 +37,7 @@
   "custom_status",
   "maintenance_contract",
   "column_break_cwfo",
+  "is_approved",
   "unit_type",
   "unit_status",
   "receive_unit",
@@ -747,6 +748,14 @@
    "fieldname": "receive_unit",
    "fieldtype": "Button",
    "label": "Receive Unit"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_approved",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Approved"
   }
  ],
  "grid_page_length": 50,
@@ -759,8 +768,8 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2026-06-14 13:33:19.665484",
- "modified_by": "shajith@tsl-me.com",
+ "modified": "2026-06-17 09:45:21.412720",
+ "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",
  "naming_rule": "By \"Naming Series\" field",

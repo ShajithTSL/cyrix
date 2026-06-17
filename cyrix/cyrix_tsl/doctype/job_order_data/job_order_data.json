@@ -739,7 +739,7 @@
    "fieldname": "custom_status",
    "fieldtype": "Select",
    "label": "Custom Status",
-   "options": "\nUE-Under Evaluation\nUTR-Under Technician Repair\nRNA-Return Not Approved\nQ-Quoted\nA-Approved\nReplace\nRNR-Return Not Repaired\nC-Cancelled",
+   "options": "\nUE-Under Evaluation\nUTR-Under Technician Repair\nRNR-Return Not Repaired\nRNA-Return Not Approved\nRNF-Return No Fault\nRNP-Return No Parts\nQ-Quoted\nA-Approved\nReplace\nC-Cancelled",
    "read_only_depends_on": "eval:!frappe.user.has_role(\"Info\")"
   },
   {
@@ -759,7 +759,7 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2026-06-14 13:33:19.665484",
+ "modified": "2026-06-16 16:32:47.211508",
  "modified_by": "shajith@tsl-me.com",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

@@ -219,9 +219,11 @@ def create_internal_quotation(supply_order_data, customer):
 			"item_code":i.item_code,
 			"item_name":i.description,
 			"description":i.description,
+			"model":i.model_no,
+			"model_number": frappe.db.get_value("Item Model",i.model_no,'model'),
+			"mfg":i.mfg,
 			"uom":'Nos',
 			"qty":i.quantity,
-			"model_no":i.model_no,
 			"supply_order_data":doc.name,
 			"warehouse":doc.warehouse
 		})

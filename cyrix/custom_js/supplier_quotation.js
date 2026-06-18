@@ -1,4 +1,20 @@
 frappe.ui.form.on('Supplier Quotation', {
+    fetch_price_list: function(frm){
+        if (frm.doc.__islocal){
+            frappe.call({
+                method: "cyrix.custom_py.utils.fetch_price_list",
+                args:{
+                    company : frm.doc.company, 
+                    document_type : "buying"
+                },
+                callback(r){
+                    if (r.message){
+                        frm.set_value("buying_price_list",r.message)
+                    }
+                }
+            })
+        }
+    },
     set_cost_center: function(frm){
         $.each(frm.doc.items, function(i,j){
             j.cost_center = frm.doc.cost_center
@@ -24,6 +40,7 @@ frappe.ui.form.on('Supplier Quotation', {
             frm.trigger("set_branch")
             frm.trigger("set_cost_center")
         }
+        frm.trigger("fetch_price_list")
     },
     naming_series: function(frm){
         if(frm.doc.__islocal){

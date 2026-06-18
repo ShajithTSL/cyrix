@@ -6,7 +6,7 @@ from frappe.utils.file_manager import get_file
 from frappe.utils.csvutils import read_csv_content
 from datetime import datetime
 
-
+@frappe.whitelist()
 def fetch_price_list(company, document_type):
 	field = "selling" if document_type == "selling" else "buying"
 

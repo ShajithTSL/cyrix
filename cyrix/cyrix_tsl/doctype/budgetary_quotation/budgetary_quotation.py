@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 from cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report import warehouse_based_on_branch_and_company
 from datetime import datetime
+from cyrix.custom_py import utils
 
 class BudgetaryQuotation(Document):
 	def update_qty(self):
@@ -63,6 +64,7 @@ class BudgetaryQuotation(Document):
 		new_doc.customer_reference_number = self.customer_ref
 		new_doc.branch = self.branch
 		new_doc.budgetary_quotation = self.name
+		new_doc.selling_price_list = utils.fetch_price_list(self.company, "selling")
 		new_doc.quotation_type = "Internal Quotation - BQ"
 		for i in self.items:
 			new_doc.append("items",{

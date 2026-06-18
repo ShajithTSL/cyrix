@@ -1,0 +1,417 @@
+{
+ "actions": [],
+ "autoname": "BG-.YYYY.-.#####",
+ "creation": "2026-06-17 11:59:42.712665",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "column_break_tjtj",
+  "company",
+  "section_break_cohc",
+  "bg_type",
+  "reference_doctype",
+  "reference_docname",
+  "supplier",
+  "type",
+  "contract_value",
+  "bid_bg_value",
+  "order_value_percent",
+  "column_break_gtla",
+  "bg_bid_status",
+  "status",
+  "bg_no",
+  "cheque_no",
+  "column_break_6",
+  "amount",
+  "document_type",
+  "job_order",
+  "supply_order",
+  "customer",
+  "customer_reference",
+  "department",
+  "validity",
+  "send",
+  "column_break_azis",
+  "start_date",
+  "validity_type",
+  "days",
+  "months",
+  "end_date",
+  "bank_account_info",
+  "bank",
+  "bank_account",
+  "account",
+  "bank_account_no",
+  "column_break_17",
+  "iban",
+  "branch_code",
+  "swift_number",
+  "application_letter_attachment",
+  "bank_received_document",
+  "section_break_14",
+  "more_information",
+  "margin_details",
+  "bank_guarantee_number",
+  "name_of_beneficiary",
+  "column_break_19",
+  "margin_money",
+  "charges",
+  "fixed_deposit_number",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "bg_type",
+   "fieldtype": "Select",
+   "label": "Bank Guarantee Type",
+   "options": "Providing",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference Document Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_docname",
+   "fieldtype": "Dynamic Link",
+   "hidden": 1,
+   "label": "Reference Document Name",
+   "options": "reference_doctype"
+  },
+  {
+   "depends_on": "eval:doc.document_type",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval: doc.bg_type == \"Providing\"",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "depends_on": "eval:doc.document_type",
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "validity",
+   "fieldtype": "Int",
+   "label": "Validity in Days"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "bank_account_info",
+   "fieldtype": "Section Break",
+   "label": "Bank Account Info"
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "label": "Bank Account No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN",
+   "options": "IBAN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "label": "Branch Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "swift_number",
+   "fieldtype": "Data",
+   "label": "SWIFT number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "more_information",
+   "fieldtype": "Text Editor",
+   "label": "Clauses and Conditions"
+  },
+  {
+   "fieldname": "margin_details",
+   "fieldtype": "Section Break",
+   "label": "Other Details"
+  },
+  {
+   "fieldname": "bank_guarantee_number",
+   "fieldtype": "Data",
+   "label": "Bank Guarantee Number",
+   "unique": 1
+  },
+  {
+   "fieldname": "name_of_beneficiary",
+   "fieldtype": "Data",
+   "label": "Name of Beneficiary"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "margin_money",
+   "fieldtype": "Currency",
+   "label": "Margin Money"
+  },
+  {
+   "fieldname": "charges",
+   "fieldtype": "Currency",
+   "label": "Charges Incurred"
+  },
+  {
+   "fieldname": "fixed_deposit_number",
+   "fieldtype": "Data",
+   "label": "Fixed Deposit Number"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Bank Guarantee",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "BG\nBid Bond"
+  },
+  {
+   "fieldname": "contract_value",
+   "fieldtype": "Float",
+   "label": "Contract Value"
+  },
+  {
+   "depends_on": "eval:doc.type",
+   "fieldname": "bid_bg_value",
+   "fieldtype": "Float",
+   "label": "Bid Bond/BG  - Value"
+  },
+  {
+   "fieldname": "order_value_percent",
+   "fieldtype": "Percent",
+   "label": "Order Value %"
+  },
+  {
+   "fieldname": "bg_bid_status",
+   "fieldtype": "Select",
+   "label": "BG BID Status",
+   "options": "\nReceived\nNot Received"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nActive\nExpired"
+  },
+  {
+   "depends_on": "eval:doc.type",
+   "fieldname": "bg_no",
+   "fieldtype": "Data",
+   "label": "BG No"
+  },
+  {
+   "depends_on": "eval:doc.type",
+   "fieldname": "cheque_no",
+   "fieldtype": "Data",
+   "label": "Cheque No"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "label": "Document Type",
+   "options": "\nJob Order\nSupply Order"
+  },
+  {
+   "depends_on": "eval:doc.document_type == \"Job Order\"",
+   "fieldname": "job_order",
+   "fieldtype": "Link",
+   "label": "Job Order ",
+   "options": "Job Order Data"
+  },
+  {
+   "depends_on": "eval:doc.document_type == \"Supply Order\"",
+   "fieldname": "supply_order",
+   "fieldtype": "Link",
+   "label": "Supply Order",
+   "options": "Supply Order Data"
+  },
+  {
+   "fieldname": "customer_reference",
+   "fieldtype": "Data",
+   "label": "Customer Reference Number"
+  },
+  {
+   "fieldname": "column_break_gtla",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_azis",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "validity_type",
+   "fieldtype": "Select",
+   "label": "Validity Type",
+   "options": "\nDays\nMonths"
+  },
+  {
+   "description": "Note : Application Document to be attached by the Concern Person ",
+   "fieldname": "application_letter_attachment",
+   "fieldtype": "Attach",
+   "label": "Application Letter Attachment"
+  },
+  {
+   "description": "Note: Bank Document to be attached by the concern Person ",
+   "fieldname": "bank_received_document",
+   "fieldtype": "Attach",
+   "label": "Bank Received Document "
+  },
+  {
+   "depends_on": "eval:doc.validity_type == \"Days\"",
+   "fieldname": "days",
+   "fieldtype": "Int",
+   "label": "Days"
+  },
+  {
+   "depends_on": "eval:doc.validity_type == \"Months\"",
+   "fieldname": "months",
+   "fieldtype": "Int",
+   "label": "Months"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "column_break_tjtj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "section_break_cohc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "send",
+   "fieldtype": "Button",
+   "label": "Send"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-06-17 13:30:48.261853",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "BG",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "search_fields": "customer",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "customer"
+}

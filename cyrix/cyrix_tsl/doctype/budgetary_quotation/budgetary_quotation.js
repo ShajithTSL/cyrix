@@ -112,6 +112,7 @@ frappe.ui.form.on("Budgetary Quotation", {
 				}
 			}
 		})
+		frm.trigger("sup_quotation")
 	},
     create_quotation: function(frm){
         frm.add_custom_button(__('Quotation'), function(){	
@@ -140,86 +141,86 @@ frappe.ui.form.on("Budgetary Quotation", {
 
 
 
-    refresh(frm){
+    sup_quotation(frm){
         frm.add_custom_button(__("Supplier Quotation"), function () {
 
-	frappe.call({
-		method: "cyrix.custom_py.supplier_quotation.get_sq_details_for_bq",
-		args: {
-			bq: frm.doc.name
-		},
-		callback: function (r) {
+			frappe.call({
+				method: "cyrix.custom_py.supplier_quotation.get_sq_details_for_bq",
+				args: {
+					bq: frm.doc.name
+				},
+				callback: function (r) {
 
-			let quotations = r.message || [];
-			console.log("Supplier Quotation Data", quotations);
+					let quotations = r.message || [];
+					console.log("Supplier Quotation Data", quotations);
 
-			let d = new frappe.ui.Dialog({
-				title: "Supplier Quotations Comparison",
-				size: "extra-large",
-				fields: [
-					{
-						fieldtype: "HTML",
-						fieldname: "quotation_html"
-					}
-				],
-				primary_action_label: "Close",
-				primary_action() {
-					d.hide();
-				}
-			});
-
-			d.show();
-			let is_mobile = window.innerWidth < 768;
-			let wrapper = d.fields_dict.quotation_html.wrapper;
-
-			// =====================================
-			// GROUP BY SUPPLIER
-			// =====================================
-
-			let suppliers = {};
-			let items = [];
-
-			quotations.forEach(row => {
-
-				// Supplier columns
-				if (!suppliers[row.name]) {
-
-					suppliers[row.name] = {
-						supplier: row.supplier,
-						currency: row.currency,
-						grand_total: row.grand_total,
-						shipping_cost: row.shipping_cost,
-						terms: row.terms,
-						items: {},
-						taxes: []
-					};
-				}
-				if (row.description) {
-						suppliers[row.name].taxes.push({
-							description: row.description,
-							tax_amount: row.tax_amount
-						});
-					}
-				if (
-					row.description &&
-					!suppliers[row.name].taxes.some(
-						t => t.description === row.description &&
-							t.tax_amount === row.tax_amount
-					)
-				) {
-					suppliers[row.name].taxes.push({
-						description: row.description,
-						tax_amount: row.tax_amount
+					let d = new frappe.ui.Dialog({
+						title: "Supplier Quotations Comparison",
+						size: "extra-large",
+						fields: [
+							{
+								fieldtype: "HTML",
+								fieldname: "quotation_html"
+							}
+						],
+						primary_action_label: "Close",
+						primary_action() {
+							d.hide();
+						}
 					});
-				}
-				// Store item against supplier
-					suppliers[row.name].items[row.item_code] = {
-					qty: row.qty,
-					rate: row.rate,
-					amount: row.amount,
-					model: row.model_number,
-					description: row.item_name
-		};
+
+					d.show();
+					let is_mobile = window.innerWidth < 768;
+					let wrapper = d.fields_dict.quotation_html.wrapper;
+
+					// =====================================
+					// GROUP BY SUPPLIER
+					// =====================================
+
+					let suppliers = {};
+					let items = [];
+
+					quotations.forEach(row => {
+
+						// Supplier columns
+						if (!suppliers[row.name]) {
+
+							suppliers[row.name] = {
+								supplier: row.supplier,
+								currency: row.currency,
+								grand_total: row.grand_total,
+								shipping_cost: row.shipping_cost,
+								terms: row.terms,
+								items: {},
+								taxes: []
+							};
+						}
+						if (row.description) {
+								suppliers[row.name].taxes.push({
+									description: row.description,
+									tax_amount: row.tax_amount
+								});
+							}
+						if (
+							row.description &&
+							!suppliers[row.name].taxes.some(
+								t => t.description === row.description &&
+									t.tax_amount === row.tax_amount
+							)
+						) {
+							suppliers[row.name].taxes.push({
+								description: row.description,
+								tax_amount: row.tax_amount
+							});
+						}
+						// Store item against supplier
+							suppliers[row.name].items[row.item_code] = {
+							qty: row.qty,
+							rate: row.rate,
+							amount: row.amount,
+							model: row.model_number,
+							description: row.item_name
+				};
 
 				// Unique item list
 				if (!items.includes(row.item_code)) {
@@ -233,120 +234,120 @@ frappe.ui.form.on("Budgetary Quotation", {
 
 			let html = "";
 
-if (!quotations.length) {
-	html = `
-		<div style="padding:30px;text-align:center;font-size:14px;">
-			No Supplier Quotations Found
-		</div>
-	`;
-}
-else {
+				if (!quotations.length) {
+					html = `
+						<div style="padding:30px;text-align:center;font-size:14px;">
+							No Supplier Quotations Found
+						</div>
+					`;
+				}
+				else {
 
-	// =====================================
-	// MOBILE VIEW (CARD UI)
-	// =====================================
-	if (is_mobile) {
+					// =====================================
+					// MOBILE VIEW (CARD UI)
+					// =====================================
+					if (is_mobile) {
 
-		html += `<div style="display:flex;flex-direction:column;gap:12px;">`;
+						html += `<div style="display:flex;flex-direction:column;gap:12px;">`;
 
-		items.forEach(item_code => {
+						items.forEach(item_code => {
 
-			html += `
-				<div style="border:1px solid #ddd;border-radius:10px;padding:10px;">
-					<div style="font-weight:700;margin-bottom:8px;">
-						${item_code}
+							html += `
+								<div style="border:1px solid #ddd;border-radius:10px;padding:10px;">
+									<div style="font-weight:700;margin-bottom:8px;">
+										${item_code}
+									</div>
+							`;
+
+							Object.keys(suppliers).forEach(name => {
+
+								let s = suppliers[name];
+								let item = s.items[item_code];
+
+								html += `
+					<div style="
+						border-top:1px solid #f2f2f2;
+						padding:10px;
+						margin-top:8px;
+						background:#fafafa;
+						border-radius:8px;
+					">
+
+						<div style="
+							font-weight:700;
+							font-size:13px;
+							color:#111827;
+							margin-bottom:6px;
+						">
+							${s.supplier}
+						</div>
+
+						${
+							item?.model
+							? `
+								<div style="
+									font-size:12px;
+									font-weight:600;
+									color:#374151;
+									margin-bottom:2px;
+								">
+									${item.model}
+								</div>
+							`
+							: ""
+						}
+
+						${
+							item?.description
+							? `
+								<div style="
+									font-size:11px;
+									color:#6b7280;
+									margin-bottom:8px;
+									line-height:1.3;
+								">
+									${item.description}
+								</div>
+							`
+							: ""
+						}
+
+						<div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+							<span style="color:#6b7280;">Rate</span>
+							<span style="
+								background:#e0f2fe;
+								padding:2px 6px;
+								border-radius:6px;
+								font-weight:600;
+								font-size:12px;
+							">
+								${item ? format_currency(item.rate || 0, s.currency) : "-"}
+							</span>
+						</div>
+
+						<div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+							<span style="color:#6b7280;">Qty</span>
+							<span style="font-weight:500;">
+								${item ? item.qty || 0 : "-"}
+							</span>
+						</div>
+
+						<div style="
+							display:flex;
+							justify-content:space-between;
+							margin-top:6px;
+							padding-top:6px;
+							border-top:1px dashed #ddd;
+							font-weight:700;
+						">
+							<span>Total</span>
+							<span style="color:#065f46;">
+								${item ? format_currency(item.amount || 0, s.currency) : "-"}
+							</span>
+						</div>
+
 					</div>
-			`;
-
-			Object.keys(suppliers).forEach(name => {
-
-				let s = suppliers[name];
-				let item = s.items[item_code];
-
-				html += `
-	<div style="
-		border-top:1px solid #f2f2f2;
-		padding:10px;
-		margin-top:8px;
-		background:#fafafa;
-		border-radius:8px;
-	">
-
-		<div style="
-			font-weight:700;
-			font-size:13px;
-			color:#111827;
-			margin-bottom:6px;
-		">
-			${s.supplier}
-		</div>
-
-		${
-			item?.model
-			? `
-				<div style="
-					font-size:12px;
-					font-weight:600;
-					color:#374151;
-					margin-bottom:2px;
-				">
-					${item.model}
-				</div>
-			`
-			: ""
-		}
-
-		${
-			item?.description
-			? `
-				<div style="
-					font-size:11px;
-					color:#6b7280;
-					margin-bottom:8px;
-					line-height:1.3;
-				">
-					${item.description}
-				</div>
-			`
-			: ""
-		}
-
-		<div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-			<span style="color:#6b7280;">Rate</span>
-			<span style="
-				background:#e0f2fe;
-				padding:2px 6px;
-				border-radius:6px;
-				font-weight:600;
-				font-size:12px;
-			">
-				${item ? format_currency(item.rate || 0, s.currency) : "-"}
-			</span>
-		</div>
-
-		<div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-			<span style="color:#6b7280;">Qty</span>
-			<span style="font-weight:500;">
-				${item ? item.qty || 0 : "-"}
-			</span>
-		</div>
-
-		<div style="
-			display:flex;
-			justify-content:space-between;
-			margin-top:6px;
-			padding-top:6px;
-			border-top:1px dashed #ddd;
-			font-weight:700;
-		">
-			<span>Total</span>
-			<span style="color:#065f46;">
-				${item ? format_currency(item.amount || 0, s.currency) : "-"}
-			</span>
-		</div>
-
-	</div>
-`;
+				`;
 			});
 
 			html += `</div>`;

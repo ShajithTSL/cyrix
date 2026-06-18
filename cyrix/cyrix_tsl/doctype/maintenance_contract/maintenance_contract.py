@@ -186,6 +186,7 @@ def create_qtn(source):
 			"uom":frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
 			"stock_uom":frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
 			"conversion_factor":1,
+			"custom_maintenance_contract":doc.name
 		})
 
 	return new_doc

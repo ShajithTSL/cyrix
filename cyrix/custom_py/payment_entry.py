@@ -139,3 +139,141 @@ def update_payment_reference_cancel(self, method):
 
                 # Save the updated document
                 doc.save(ignore_permissions=True)
+
+@frappe.whitelist()
+def create_payment(bg):
+    bg_doc = frappe.get_doc("BG", bg)
+    je = frappe.new_doc("Journal Entry")
+    
+    je.company = bg_doc.company
+    je.voucher_type = "Bank Entry"
+    je.paid_amount = bg_doc.bid_bg_value
+    je.custom_bg = bg
+    
+    bg_account = ""
+    account = frappe.get_value("Account",{"company":bg_doc.company},"name")
+    if account:
+        bg_account = account
+
+    je.append("accounts", {
+        "reference_doctype": "BG",
+        "supply_order_data": bg_doc.supply_order,
+        "work_order_data": bg_doc.job_order,
+        "debit_in_account_currency":bg_doc.bid_bg_value,
+        "account":bg_account,
+        "party_type":"Customer",
+        "party":bg_doc.customer,
+        "cost_center":bg_doc.department,
+        "bank_account":bg_doc.bank_account,
+
+
+    })
+
+    return je
+
+
+@frappe.whitelist()
+def send_finance(bg):
+
+    doc = frappe.get_doc("BG", bg)
+
+    data = f"""
+    <p>Dear Finance Team,</p>
+
+    <p>
+        Kindly find below the Bank Guarantee details for your review and further processing.
+    </p>
+
+    <table border="1" cellpadding="8" cellspacing="0"
+        style="border-collapse:collapse; width:100%; font-family:Arial; font-size:13px;">
+
+        <tr style="background-color:#d9eaf7;">
+            <th colspan="2">BG Information</th>
+            <th colspan="2">Customer Information</th>
+        </tr>
+
+        <tr>
+            <td><b>Bank Guarantee Type</b></td>
+            <td>{doc.bg_type or ""}</td>
+
+            <td><b>Document Type</b></td>
+            <td>{doc.document_type or ""}</td>
+        </tr>
+
+        <tr>
+            <td><b>Type</b></td>
+            <td>{doc.type or ""}</td>
+
+            <td><b>Supply Order</b></td>
+            <td>{doc.supply_order or ""}</td>
+        </tr>
+
+        <tr>
+            <td><b>Contract Value</b></td>
+            <td>{doc.contract_value or ""}</td>
+
+            <td><b>Customer</b></td>
+            <td>{doc.customer or ""}</td>
+        </tr>
+
+        <tr>
+            <td><b>Bid Bond/BG Value</b></td>
+            <td>{doc.bid_bg_value or ""}</td>
+
+            <td><b>Customer Ref No</b></td>
+            <td>{doc.customer_reference or ""}</td>
+        </tr>
+
+        <tr>
+            <td><b>BG BID Status</b></td>
+            <td>{doc.bg_bid_status or ""}</td>
+
+            <td><b>Check No</b></td>
+            <td>{doc.cheque_no or ""}</td>
+        </tr>
+
+        <tr>
+            <td><b>Status</b></td>
+            <td>{doc.status or ""}</td>
+
+            <td><b>Start Date</b></td>
+            <td>{doc.start_date or ""}</td>
+        </tr>
+
+        <tr>
+            <td><b>BG No</b></td>
+            <td>{doc.bg_no or ""}</td>
+
+            <td><b>End Date</b></td>
+            <td>{doc.end_date or ""}</td>
+        </tr>
+
+        <tr>
+            <td><b>Department</b></td>
+            <td>{doc.department or ""}</td>
+
+            <td><b>Order Value %</b></td>
+            <td>{doc.order_value_percent or ""}</td>
+        </tr>
+
+    </table>
+
+    <br>
+
+    <p>
+        Requesting you to proceed with the necessary finance process related to this BG.
+    </p>
+
+    <br>
+
+    Regards,<br>
+    <b>{frappe.session.user}</b><br>
+    TSL
+    """
+
+    frappe.sendmail(
+        sender="karthick@tsl-me.com",
+        recipients=["karthiksrinivasan1996.ks@gmail.com","yousuf@tsl-me.com"],
+        subject=f"Finance Approval Pending - {doc.name}",
+        message=data
+    )

@@ -300,7 +300,7 @@ def fetch_item_price_details(self, method=None):
 	fetch_previous_quotation_details(self, method)
 	fetch_price_from_eval_report(self, method)
 	fetch_supplier_details(self, method)
-	fetch_price_from_sq(self, method)
+	# fetch_price_from_sq(self, method)
 	
 def fetch_price_from_eval_report(self, method):
 	if self.quotation_type != "Internal Quotation - Repair":
@@ -487,8 +487,10 @@ def fetch_price_from_sq(self, method):
 			SELECT
 				sqi.item_code,
 				sqi.qty,
-				sq.grand_total as base_rate,
-				sq.grand_total as base_amount,
+				sq.grand_total as rate,
+				sq.base_grand_total as base_rate,
+				sq.grand_total as amount,
+				sq.base_grand_total as base_amount,
 				sq.name AS supplier_quotation,
 				sq.supplier,
 				sq.shipping_cost,
@@ -508,10 +510,13 @@ def fetch_price_from_sq(self, method):
 				"item": row.item_code,
 				"item_source": "Supplier",
 				"model": frappe.db.get_value("Item", row.item_code, "model_num"),
-				"price": row.base_rate,
-				"amount": row.base_amount,
+				"price": row.rate,
+				"base_price": row.base_rate,
+				"amount": row.amount,
+				"base_amount": row.base_amount,
 				"supplier_quotation": row.supplier_quotation,
-				"supplier": row.supplier
+				"supplier": row.supplier,
+				"currency": row.currency
 			})
 
 			supplier_total += row.base_amount or 0

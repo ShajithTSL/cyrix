@@ -300,7 +300,7 @@ def fetch_item_price_details(self, method=None):
 	fetch_previous_quotation_details(self, method)
 	fetch_price_from_eval_report(self, method)
 	fetch_supplier_details(self, method)
-	# fetch_price_from_sq(self, method)
+	fetch_price_from_sq(self, method)
 	
 def fetch_price_from_eval_report(self, method):
 	if self.quotation_type != "Internal Quotation - Repair":

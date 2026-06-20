@@ -47,12 +47,36 @@ def update_eval_report_status(doc,method):
                 eval.status = "Supplier Quoted"
                 eval.save()
 
+@frappe.whitelist()
+def revert_approved_orders(supplier_quotation):
+
+    sq = frappe.get_doc("Supplier Quotation", supplier_quotation)
+
+    for item in sq.items:
+
+        # Job Order Data
+        if item.job_order_data:
+            jo = frappe.get_doc("Job Order Data", item.job_order_data)
+
+            if jo.is_approved:
+                jo.status = "Parts Priced"
+                jo.save()
+
+        # Supply Order Data
+        if item.supply_order_data:
+            so = frappe.get_doc("Supply Order Data", item.supply_order_data)
+
+            if so.is_approved:
+                so.status = "Parts Priced"
+                so.save()
+
 def update_job_order_status(doc,method):
     for i in doc.items:
         if i.job_order_data:
             jo = frappe.get_doc("Job Order Data",i.job_order_data)
-            jo.status = "Parts Priced"
-            jo.save()
+            if not jo.is_approved:
+                jo.status = "Parts Priced"
+                jo.save()
 
     if doc.get("custom_replacement_unit"):
         rep = frappe.get_doc("Job Order Data",doc.get("custom_replacement_unit"))
@@ -74,7 +98,8 @@ def update_supply_order_data(self,method):
                     j.price = i.rate     
                     j.amount = i.rate * float(j.quantity)
                     j.supplier_quotation = self.name
-            doc.status = "Parts Priced"
+            if not doc.is_approved:
+                doc.status = "Parts Priced"
             doc.save(ignore_permissions=True)
 
 def update_budgetary_quotation(self,method):

@@ -300,7 +300,32 @@ def fetch_item_price_details(self, method=None):
 	fetch_previous_quotation_details(self, method)
 	fetch_price_from_eval_report(self, method)
 	fetch_supplier_details(self, method)
-	fetch_price_from_sq(self, method)
+	if have_direct_sq(self,method):
+		fetch_price_from_sq(self, method)
+
+def have_direct_sq(self, method):
+	values = [
+		(d.item_code, d.job_order_data)
+		for d in self.items
+	]
+
+	if not values:
+		return False
+
+	placeholders = ",".join(["(%s,%s)"] * len(values))
+
+	result = frappe.db.sql(
+		f"""
+		SELECT 1
+		FROM `tabSupplier Quotation Item`
+		WHERE docstatus = 1
+		AND (item_code, job_order_data) IN ({placeholders})
+		LIMIT 1
+		""",
+		[v for pair in values for v in pair],
+	)
+
+	return bool(result)
 	
 def fetch_price_from_eval_report(self, method):
 	if self.quotation_type != "Internal Quotation - Repair":
@@ -309,9 +334,7 @@ def fetch_price_from_eval_report(self, method):
 	eval_list = []
 
 	# Clear existing tables and totals
-	if not self.item_price_details:
-		self.item_price_details = []
-
+	self.item_price_details = []
 	self.parts_price = []
 	self.shipping_cost = 0.0
 
@@ -436,9 +459,6 @@ def fetch_price_from_sq(self, method):
 	if self.quotation_type != "Internal Quotation - Repair":
 		return
 
-	if not self.item_price_details:
-		self.item_price_details = []
-
 	self.item_price_details = []
 	self.parts_price = []
 	self.shipping_cost = 0.0
@@ -453,6 +473,7 @@ def fetch_price_from_sq(self, method):
 		eval_list.extend(child_eval_list)
 
 	for job_order in set(eval_list):
+		sq_item = frappe.db.get_value("Material List",{"parent":job_order,"parenttype":"Job Order Data"},"item_code") 
 		shipping_costs = frappe.db.sql("""
 			SELECT DISTINCT
 				sq.name,
@@ -463,7 +484,8 @@ def fetch_price_from_sq(self, method):
 				ON sq.name = sqi.parent
 			WHERE sq.docstatus = 1
 			AND sqi.job_order_data = %s
-		""", (job_order,), as_dict=True)
+			AND sqi.item_code = %s
+		""", (job_order,sq_item), as_dict=True)
 
 		for ship in shipping_costs:
 			try:
@@ -500,8 +522,9 @@ def fetch_price_from_sq(self, method):
 				ON sq.name = sqi.parent
 			WHERE sq.docstatus = 1
 				AND sqi.job_order_data = %s
+				AND sqi.item_code = %s
 			ORDER BY sq.modified DESC
-		""", (job_order), as_dict=True)
+		""", (job_order, sq_item), as_dict=True)
 
 		for row in sq_items:
 
@@ -551,7 +574,7 @@ def fetch_supplier_details(self, method):
 			sup = frappe.db.sql(""" 
 				select `tabSupplier Quotation`.supplier,
 					`tabSupplier Quotation`.name,
-					`tabSupplier Quotation Item`.base_amount,
+					`tabSupplier Quotation Item`.base_net_amount as base_amount,
 					`tabSupplier Quotation Item`.supply_order_data AS reference,
 					`tabSupplier Quotation`.base_total_taxes_and_charges
 				from `tabSupplier Quotation` 
@@ -584,7 +607,7 @@ def fetch_supplier_details(self, method):
 			sup_budgetary = frappe.db.sql(""" 
 				select `tabSupplier Quotation`.supplier,
 					`tabSupplier Quotation`.name,
-					`tabSupplier Quotation Item`.base_amount,
+					`tabSupplier Quotation Item`.base_net_amount as base_amount,
 					`tabSupplier Quotation Item`.budgetary_quotation AS reference,
 					`tabSupplier Quotation`.base_total_taxes_and_charges
 				from `tabSupplier Quotation` 

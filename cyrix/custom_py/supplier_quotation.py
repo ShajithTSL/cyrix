@@ -24,9 +24,7 @@ def update_price(self,method):
         if evl:
             doc = frappe.get_doc("Evaluation Report",evl)
             for i in self.get("items"):
-                com_cur = frappe.get_value("Company",self.company,"default_currency")
-                ex_rate = get_exchange_rate(self.currency,com_cur)
-                rate = i.rate * ex_rate
+                rate = i.get("base_net_rate")
                 for j in doc.get("items"):
                     if j.part == i.item_code:
                         j.price_ea = rate
@@ -95,8 +93,8 @@ def update_supply_order_data(self,method):
             doc = frappe.get_doc("Supply Order Data",i.supply_order_data)
             for j in doc.get('material_list'):
                 if j.item_code == i.item_code:
-                    j.price = i.rate     
-                    j.amount = i.rate * float(j.quantity)
+                    j.price = i.get("base_net_rate")     
+                    j.amount = i.get("base_net_rate") * float(j.quantity)
                     j.supplier_quotation = self.name
             if not doc.is_approved:
                 doc.status = "Parts Priced"
@@ -108,7 +106,7 @@ def update_budgetary_quotation(self,method):
             doc = frappe.get_doc("Budgetary Quotation",i.budgetary_quotation)
             for j in doc.get('items'):
                 if j.sku == i.item_code:
-                    j.rate = i.base_net_rate
+                    j.rate = i.get("base_net_rate")
             doc.status = "Parts Priced"
             doc.save(ignore_permissions=True)
 
@@ -126,8 +124,8 @@ def update_price_for_replacement(self,method):
         for i in self.items:
             so.append("item_price_details",{
             "supplier":self.supplier,
-            "price": i.base_rate,
-            "amount":i.base_amount,
+            "price": i.get("base_net_rate"),
+            "amount":i.get("base_net_amount"),
             "job_order_data":self.get("custom_replacement_unit"),
             "item":i.item_code,
             "model":i.model_number,
@@ -152,8 +150,8 @@ def get_sq_details(so):
 
         sqi.item_code,
         sqi.qty,
-        sqi.rate,
-        sqi.amount,
+        sqi.net_rate as rate,
+        sqi.net_amount as amount,
         sqi.model_number AS  model,
         sqi.item_name,
 
@@ -169,6 +167,7 @@ def get_sq_details(so):
             ON ptc.parent = sq.name
 
         WHERE sq.supply_order_data = %s
+            AND sq.docstatus != 2
 
         ORDER BY sq.name, ptc.idx
         """, (so,), as_dict=True)
@@ -192,8 +191,8 @@ def get_sq_details_for_bq(bq):
 
         sqi.item_code,
         sqi.qty,
-        sqi.rate,
-        sqi.amount,
+        sqi.net_rate as rate,
+        sqi.net_amount as amount,
         sqi.model_number AS  model,
         sqi.item_name,
 

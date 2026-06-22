@@ -546,7 +546,86 @@ def item_import(import_file):
 # 				# 		print(f"{customer_name} - {similar[0].name}")
 						
 				
+# @frappe.whitelist()
+# def set_br():
+#     frappe.db.sql("""
+#         UPDATE `tabPurchase Order Item`
+#         SET branch = %s
+#         WHERE parent = %s
+#     """, (
+#         "Kuwait",
+#         "PO-K26-00046"
+#     ))
+
+#     frappe.db.commit()
+
+#     return "Branch Updated"		
+
+
+from frappe.utils.pdf import get_pdf
+from frappe.utils.file_manager import get_file
+from frappe.utils.csvutils import read_csv_content
+
+@frappe.whitelist()
+def si_import(import_file):
+	"""
+	import_file = File Doc name OR file URL
+	"""
+	# get file path
+	file_doc = get_file(import_file)
+	file_path = file_doc[1]
+
+	# read csv
+	data = read_csv_content(file_path)
+
+	# skip header, process first 20 rows
+	count = 0
+	
+
+	for i in data[1:]:
+		if i[1]:
+			from datetime import datetime
+
+			converted_date = datetime.strptime(i[2], "%d/%m/%Y").strftime("%Y-%m-%d")
+
+			frappe.db.sql("""
+				UPDATE `tabSales Invoice`
+				SET posting_date = %s,
+					set_posting_time = 1
+				WHERE name = %s
+			""", (
+				converted_date,
+				i[3]
+			))
+			
+			# si = frappe.new_doc("Sales Invoice")
+			# if i[1] == "CENTRAL CIRCLE":
+			# 	si.customer = "CENTRAL CIRCLE CO."
+	
+			# else:
+			# 	si.customer = i[1]
+
+			# si.name = i[3]
+			# si.set_posting_date = 1
+			# si.posting_date = i[2]
+			# si.sales_person = i[5]
+			# si.company = "Cyrix TSL - Kuwait"
+			# si.branch = "Kuwait"
+			
+			# si.cost_center = "Kuwait - Repair - CT-K"
+			# si.append("items",{
 				
+			# 	"item_code":"000240",
+			# 	"rate":i[4],
+			# 	"qty":1,
+			# 	"income_account":"4010102 - Revenue from Service - CT-K",
+			# 	"uom":"Nos",
+			# 	"cost_center":"Kuwait - Repair - CT-K"
+			# })
+			# si.save()
+			
+
+	
 			
 
 

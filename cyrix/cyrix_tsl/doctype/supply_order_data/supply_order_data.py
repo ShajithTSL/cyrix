@@ -238,6 +238,7 @@ def create_internal_quotation(supply_order_data, customer):
 def create_delivery_note(supply_order_data, customer):
 	doc = frappe.get_doc("Supply Order Data",supply_order_data)
 	new_doc = frappe.new_doc("Delivery Note")
+	new_doc.customer_reference_number = doc.customer_reference_number
 	new_doc.company = doc.company
 	new_doc.customer = customer
 	if doc.customer != customer:

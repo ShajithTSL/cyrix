@@ -86,23 +86,31 @@ def get_mt(name):
 	company = frappe.get_value("Quotation", name, "company")
 
 	query = """
-		SELECT
-			ths.job_order_data,
-			ths.total_price,
-			IFNULL(SUM(ipd.amount), 0) AS m_cost
+		SELECT		
+			IFNULL(
+				SUM(
+					CASE
+						WHEN ipd.base_amount = 0 THEN ipd.amount
+						ELSE ipd.base_amount
+					END
+				),
+				0
+			) AS m_cost
 		FROM
-			`tabQuotation` AS q
-		LEFT JOIN 
-			`tabTechnician Hours Spent` AS ths ON q.name = ths.parent
-		LEFT JOIN 
-			`tabItem Price Details` AS ipd ON ths.job_order_data = ipd.job_order_data
-			AND q.name = ipd.parent
+			`tabQuotation` q
+		LEFT JOIN
+			`tabQuotation Item` qi
+			ON qi.parent = q.name
+		LEFT JOIN
+			`tabItem Price Details` ipd
+			ON ipd.parent = q.name
+			AND ipd.job_order_data = qi.job_order_data
 		WHERE
 			q.name = %s
 		GROUP BY
-			ths.job_order_data
+			qi.job_order_data
 		ORDER BY
-			ths.job_order_data
+			qi.job_order_data
 	"""
 	result = frappe.db.sql(query, (name,), as_dict=True)
 
@@ -117,7 +125,6 @@ def get_mt(name):
 
 	# Return the total material cost
 	return total_m_cost
-
 
 @frappe.whitelist()
 def get_labour(name):

@@ -73,6 +73,44 @@ frappe.ui.form.on('Quotation', {
 
     validate: function(frm){
         frm.trigger("naming_series")
+        let has_job_order = false;
+        let has_supply_order = false;
+
+        (frm.doc.items || []).forEach(row => {
+            if (row.job_order_data) {
+                has_job_order = true;
+            }
+
+            if (row.supply_order_data) {
+                has_supply_order = true;
+            }
+        });
+
+        if (
+            has_job_order &&
+            has_supply_order &&
+            frm.doc.quotation_type !== "Merged Quotation"
+        ) {
+            frappe.validated = false;
+
+            frappe.confirm(
+                __(
+                    "This document contains both Job Order and Supply Order references.<br><br>" +
+                    "Do you want to change the Quotation Type to <b>Merged Quotation</b> and continue saving?"
+                ),
+                function () {
+                    // Yes
+                    frm.set_value("quotation_type", "Merged Quotation");
+
+                    // Save again after the value is updated
+                    frm.save();
+                },
+                function () {
+                    // No - do nothing
+                }
+            );
+
+        }
     },
     quotation_type: function(frm){
         frm.trigger("naming_series")
@@ -177,6 +215,13 @@ frappe.ui.form.on('Quotation', {
                     "Riyadh": { series: "CQMC-R.YY.-"},
                     "Jeddah": { series: "CQMC-J.YY.-"},
                     "Dubai": { series: "CQMC-DU.YY.-"}
+                },
+                "Merged Quotation": {
+                    "Kuwait": { series: "CMQ-K.YY.-"},
+                    "Dammam": { series: "CMQ-D.YY.-"},
+                    "Riyadh": { series: "CMQ-R.YY.-"},
+                    "Jeddah": { series: "CMQ-J.YY.-"},
+                    "Dubai": { series: "CMQ-DU.YY.-"}
                 },
             };
 
@@ -580,7 +625,21 @@ frappe.ui.form.on('Quotation', {
                             },
                             callback: function(r) {
                                 if(r.message) {
-                                    frm.set_value("items",r.message[0])
+                                    $.each(r.message[0], function(i, j) {
+                                        let row = frm.add_child("items");
+
+                                        row.item_code = j.item_code;
+                                        row.description = j.description;
+                                        row.item_name = j.item_name;
+                                        row.job_order_data = j.job_order_data;
+                                        row.supply_order_data = j.supply_order_data;
+                                        row.mfg = j.mfg;
+                                        row.model = j.model;
+
+                                        // Add other fields as needed
+                                        row.qty = j.qty;
+                                        row.uom = j.uom;
+                                    });
                                     frm.set_value("quotation_type","Internal Quotation - Supply")
                                     frm.set_value("branch",r.message[1])
                                     frm.set_value("party_name",r.message[2])

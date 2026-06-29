@@ -1234,7 +1234,7 @@
    "field_name": null,
    "idx": 0,
    "is_system_generated": 0,
-   "modified": "2026-06-17 14:32:46.540445",
+   "modified": "2026-06-29 11:08:25.937107",
    "modified_by": "Administrator",
    "module": null,
    "name": "Quotation Item-main-field_order",
@@ -1243,6 +1243,29 @@
    "property_type": "Data",
    "row_name": null,
    "value": "[\"item_code\", \"customer_item_code\", \"model\", \"model_number\", \"mfg\", \"col_break1\", \"custom_for_operational_company\", \"item_name\", \"job_order_data\", \"supply_order_data\", \"budgetary_quotation\", \"serial_number\", \"custom_replacement_unit\", \"maintenance_contract\", \"section_break_5\", \"description\", \"tax_code\", \"tax_rate\", \"tax_amount\", \"total_amount\", \"item_group\", \"brand\", \"custom_column_break_zlmht\", \"description_arabic\", \"image_section\", \"image\", \"image_view\", \"quantity_and_rate\", \"qty\", \"stock_uom\", \"col_break2\", \"uom\", \"conversion_factor\", \"stock_qty\", \"available_quantity_section\", \"actual_qty\", \"column_break_ylrv\", \"company_total_stock\", \"section_break_gs1av\", \"invoiced_qty\", \"section_break_16\", \"price_list_rate\", \"base_price_list_rate\", \"discount_and_margin\", \"margin_type\", \"margin_rate_or_amount\", \"rate_with_margin\", \"column_break_18\", \"discount_percentage\", \"discount_amount\", \"distributed_discount_amount\", \"base_rate_with_margin\", \"section_break1\", \"rate\", \"custom_unit_rate\", \"net_rate\", \"amount\", \"net_amount\", \"item_tax_template\", \"col_break3\", \"base_rate\", \"base_net_rate\", \"base_amount\", \"base_net_amount\", \"pricing_rules\", \"stock_uom_rate\", \"is_free_item\", \"is_alternative\", \"has_alternative_item\", \"section_break_43\", \"valuation_rate\", \"column_break_45\", \"gross_profit\", \"item_weight_details\", \"weight_per_unit\", \"total_weight\", \"column_break_20\", \"weight_uom\", \"reference\", \"warehouse\", \"against_blanket_order\", \"blanket_order\", \"blanket_order_rate\", \"column_break_30\", \"prevdoc_doctype\", \"prevdoc_docname\", \"item_balance\", \"projected_qty\", \"col_break4\", \"stock_balance\", \"item_tax_rate\", \"shopping_cart_section\", \"additional_notes\", \"section_break_61\", \"page_break\"]"
+  },
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2026-06-24 11:24:57.667689",
+   "default_value": null,
+   "doc_type": "Quotation Item",
+   "docstatus": 0,
+   "doctype_or_field": "DocField",
+   "field_name": "rate",
+   "idx": 0,
+   "is_system_generated": 0,
+   "modified": "2026-06-24 11:24:57.667689",
+   "modified_by": "Administrator",
+   "module": null,
+   "name": "Quotation Item-rate-precision",
+   "owner": "Administrator",
+   "property": "precision",
+   "property_type": "Select",
+   "row_name": null,
+   "value": "3"
   }
  ],
  "sync_on_migrate": 1

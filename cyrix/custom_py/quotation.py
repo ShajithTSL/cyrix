@@ -64,13 +64,12 @@ customer_quotation_type = ["Customer Quotation - Repair", "Customer Quotation - 
 						"Customer Quotation - Supply", "Customer Quotation - S - Revised",
 						"Customer Quotation - Site Visit", "Customer Quotation - SV - Revised",
 						"Customer Quotation - BQ", "Customer Quotation - BQ - Revised",
-						"Customer Quotation - MC", "Customer Quotation - MC - Revised"]
+						"Customer Quotation - MC", "Customer Quotation - MC - Revised","Merged Quotation"]
 
 quotation_type = ["Customer Quotation - Repair","Customer Quotation - R - Revised",
 				"Customer Quotation - Supply","Customer Quotation - S - Revised",
 				"Customer Quotation - Site Visit","Customer Quotation - SV - Revised",
-				"Customer Quotation - BQ", "Customer Quotation - MC", "Customer Quotation - MC - Revised"]
-
+				"Customer Quotation - BQ", "Customer Quotation - MC", "Customer Quotation - MC - Revised","Merged Quotation"]
 
 def after_insert(doc,method):
 	if doc.quotation_type in internal_quotation_type:
@@ -309,6 +308,7 @@ def have_direct_sq(self, method):
 		for d in self.items
 	]
 
+
 	if not values:
 		return False
 
@@ -326,7 +326,7 @@ def have_direct_sq(self, method):
 	)
 
 	return bool(result)
-	
+
 def fetch_price_from_eval_report(self, method):
 	if self.quotation_type != "Internal Quotation - Repair":
 		return
@@ -344,8 +344,10 @@ def fetch_price_from_eval_report(self, method):
 	scrap_total = 0.0
 
 	for item in self.get("items"):
-		child_eval_list = fetch_eval_list(eval_list, item.job_order_data)
-		eval_list.extend(child_eval_list)
+		if item.job_order_data:
+			child_eval_list = fetch_eval_list(eval_list, item.job_order_data)
+			eval_list.extend(child_eval_list)
+
 	for eval in  eval_list:
 		eval_report_name = frappe.db.exists("Evaluation Report", {"job_order_data": eval})
 		if not eval_report_name:
@@ -401,7 +403,6 @@ def fetch_price_from_eval_report(self, method):
 					sq = sq_data[0]
 					supplier_quotation = sq.sq or ""
 					supplier = sq.supplier or ""
-
 			# Add to item_price_details
 			self.append("item_price_details", {
 				"job_order_data": eval_doc.job_order_data,
@@ -459,8 +460,8 @@ def fetch_price_from_sq(self, method):
 	if self.quotation_type != "Internal Quotation - Repair":
 		return
 
-	self.item_price_details = []
-	self.parts_price = []
+	# self.item_price_details = []
+	# self.parts_price = []
 	self.shipping_cost = 0.0
 
 	supplier_total = 0.0
@@ -469,8 +470,9 @@ def fetch_price_from_sq(self, method):
 	eval_list = []
 
 	for item in self.get("items"):
-		child_eval_list = fetch_eval_list(eval_list, item.job_order_data)
-		eval_list.extend(child_eval_list)
+		if item.job_order_data:
+			child_eval_list = fetch_eval_list(eval_list, item.job_order_data)
+			eval_list.extend(child_eval_list)
 
 	for job_order in set(eval_list):
 		sq_item = frappe.db.get_value("Material List",{"parent":job_order,"parenttype":"Job Order Data"},"item_code") 
@@ -562,6 +564,7 @@ def fetch_price_from_sq(self, method):
 		round(total_material_cost + self.shipping_cost, 2)
 		+ total_price
 	)
+	
 def fetch_supplier_details(self, method):
 	if self.quotation_type == "Internal Quotation - Repair":
 		return
@@ -655,7 +658,6 @@ def fetch_supplier_details(self, method):
 			if detail.supplier_quotation and detail.supplier_quotation not in quotations:
 				quotations.add(detail.supplier_quotation)
 				shipment_total += round(detail.shipment, 2)
-
 	self.total_actual_cost = round(total_price + shipment_total, 2)
 
 

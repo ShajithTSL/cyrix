@@ -92,3 +92,23 @@ def update_invoice_percentage_on_cancel(doc,method):
             total_invoiced_qty = sum([d.invoiced_qty for d in parent_qt.items])
             percentage = (total_invoiced_qty / total_qty) * 100 if total_qty else 0
             frappe.db.set_value("Quotation", qi_doc.parent, "invoiced", percentage)
+
+
+def update_branch():
+    branches = frappe._dict(
+        frappe.get_all(
+            "Sales Invoice",
+            fields=["name", "branch"],
+            as_list=True
+        )
+    )
+
+    for row in frappe.get_all("Sales Invoice Item", filters={"branch": ["in", ["", None]]}, fields=["name", "parent"]):
+        if branches.get(row.parent):
+            frappe.db.set_value("Sales Invoice Item", row.name, "branch", branches[row.parent], update_modified=False)
+
+    for row in frappe.get_all("Sales Taxes and Charges", filters={"branch": ["in", ["", None]]}, fields=["name", "parent"]):
+        if branches.get(row.parent):
+            frappe.db.set_value("Sales Taxes and Charges", row.name, "branch", branches[row.parent], update_modified=False)
+
+    frappe.db.commit()

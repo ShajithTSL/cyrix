@@ -8,7 +8,8 @@
  "field_order": [
   "user",
   "username",
-  "image"
+  "image",
+  "company"
  ],
  "fields": [
   {
@@ -28,13 +29,19 @@
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "label": "Image"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-10 12:12:58.804804",
+ "modified": "2026-06-28 13:02:17.409840",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Signature",
@@ -56,6 +63,7 @@
  ],
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
+ "search_fields": "username",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

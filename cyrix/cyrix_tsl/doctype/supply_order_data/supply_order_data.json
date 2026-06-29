@@ -97,7 +97,10 @@
   "status_duration_details",
   "attach_image",
   "is_quotation_created",
-  "amended_from"
+  "amended_from",
+  "tab_4_tab",
+  "notes_section",
+  "notes"
  ],
  "fields": [
   {
@@ -271,7 +274,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nPending Internal Approval\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nReceived\nIn Custom\nDelivered\nPartially Delivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid\nSupplier Quoted"
+   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nPending Internal Approval\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nReceived\nIn Custom\nDelivered\nPartially Delivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid\nSupplier Quoted\nCancelled"
   },
   {
    "allow_on_submit": 1,
@@ -676,15 +679,32 @@
    "default": "0",
    "fieldname": "is_approved",
    "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Approved"
+   "label": "Approved",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tab_4_tab",
+   "fieldtype": "Tab Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes_section",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-17 10:44:11.419275",
+ "modified": "2026-06-28 12:56:04.520060",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

@@ -211,6 +211,7 @@
    "label": "Materials"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "received_equipment",
    "fieldtype": "Table",
    "label": "Equipments & Components",
@@ -256,7 +257,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-14 13:10:52.506110",
+ "modified": "2026-06-24 16:01:13.547321",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Create Supply Order",

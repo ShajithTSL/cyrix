@@ -150,17 +150,17 @@ def create_payment(bg):
     je.paid_amount = bg_doc.bid_bg_value
     je.custom_bg = bg
     
-    bg_account = ""
-    account = frappe.get_value("Account",{"company":bg_doc.company},"name")
-    if account:
-        bg_account = account
+    # bg_account = ""
+    # account = frappe.get_value("Account",{"company":bg_doc.company},"name")
+    # if account:
+    #     bg_account = account
 
     je.append("accounts", {
         "reference_doctype": "BG",
         "supply_order_data": bg_doc.supply_order,
         "work_order_data": bg_doc.job_order,
         "debit_in_account_currency":bg_doc.bid_bg_value,
-        "account":bg_account,
+        "account":"1020701 - Bank Guarantees - CT-K",
         "party_type":"Customer",
         "party":bg_doc.customer,
         "cost_center":bg_doc.department,

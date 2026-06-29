@@ -257,7 +257,12 @@ def preview_custom_pdf(doctype, name, print_format="Standard", no_letterhead=0):
 	pdf = get_pdf(html)
 
 	# Clean filename (remove spaces, special chars)
-	customer = (doc.customer_name or "").replace(" ", "_").replace("/", "_")
+	if doctype == "Quotation" and doc.get("parent_customer"):
+		customer = doc.get("parent_customer")+" "+ doc.customer_name
+	else:
+		customer = doc.customer_name or ""
+
+	customer = customer.replace(" ", "_").replace("/", "_")
 	filename = f"{name}_{customer}.pdf"
 
 	frappe.local.response.filename = filename
@@ -548,18 +553,36 @@ def item_import(import_file):
 				
 # @frappe.whitelist()
 # def set_br():
-#     frappe.db.sql("""
-#         UPDATE `tabPurchase Order Item`
-#         SET branch = %s
-#         WHERE parent = %s
-#     """, (
-#         "Kuwait",
-#         "PO-K26-00046"
-#     ))
+# 	sales_invoices = frappe.get_all("Sales Invoice",filters={"custom_old_invoice": ["!=", ""]},fields=["name", "custom_old_invoice"])
 
-#     frappe.db.commit()
+# 	for si in sales_invoices:
+		
 
-#     return "Branch Updated"		
+# 		if not frappe.db.exists("Sales Invoice", si.custom_old_invoice):
+# 			print(si.name)
+
+# 			frappe.rename_doc(
+# 				"Sales Invoice",
+# 				si.name,
+# 				si.custom_old_invoice,
+# 				force=True
+# 			)
+
+# 	frappe.db.commit()
+
+    # frappe.db.sql("""
+    #     UPDATE `tabPurchase Order Item`
+    #     SET branch = %s
+    #     WHERE parent = %s
+    # """, (
+    #     "Kuwait",
+    #     "PO-K26-00046"
+    # ))
+
+    # frappe.db.commit()
+
+    # return "Branch Updated"		
+
 
 
 from frappe.utils.pdf import get_pdf
@@ -584,49 +607,64 @@ def si_import(import_file):
 
 	for i in data[1:]:
 		if i[1]:
+
+# 			frappe.rename_doc("Sales Invoice", si.name, invoice_name, force=True)
+
+    		# frappe.db.commit()
+			# count = count + 1
+			# print(i[3])
+			# frappe.db.sql("""
+			# 	DELETE FROM `tabSales Invoice`
+			# 	WHERE name = %s
+			# """, (i[3],))
+
+
+			# frappe.db.sql("""
+			# 	DELETE FROM `tabGL Entry`
+			# 	WHERE voucher_no = %s
+			# """, (i[3],))
+
+			# frappe.db.sql("""
+			# 	DELETE FROM `tabPayment Ledger Entry`
+			# 	WHERE voucher_no = %s
+			# """, (i[3],))
+
+
 			from datetime import datetime
 
 			converted_date = datetime.strptime(i[2], "%d/%m/%Y").strftime("%Y-%m-%d")
-
-			frappe.db.sql("""
-				UPDATE `tabSales Invoice`
-				SET posting_date = %s,
-					set_posting_time = 1
-				WHERE name = %s
-			""", (
-				converted_date,
-				i[3]
-			))
 			
-			# si = frappe.new_doc("Sales Invoice")
-			# if i[1] == "CENTRAL CIRCLE":
-			# 	si.customer = "CENTRAL CIRCLE CO."
-	
-			# else:
-			# 	si.customer = i[1]
+			invoice_name = i[3]
 
-			# si.name = i[3]
-			# si.set_posting_date = 1
-			# si.posting_date = i[2]
-			# si.sales_person = i[5]
-			# si.company = "Cyrix TSL - Kuwait"
-			# si.branch = "Kuwait"
+			if invoice_name.startswith("INV-"):
+				number = invoice_name.replace("INV-", "")
+				invoice_name = f"INV- {int(number):05d}"
+
+			si = frappe.new_doc("Sales Invoice")
 			
-			# si.cost_center = "Kuwait - Repair - CT-K"
-			# si.append("items",{
-				
-			# 	"item_code":"000240",
-			# 	"rate":i[4],
-			# 	"qty":1,
-			# 	"income_account":"4010102 - Revenue from Service - CT-K",
-			# 	"uom":"Nos",
-			# 	"cost_center":"Kuwait - Repair - CT-K"
-			# })
-			# si.save()
+			si.customer = i[1]
+			si.name = invoice_name
+			si.set_posting_time = 1
+			si.posting_date = converted_date
+			si.due_date = converted_date
+			si.sales_person = i[5]
+			si.company = "Cyrix TSL - Kuwait"
+			si.branch = "Kuwait"
+			si.currency = "KWD"
+			si.custom_old_invoice = i[3]
+			si.cost_center = "Kuwait - Repair - CT-K"
 			
+			# si.items = []
+			si.append("items",{
+			"item_code":"000240",
+			"rate":float(i[4]),
+			"qty":1,
+			"income_account":"4010102 - Revenue from Service - CT-K",
+			"uom":"Nos",
+			"cost_center":"Kuwait - Repair - CT-K"
+			})
 
-	
 			
-
-
-	
+			si.save()
+			print(i[3])
+			

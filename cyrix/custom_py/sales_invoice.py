@@ -97,18 +97,18 @@ def update_invoice_percentage_on_cancel(doc,method):
 def update_branch():
     branches = frappe._dict(
         frappe.get_all(
-            "Sales Invoice",
+            "Purchase Invoice",
             fields=["name", "branch"],
             as_list=True
         )
     )
 
-    for row in frappe.get_all("Sales Invoice Item", filters={"branch": ["in", ["", None]]}, fields=["name", "parent"]):
+    for row in frappe.get_all("Purchase Invoice Item", filters={"branch": ["in", ["", None]]}, fields=["name", "parent"]):
         if branches.get(row.parent):
-            frappe.db.set_value("Sales Invoice Item", row.name, "branch", branches[row.parent], update_modified=False)
+            frappe.db.set_value("Purchase Invoice Item", row.name, "branch", branches[row.parent], update_modified=False)
 
-    for row in frappe.get_all("Sales Taxes and Charges", filters={"branch": ["in", ["", None]]}, fields=["name", "parent"]):
+    for row in frappe.get_all("Purchase Taxes and Charges", filters={"branch": ["in", ["", None]]}, fields=["name", "parent"]):
         if branches.get(row.parent):
-            frappe.db.set_value("Sales Taxes and Charges", row.name, "branch", branches[row.parent], update_modified=False)
+            frappe.db.set_value("Purchase Taxes and Charges", row.name, "branch", branches[row.parent], update_modified=False)
 
     frappe.db.commit()

@@ -94,7 +94,33 @@ def on_update_after_submit(doc,method):
 				frappe.db.set_value("Budgetary Quotation",i.budgetary_quotation,"quotation_approved_date",doc.approval_date)
 	update_quotation_reference(doc,method)
 
-def update_job_order_status(self, method):        
+def update_job_order_status(self, method):
+	def update_document_status(self, method):
+		if self.quotation_type in ["Merged Quotation"]:
+			for item in self.items:
+				if item.job_order_data:
+					update = frappe.get_doc("Job Order Data", item.job_order_data)
+					if update.is_approved == 0:
+						if method == "on_submit":
+							update.status = "A-Approved"
+						elif method in ["after_insert","validate"]:
+							update.status = "Q-Quoted"
+
+					update.po_no = self.get("purchase_order_no")
+					update.save(ignore_permissions=True)
+					
+				if item.supply_order_data:
+					doc = frappe.get_doc("Supply Order Data", item.supply_order_data)
+					if doc.status not in ["Paid", "Partially Paid", "Invoiced"]:
+						if doc.is_approved == 0:
+							if method == "on_submit":
+								doc.status = "Approved"
+							elif method in ["after_insert","validate"]:
+								doc.status = "Quoted"
+
+					doc.po_no = self.get("purchase_order_no")
+					doc.save(ignore_permissions=True)  
+					   
 	def update_status(self,item, status):
 		if item.job_order_data:
 			update = frappe.get_doc("Job Order Data", item.job_order_data)
@@ -138,6 +164,7 @@ def update_job_order_status(self, method):
 
 				if self.workflow_state == "Waiting For Approval":
 					update_status(self,item, "Pending Internal Approval")
+	update_document_status(self, method)
 
 def update_supply_order_status(self, method):
 	supply_status_map = {

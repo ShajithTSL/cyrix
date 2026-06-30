@@ -492,7 +492,8 @@ frappe.ui.form.on('Quotation', {
 			    }			
             },
             () => {
-                if (frm.doc.docstatus === 0 && ["Customer Quotation - Repair", "Customer Quotation - R - Revised",
+                if (frm.doc.docstatus === 0 && ["Merged Quotation",
+                            "Customer Quotation - Repair", "Customer Quotation - R - Revised",
 						   "Customer Quotation - Supply", "Customer Quotation - S - Revised",
 						   "Customer Quotation - Site Visit", "Customer Quotation - SV - Revised",
 						   "Customer Quotation - BQ", "Customer Quotation - BQ - Revised",

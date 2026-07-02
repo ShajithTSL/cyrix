@@ -12,9 +12,11 @@
   "serial_no",
   "category",
   "sub_category",
+  "column_break_lvyc",
   "qty",
   "returned_qty",
   "released",
+  "returned",
   "column_break_8",
   "part_name",
   "websitelink",
@@ -230,19 +232,30 @@
   {
    "allow_on_submit": 1,
    "columns": 1,
-   "default": "1",
+   "default": "0",
    "fieldname": "returned_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Returned Qty",
-   "read_only_depends_on": "eval:(doc.is_read_only == 1);"
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lvyc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "returned",
+   "fieldtype": "Check",
+   "label": "Returned",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-02 09:58:41.598211",
- "modified_by": "shajith@tsl-me.com",
+ "modified": "2026-07-02 10:48:59.467901",
+ "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Part Sheet Item",
  "owner": "Administrator",

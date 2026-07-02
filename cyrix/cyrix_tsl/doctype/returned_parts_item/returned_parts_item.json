@@ -15,11 +15,11 @@
   "qty",
   "column_break_lrjy",
   "part_name",
-  "column_break_susl",
   "released",
-  "reference",
+  "column_break_susl",
   "return_reason",
   "column_break_ibkd",
+  "reference",
   "reason",
   "part_description",
   "price_ea",
@@ -36,7 +36,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "SKU",
-   "options": "Item"
+   "options": "Item",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -46,13 +47,15 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Model/Part Number",
-   "options": "Item Model"
+   "options": "Item Model",
+   "read_only": 1
   },
   {
    "fetch_from": "model.model",
    "fieldname": "model_name",
    "fieldtype": "Read Only",
-   "label": "Model Name"
+   "label": "Model Name",
+   "read_only": 1
   },
   {
    "fetch_from": "part.mfg",
@@ -60,18 +63,20 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Manufacturer",
-   "options": "Item Mfg"
+   "options": "Item Mfg",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "columns": 1,
-   "fetch_from": "part.category_",
+   "fetch_from": "part.category",
    "fieldname": "category",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Category",
    "mandatory_depends_on": "eval:frappe.user.has_role(\"Procurement\")",
-   "options": "Category"
+   "options": "Category",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -82,7 +87,8 @@
    "in_list_view": 1,
    "label": "Sub Category",
    "mandatory_depends_on": "eval:frappe.user.has_role(\"Procurement\")",
-   "options": "Sub Category"
+   "options": "Sub Category",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -100,12 +106,14 @@
    "default": "0",
    "fieldname": "released",
    "fieldtype": "Check",
-   "label": "Released"
+   "label": "Released",
+   "read_only": 1
   },
   {
    "fieldname": "reference",
    "fieldtype": "Read Only",
-   "label": "Reference"
+   "label": "Reference",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -116,7 +124,8 @@
   {
    "fieldname": "part_name",
    "fieldtype": "Text Editor",
-   "label": "Description"
+   "label": "Description",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -134,19 +143,22 @@
    "fieldname": "part_description",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Package Name"
+   "label": "Package Name",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "price_ea",
    "fieldtype": "Currency",
-   "label": "Price EA"
+   "label": "Price EA",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "total",
    "fieldtype": "Currency",
-   "label": "Total"
+   "label": "Total",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -154,7 +166,8 @@
    "fetch_if_empty": 1,
    "fieldname": "bin_no",
    "fieldtype": "Data",
-   "label": "Bin No"
+   "label": "Bin No",
+   "read_only": 1
   },
   {
    "fieldname": "spare_part_image_section",
@@ -182,8 +195,8 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-02 09:55:23.468373",
- "modified_by": "shajith@tsl-me.com",
+ "modified": "2026-07-02 10:55:15.816866",
+ "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Returned Parts Item",
  "owner": "shajith@tsl-me.com",

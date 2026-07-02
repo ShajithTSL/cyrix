@@ -7,6 +7,8 @@ import json
 from frappe.utils import add_to_date
 from cyrix.custom_py.boot import get_bootinfo as info
 from cyrix.custom_py.utils import sendmail
+from frappe.model.mapper import get_mapped_doc
+import datetime
 
 NO_REPLY_EMAIL = "no-reply@cyrix-tsl.com"
 base_url = frappe.utils.get_url()
@@ -629,10 +631,6 @@ def create_technical_report(name):
 
 	return new_doc
 
-
-# from tsl.tsl.doctype.returned_parts.returned_parts import warehouse_and_cc
-from frappe.model.mapper import get_mapped_doc
-
 @frappe.whitelist()
 def create_returned_parts(source_name, target_doc=None):
 	target_doc = frappe.new_doc("Returned Parts")
@@ -664,20 +662,14 @@ def create_returned_parts(source_name, target_doc=None):
 		source_item = frappe.get_doc("Part Sheet Item", item.reference)
 		item.qty = source_item.qty - source_item.returned_qty
 
-	# if doc.company == "TSL COMPANY - Kuwait":
-	# 	target_doc.naming_series = "RP-K.YY.-"
-
-	# if doc.company == "TSL COMPANY - UAE":
-	# 	target_doc.naming_series = "RP-DU.YY.-"
-
-	# if doc.company == "TSL COMPANY - KSA":
-	# 	if doc.branch == "Riyadh - TSL- KSA":
-	# 		target_doc.naming_series = "RP-R.YY.-"
-	# 	elif doc.branch == "Jeddah - TSL-SA":
-	# 		target_doc.naming_series = "RP-J.YY.-"
-	# 	elif doc.branch == "Dammam - TSL-SA":
-	# 		target_doc.naming_series = "RP-D.YY.-"
-	# warehouse, _ = warehouse_and_cc(doc.company, doc.branch)
+	branch_series_map = {
+		"Dammam": "RP-D.YY.-",
+		"Jeddah": "RP-J.YY.-",
+		"Riyadh": "RP-R.YY.-",
+		"Kuwait": "RP-K.YY.-",
+		"Dubai": "RP-DU.YY.-"
+	}
+	target_doc.naming_series = branch_series_map.get(doc.branch, "")
 	target_doc.warehouse = warehouse_list.get(doc.branch)
 	target_doc.date = datetime.datetime.now()
 	target_doc.job_order_data = frappe.db.get_value("Evaluation Report",source_name,"job_order_data")

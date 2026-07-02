@@ -75,5 +75,9 @@ frappe.listview_settings['Supply Order Data'] = {
          else if (doc.status === "Supplier Quoted") {
                 return [__("Supplier Quoted"), "green", "status,=,Supplier Quoted"];
         }
+
+        else if (doc.status === "Cancelled") {
+                return [__("Cancelled"), "red", "status,=,Cancelled"];
+        }
     },
 };

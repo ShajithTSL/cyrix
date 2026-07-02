@@ -1,37 +1,32 @@
 {
  "actions": [],
- "creation": "2025-07-29 14:32:08.023444",
+ "allow_rename": 1,
+ "creation": "2026-07-02 09:52:45.974566",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "part",
   "model",
+  "model_name",
   "manufacturer",
-  "marking_code",
-  "serial_no",
   "category",
   "sub_category",
   "qty",
-  "returned_qty",
-  "released",
-  "column_break_8",
+  "column_break_lrjy",
   "part_name",
-  "websitelink",
-  "column_break_cyax",
+  "column_break_susl",
+  "released",
+  "reference",
+  "return_reason",
+  "column_break_ibkd",
+  "reason",
   "part_description",
   "price_ea",
   "total",
-  "parts_availability",
-  "part_sheet_no",
-  "create",
-  "from_scrap",
   "bin_no",
   "spare_part_image_section",
-  "add_image",
-  "image_18",
-  "is_not_edit",
-  "is_read_only"
+  "add_image"
  ],
  "fields": [
   {
@@ -54,6 +49,12 @@
    "options": "Item Model"
   },
   {
+   "fetch_from": "model.model",
+   "fieldname": "model_name",
+   "fieldtype": "Read Only",
+   "label": "Model Name"
+  },
+  {
    "fetch_from": "part.mfg",
    "fieldname": "manufacturer",
    "fieldtype": "Link",
@@ -62,27 +63,14 @@
    "options": "Item Mfg"
   },
   {
-   "fetch_from": "part.marking_code",
-   "fieldname": "marking_code",
-   "fieldtype": "Data",
-   "label": "Marking Code",
-   "read_only": 1
-  },
-  {
-   "fieldname": "serial_no",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Serial No",
-   "options": "Serial Number"
-  },
-  {
    "allow_on_submit": 1,
    "columns": 1,
-   "fetch_from": "part.category",
+   "fetch_from": "part.category_",
    "fieldname": "category",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Category",
+   "mandatory_depends_on": "eval:frappe.user.has_role(\"Procurement\")",
    "options": "Category"
   },
   {
@@ -93,6 +81,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Sub Category",
+   "mandatory_depends_on": "eval:frappe.user.has_role(\"Procurement\")",
    "options": "Sub Category"
   },
   {
@@ -114,21 +103,30 @@
    "label": "Released"
   },
   {
-   "fieldname": "column_break_8",
-   "fieldtype": "Column Break"
+   "fieldname": "reference",
+   "fieldtype": "Read Only",
+   "label": "Reference"
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "part.description",
+   "fieldname": "return_reason",
+   "fieldtype": "Text Editor",
+   "label": "Return Reason"
+  },
+  {
    "fieldname": "part_name",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Description"
   },
   {
    "allow_on_submit": 1,
-   "fieldname": "websitelink",
-   "fieldtype": "Data",
-   "label": "Website/Link"
+   "columns": 1,
+   "fieldname": "reason",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Reason",
+   "options": "\nNormal\nNot Working\nMistake from Supplier\nBroken Shipment\nOld parts Working Fine\nParts Not compatible\nParameter Issue\nTechnician Ordered Wrong Parts\nTechnician Ordered Extra",
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -152,33 +150,8 @@
   },
   {
    "allow_on_submit": 1,
-   "columns": 1,
-   "default": "No",
-   "fieldname": "parts_availability",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Parts Availability",
-   "options": "\nYes\nNo",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "part_sheet_no",
-   "fieldtype": "Data",
-   "label": "Part Sheet No",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "from_scrap",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Scrap "
-  },
-  {
-   "allow_on_submit": 1,
    "fetch_from": "part.bin",
+   "fetch_if_empty": 1,
    "fieldname": "bin_no",
    "fieldtype": "Data",
    "label": "Bin No"
@@ -194,58 +167,26 @@
    "label": "Add Image"
   },
   {
-   "default": "add_image",
-   "fieldname": "image_18",
-   "fieldtype": "Image",
-   "options": "add_image"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "is_not_edit",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Not Edit"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "is_read_only",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Read Only"
-  },
-  {
-   "fieldname": "column_break_cyax",
+   "fieldname": "column_break_lrjy",
    "fieldtype": "Column Break"
   },
   {
-   "columns": 1,
-   "fieldname": "create",
-   "fieldtype": "Button",
-   "in_list_view": 1,
-   "label": "Create",
-   "permlevel": 1
+   "fieldname": "column_break_susl",
+   "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
-   "columns": 1,
-   "default": "1",
-   "fieldname": "returned_qty",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Returned Qty",
-   "read_only_depends_on": "eval:(doc.is_read_only == 1);"
+   "fieldname": "column_break_ibkd",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-02 09:58:41.598211",
+ "modified": "2026-07-02 09:55:23.468373",
  "modified_by": "shajith@tsl-me.com",
  "module": "Cyrix TSL",
- "name": "Part Sheet Item",
- "owner": "Administrator",
+ "name": "Returned Parts Item",
+ "owner": "shajith@tsl-me.com",
  "permissions": [],
  "row_format": "Dynamic",
  "sort_field": "modified",

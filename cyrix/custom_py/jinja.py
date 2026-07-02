@@ -2563,7 +2563,24 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 			AND pe.payment_type = 'Receive'
 			AND si.sales_person = %s
 			""", (start_date, end_date, sp["name"]), as_dict=True)
-			col2 = col_result2[0]["total"] or 0 if col_result2 else 0
+
+			# col2 = col_result2[0]["total"] or 0 if col_result2 else 0
+
+			je_result2 = frappe.db.sql("""
+			SELECT
+				COALESCE(SUM(jea.credit_in_account_currency), 0) AS total
+			FROM `tabJournal Entry Account` jea
+			INNER JOIN `tabJournal Entry` je
+				ON je.name = jea.parent
+			WHERE je.posting_date BETWEEN %s AND %s
+				AND je.docstatus = 1
+				AND jea.custom_sales_person = %s
+				AND jea.reference_type = 'Sales Invoice'
+			""", (start_date, end_date, sp["name"]), as_dict=True)
+
+			je_total2 = je_result2[0]["total"] or 0
+
+			col2 = (col_result2[0]["total"] or 0 if col_result2 else 0) + (je_result2[0]["total"] or 0 if je_result2 else 0)
 
 			# Get actual values (cumulative - date range)
 			app_result = frappe.db.sql("""
@@ -2595,7 +2612,25 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 			AND pe.payment_type = 'Receive'
 			AND si.sales_person = %s
 			""", (from_date, to_date, sp["name"]), as_dict=True)
-			col = col_result[0]["total"] or 0 if col_result else 0
+
+			# col = col_result[0]["total"] or 0 if col_result else 0
+
+			je_result = frappe.db.sql("""
+			SELECT
+				COALESCE(SUM(jea.credit_in_account_currency), 0) AS total
+			FROM `tabJournal Entry Account` jea
+			INNER JOIN `tabJournal Entry` je
+				ON je.name = jea.parent
+			WHERE je.posting_date BETWEEN %s AND %s
+				AND je.docstatus = 1
+				AND jea.custom_sales_person = %s
+				AND jea.reference_type = 'Sales Invoice'
+			""", (from_date, to_date, sp["name"]), as_dict=True)
+
+			je_total = je_result[0]["total"] or 0
+
+			col = (col_result[0]["total"] or 0 if col_result else 0) + (je_result[0]["total"] or 0 if je_result else 0)
+
 
 			# Calculate percentages (current month range)
 			pct_app2 = round((app2 / monthly_approval_target2) * 100) if monthly_approval_target2 else 0

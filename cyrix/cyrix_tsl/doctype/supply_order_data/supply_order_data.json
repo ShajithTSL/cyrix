@@ -193,6 +193,7 @@
    "allow_on_submit": 1,
    "fieldname": "customer_reference_number",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Customer Reference Number"
   },
   {
@@ -704,7 +705,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-28 12:56:04.520060",
+ "modified": "2026-07-01 13:06:33.015377",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

@@ -1,0 +1,238 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-07-02 09:41:14.800450",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "customer",
+  "parent_customer",
+  "attn",
+  "ner_field",
+  "priority_status",
+  "column_break_cilm",
+  "date",
+  "hours_spent",
+  "document_active_status",
+  "ratehour",
+  "warehouse",
+  "column_break_3",
+  "company",
+  "branch",
+  "specify_1",
+  "column_break_obvw",
+  "technician",
+  "job_order_data",
+  "parent_jo",
+  "section_break_7",
+  "evaluation_details",
+  "section_break_ylpy",
+  "items",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "EVAL-REP-.YYYY.-\nEVAL-DU-REP-.YYYY.-\nEVAL-D-.YY.-\nEVAL-J-.YY.-\nEVAL-R-.YY.-",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer.parent_customer",
+   "fetch_if_empty": 1,
+   "fieldname": "parent_customer",
+   "fieldtype": "Link",
+   "label": "Parent Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attn",
+   "fieldtype": "Data",
+   "label": "Sales Person",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "ner_field",
+   "fieldtype": "Data",
+   "label": "NER Field",
+   "read_only": 1
+  },
+  {
+   "fieldname": "priority_status",
+   "fieldtype": "Select",
+   "label": "Priority Status",
+   "options": "Normal\nUrgent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cilm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "hours_spent",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Hours Spent"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Yes",
+   "fieldname": "document_active_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Document Active Status",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "ratehour",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Rate/Hour"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:(doc.status == \"Others\");",
+   "fieldname": "specify_1",
+   "fieldtype": "Small Text",
+   "label": "Specify"
+  },
+  {
+   "fieldname": "column_break_obvw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "technician",
+   "fieldtype": "Link",
+   "label": "Technician",
+   "options": "Technician ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "job_order_data",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Job Order",
+   "options": "Job Order Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parent_jo",
+   "fieldtype": "Link",
+   "label": "Parent JO",
+   "options": "Job Order Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "evaluation_details",
+   "fieldtype": "Table",
+   "label": "Evaluation Details",
+   "options": "Evaluation Item",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Part Sheet",
+   "options": "Returned Parts Item"
+  },
+  {
+   "fieldname": "section_break_ylpy",
+   "fieldtype": "Section Break",
+   "label": "Returned Parts "
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Returned Parts",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "make_attachments_public": 1,
+ "modified": "2026-07-02 09:55:47.735632",
+ "modified_by": "shajith@tsl-me.com",
+ "module": "Cyrix TSL",
+ "name": "Returned Parts",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "shajith@tsl-me.com",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_views": 1
+}

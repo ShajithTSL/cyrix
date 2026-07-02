@@ -80,6 +80,7 @@ def get_data(filters):
 				"approval_date": quote.get("approval_date"),
 				"quotation": quote.get("quote_name"),
 				"quoted_amount": quote.get("amount", 0),
+				"vat_amount": quote.get("vat", 0),
 				"delivery_note": order.dn_no if first_row else "",
 				"delivery_date": order.dn_date if first_row else "",
 				"invoice_no": order.invoice_no if first_row else "",
@@ -87,7 +88,7 @@ def get_data(filters):
 				"payment_entry_reference": order.payment_entry if first_row else "",
 				"payment_date": order.advance_paid_date if first_row else "",
 				"status": order.status if first_row else "",
-				"total_amount": quote.get("amount", 0),
+				"total_amount": quote.get("amount", 0) +  quote.get("vat", 0),
 				"currency": frappe.get_value("Company", order.company, "default_currency")
 			})
 
@@ -129,13 +130,14 @@ def get_quotation_details(order_name, model_no):
 		SELECT qi.net_amount as amount,
 		       q.transaction_date as quoted_date,
 		       q.approval_date as approval_date,
+			   qi.tax_amount as vat,
 		       q.name as quote_name
 		FROM `tabQuotation` q
 		JOIN `tabQuotation Item` qi ON q.name = qi.parent
 		WHERE qi.supply_order_data = %s
 		  AND qi.model = %s
-		  AND q.workflow_state = "Approved By Customer"
-		LIMIT 1
+		  AND q.workflow_state in ("Approved By Customer","Quoted to Customer") ORDER BY q.transaction_date DESC
+		LIMIT 1 
 		""",
 		(order_name, model_no),
 		as_dict=1,

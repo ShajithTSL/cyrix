@@ -9,25 +9,40 @@ frappe.ui.form.on("Evaluation Report", {
 		}
 	},
 	send(frm){
-         frappe.call({
-		method: "cyrix.custom_py.mail_notification.purchase_msg_to_info",
-		args: {
-			"com": frm.doc.company,
-			"branch":frm.doc.branch,
-			"ev":frm.doc.name,
-			"sender":frappe.session.user
-		},
-		
-		callback: function(r) {
-			if(r.message) {
-		
-				
-			}
-		}
-				
-		})
-        
+        frappe.call({
+			method: "cyrix.custom_py.mail_notification.purchase_msg_to_info",
+			args: {
+				"com": frm.doc.company,
+				"branch":frm.doc.branch,
+				"ev":frm.doc.name,
+				"sender":frappe.session.user
+			}				
+		})       
     },
+
+	returned_parts: function(frm){
+		// Returned Parts
+		if(frm.doc.docstatus == 1 && frm.doc.if_parts_required == 1 && (frappe.user.has_role("Purchase Manager"))){
+			// let all_checked = frm.doc.items.every(row => row.returned);
+			// if (!all_checked) {
+				frm.add_custom_button(__("Returned Parts"), function(){
+					frappe.call({
+						method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.create_returned_parts",
+						args: {
+							"source_name": frm.doc.name
+						},
+						callback: function(r) {
+							if(r.message) {
+								var doc = frappe.model.sync(r.message);
+								frappe.set_route("Form", doc[0].doctype, doc[0].name);
+							}
+						}
+					});
+				},__('Create'));
+			// }
+		}
+	},
+	
 
 
 	
@@ -182,6 +197,8 @@ frappe.ui.form.on("Evaluation Report", {
 		if(frm.doc.status == "Extra Parts"){
 			frm.set_df_property('extra_repair_time', 'hidden', 0);
 		}
+
+		frm.trigger("returned_parts")
 	}
 });
 

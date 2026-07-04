@@ -203,8 +203,7 @@
    "allow_on_submit": 1,
    "fieldname": "returned_parts",
    "fieldtype": "Table",
-   "options": "Returned Parts Item",
-   "read_only": 1
+   "options": "Returned Parts Item"
   },
   {
    "fieldname": "evaluation_report",
@@ -218,8 +217,8 @@
  "is_submittable": 1,
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-07-02 10:55:30.821478",
- "modified_by": "Administrator",
+ "modified": "2026-07-02 15:53:56.018123",
+ "modified_by": "shajith@tsl-me.com",
  "module": "Cyrix TSL",
  "name": "Returned Parts",
  "naming_rule": "By \"Naming Series\" field",

@@ -88,8 +88,10 @@ def on_update_after_submit(doc,method):
 		for i in doc.items:
 			if i.job_order_data:
 				frappe.db.set_value("Job Order Data",i.job_order_data,"quotation_approved_date",doc.approval_date)
+				frappe.db.set_value("Job Order Data",i.job_order_data,"type_of_approval",doc.type_of_approval)
 			if i.supply_order_data:
 				frappe.db.set_value("Supply Order Data",i.supply_order_data,"quotation_approved_date",doc.approval_date)
+				frappe.db.set_value("Supply Order Data",i.supply_order_data,"type_of_approval",doc.type_of_approval)
 			if i.budgetary_quotation:
 				frappe.db.set_value("Budgetary Quotation",i.budgetary_quotation,"quotation_approved_date",doc.approval_date)
 	update_quotation_reference(doc,method)
@@ -107,6 +109,7 @@ def update_job_order_status(self, method):
 							update.status = "Q-Quoted"
 
 					update.po_no = self.get("purchase_order_no")
+					update.type_of_approval = self.get("type_of_approval")
 					update.save(ignore_permissions=True)
 					
 				if item.supply_order_data:
@@ -119,6 +122,7 @@ def update_job_order_status(self, method):
 								doc.status = "Quoted"
 
 					doc.po_no = self.get("purchase_order_no")
+					doc.type_of_approval = self.get("type_of_approval")
 					doc.save(ignore_permissions=True)  
 					   
 	def update_status(self,item, status):

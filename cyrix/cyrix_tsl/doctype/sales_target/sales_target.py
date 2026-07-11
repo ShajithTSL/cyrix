@@ -21,7 +21,9 @@ class SalesTarget(Document):
 		year = date.today().year
 
 		months = []
-
+		invoice_monthly = (self.invoice_target or 0) / 12
+		collection_monthly = (self.collection_target or 0) / 12
+		quotation_monthly = (self.quotation_approval_target or 0) / 12
 		for month in range(1, 13):
 			month_name = calendar.month_abbr[month]  # Jan, Feb, ...
 
@@ -32,12 +34,15 @@ class SalesTarget(Document):
 			end_date = date(year, month, last_day)
 
 		
-
+		
 			self.append("target_table", {
 				
 					"month": month_name,
 					"from_date": start_date,
 					"to_date": end_date,
+					"invoice_target": round(invoice_monthly, 2),
+					"collection_target": round(collection_monthly, 2),
+					"quotation_approval_target": round(quotation_monthly, 2),
 					
 				})
 

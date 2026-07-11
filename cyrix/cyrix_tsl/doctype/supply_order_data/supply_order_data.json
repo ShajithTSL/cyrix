@@ -37,6 +37,7 @@
   "customer_reference_number",
   "status",
   "remarks",
+  "type_of_approval",
   "column_break_rjhd",
   "job_order_data",
   "is_approved",
@@ -699,13 +700,20 @@
    "fieldname": "notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "type_of_approval",
+   "fieldtype": "Select",
+   "label": "Type of Approval",
+   "options": "\nPO\nEmail\nPhone Call\nOthers"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-01 13:06:33.015377",
+ "modified": "2026-07-07 11:51:33.741792",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",

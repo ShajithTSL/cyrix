@@ -10,6 +10,7 @@
   "item_code",
   "item_number",
   "model_no",
+  "model",
   "update_model_no",
   "mfg",
   "column_break_ioet",
@@ -237,13 +238,19 @@
    "fieldname": "equipment_name",
    "fieldtype": "Data",
    "label": "Equipment Name"
+  },
+  {
+   "fetch_from": "model_no.model",
+   "fieldname": "model",
+   "fieldtype": "Read Only",
+   "label": "Model"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-14 13:04:13.261474",
- "modified_by": "Administrator",
+ "modified": "2026-07-09 11:57:41.603401",
+ "modified_by": "shajith@tsl-me.com",
  "module": "Cyrix TSL",
  "name": "Supply Order Table",
  "owner": "Administrator",

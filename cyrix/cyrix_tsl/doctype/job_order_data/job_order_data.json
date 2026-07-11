@@ -36,6 +36,7 @@
   "status",
   "custom_status",
   "maintenance_contract",
+  "type_of_approval",
   "column_break_cwfo",
   "is_approved",
   "unit_type",
@@ -743,7 +744,7 @@
    "fieldname": "custom_status",
    "fieldtype": "Select",
    "label": "Custom Status",
-   "options": "\nUE-Under Evaluation\nUTR-Under Technician Repair\nRNR-Return Not Repaired\nRNA-Return Not Approved\nRNF-Return No Fault\nRNP-Return No Parts\nQ-Quoted\nA-Approved\nReplace\nC-Cancelled",
+   "options": "\nUE-Under Evaluation\nUTR-Under Technician Repair\nRNR-Return Not Repaired\nRNA-Return Not Approved\nRNF-Return No Fault\nRNP-Return No Parts\nQ-Quoted\nA-Approved\nReplace\nC-Cancelled\nTP-Third Party",
    "read_only_depends_on": "eval:!frappe.user.has_role(\"Info\")"
   },
   {
@@ -771,6 +772,13 @@
    "fieldname": "long_text",
    "fieldtype": "Long Text",
    "label": "Notes"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "type_of_approval",
+   "fieldtype": "Select",
+   "label": "Type of Approval",
+   "options": "\nPO\nEmail\nPhone Call\nOthers"
   }
  ],
  "grid_page_length": 50,
@@ -783,7 +791,7 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2026-06-28 11:01:08.553421",
+ "modified": "2026-07-09 15:46:13.174296",
  "modified_by": "shajith@tsl-me.com",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

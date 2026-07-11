@@ -18,6 +18,12 @@ warehouse_list = {
 	"Jeddah":"Jeddah - BM"
 }
 
+def validate_status(self):
+	before = self.get_doc_before_save()
+	if before.status != self.status:
+		return True
+	else:
+		return False
 
 
 class EvaluationReport(Document):
@@ -145,31 +151,31 @@ class EvaluationReport(Document):
 
 	def update_working_status(self):
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
-		if self.status == "Working":
+		if self.status == "Working" and validate_status(self):
 			if doc.status != "W-Working" and not self.check_quotation_exists(self.job_order_data):
 				doc.status = "W-Working"
 			doc.save(ignore_permissions=True)
 
-		if self.status == "Installed and Completed/Repaired":
-			if doc.status != "RS-Repaired and Shipped":
-				doc.status = "RS-Repaired and Shipped"
+		if self.status == "Installed and Completed/Repaired" and validate_status(self):
+			doc.status = "RS-Repaired and Shipped"
 			doc.save(ignore_permissions=True)
 
-		if self.status == "Return Not Repaired":
-			if doc.status != "RNR-Return Not Repaired":
-				doc.status = "RNR-Return Not Repaired"
+		if self.status == "Return Not Repaired" and validate_status(self):
+			doc.status = "RNR-Return Not Repaired"
 			doc.save(ignore_permissions=True)	
 
-		if self.status == "RNP-Return No Parts":
-			if doc.status != "RNP-Return No Parts":
-				doc.status = "RNP-Return No Parts"
-			doc.save(ignore_permissions=True)		
+		if self.status == "RNP-Return No Parts" and validate_status(self):
+			doc.status = "RNP-Return No Parts"
+			doc.save(ignore_permissions=True)
+
+		if self.status == "Extra Parts" and self.parts_availability != "Yes" and validate_status(self):
+			doc.status = "EP-Extra Parts"
+			doc.save(ignore_permissions = True)	
 
 	def update_board_evaluation_status(self):
 		doc = frappe.get_doc("Job Order Data",self.job_order_data)
-		if self.status == "Board Evaluation":
-			if doc.status != "Board Evaluation":
-				doc.status = "Board Evaluation"
+		if self.status == "Board Evaluation" and validate_status(self):
+			doc.status = "Board Evaluation"
 			doc.save(ignore_permissions=True)
 
 	def check_quotation_exists(self,jo):

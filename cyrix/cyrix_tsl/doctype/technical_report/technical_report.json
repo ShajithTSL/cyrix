@@ -34,6 +34,7 @@
   "evaluation_result",
   "status",
   "column_break_ijur",
+  "template",
   "service_performed",
   "section_break_dhow",
   "remarks_needed",
@@ -151,6 +152,8 @@
    "label": "Evaluation Result"
   },
   {
+   "fetch_from": "template.terms",
+   "fetch_if_empty": 1,
    "fieldname": "service_performed",
    "fieldtype": "Text Editor",
    "label": "Service Performed"
@@ -244,12 +247,18 @@
    "fieldtype": "Link",
    "label": "Tech Sign",
    "options": "Signature"
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "label": "Template",
+   "options": "Service Template"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-10 15:50:11.646920",
+ "modified": "2026-07-12 11:55:31.152981",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",

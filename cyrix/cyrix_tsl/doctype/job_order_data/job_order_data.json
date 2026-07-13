@@ -788,11 +788,15 @@
   {
    "link_doctype": "Replacement Unit",
    "link_fieldname": "name"
+  },
+  {
+   "link_doctype": "Technical Report",
+   "link_fieldname": "document_reference"
   }
  ],
  "make_attachments_public": 1,
- "modified": "2026-07-09 15:46:13.174296",
- "modified_by": "shajith@tsl-me.com",
+ "modified": "2026-07-11 12:59:50.456330",
+ "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",
  "naming_rule": "By \"Naming Series\" field",

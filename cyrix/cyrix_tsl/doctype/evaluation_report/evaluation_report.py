@@ -20,10 +20,13 @@ warehouse_list = {
 
 def validate_status(self):
 	before = self.get_doc_before_save()
-	if before.status != self.status:
-		return True
+	if before.docstatus:
+		if before.status != self.status:
+			return True
+		else:
+			return False
 	else:
-		return False
+		return True
 
 
 class EvaluationReport(Document):
@@ -68,7 +71,7 @@ class EvaluationReport(Document):
 				self.part_no = i.part_sheet_no
 				frappe.db.sql('''update `tabEvaluation Report` set part_no = %s where name = %s''',((int(i.part_sheet_no)),self.name))
 		
-			if int(self.items[-1].part_sheet_no) > int(1) and self.status in ["Spare Parts","Comparison","Extra Parts","Internal Extra Parts"] and self.ner_field != "NER-Need Evaluation Return":
+			if self.items and int(self.items[-1].part_sheet_no) > int(1) and self.status in ["Spare Parts","Comparison","Extra Parts","Internal Extra Parts"] and self.ner_field != "NER-Need Evaluation Return":
 				self.status = "Internal Extra Parts"
 				frappe.db.sql('''update `tabEvaluation Report` set status = %s where name = %s ''',("Internal Extra Parts",self.name))
 				if self.document_active_status == "Yes":
@@ -166,6 +169,14 @@ class EvaluationReport(Document):
 
 		if self.status == "RNP-Return No Parts" and validate_status(self):
 			doc.status = "RNP-Return No Parts"
+			doc.save(ignore_permissions=True)
+
+		if self.status == "Return No Fault" and validate_status(self):
+			doc.status = "RNF-Return No Fault"
+			doc.save(ignore_permissions=True)
+		
+		if self.status == "Comparison" and validate_status(self):
+			doc.status = "C-Comparison"
 			doc.save(ignore_permissions=True)
 
 		if self.status == "Extra Parts" and self.parts_availability != "Yes" and validate_status(self):

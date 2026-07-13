@@ -214,7 +214,6 @@ frappe.ui.form.on('Part Sheet Item', {
 					"warehouse":frm.doc.warehouse
 				},
 				callback :function(r){
-					console.log(r.message.status)
 					frappe.model.set_value(cdt, cdn, "price_ea", r.message.price);
 					frappe.model.set_value(cdt, cdn, "parts_availability", r.message.status);
 					row.total = row.qty * r.message.price;

@@ -29,10 +29,8 @@ above _create_item for how to do that and what it gives up (hooks,
 autoname, versioning) in exchange for speed. Not enabled by default here;
 turn it on only if you've confirmed you don't need those doctypes'
 validate()/hooks for correctness.
-
-Adjust ITEM_MODEL_TITLE_FIELD / ITEM_MFG_TITLE_FIELD below to match the
-actual identifying field on your "Item Model" / "Item Mfg" doctypes.
 """
+
 
 import frappe
 from frappe import _
@@ -44,7 +42,7 @@ from cyrix.custom_py.bulk_import_utils import bulk_get_or_create
 REQUIRED_COLUMNS = ["item_name", "model", "manufacturer", "item_group", "uom", "serial_number"]
 
 ITEM_MODEL_TITLE_FIELD = "model"          # confirmed from child table's fetch_from
-ITEM_MFG_TITLE_FIELD = "mfg"     # TODO: confirm against your Item Mfg doctype
+ITEM_MFG_TITLE_FIELD = "manufacturer"     # TODO: confirm against your Item Mfg doctype
 
 PROGRESS_EVERY = 50
 
@@ -73,8 +71,7 @@ def start_import(name):
     return {"queued": True}
 
 
-def process_import():
-    name = "AMC-R26-00011"
+def process_import(name):
     doc = frappe.get_doc("Item Bulk Import", name)
     doc.db_set("status", "Processing", update_modified=False)
 
@@ -88,12 +85,19 @@ def process_import():
         # -----------------------------------------------------------
         # Step 1 — Item Model / Item Mfg, resolved in bulk (small lists
         # even across 1000+ rows — normally a few dozen distinct values)
+        #
+        # Only rows with BOTH model and manufacturer filled in count as a
+        # real combination — a row with just one of the two doesn't
+        # identify anything, so it's excluded here and handled by the
+        # item_name-only fallback (or skipped) in the row loop below.
         # -----------------------------------------------------------
+        complete_rows = [r for r in rows if r.get("model") and r.get("manufacturer")]
+
         model_map, models_created = bulk_get_or_create(
-            "Item Model", ITEM_MODEL_TITLE_FIELD, [r.get("model") for r in rows]
+            "Item Model", ITEM_MODEL_TITLE_FIELD, [r.get("model") for r in complete_rows]
         )
         mfg_map, mfgs_created = bulk_get_or_create(
-            "Item Mfg", ITEM_MFG_TITLE_FIELD, [r.get("manufacturer") for r in rows]
+            "Item Mfg", ITEM_MFG_TITLE_FIELD, [r.get("manufacturer") for r in complete_rows]
         )
 
         # -----------------------------------------------------------
@@ -125,22 +129,44 @@ def process_import():
         serials_created = 0
         errors = []
 
+        skipped = 0
+
         for idx, row in enumerate(rows):
             try:
-                print(f"Processing row {idx + 1} of {len(rows)}: {row}")
-                model_name = model_map.get(row.get("model"))
-                mfg_name = mfg_map.get(row.get("manufacturer"))
-                key = (model_name, mfg_name)
+                if row.get("model") and row.get("manufacturer"):
+                    model_name = model_map.get(row.get("model"))
+                    mfg_name = mfg_map.get(row.get("manufacturer"))
+                    key = (model_name, mfg_name)
 
-                item_code = item_lookup.get(key)
-                if not item_code:
-                    item_code = _create_item(row, model_name, mfg_name)
-                    item_lookup[key] = item_code
+                    item_code = item_lookup.get(key)
+                    if not item_code:
+                        item_code = _create_item(row, model_name, mfg_name)
+                        item_lookup[key] = item_code
+                        items_created += 1
+
+                    row["_model_name"] = model_name
+                    row["_mfg_name"] = mfg_name
+
+                elif row.get("item_name"):
+                    # no (model, manufacturer) combination — fall back to
+                    # a plain Item from item_name alone
+                    item_code = _create_item(row, None, None)
                     items_created += 1
+                    row["_model_name"] = None
+                    row["_mfg_name"] = None
+
+                else:
+                    # neither a full combination nor an item_name to fall
+                    # back on — nothing to create for this row; skip it
+                    # and keep going with the rest
+                    skipped += 1
+                    errors.append({
+                        "row": idx + 2,
+                        "error": "Skipped — no model+manufacturer combination and no item_name",
+                    })
+                    continue
 
                 row["item_code"] = item_code
-                row["_model_name"] = model_name
-                row["_mfg_name"] = mfg_name
 
                 serial_no = row.get("serial_number")
                 if serial_no and serial_no not in existing_serials:
@@ -176,6 +202,13 @@ def process_import():
         doc.db_set("serials_created", serials_created, update_modified=False)
         doc.db_set("error_log", frappe.as_json(errors), update_modified=False)
         doc.db_set("status", "Completed", update_modified=False)
+
+        if skipped:
+            frappe.log_error(
+                title=f"Item Bulk Import {name}: {skipped} row(s) skipped",
+                message=f"{skipped} of {len(rows)} rows had no model+manufacturer "
+                        f"combination and no item_name — see error_log for the row numbers.",
+            )
 
         frappe.publish_realtime(
             "item_bulk_import_done",
@@ -243,7 +276,13 @@ def _create_maintenance_contract(doc, rows):
     mc.date = doc.date or frappe.utils.today()
 
     for row in rows:
-        mc.append("items", {
+        # rows that had neither a (model, manufacturer) combination nor an
+        # item_name were skipped earlier and never got an item_code —
+        # nothing to add to the contract for those
+        if not row.get("item_code"):
+            continue
+
+        mc.append("equipments", {
             "item_code": row.get("item_code"),
             "item_name": row.get("item_name"),
             "model": row.get("_model_name"),
@@ -253,8 +292,8 @@ def _create_maintenance_contract(doc, rows):
             "item_group": row.get("item_group"),
             "description": row.get("item_name"),
         })
-
-    mc.insert(ignore_permissions=True)  # left as Draft — user reviews, then submits
+    mc.flags.ignore_mandatory = True  # left as Draft — user reviews, then submits
+    mc.insert(ignore_permissions=True)
     return mc.name
 
 

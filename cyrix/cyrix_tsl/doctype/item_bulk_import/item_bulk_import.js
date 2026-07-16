@@ -40,18 +40,17 @@ frappe.ui.form.on('Item Bulk Import', {
 					frappe.msgprint(__('Fill in: {0}', [missing.join(', ')]));
 					return;
 				}
-				frm.save().then(() => {
-					frappe.call({
-						method: 'cyrix.cyrix_tsl.doctype.item_bulk_import.item_bulk_import.start_import',
-						args: { name: frm.doc.name },
-						freeze: true,
-						freeze_message: __('Queuing import...'),
-						callback: () => {
-							frappe.show_alert({ message: __('Import queued'), indicator: 'blue' });
-							frm.reload_doc();
-						},
-					});
-				});
+				
+                frappe.call({
+                    method: 'cyrix.cyrix_tsl.doctype.item_bulk_import.item_bulk_import.start_import',
+                    args: { name: frm.doc.name },
+                    freeze: true,
+                    freeze_message: __('Queuing import...'),
+                    callback: () => {
+                        frappe.show_alert({ message: __('Import queued'), indicator: 'blue' });
+                        window.location.reload();
+                    },
+                });
 			}).addClass('btn-primary');
 		}
 

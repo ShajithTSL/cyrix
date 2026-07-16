@@ -39,6 +39,7 @@ before_submit optimization alone.
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from cyrix.custom_py import utils
 
 from cyrix.custom_py.bulk_import_utils import bulk_get_or_create, bulk_activate_serials
 
@@ -82,15 +83,19 @@ class MaintenanceContract(Document):
         before an Item can be saved referencing them. Resolve/create both
         in bulk rather than trusting the raw child-table values are
         already valid link targets.
+
+        Only rows with BOTH model and manufacturer set count as a valid
+        combination to resolve — a row with just one of the two doesn't
+        identify anything and is left for check_for_item to skip/fall
+        through, not half-resolved here.
         """
-        model_values = [i.get('model') for i in pending if i.get('model')]
-        mfg_values = [i.get('manufacturer') for i in pending if i.get('manufacturer')]
+        complete = [i for i in pending if i.get('model') and i.get('manufacturer')]
 
         model_map, _created_models = bulk_get_or_create(
-            "Item Model", ITEM_MODEL_TITLE_FIELD, model_values
+            "Item Model", ITEM_MODEL_TITLE_FIELD, [i.get('model') for i in complete]
         )
         mfg_map, _created_mfgs = bulk_get_or_create(
-            "Item Mfg", ITEM_MFG_TITLE_FIELD, mfg_values
+            "Item Mfg", ITEM_MFG_TITLE_FIELD, [i.get('manufacturer') for i in complete]
         )
         return model_map, mfg_map
 
@@ -99,27 +104,26 @@ class MaintenanceContract(Document):
         One query instead of one per row. Returns {(model, mfg): item_row},
         keyed by the *resolved* Item Model / Item Mfg doc names.
 
+        Only rows with both model and manufacturer set contribute to the
+        filter — see _resolve_models_and_mfgs.
+
         Note: the filter below fetches every Item whose model OR mfg is in
         the requested sets (an AND-of-INs, which can over-fetch compared to
         the exact pairs requested). That's fine — matching happens by exact
         (model, mfg) tuple afterwards, so over-fetched rows are simply
         unused, never mis-assigned.
         """
-        resolved_models = list({model_map.get(i.get('model')) for i in pending if i.get('model')})
-        resolved_mfgs = list({mfg_map.get(i.get('manufacturer')) for i in pending if i.get('manufacturer')})
+        complete = [i for i in pending if i.get('model') and i.get('manufacturer')]
+
+        resolved_models = list({model_map.get(i.get('model')) for i in complete})
+        resolved_mfgs = list({mfg_map.get(i.get('manufacturer')) for i in complete})
 
         if not resolved_models and not resolved_mfgs:
             return {}
 
-        filters = []
-        if resolved_models:
-            filters.append(["model", "in", resolved_models])
-        if resolved_mfgs:
-            filters.append(["mfg", "in", resolved_mfgs])
-
         existing = frappe.get_all(
             "Item",
-            filters=filters,
+            filters=[["model", "in", resolved_models], ["mfg", "in", resolved_mfgs]],
             fields=["name", "model", "mfg", "item_name"],
         )
         return {(d.model, d.mfg): d for d in existing}
@@ -166,7 +170,11 @@ class MaintenanceContract(Document):
     # ------------------------------------------------------------------
 
     def check_for_item(self, i, item_lookup, model_map, mfg_map):
-        if i.get("model") or i.get("manufacturer"):
+        # Only a genuine (model, manufacturer) *pair* identifies an Item
+        # combination worth resolving/creating. A row with just one of the
+        # two doesn't — skip this check for it and fall through instead
+        # of creating a half-populated Item.
+        if i.get("model") and i.get("manufacturer"):
             model_name = model_map.get(i.get('model'))
             mfg_name = mfg_map.get(i.get('manufacturer'))
             key = (model_name, mfg_name)
@@ -188,8 +196,14 @@ class MaintenanceContract(Document):
                 )
 
         elif i.get("item_name"):
+            # no model+manufacturer combination — fall back to creating a
+            # plain Item from item_name alone (model/mfg left unset)
             new_doc = self._make_item(i, None, None)
             i.item_code = new_doc.name
+
+        # else: neither a (model, manufacturer) combination nor an
+        # item_name — nothing to resolve or create for this row, skip it
+        # and move on to the remaining rows/combinations.
 
     def _make_item(self, i, model_name, mfg_name):
         new_doc = frappe.new_doc('Item')
@@ -198,7 +212,7 @@ class MaintenanceContract(Document):
         new_doc.item_group = i.get('item_group') or "Equipments"
         new_doc.description = i.get('item_name') or ""
         new_doc.model = model_name
-        new_doc.stock_uom = i.get('uom') or ""
+        new_doc.stock_uom = i.get('uom') or "Nos"
         new_doc.is_stock_item = 1
         new_doc.mfg = mfg_name
         new_doc.insert(ignore_permissions=True)

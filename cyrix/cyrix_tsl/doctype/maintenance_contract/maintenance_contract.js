@@ -216,17 +216,16 @@ frappe.ui.form.on("Maintenance Contract", {
 				frappe.confirm(
 					__('This contract has {0} items and may take a while to process. It will be submitted in the background — continue?', [item_count]),
 					() => {
-						frm.save().then(() => {
-							frappe.call({
-								method: 'cyrix.cyrix_tsl.doctype.maintenance_contract.maintenance_contract.queue_submit',
-								args: { name: frm.doc.name },
-								freeze: true,
-								freeze_message: __('Queuing submission...'),
-								callback: () => {
-									frappe.show_alert({ message: __('Submission queued — you can leave this page'), indicator: 'blue' });
-									frm.reload_doc();
-								},
-							});
+						console.log("Ss")
+						frappe.call({
+							method: 'cyrix.cyrix_tsl.doctype.maintenance_contract.maintenance_contract.queue_submit',
+							args: { name: frm.doc.name },
+							freeze: true,
+							freeze_message: __('Queuing submission...'),
+							callback: () => {
+								frappe.show_alert({ message: __('Submission queued — you can leave this page'), indicator: 'blue' });
+								frm.reload_doc();
+							},
 						});
 					}
 				);

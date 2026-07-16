@@ -266,12 +266,13 @@ def _create_serial(serial_no, item_code, company):
 
 def _create_maintenance_contract(doc, rows):
     mc = frappe.new_doc("Maintenance Contract")
-    mc.naming_series = doc.naming_series
+    mc.naming_series = doc.custom_naming_series
     mc.type = doc.type
     mc.customer = doc.customer
     mc.company = doc.company
     mc.branch = doc.branch
     mc.sales_person = doc.sales_person
+    mc.department = doc.department
     mc.incharge = doc.incharge
     mc.date = doc.date or frappe.utils.today()
 

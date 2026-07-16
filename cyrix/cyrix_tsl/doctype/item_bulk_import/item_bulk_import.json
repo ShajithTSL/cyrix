@@ -1,27 +1,28 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "hash",
  "creation": "2026-07-16 09:35:33.635290",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_llu3",
   "import_file",
-  "column_break_3to9",
   "status",
-  "maintenance_contract_details_section",
-  "naming_series",
+  "column_break_3to9",
   "type",
-  "column_break_fxhq",
+  "custom_naming_series",
+  "maintenance_contract_details_section",
   "company",
-  "branch",
-  "column_break_pijy",
   "customer",
+  "column_break_fxhq",
+  "branch",
   "sales_person",
+  "column_break_pijy",
+  "department",
+  "incharge",
   "column_break_gsbc",
   "date",
-  "incharge",
   "progress_section",
   "total_rows",
   "processed_rows",
@@ -134,12 +135,6 @@
    "label": "Maintenance Contract Details"
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Naming Series",
-   "options": "AMC-R.YY.-\nAMC-K.YY.-\nCMC-R.YY.-\\nCMC-K.YY.-"
-  },
-  {
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
@@ -168,6 +163,7 @@
    "reqd": 1
   },
   {
+   "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
    "label": "Date"
@@ -193,16 +189,28 @@
    "fieldtype": "Link",
    "label": "Incharge",
    "options": "Contact"
+  },
+  {
+   "fieldname": "custom_naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "AMC-R.YY.-\nAMC-K.YY.-\nAMC-J.YY.-\nAMC-DU.YY.-\nCMC-R.YY.-\nCMC-K.YY.-\nCMC-J.YY.-\nCMC-DU.YY.-"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-16 10:41:41.693670",
+ "modified": "2026-07-16 12:38:25.232214",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Item Bulk Import",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {

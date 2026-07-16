@@ -207,7 +207,7 @@ frappe.ui.form.on("Maintenance Contract", {
                 });
 			}, ('Create'))
 		}
-				const item_count = (frm.doc.items || []).length;
+		const item_count = (frm.doc.items || []).length;
 		const is_large = item_count > LARGE_CONTRACT_THRESHOLD;
 
 		if (frm.doc.docstatus === 0 && is_large && frm.doc.queue_status !== 'Queued') {
@@ -303,10 +303,14 @@ frappe.ui.form.on("Maintenance Contract", {
             "AMC": {
                 "Kuwait": "AMC-K.YY.-",
                 "Riyadh": "AMC-R.YY.-",
+                "Jeddah": "AMC-J.YY.-",
+                "Dubai": "AMC-DU.YY.-",
             },
             "CMC": {
                 "Kuwait": "CMC-K.YY.-",
                 "Riyadh": "CMC-R.YY.-",
+                "Jeddah": "CMC-J.YY.-",
+                "Dubai": "CMC-DU.YY.-",
             },
         }
         if (frm.doc.type && frm.doc.branch) {

@@ -326,3 +326,34 @@ def _read_excel(file_url):
             row["qty"] = frappe.utils.cint(row["qty"]) or 1
         rows.append(row)
     return rows
+
+
+
+import frappe
+from frappe import _
+from openpyxl import Workbook
+from io import BytesIO
+
+@frappe.whitelist()
+def download_excel():
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Items"
+
+    # Header row
+    ws.append([
+        "item_name",
+        "model",
+        "manufacturer",
+        "item_group",
+        "uom",
+        "serial_number"
+    ])
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    frappe.response.filename = "Item_Template.xlsx"
+    frappe.response.filecontent = output.getvalue()
+    frappe.response.type = "binary"

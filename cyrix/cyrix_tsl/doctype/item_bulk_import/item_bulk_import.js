@@ -103,8 +103,8 @@ frappe.ui.form.on('Item Bulk Import', {
 		});
 	},
 
-	refresh(frm) {
-		if (frm.doc.status === 'Draft' || frm.doc.status === 'Failed') {
+    import_file: function(frm) {
+        if ((frm.doc.status === 'Draft' || frm.doc.status === 'Failed') && (frm.doc.import_file)) {
 			frm.add_custom_button(__('Start Import'), () => {
 				if (!frm.doc.import_file) {
 					frappe.msgprint(__('Attach the Excel template first'));
@@ -129,6 +129,23 @@ frappe.ui.form.on('Item Bulk Import', {
                 });
 			}).addClass('btn-primary');
 		}
+        
+        frm.trigger('download_file');
+    },
+
+    download_file: function(frm) {
+        if (!frm.doc.import_file){
+            frm.add_custom_button(__("Download Excel"), function () {
+                window.open(
+                    `/api/method/cyrix.cyrix_tsl.doctype.item_bulk_import.item_bulk_import.download_excel`
+                );
+            }).addClass('btn-primary');
+        }
+    },
+
+	refresh(frm) {
+		frm.trigger('import_file');
+		frm.trigger('download_file');
 
 		if (frm.doc.status === 'Processing' || frm.doc.status === 'Queued') {
 			frm.dashboard.set_headline_alert(

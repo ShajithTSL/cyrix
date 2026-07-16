@@ -1,0 +1,226 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-07-16 09:35:33.635290",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_llu3",
+  "import_file",
+  "column_break_3to9",
+  "status",
+  "maintenance_contract_details_section",
+  "naming_series",
+  "type",
+  "column_break_fxhq",
+  "company",
+  "branch",
+  "column_break_pijy",
+  "customer",
+  "sales_person",
+  "column_break_gsbc",
+  "date",
+  "incharge",
+  "progress_section",
+  "total_rows",
+  "processed_rows",
+  "column_break_4wj6",
+  "models_created",
+  "mfgs_created",
+  "column_break_5d2e",
+  "items_created",
+  "serials_created",
+  "section_break_mwq9",
+  "created_maintenance_contract",
+  "error_log"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_llu3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "Columns required: item_name, model, manufacturer, item_group, uom, serial_number",
+   "fieldname": "import_file",
+   "fieldtype": "Attach",
+   "label": "Excel Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3to9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nQueued\nProcessing\nCompleted\nFailed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "progress_section",
+   "fieldtype": "Section Break",
+   "label": "Progress"
+  },
+  {
+   "fieldname": "total_rows",
+   "fieldtype": "Int",
+   "label": "Total Rows",
+   "read_only": 1
+  },
+  {
+   "fieldname": "processed_rows",
+   "fieldtype": "Int",
+   "label": "Processed Rows",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4wj6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "models_created",
+   "fieldtype": "Int",
+   "label": "Item Models Created",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mfgs_created",
+   "fieldtype": "Int",
+   "label": "Item Mfgs Created",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5d2e",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "items_created",
+   "fieldtype": "Int",
+   "label": "Items Created",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serials_created",
+   "fieldtype": "Int",
+   "label": "Serial Numbers Created",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_mwq9",
+   "fieldtype": "Section Break",
+   "label": "Result"
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Code",
+   "label": "Errors",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "fieldname": "maintenance_contract_details_section",
+   "fieldtype": "Section Break",
+   "label": "Maintenance Contract Details"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "AMC-R.YY.-\nAMC-K.YY.-\nCMC-R.YY.-\\nCMC-K.YY.-"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "AMC\nCMC"
+  },
+  {
+   "fieldname": "column_break_fxhq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_pijy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "created_maintenance_contract",
+   "fieldtype": "Link",
+   "label": "Maintenance Contract",
+   "options": "Maintenance Contract"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "column_break_gsbc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incharge",
+   "fieldtype": "Link",
+   "label": "Incharge",
+   "options": "Contact"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-16 10:41:41.693670",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Item Bulk Import",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

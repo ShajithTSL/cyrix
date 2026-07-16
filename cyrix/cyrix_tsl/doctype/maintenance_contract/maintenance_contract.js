@@ -28,8 +28,21 @@ frappe.ui.form.on('Maintenance Contract Item', {
 		})
 	}
 })
+const LARGE_CONTRACT_THRESHOLD = 50; 
 
 frappe.ui.form.on("Maintenance Contract", {
+	onload(frm) {
+		frappe.realtime.on('maintenance_contract_submitted', (data) => {
+			if (data.name !== frm.doc.name) return;
+
+			if (data.status === 'success') {
+				frappe.show_alert({ message: __('Maintenance Contract submitted'), indicator: 'green' });
+			} else {
+				frappe.show_alert({ message: __('Submission failed — check the Error Log'), indicator: 'red' });
+			}
+			frm.reload_doc();
+		});
+	},
 
 	html(frm) {
         if (!frm.doc.name) return;
@@ -193,6 +206,42 @@ frappe.ui.form.on("Maintenance Contract", {
                     }
                 });
 			}, ('Create'))
+		}
+				const item_count = (frm.doc.items || []).length;
+		const is_large = item_count > LARGE_CONTRACT_THRESHOLD;
+
+		if (frm.doc.docstatus === 0 && is_large && frm.doc.queue_status !== 'Queued') {
+			// Override the primary "Submit" action for large contracts
+			frm.page.set_primary_action(__('Queue for Submission'), () => {
+				frappe.confirm(
+					__('This contract has {0} items and may take a while to process. It will be submitted in the background — continue?', [item_count]),
+					() => {
+						frm.save().then(() => {
+							frappe.call({
+								method: 'cyrix.cyrix_tsl.doctype.maintenance_contract.maintenance_contract.queue_submit',
+								args: { name: frm.doc.name },
+								freeze: true,
+								freeze_message: __('Queuing submission...'),
+								callback: () => {
+									frappe.show_alert({ message: __('Submission queued — you can leave this page'), indicator: 'blue' });
+									frm.reload_doc();
+								},
+							});
+						});
+					}
+				);
+			});
+		}
+
+		if (frm.doc.queue_status === 'Queued') {
+			frm.dashboard.set_headline_alert(
+				__('Submission is processing in the background. This page will update automatically when it finishes.')
+			);
+		} else if (frm.doc.queue_status === 'Failed') {
+			frm.dashboard.set_headline_alert(
+				__('Background submission failed. Check the Error Log, then try again.'),
+				'red'
+			);
 		}
 	},
 

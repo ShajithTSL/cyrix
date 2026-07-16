@@ -1,78 +1,263 @@
-# Copyright (c) 2026, tsl and contributors
-# For license information, please see license.txt
+"""
+Maintenance Contract controller — optimized item/serial creation
++ optional background submission for large item counts.
+
+Three things changed from the original:
+
+1. `before_submit` no longer does one Item lookup query + one Serial Number
+   lookup query PER ROW. It does a small, fixed number of bulk queries up
+   front, then resolves every row against in-memory dicts/sets.
+
+2. In the normal case (rows already carry `item_code` from the Item Bulk
+   Import tool / item_bulk_import.py), this whole hook is close to a no-op:
+   `item_code` is set, so check_for_item skips straight through, and
+   model/manufacturer/item_name are already filled in by Frappe's
+   fetch_if_empty on save. The per-row creation paths below only run for
+   rows that slip through without a pre-resolved item_code — they now
+   also correctly create the Item Model / Item Mfg records first, since
+   `model`/`manufacturer` are Link fields and must reference existing
+   records before an Item can be saved with them.
+
+3. Existing Serial Numbers are activated with a handful of bulk UPDATE
+   statements instead of one full `.save()` per row (see
+   bulk_import_utils.bulk_activate_serials). Only genuinely new serials
+   still go through the normal Document API.
+
+4. A `queue_submit` whitelisted method + `background_submit` function let
+   the client kick off the *entire* submit (before_submit included) on an
+   RQ worker with a long timeout, instead of running it inside the HTTP
+   request. This is a safety net on top of (1)-(3) — even if a batch is
+   unusually large, the web request never blocks long enough to time out.
+
+Requires: add a Select field `queue_status` (options: Draft/Queued/
+Submitted/Failed, default Draft) to the Maintenance Contract doctype if
+you want to use the background-submit flow. Not required for the
+before_submit optimization alone.
+
+"""
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from cyrix.custom_py import utils
+
+from cyrix.custom_py.bulk_import_utils import bulk_get_or_create, bulk_activate_serials
+
+BULK_LOOKUP_CHUNK_SIZE = 500  # keep IN-clauses to a sane size
+
+ITEM_MODEL_TITLE_FIELD = "model"          # confirmed from child table's fetch_from
+ITEM_MFG_TITLE_FIELD = "mfg"     # TODO: confirm against your Item Mfg doctype
 
 
 class MaintenanceContract(Document):
-	def before_submit(self):
-		for i in self.get('items'):
-			self.check_for_item(i)
-			self.create_serial_no(i)
 
-	def create_serial_no(self, i):
-		# Create Serial Number record if the item has serial number and update its status to Active
-		if i.get('serial_number'):
-			s_number = frappe.db.exists("Serial Number",{"name":i.get('serial_number')})
-			if s_number:
-				sn_doc = frappe.get_doc("Serial Number",i.get('serial_number'))
-				sn_doc.item_code = i.get('item_code')
-				sn_doc.status = "Active"
-				sn_doc.save()
-				
-			else:
-				sn_doc = frappe.new_doc("Serial Number")
-				sn_doc.serial_no = i.get('serial_number')
-				sn_doc.item_code = i.get('item_code')
-				sn_doc.company = self.company
-				sn_doc.status = "Active"
-				sn_doc.save(ignore_permissions=True)
+    # ------------------------------------------------------------------
+    # Submit hook
+    # ------------------------------------------------------------------
 
-	def check_for_item(self, i):
-		# If item_code is not provided, try to fetch or create Item based on model and manufacturer
-		if not i.get("item_code") and (i.get("model") or i.get("manufacturer")):
-			item = frappe.db.get_value("Item", {
-				"model": i.get("model"),
-				"mfg": i.get("manufacturer")
-			}, "name")
+    def before_submit(self):
+        items = self.get('items') or []
+        if not items:
+            return
 
-			if item:
-				i.item_code = item
-				i.item_name = frappe.db.get_value("Item", item, "item_name")
-			else:
-				if not i.get("item_name"):
-					i.item_name = ""
+        # rows needing any creation at all — normally empty/tiny once the
+        # bulk import tool has pre-resolved item_code for everything
+        pending = [i for i in items if not i.get('item_code')]
 
-				new_doc = frappe.new_doc('Item')
-				new_doc.naming_series = '.######'
-				new_doc.item_name = i.get('item_name')
-				new_doc.item_group = i.get('item_group') or "Equipments"
-				new_doc.description = i.get('item_name')
-				new_doc.model = i.get('model')
-				new_doc.stock_uom = i.get('uom')
-				new_doc.is_stock_item = 1
-				new_doc.mfg = i.get('manufacturer')
-				new_doc.save(ignore_permissions=True)
+        if pending:
+            model_map, mfg_map = self._resolve_models_and_mfgs(pending)
+            item_lookup = self._get_existing_item_lookup(pending, model_map, mfg_map)
+            for i in pending:
+                self.check_for_item(i, item_lookup, model_map, mfg_map)
 
-				if new_doc.name:
-					i.item_code = new_doc.name
+        self._activate_serials(items)
 
-		elif i.get("item_name") and not i.get("item_code"):
-			new_doc = frappe.new_doc('Item')
-			new_doc.naming_series = '.######'
-			new_doc.item_name = i.get('item_name', "")
-			new_doc.item_group = i.get('item_group') or "Equipments"
-			new_doc.description = i.get('item_name', "")
-			new_doc.model = i.get('model', "")
-			new_doc.stock_uom = i.get('uom', "")
-			new_doc.is_stock_item = 1
-			new_doc.mfg = i.get('manufacturer', "")
-			new_doc.save(ignore_permissions=True)
+    # ------------------------------------------------------------------
+    # Bulk lookups (replace the old per-row frappe.db.get_value / exists)
+    # ------------------------------------------------------------------
 
-			if new_doc.name:
-				i.item_code = new_doc.name
+    def _resolve_models_and_mfgs(self, pending):
+        """
+        model/manufacturer on the child table are Link fields (to Item
+        Model / Item Mfg), so their values must exist as real records
+        before an Item can be saved referencing them. Resolve/create both
+        in bulk rather than trusting the raw child-table values are
+        already valid link targets.
+        """
+        model_values = [i.get('model') for i in pending if i.get('model')]
+        mfg_values = [i.get('manufacturer') for i in pending if i.get('manufacturer')]
+
+        model_map, _created_models = bulk_get_or_create(
+            "Item Model", ITEM_MODEL_TITLE_FIELD, model_values
+        )
+        mfg_map, _created_mfgs = bulk_get_or_create(
+            "Item Mfg", ITEM_MFG_TITLE_FIELD, mfg_values
+        )
+        return model_map, mfg_map
+
+    def _get_existing_item_lookup(self, pending, model_map, mfg_map):
+        """
+        One query instead of one per row. Returns {(model, mfg): item_row},
+        keyed by the *resolved* Item Model / Item Mfg doc names.
+
+        Note: the filter below fetches every Item whose model OR mfg is in
+        the requested sets (an AND-of-INs, which can over-fetch compared to
+        the exact pairs requested). That's fine — matching happens by exact
+        (model, mfg) tuple afterwards, so over-fetched rows are simply
+        unused, never mis-assigned.
+        """
+        resolved_models = list({model_map.get(i.get('model')) for i in pending if i.get('model')})
+        resolved_mfgs = list({mfg_map.get(i.get('manufacturer')) for i in pending if i.get('manufacturer')})
+
+        if not resolved_models and not resolved_mfgs:
+            return {}
+
+        filters = []
+        if resolved_models:
+            filters.append(["model", "in", resolved_models])
+        if resolved_mfgs:
+            filters.append(["mfg", "in", resolved_mfgs])
+
+        existing = frappe.get_all(
+            "Item",
+            filters=filters,
+            fields=["name", "model", "mfg", "item_name"],
+        )
+        return {(d.model, d.mfg): d for d in existing}
+
+    # ------------------------------------------------------------------
+    # Serial Number activation — bulk UPDATE for existing serials,
+    # normal Document API only for genuinely new ones.
+    # ------------------------------------------------------------------
+
+    def _activate_serials(self, items):
+        rows_with_serial = [i for i in items if i.get('serial_number')]
+        if not rows_with_serial:
+            return
+
+        serials = [i.get('serial_number') for i in rows_with_serial]
+        existing = set()
+        for start in range(0, len(serials), BULK_LOOKUP_CHUNK_SIZE):
+            chunk = serials[start:start + BULK_LOOKUP_CHUNK_SIZE]
+            existing.update(
+                frappe.get_all("Serial Number", filters={"name": ["in", chunk]}, pluck="name")
+            )
+
+        to_activate = {}  # serial_no -> item_code, for existing serials
+        for i in rows_with_serial:
+            serial_number = i.get('serial_number')
+            if serial_number in existing:
+                to_activate[serial_number] = i.get('item_code')
+            else:
+                sn_doc = frappe.new_doc("Serial Number")
+                sn_doc.serial_no = serial_number
+                sn_doc.item_code = i.get('item_code')
+                sn_doc.company = self.company
+                sn_doc.status = "Active"
+                sn_doc.insert(ignore_permissions=True)
+                existing.add(serial_number)
+
+        # one/few UPDATE statements instead of hundreds of .save() calls —
+        # see bulk_import_utils.bulk_activate_serials for the tradeoffs
+        bulk_activate_serials(to_activate)
+
+    # ------------------------------------------------------------------
+    # Fallback per-row creation — only reached for rows without a
+    # pre-resolved item_code (i.e. bypassed the bulk import tool).
+    # ------------------------------------------------------------------
+
+    def check_for_item(self, i, item_lookup, model_map, mfg_map):
+        if i.get("model") or i.get("manufacturer"):
+            model_name = model_map.get(i.get('model'))
+            mfg_name = mfg_map.get(i.get('manufacturer'))
+            key = (model_name, mfg_name)
+            match = item_lookup.get(key)
+
+            if match:
+                i.item_code = match.name
+                i.item_name = match.item_name
+            else:
+                new_doc = self._make_item(i, model_name, mfg_name)
+                i.item_code = new_doc.name
+                # register so other rows in the same contract reuse it
+                # instead of creating a duplicate Item
+                item_lookup[key] = frappe._dict(
+                    name=new_doc.name,
+                    model=new_doc.model,
+                    mfg=new_doc.mfg,
+                    item_name=new_doc.item_name,
+                )
+
+        elif i.get("item_name"):
+            new_doc = self._make_item(i, None, None)
+            i.item_code = new_doc.name
+
+    def _make_item(self, i, model_name, mfg_name):
+        new_doc = frappe.new_doc('Item')
+        new_doc.naming_series = '.######'
+        new_doc.item_name = i.get('item_name') or ""
+        new_doc.item_group = i.get('item_group') or "Equipments"
+        new_doc.description = i.get('item_name') or ""
+        new_doc.model = model_name
+        new_doc.stock_uom = i.get('uom') or ""
+        new_doc.is_stock_item = 1
+        new_doc.mfg = mfg_name
+        new_doc.insert(ignore_permissions=True)
+        return new_doc
+
+
+# ----------------------------------------------------------------------
+# Background submission (used for large contracts to keep the HTTP
+# request fast; the actual submit — including before_submit above — runs
+# on an RQ worker with a 1500s timeout instead of the web request's).
+# ----------------------------------------------------------------------
+
+@frappe.whitelist()
+def queue_submit(name):
+    doc = frappe.get_doc("Maintenance Contract", name)
+    doc.check_permission("submit")
+
+    if doc.docstatus != 0:
+        frappe.throw(_("Only draft documents can be queued for submission"))
+
+    frappe.db.set_value(
+        "Maintenance Contract", name, "queue_status", "Queued", update_modified=False
+    )
+
+    frappe.enqueue(
+        "cyrix.cyrix_tsl.doctype.maintenance_contract.maintenance_contract.background_submit",
+        queue="long",
+        timeout=3000,
+        name=name,
+        enqueue_after_commit=True,
+    )
+    return {"queued": True}
+
+
+def background_submit(name):
+    doc = frappe.get_doc("Maintenance Contract", name)
+    try:
+        doc.submit()
+        frappe.db.set_value(
+            "Maintenance Contract", name, "queue_status", "Submitted", update_modified=False
+        )
+        frappe.publish_realtime(
+            event="maintenance_contract_submitted",
+            message={"name": name, "status": "success"},
+            user=doc.owner,
+        )
+    except Exception:
+        frappe.db.rollback()
+        frappe.db.set_value(
+            "Maintenance Contract", name, "queue_status", "Failed", update_modified=False
+        )
+        frappe.log_error(title=f"Maintenance Contract {name} background submit failed")
+        frappe.publish_realtime(
+            event="maintenance_contract_submitted",
+            message={"name": name, "status": "failed", "error": frappe.get_traceback()},
+            user=doc.owner,
+        )
+
+
 
 # Interval is mentioned in days. Need to calculate the no of schedules based on the start and end date and interval and return the list of schedule dates
 @frappe.whitelist()

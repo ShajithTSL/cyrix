@@ -132,6 +132,29 @@ def get_data(filters):
 	data = filter_out_zero_value_rows(
 		data, parent_children_map, show_zero_values=filters.get("show_zero_values")
 	)
+	
+
+	# Add Total Row
+	if data:
+		total_row = {
+			"account": "<b>Total</b>",
+			"currency": company_currency,
+			"opening_debit": 0,
+			"opening_credit": 0,
+			"debit": 0,
+			"credit": 0,
+			"closing_debit": 0,
+			"closing_credit": 0,
+		}
+
+		for row in data:
+			for field in value_fields:
+				total_row[field] += flt(row.get(field))
+
+		total_row["has_value"] = True
+		total_row["indent"] = 0
+		data.append(total_row)
+
 
 	return data
 
@@ -356,32 +379,6 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, show_net
 		if show_net_values:
 			prepare_opening_closing(d)
 
-
-def calculate_total_row(accounts, company_currency):
-	total_row = {
-		"account": "'" + _("Total") + "'",
-		"account_name": "'" + _("Total") + "'",
-		"warn_if_negative": True,
-		"opening_debit": 0.0,
-		"opening_credit": 0.0,
-		"debit": 0.0,
-		"credit": 0.0,
-		"closing_debit": 0.0,
-		"closing_credit": 0.0,
-		"parent_account": None,
-		"indent": 0,
-		"has_value": True,
-		"currency": company_currency,
-	}
-
-	for d in accounts:
-		if not d.parent_account:
-			for field in value_fields:
-				total_row[field] += d[field]
-
-	return total_row
-
-
 def accumulate_values_into_parents(accounts, accounts_by_name):
 	for d in reversed(accounts):
 		if d.parent_account:
@@ -402,7 +399,6 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 			row = {
 				"account": d.name,
 				"parent_account": d.parent_account,
-				"indent": 0,
 				"from_date": filters.from_date,
 				"to_date": filters.to_date,
 				"currency": company_currency,

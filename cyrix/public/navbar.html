@@ -12,21 +12,47 @@
 			<div class="collapse navbar-collapse justify-content-end">
 				<form class="form-inline fill-width justify-content-end" role="search" onsubmit="return false;">
 					
-				<button 
-					class="company-btn {% if !frappe.defaults.get_default('company') %}company-alert{% endif %}" 
-					onclick="company_change()"
-					type="button"
-				>
-					{% if frappe.defaults.get_default("company") %}
-						<span class="company-label">
-							{{ frappe.defaults.get_default("company") }}
-						</span>
-					{% else %}
-						<span class="company-label">
-							Select Company
-						</span>
-					{% endif %}
-				</button>
+<div class="company-branch-container">
+
+	{% 
+		let company = frappe.defaults.get_default("company");
+		let branch = frappe.defaults.get_default("branch");
+	%}
+
+	<!-- Company Pill -->
+	<button 
+		class="pill company-pill {% if (!company) { %}company-alert{% } %}" 
+		onclick="company_change()"
+		type="button"
+	>
+		<span class="pill-icon">🏢</span>
+		<span class="pill-text">
+			{% if (company) { %}
+				{%= company %}
+			{% } else { %}
+				Select Company
+			{% } %}
+		</span>
+		<span class="pill-arrow">▼</span>
+	</button>
+
+	<!-- Divider -->
+	<span class="pill-divider">|</span>
+
+	<!-- Branch Pill -->
+	{% if (branch) { %}
+	<button 
+		class="pill branch-pill"
+		onclick="company_change()"
+		type="button"
+	>
+		<span class="pill-icon">📍</span>
+		<span class="pill-text">{%= branch %}</span>
+		<span class="pill-arrow">▼</span>
+	</button>
+	{% } %}
+
+</div>
 					
 					{% if (frappe.boot.read_only) { %}
 						<span class="indicator-pill yellow no-indicator-dot" title="{%= __("Your site is undergoing maintenance or being updated.") %}">
@@ -171,65 +197,110 @@
 
 </div>
 <style>
-	.company-btn {
-		background: linear-gradient(135deg, #00adef 0%, #015ca3 100%);
-		color: #fff !important;
-		padding: 6px 16px;
-		border-radius: 20px;
-		border: none;
-		cursor: pointer;
-		font-weight: bold;
-		font-size: 13px;
-		transition: 0.2s ease;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 34px;
-		text-align: center;
-		white-space: nowrap;
+	.company-branch-container {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* Common pill style */
+.pill {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 16px;
+	border-radius: 20px;
+	border: none;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 600;
+	color: #fff;
+	white-space: nowrap;
+
+	/* ✅ UPDATED */
+	max-width: 300px;   /* increase limit */
+	min-width: 120px;   /* keeps shape nice */
+}
+
+/* Company pill (blue) */
+.company-pill {
+	background: linear-gradient(135deg, #2f5aa8 0%, #1d3f7a 100%);
+}
+
+/* Branch pill (slightly lighter blue) */
+.branch-pill {
+	background: linear-gradient(135deg, #3a6fd8 0%, #274b9f 100%);
+}
+
+/* Text handling */
+.pill-text {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Icons */
+.pill-icon {
+	font-size: 14px;
+}
+
+/* Arrow */
+.pill-arrow {
+	font-size: 10px;
+	opacity: 0.8;
+}
+
+/* Divider */
+.pill-divider {
+	color: #999;
+	font-weight: 300;
+}
+
+/* Alert animation */
+.company-alert {
+	background: linear-gradient(135deg, #ff4d4f 0%, #c1121f 100%);
+	animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+	0% { transform: scale(1); }
+	50% { transform: scale(1.05); }
+	100% { transform: scale(1); }
+}
+@media (max-width: 768px) {
+
+	.company-branch-container {
+		gap: 4px;
 	}
 
-	.company-label {
-		color: #fff !important;
-		line-height: 1;
+	.pill {
+		max-width: 140px;   /* smaller pills */
+		padding: 5px 10px;
+		font-size: 12px;
 	}
 
-	/* ALERT WHEN COMPANY NOT SET */
-	.company-alert {
-		background: linear-gradient(135deg, #ff4d4f 0%, #c1121f 100%);
-		animation: sirenAlert 1.2s infinite ease-in-out;
+	/* Hide divider */
+	.pill-divider {
+		display: none;
 	}
 
-	@keyframes sirenAlert {
-
-		0% {
-			background: linear-gradient(135deg, #ff4d4f 0%, #c1121f 100%);
-			box-shadow:
-				0 0 0px rgba(255, 77, 79, 0.4);
-			transform: scale(1);
-		}
-
-		50% {
-			background: linear-gradient(135deg, #c1121f 0%, #ff4d4f 100%);
-			box-shadow:
-				0 0 10px rgba(255, 77, 79, 0.9),
-				0 0 20px rgba(255, 77, 79, 0.7),
-				0 0 30px rgba(255, 77, 79, 0.5);
-			transform: scale(1.03);
-		}
-
-		100% {
-			background: linear-gradient(135deg, #ff4d4f 0%, #c1121f 100%);
-			box-shadow:
-				0 0 0px rgba(255, 77, 79, 0.4);
-			transform: scale(1);
-		}
+	/* Option 1: Hide branch completely */
+	.branch-pill {
+		display: none;
 	}
 
-	.company-alert:hover {
-		animation-play-state: paused;
-		background: linear-gradient(135deg, #c1121f 0%, #ff4d4f 100%);
+	/* Option 2 (alternative): show branch as tiny */
+	
+	.branch-pill {
+		max-width: 100px;
+		font-size: 11px;
+		opacity: 0.85;
 	}
+
+	/* Better truncation */
+	.pill-text {
+		max-width: 90px;
+	}
+}
 </style>
 <script>
 window.company_change = function() {

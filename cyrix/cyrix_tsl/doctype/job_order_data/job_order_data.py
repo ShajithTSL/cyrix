@@ -707,6 +707,7 @@ def create_rfq_from_jo(name):
 	rfq.job_order_data = doc.name
 	rfq.cost_center = frappe.db.get_value("Job Order Data",doc.name,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1})
 	# rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2)
+	rfq.custom_maintenance_contract = doc.get("maintenance_contract")
 	rfq.items=[]
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
 	for i in doc.get("material_list"):
@@ -728,14 +729,15 @@ def create_rfq_from_jo(name):
 				"uom":"Nos",
 				"stock_uom":"Nos",
 				"conversion_factor":1,
-				"stock_qty":1,
-				"qty":1,
+				"stock_qty":i.get('quantity') or 1,
+				"qty":i.get('quantity') or 1,
 				# "schedule_date":add_to_date(rfq.transaction_date,days = 2),
 				"warehouse":warehouse,
 				"branch":rfq.branch,
 				"parent_jo":doc.parent_jo,
 				"job_order_data":doc.name,
-				"cost_center":frappe.db.get_value("Job Order Data",doc.name,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1})
+				"cost_center":frappe.db.get_value("Job Order Data",doc.name,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}),
+				"custom_maintenance_contract":doc.get("maintenance_contract")
 			})
 
 	return rfq

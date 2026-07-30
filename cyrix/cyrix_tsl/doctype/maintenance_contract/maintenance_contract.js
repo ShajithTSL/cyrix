@@ -206,6 +206,21 @@ frappe.ui.form.on("Maintenance Contract", {
                     }
                 });
 			}, ('Create'))
+
+			frm.add_custom_button(__('Job Order'), function(){
+				frappe.call({
+					method: "cyrix.cyrix_tsl.doctype.maintenance_contract.maintenance_contract.create_callibration",
+					args: {
+						source: frm.doc.name,
+					},
+					callback: function(r) {
+						if (r.message) {
+							var doc = frappe.model.sync(r.message);
+							frappe.set_route("Form", doc[0].doctype, doc[0].name);
+						}
+					}
+				})
+			}, ('Create'))
 		}
 		const item_count = (frm.doc.items || []).length;
 		const is_large = item_count > LARGE_CONTRACT_THRESHOLD;

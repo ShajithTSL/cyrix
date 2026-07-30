@@ -22,6 +22,9 @@ frappe.ui.form.on("Create Supply Order", {
 				frm.set_value("branch", branches[0]);
 				frm.set_df_property("branch", "read_only", 1);
 			}
+			else{
+				frm.set_value("branch", frappe.defaults.get_default('branch'));
+			}
 			frm.set_query("branch", function () {
 				return {
 					filters: [
@@ -31,7 +34,13 @@ frappe.ui.form.on("Create Supply Order", {
 			});
 		}
 	},
-    setup: function (frm) {
+	onload: function (frm) {
+		frm.trigger("setup_query");
+	},
+	setup: function (frm) {
+		frm.trigger("setup_query");
+	},
+    setup_query: function (frm) {
         // child table set_query
 		frm.fields_dict['received_equipment'].grid.get_field('item_code').get_query = function (frm, cdt, cdn) {
 			var child = locals[cdt][cdn];
@@ -68,7 +77,26 @@ frappe.ui.form.on("Create Supply Order", {
 			}
 		});
 		
-		frm.trigger("branch_trigger")
+		const branchMap = frappe.boot.company_branches;
+
+		if (branchMap[frappe.defaults.get_default("company")]) {
+			const branches = branchMap[frappe.defaults.get_default("company")];
+			console.log(branches)
+
+			// If only one branch exists, auto-set it
+			if (branches.length === 1) {
+				console.log(branches)
+				frm.set_value("branch", branches[0]);
+				frm.set_df_property("branch", "read_only", 1);
+			}
+			frm.set_query("branch", function () {
+				return {
+					filters: [
+						["name", "in", branchMap[frappe.defaults.get_default("company")]]
+					]
+				};
+			});
+		}	
 
 		const territoryMap = frappe.boot.company_territories;
 
@@ -105,7 +133,11 @@ frappe.ui.form.on("Create Supply Order", {
 			// () => $('[data-fieldname="document_type"] select').css({'color':'white', 'background':'#00adef', 'font-weight':'bold'}),
 			() => frm.set_value("company", frappe.defaults.get_default("company")),
 
+			() => frm.trigger("setup_query"),
+
 			() => frm.trigger("branch"),
+
+			() => frm.trigger("branch_trigger"),
 			
 			() => {
 				// If job_order_data does not exist Create a New Job Order

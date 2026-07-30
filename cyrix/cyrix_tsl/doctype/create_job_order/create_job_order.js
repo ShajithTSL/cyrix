@@ -65,6 +65,9 @@ frappe.ui.form.on("Create Job Order", {
 				frm.set_value("branch", branches[0]);
 				frm.set_df_property("branch", "read_only", 1);
 			}
+			else{
+				frm.set_value("branch", frappe.defaults.get_default('branch'));
+			}
 			frm.set_query("branch", function () {
 				return {
 					filters: [

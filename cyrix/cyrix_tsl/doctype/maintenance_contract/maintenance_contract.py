@@ -5,29 +5,29 @@ Maintenance Contract controller — optimized item/serial creation
 Three things changed from the original:
 
 1. `before_submit` no longer does one Item lookup query + one Serial Number
-   lookup query PER ROW. It does a small, fixed number of bulk queries up
-   front, then resolves every row against in-memory dicts/sets.
+lookup query PER ROW. It does a small, fixed number of bulk queries up
+front, then resolves every row against in-memory dicts/sets.
 
 2. In the normal case (rows already carry `item_code` from the Item Bulk
-   Import tool / item_bulk_import.py), this whole hook is close to a no-op:
-   `item_code` is set, so check_for_item skips straight through, and
-   model/manufacturer/item_name are already filled in by Frappe's
-   fetch_if_empty on save. The per-row creation paths below only run for
-   rows that slip through without a pre-resolved item_code — they now
-   also correctly create the Item Model / Item Mfg records first, since
-   `model`/`manufacturer` are Link fields and must reference existing
-   records before an Item can be saved with them.
+Import tool / item_bulk_import.py), this whole hook is close to a no-op:
+`item_code` is set, so check_for_item skips straight through, and
+model/manufacturer/item_name are already filled in by Frappe's
+fetch_if_empty on save. The per-row creation paths below only run for
+rows that slip through without a pre-resolved item_code — they now
+also correctly create the Item Model / Item Mfg records first, since
+`model`/`manufacturer` are Link fields and must reference existing
+records before an Item can be saved with them.
 
 3. Existing Serial Numbers are activated with a handful of bulk UPDATE
-   statements instead of one full `.save()` per row (see
-   bulk_import_utils.bulk_activate_serials). Only genuinely new serials
-   still go through the normal Document API.
+statements instead of one full `.save()` per row (see
+bulk_import_utils.bulk_activate_serials). Only genuinely new serials
+still go through the normal Document API.
 
 4. A `queue_submit` whitelisted method + `background_submit` function let
-   the client kick off the *entire* submit (before_submit included) on an
-   RQ worker with a long timeout, instead of running it inside the HTTP
-   request. This is a safety net on top of (1)-(3) — even if a batch is
-   unusually large, the web request never blocks long enough to time out.
+the client kick off the *entire* submit (before_submit included) on an
+RQ worker with a long timeout, instead of running it inside the HTTP
+request. This is a safety net on top of (1)-(3) — even if a batch is
+unusually large, the web request never blocks long enough to time out.
 
 Requires: add a Select field `queue_status` (options: Draft/Queued/
 Submitted/Failed, default Draft) to the Maintenance Contract doctype if
@@ -276,14 +276,14 @@ def background_submit(name):
 # Interval is mentioned in days. Need to calculate the no of schedules based on the start and end date and interval and return the list of schedule dates
 @frappe.whitelist()
 def create_schedule(from_date, to_date, interval):
-	schedule_dates = []
-	current_date = from_date
+    schedule_dates = []
+    current_date = from_date
 
-	while current_date <= to_date:
-		schedule_dates.append(current_date)
-		current_date = frappe.utils.add_days(current_date, int(interval))
+    while current_date <= to_date:
+        schedule_dates.append(current_date)
+        current_date = frappe.utils.add_days(current_date, int(interval))
 
-	return schedule_dates
+    return schedule_dates
 
 
 # @frappe.whitelist()
@@ -302,90 +302,122 @@ def create_schedule(from_date, to_date, interval):
 from frappe.model.mapper import get_mapped_doc
 @frappe.whitelist()
 def create_service_call_form(source, target_doc=None):
-	doc = get_mapped_doc(
-		"Maintenance Contract",
-		source,
-		{
-			"Maintenance Contract": {
-				"doctype": "Service Call Form",
-				"field_map": {
-					"doctype": "document_type",
-					"name": "related_doc",
-					"description": "reason"
-				},
-			},
-			"Maintenance Contract Item": {
-				"doctype": "Service Call Item"
-			},
-		},
-		target_doc,
-	)
-	doc.naming_series = ""
-	doc.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or ""
+    doc = get_mapped_doc(
+        "Maintenance Contract",
+        source,
+        {
+            "Maintenance Contract": {
+                "doctype": "Service Call Form",
+                "field_map": {
+                    "doctype": "document_type",
+                    "name": "related_doc",
+                    "description": "reason"
+                },
+            },
+            "Maintenance Contract Item": {
+                "doctype": "Service Call Item"
+            },
+        },
+        target_doc,
+    )
+    doc.naming_series = ""
+    doc.department = frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1}) or ""
 
-	return doc
+    return doc
 
 # route to Create Job Order single doctype page with reference to Maintenance Contract and pre-fill the item details in Job Order Item child table based on the items added in Maintenance Contract
 @frappe.whitelist()
 def create_job_order(source, row_name):
-	doc = frappe.get_doc("Maintenance Contract", source)
-	# if doc.items:
-	job_order = frappe.new_doc("Create Job Order")
-	job_order.maintenance_contract = doc.name
-	job_order.customer = doc.customer
-	job_order.incharge = doc.incharge
-	job_order.incharge_name = doc.incharge_name
-	job_order.incharge_email = doc.incharge_email
-	job_order.incharge_phone_no = doc.incharge_phone_no
-	job_order.company = doc.company
-	job_order.sales_person = doc.sales_person
-	job_order.branch = doc.branch
-	for item in doc.items:
-		if row_name and item.name != row_name:
-			continue
-		serial_no = item.serial_number if item.serial_number else ""
-		has_serial_no = 1 if item.serial_number else 0
-		job_order.append("received_equipment", {
-			"item_code": item.item_code,
-			"item_name": item.item_name,
-			"item_group": item.item_group,
-			"model": item.model,
-			"manufacturer": item.manufacturer,
-			"serial_no": serial_no,
-			"has_serial_no": has_serial_no,
-			"uom": frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
-			"qty": item.qty
-		})
-	return job_order
+    doc = frappe.get_doc("Maintenance Contract", source)
+    # if doc.items:
+    job_order = frappe.new_doc("Create Job Order")
+    job_order.maintenance_contract = doc.name
+    job_order.customer = doc.customer
+    job_order.incharge = doc.incharge
+    job_order.incharge_name = doc.incharge_name
+    job_order.incharge_email = doc.incharge_email
+    job_order.incharge_phone_no = doc.incharge_phone_no
+    job_order.company = doc.company
+    job_order.sales_person = doc.sales_person
+    job_order.branch = doc.branch
+    for item in doc.items:
+        if row_name and item.name != row_name:
+            continue
+        serial_no = item.serial_number if item.serial_number else ""
+        has_serial_no = 1 if item.serial_number else 0
+        job_order.append("received_equipment", {
+            "item_code": item.item_code,
+            "item_name": item.item_name,
+            "item_group": item.item_group,
+            "model": item.model,
+            "manufacturer": item.manufacturer,
+            "serial_no": serial_no,
+            "has_serial_no": has_serial_no,
+            "uom": frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
+            "qty": item.qty
+        })
+    return job_order
+
+
+@frappe.whitelist()
+def create_callibration(source):
+    doc = frappe.get_doc("Maintenance Contract", source)
+    # if doc.items:
+    job_order = frappe.new_doc("Create Job Order")
+    job_order.maintenance_contract = doc.name
+    job_order.customer = doc.customer
+    job_order.incharge = doc.incharge
+    job_order.incharge_name = doc.incharge_name
+    job_order.incharge_email = doc.incharge_email
+    job_order.incharge_phone_no = doc.incharge_phone_no
+    job_order.company = doc.company
+    job_order.sales_person = doc.sales_person
+    job_order.branch = doc.branch
+    job_order.unit_type = "Calibration"
+    for item in doc.items:
+        serial_no = item.serial_number if item.serial_number else ""
+        has_serial_no = 1 if item.serial_number else 0
+        job_order.append("received_equipment", {
+            "item_code": item.item_code,
+            "item_name": item.item_name,
+            "item_group": item.item_group,
+            "model": item.model,
+            "manufacturer": item.manufacturer,
+            "serial_no": serial_no,
+            "has_serial_no": has_serial_no,
+            "uom": frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
+            "qty": item.qty
+        })
+    return job_order
 
 
 @frappe.whitelist()
 def create_qtn(source):
-	doc = frappe.get_doc("Maintenance Contract",source)
-	new_doc = frappe.new_doc("Quotation")	
-	new_doc.company = doc.company
-	new_doc.party_name = doc.customer
-	new_doc.customer_address = frappe.db.get_value("Customer",doc.customer,"customer_primary_address")
-	new_doc.address_display = frappe.db.get_value("Customer",doc.customer,"primary_address")
-	new_doc.quotation_type = "Internal Quotation - MC"
-	new_doc.sales_person = doc.sales_person
-	new_doc.maintenance_contract = doc.name
-	new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
-	new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
-	new_doc.branch = doc.branch
-	for item in doc.items:
-		new_doc.append("items",{
-			"item_code":item.item_code,
-			"item_name":item.item_name,
-			"model":frappe.db.get_value("Item", item.item_code, "model"),
-			"mfg":frappe.db.get_value("Item", item.item_code, "mfg"),
-			"description":item.description,
-			"serial_number":item.serial_number,
-			"qty":item.qty,
-			"uom":frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
-			"stock_uom":frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
-			"conversion_factor":1,
-			"custom_maintenance_contract":doc.name
-		})
+    doc = frappe.get_doc("Maintenance Contract",source)
+    new_doc = frappe.new_doc("Quotation")	
+    new_doc.company = doc.company
+    new_doc.party_name = doc.customer
+    new_doc.customer_address = frappe.db.get_value("Customer",doc.customer,"customer_primary_address")
+    new_doc.address_display = frappe.db.get_value("Customer",doc.customer,"primary_address")
+    new_doc.quotation_type = "Internal Quotation - MC"
+    new_doc.sales_person = doc.sales_person
+    new_doc.maintenance_contract = doc.name
+    new_doc.currency = frappe.db.get_value("Company",doc.company,"default_currency")
+    new_doc.selling_price_list = utils.fetch_price_list(doc.company, "selling")
+    new_doc.branch = doc.branch
+    for item in doc.items:
+        new_doc.append("items",{
+            "item_code":item.item_code,
+            "item_name":item.item_name,
+            "model":frappe.db.get_value("Item", item.item_code, "model"),
+            "mfg":frappe.db.get_value("Item", item.item_code, "mfg"),
+            "description":item.description,
+            "serial_number":item.serial_number,
+            "qty":item.qty,
+            "uom":frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
+            "stock_uom":frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
+            "conversion_factor":1,
+            "custom_maintenance_contract":doc.name
+        })
 
-	return new_doc
+    return new_doc

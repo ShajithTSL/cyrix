@@ -337,6 +337,79 @@ def update_so_status(self,method):
 
         frappe.msgprint("Notified successfully")
 
+
+@frappe.whitelist()
+def update_jo_status(self,method):
+    info = ""
+    if self.branch:
+        br_info = frappe.get_value("Branch",self.branch,"customer_support")
+        if br_info:
+            info = br_info
+    if self.job_order_data and self.workflow_state == "On Review":
+
+        quotation_exists = frappe.db.sql("""
+        SELECT q.name
+        FROM `tabQuotation Item` qi
+        INNER JOIN `tabQuotation` q
+            ON q.name = qi.parent
+        WHERE qi.job_order_data = %s
+          AND q.quotation_type IN ('Customer Quotation - Repair','Internal Quotation - Repair')
+        LIMIT 1
+        """, (self.job_order_data,))
+
+        if not quotation_exists:
+            jo = frappe.get_doc("Job Order Data", self.Job_order_data)
+            jo.status = "Supplier Quoted"
+            jo.save(ignore_permissions=True)
+
+        
+               
+        subject = f"Supplier Quotation Created - {self.name}"
+
+        message = f"""
+        Dear Info,
+
+        <br><br>
+
+        Supplier Quotation <b>{self.name}</b> has been created successfully.
+
+        <br><br>
+
+        <b>Supplier :</b> {self.supplier}<br>
+        <b>Grand Total :</b> {self.grand_total}<br>
+        <b>Currency :</b> {self.currency}
+
+        <br><br>
+
+        Regards,<br>
+        ERP System
+        """
+        
+        # Create Communication
+        frappe.get_doc({
+            "doctype": "Communication",
+            "communication_type": "Communication",
+            "communication_medium": "Email",
+            "sent_or_received": "Sent",
+            "subject": subject,
+            "content": message,
+            "reference_doctype": self.doctype,
+            "reference_name": self.name,
+            "sender": frappe.session.user,
+            "recipients": info
+        }).insert(ignore_permissions=True)
+
+        # Send Email
+        frappe.sendmail(
+            recipients=[info],
+            subject=subject,
+            message=message
+        )
+
+        frappe.msgprint("Notified successfully")
+
+
+
 @frappe.whitelist()
 def update_bq_status(self,method):
     info = ""

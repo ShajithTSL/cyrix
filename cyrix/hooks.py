@@ -101,7 +101,8 @@ jinja = {
 		"cyrix.custom_py.jinja.get_receivable",
         "cyrix.custom_py.jinja.get_technician_service_report",
 		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.weekly_sales",
-		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.daily_sales"
+		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.daily_sales",
+		 "cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.get_amc",
 
 	]
 }
@@ -184,6 +185,7 @@ doc_events = {
 
 		"after_insert": [
 		"cyrix.custom_py.supplier_quotation.update_so_status",
+		# "cyrix.custom_py.supplier_quotation.update_jo_status",
 		"cyrix.custom_py.supplier_quotation.update_bq_status",
 			
 		],

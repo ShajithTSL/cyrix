@@ -130,6 +130,7 @@ def update_job_order_status(self, method):
 			update = frappe.get_doc("Job Order Data", item.job_order_data)
 			if update.is_approved == 0:
 				update.status = status
+			update.type_of_approval = self.get("type_of_approval")
 			update.po_no = self.get("purchase_order_no")
 			update.save(ignore_permissions=True)
 
@@ -147,6 +148,7 @@ def update_job_order_status(self, method):
 			mc_doc = frappe.get_doc("Maintenance Contract", self.maintenance_contract)
 			mc_doc.quoted_date = self.transaction_date
 			mc_doc.warranty_expiry_date = add_months(self.transaction_date, self.warranty_months)
+			frappe.errprint("yesss")
 			mc_doc.save(ignore_permissions=True)
 
 		for item in self.get("items"):

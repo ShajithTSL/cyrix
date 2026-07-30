@@ -46,7 +46,7 @@
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
-   "options": "\nWO Approval\nSales Summary\nWeekly Lab Report\nTarget Master\nSales Weekly Summary\nSales Daily Summary\nStatement of Customer"
+   "options": "\nWO Approval\nAMC\nSales Summary\nWeekly Lab Report\nTarget Master\nSales Weekly Summary\nSales Daily Summary\nStatement of Customer"
   },
   {
    "depends_on": "eval:doc.type == \"Statement of Customer\"",
@@ -65,7 +65,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-04 12:23:06.828031",
+ "modified": "2026-07-16 15:56:20.874975",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "WO Approval",

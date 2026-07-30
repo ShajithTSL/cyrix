@@ -31,6 +31,7 @@ def create_journal_entry_bts(
 	party=None,
 	allow_edit=None,
 	cost_center=None,
+	branch=None,
 	pay_to_recd_from=None,
 	user_remark=None,
 	attach_file=None,
@@ -84,6 +85,7 @@ def create_journal_entry_bts(
 		"party": party,
 		# "cost_center": get_default_cost_center(company),
 		"cost_center": cost_center,
+		"branch": branch,
 		"user_remark": user_remark,
 	}
 
@@ -95,6 +97,7 @@ def create_journal_entry_bts(
 		"debit_in_account_currency": deposit,
 		"cost_center": get_default_cost_center(company),
 		"cost_center": cost_center,
+		"branch": branch,
 		"user_remark": user_remark,
 	}
 
@@ -211,6 +214,20 @@ def link_file_to_journal_entry(je_name, file_url):
 	file_doc.attached_to_name = je_name
 	file_doc.save(ignore_permissions=True)
 
+@frappe.whitelist()
+def reconcile_vouchers(bank_transaction_name, vouchers):
+	# updated clear date of all the vouchers based on the bank transaction
+	vouchers = json.loads(vouchers)
+	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+	transaction.add_payment_entries(vouchers)
+	transaction.validate_duplicate_references()
+	transaction.allocate_payment_entries()
+	transaction.update_allocated_amount()
+	transaction.set_status()
+	transaction.save()
+
+	return transaction
+	
 def link_file_to_payment_entry(pe_name, file_url):
 	# Find the File doc created by the dialog upload
 	file_doc = frappe.get_doc("File", {
@@ -234,6 +251,7 @@ def create_payment_entry_bts(
 	mode_of_payment=None,
 	project=None,
 	cost_center=None,
+	branch=None,
 	allow_edit=None,
 	attach_file=None,
 ):
@@ -276,6 +294,7 @@ def create_payment_entry_bts(
 	pe.mode_of_payment = mode_of_payment
 	pe.project = project
 	pe.cost_center = cost_center
+	pe.branch = branch
 
 	pe.validate()
 
@@ -299,21 +318,6 @@ def create_payment_entry_bts(
 	)
 	return reconcile_vouchers(bank_transaction_name, vouchers)
 
-@frappe.whitelist()
-def reconcile_vouchers(bank_transaction_name, vouchers):
-	# updated clear date of all the vouchers based on the bank transaction
-	vouchers = json.loads(vouchers)
-	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
-	transaction.add_payment_entries(vouchers)
-	transaction.validate_duplicate_references()
-	transaction.allocate_payment_entries()
-	transaction.update_allocated_amount()
-	transaction.set_status()
-	transaction.save()
-
-	return transaction
-
-
 def update_deposit_values_as_positive():
 	docs = frappe.get_all(
 		"Bank Transaction",
@@ -329,3 +333,42 @@ def update_deposit_values_as_positive():
 		else:
 			withdrawal = d.withdrawal
 		frappe.db.set_value("Bank Transaction", d.name, "withdrawal", withdrawal)
+
+
+
+@frappe.whitelist()
+def get_bank_transactions(bank_account, from_date=None, to_date=None, type=None):
+	# returns bank transactions for a bank account
+	filters = []
+	
+	if type:
+		filters.append([type, ">", 0])
+		
+	filters.append(["bank_account", "=", bank_account])
+	filters.append(["docstatus", "=", 1])
+	filters.append(["unallocated_amount", ">", 0.0])
+	if to_date:
+		filters.append(["date", "<=", to_date])
+	if from_date:
+		filters.append(["date", ">=", from_date])
+	transactions = frappe.get_all(
+		"Bank Transaction",
+		fields=[
+			"date",
+			"deposit",
+			"withdrawal",
+			"currency",
+			"description",
+			"name",
+			"bank_account",
+			"company",
+			"unallocated_amount",
+			"reference_number",
+			"party_type",
+			"party",
+			"remarks"
+		],
+		filters=filters,
+		order_by="date",
+	)
+	return transactions

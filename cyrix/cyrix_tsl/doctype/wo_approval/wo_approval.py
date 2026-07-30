@@ -716,3 +716,610 @@ def daily_sales(self):
         html += "</table>"
 
     return html
+
+
+import frappe
+from datetime import datetime
+import calendar
+from frappe.utils import getdate
+
+@frappe.whitelist()
+def get_amc(company, branch):
+	try:
+		today = datetime.now().date()
+		formatted_date = today.strftime("%d-%m-%Y")
+		current_year = today.year
+
+		months = list(calendar.month_name)[1:]
+		current_month = today.month
+		last_12_months = [
+			(months[(current_month - i - 1) % 12],
+			 (current_year if current_month - i > 0 else current_year - 1))
+			for i in range(11, -1, -1)
+		]
+
+		sales_people = frappe.get_all(
+		"Sales Person",
+		filters={"name": ["!=", "Sales Team"],"custom_branch":branch}
+		)
+
+		# target_sales = {
+		#     "Cyrix TSL - Kuwait": [
+		#         "Yazeed", "Jubil"
+
+		#     ]
+		# }
+
+		html = []
+
+		# ===== Header with Logo and Flag =====
+		html.append(render_header(company, formatted_date))
+
+		# ===== Initialize cumulative totals =====
+		total_quoted_wo = 0
+		total_approved_wo = 0
+		total_days_wo = 0
+		wo_count_total = 0
+
+		# First pass: Calculate cumulative totals
+		for sp in sales_people:
+			# if sp.name not in target_sales.get(company, []):
+			#     continue
+
+			# Get totals for this salesperson
+			totals = calculate_salesperson_totals(sp, company, last_12_months)
+
+			total_quoted_wo += totals.get('quoted_wo', 0)
+			total_approved_wo += totals.get('approved_wo', 0)
+			total_days_wo += totals.get('days_wo', 0)
+			wo_count_total += totals.get('wo_count', 0)
+
+		# Calculate cumulative percentages and averages
+		total_per_wo = (total_approved_wo / total_quoted_wo * 100) if total_quoted_wo else 0
+		avg_days_wo = round(total_days_wo / wo_count_total) if wo_count_total > 0 else 0
+
+		# ===== Add Cumulative Table after Header =====
+		html.append(render_cumulative_table(
+			total_quoted_wo, total_approved_wo, total_per_wo, avg_days_wo
+		))
+
+		# ===== Main Table Header =====
+		html.append(render_table_header(company))
+
+		# Reset totals for display in main table
+		total_quoted_wo = 0
+		total_approved_wo = 0
+		total_days_wo = 0
+
+		# Second pass: Generate individual salesperson rows
+		for sp in sales_people:
+			# if sp.name not in target_sales.get(company, []):
+			#     continue
+
+			# Generate rows and collect data
+			rows_result = generate_salesperson_rows(sp, company, last_12_months)
+			if rows_result and len(rows_result) > 1:
+				html.extend(rows_result[0])  # HTML rows
+
+				# Get totals from the second return value
+				if len(rows_result) > 1:
+					totals = rows_result[1]
+					total_quoted_wo += totals.get('quoted_wo', 0)
+					total_approved_wo += totals.get('approved_wo', 0)
+					total_days_wo += totals.get('days_wo', 0)
+
+		# Calculate percentages for main table
+		total_per_wo = (total_approved_wo / total_quoted_wo * 100) if total_quoted_wo else 0
+
+		html.append("</table>")
+
+		# ===== Second Section =====
+		# html.append(render_header2(company, formatted_date))
+		# html.append(render_table_header2(company))
+
+		# # ===== Total Row =====
+		# html.append(f"""
+		# <tr style="font-weight:bold;background-color:#f2f2f2">
+		#     <td style="background-color:#D3D3D3"><center>{total_quoted_wo:,.0f}</center></td>
+		#     <td style="background-color:#D3D3D3"><center>{total_approved_wo:,.0f}</center></td>
+		#     <td style="background-color:#D3D3D3"><center>{round(total_per_wo)}%</center></td>
+		# </tr>
+		# """)
+		# html.append("</table>")
+
+		return "".join(html)
+	except Exception as e:
+		frappe.log_error(f"Error in get_sales_kuwait: {str(e)}", "Sales Report Error")
+		return f"<div style='color:red; padding:20px;'>Error generating report: {str(e)}</div>"
+
+def calculate_salesperson_totals(sp, company, months):
+	"""Calculate totals for a salesperson without generating HTML."""
+	try:
+		total_quoted = 0
+		total_approved = 0
+		total_days_wo = 0
+		wo_count = 0
+
+		for month_name, year in months:
+			try:
+				month_num = datetime.strptime(month_name, "%B").month
+				first_day = datetime(year, month_num, 1).date()
+				last_day = datetime(year, month_num, calendar.monthrange(year, month_num)[1]).date()
+
+				quoted, approved, quoted2, approved2, wod_hrs, sod_hrs = get_monthly_sales(
+					sp.name, first_day, last_day, company
+				)
+
+				total_quoted += quoted or 0
+				total_approved += approved or 0
+				total_days_wo += wod_hrs or 0
+
+				if wod_hrs > 0:
+					wo_count += 1
+
+			except Exception as e:
+				frappe.log_error(f"Error in calculate_salesperson_totals for {sp.name}: {str(e)}", "Totals Calculation Error")
+				continue
+
+		return {
+			'quoted_wo': total_quoted,
+			'approved_wo': total_approved,
+			'days_wo': total_days_wo,
+			'wo_count': wo_count,
+		}
+	except Exception as e:
+		frappe.log_error(f"Error in calculate_salesperson_totals for {sp.name}: {str(e)}", "Totals Calculation Error")
+		return {}
+
+def render_cumulative_table(q_wo, a_wo, p_wo, d_wo):
+	"""Render the cumulative summary table."""
+
+	# Determine color based on percentage
+	color_wo = get_color(p_wo)
+
+	return f"""
+	<br>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse; margin-top:10px;">
+		<tr>
+			<td colspan="3" align="center" style="background-color:#0e86d4; color:white; font-size:14px; font-weight:bold; padding:8px;">
+				CUMULATIVE SUMMARY
+			</td>
+		</tr>
+		<tr style="background-color:#145da0; color:white; font-weight:bold;">
+			<td colspan="3" style="text-align:center; padding:8px; font-size:12px;color:white;">MAINTENANCE CONTRACT</td>
+		</tr>
+		<tr style="background-color:#f0f0f0; font-weight:bold;">
+			<td style="padding:8px; text-align:center; font-size:11px;">Quoted (KWD)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">Approved (KWD)</td>
+			<td style="padding:8px; text-align:center; font-size:11px;">% Approved</td>
+		</tr>
+		<tr style="font-size:14px;">
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{q_wo:,.0f}</td>
+			<td style="padding:10px; text-align:center; background-color:#D3D3D3; font-weight:bold;">{a_wo:,.0f}</td>
+			<td style="padding:10px; text-align:center; background-color:{color_wo}; font-weight:bold;">{round(p_wo)}%</td>
+		</tr>
+	</table>
+	<br>
+	"""
+
+def render_header(company, formatted_date):
+	"""Generate the report header HTML."""
+	logo_path = "/files/Cyrix Logo.png"
+	country_label = "Kuwait" if "Kuwait" in company else "UAE"
+
+	return f"""
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td style="width:30%; border-color:#000000;"><img src="{logo_path}" width="200"></td>
+			<td style="width:40%; border-color:#000000; font-size:16px; color:#055c9d; text-align:center; font-weight:bold;">
+				<br>TSL Company<br>AMC Approval Percentage by Amount
+			</td>
+			<td style="width:30%; border-color:#000000;">
+				<center><img src="/files/kuwait flag.jpg" width="140" height="80"></center>
+			</td>
+		</tr>
+	</table>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td align="left" style="width:30%;border-right:hidden; border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
+				Branch - {country_label}
+			</td>
+			<td align="center" style="width:40%;border-right:hidden; border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
+				Currency - KWD
+			</td>
+			<td align="right" style="width:30%;border-color:#000000; background-color:#0e86d4; color:white; font-size:12px; font-weight:bold;">
+				Generation Date: {formatted_date}
+			</td>
+		</tr>
+	</table>
+	"""
+
+def render_header2(company, formatted_date):
+	"""Generate the report header HTML."""
+	return f"""
+	<br>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td colspan="7" align="center" style="border-color:#000000; background-color:#0e86d4; color:white; font-size:14px; font-weight:bold;">
+				CUMULATIVE SUMMARY
+			</td>
+		</tr>
+	</table>
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+	"""
+
+def render_table_header(company):
+	"""Render the table column headers depending on company."""
+	return f"""
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse; margin-top:10px;">
+		<tr>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="16%"></td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="16%"></td>
+			<td colspan="4" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">MAINTENANCE CONTRACT</td>
+		</tr>
+		<tr>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="16%">Sales</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:10px; text-align:center;" width="16%">Quoted Month</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="17%">Quoted</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="17%">Approved</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="17%">% of Approved</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:10px; text-align:center;" width="17%">Approval Days</td>
+		</tr>
+	"""
+
+def render_table_header2(company):
+	"""Render the table column headers depending on company."""
+	return f"""
+	<table border="1" width="100%" style="border-color:#000000; border-collapse:collapse;">
+		<tr>
+			<td colspan="3" style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;">JOB ORDER</td>
+			<td colspan="4" style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;">SUPPLY ORDER</td>
+		</tr>
+		<tr>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Quoted</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Approved</td>
+			<td style="background-color:#145da0; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">% of Approved</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Quoted</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">Approved</td>
+			<td style="background-color:#0e86d4; color:white; font-weight:bold; font-size:12px; text-align:center;" width="12%">% of Approved</td>
+		</tr>
+	"""
+
+def generate_salesperson_rows(sp, company, months):
+	"""Generate monthly sales data for a single salesperson."""
+	try:
+		rows = []
+		total_quoted = 0
+		total_approved = 0
+		total_days_wo = 0
+		wo_count = 0
+
+		for month_name, year in months:
+			try:
+				month_num = datetime.strptime(month_name, "%B").month
+				first_day = datetime(year, month_num, 1).date()
+				last_day = datetime(year, month_num, calendar.monthrange(year, month_num)[1]).date()
+
+				quoted, approved, quoted2, approved2, wod_hrs, sod_hrs = get_monthly_sales(
+					sp.name, first_day, last_day, company
+				)
+
+				total_quoted += quoted or 0
+				total_approved += approved or 0
+				total_days_wo += wod_hrs or 0
+
+				if wod_hrs > 0:
+					wo_count += 1
+
+				# Calculate percentage
+				percent1 = round((approved / quoted) * 100) if quoted and quoted > 0 else 0
+
+				# Set color based on percentage
+				color4 = get_color(percent1)
+
+				rows.append(f"""
+				<tr>
+					<td style="text-align:center; border-bottom:hidden; color:#145da0; font-weight:bold;">{sp.name if month_name == "June" else ''}</td>
+					<td style="font-size:10px; text-align:center; font-weight:bold;">{month_name}</td>
+					<td style="font-size:10px; text-align:center;">{quoted:,.0f}</td>
+					<td style="font-size:10px; text-align:center;">{approved:,.0f}</td>
+					<td style="font-size:10px; text-align:center; background-color:{color4}; font-weight:bold;">{percent1}%</td>
+					<td style="font-size:10px; text-align:center;">{wod_hrs}</td>
+				</tr>
+
+				""")
+			except Exception as e:
+				frappe.log_error(f"Error processing month {month_name} for {sp.name}: {str(e)}", "Month Processing Error")
+				continue
+
+		# Calculate totals
+		total_percent = round((total_approved / total_quoted) * 100) if total_quoted and total_quoted > 0 else 0
+
+		# Get color for totals
+		color1 = get_color(total_percent)
+
+		# Calculate average days
+		avg_days_wo = round(total_days_wo / wo_count) if wo_count > 0 else 0
+
+		rows.append(f"""
+		<tr>
+			<td></td>
+			<td><center><b>Total</b></center></td>
+			<td style="background-color:#D3D3D3"><center><b>{total_quoted:,.0f}</b></center></td>
+			<td style="background-color:#D3D3D3"><center><b>{total_approved:,.0f}</b></center></td>
+			<td style="background-color:{color1};"><center><b>{total_percent}%</b></center></td>
+			<td style="background-color:#D3D3D3"><center><b>{avg_days_wo}</b></center></td>
+		</tr>
+		<tr><td colspan="6"><center><b>-</b></center></td></tr>
+		""")
+
+		# Return both rows and totals
+		totals = {
+			'quoted_wo': total_quoted,
+			'approved_wo': total_approved,
+			'days_wo': avg_days_wo,
+		}
+
+		return [rows, totals]
+	except Exception as e:
+		frappe.log_error(f"Error in generate_salesperson_rows for {sp.name}: {str(e)}", "Salesperson Error")
+		return [[], {}]
+
+def get_color(percentage):
+	"""Return color based on percentage."""
+	if percentage < 60:
+		return "#FF7074"
+	elif percentage < 80:
+		return "#FFFF8F"
+	else:
+		return "#98FB98"
+
+def get_monthly_sales(sales_user, from_date, to_date, company):
+	"""
+	Calculates total quoted and approved amounts per distinct maintenance contract,
+	with correct discount handling. Uses net_amount for 2026 onwards.
+
+	Wherever a Quotation Item's custom_maintenance_contract is referenced, it falls
+	back to the parent Quotation's maintenance_contract whenever
+	custom_maintenance_contract is empty/blank:
+		COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract)
+	"""
+	try:
+		if not sales_user:
+			return 0, 0, 0, 0, 0, 0
+
+		# Get distinct Maintenance Contract list (falls back to header-level field when blank)
+		wod_list = frappe.db.sql("""
+			SELECT DISTINCT
+				COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) AS jo
+			FROM `tabQuotation` q
+			INNER JOIN `tabQuotation Item` qi
+				ON q.name = qi.parent
+			WHERE q.sales_person = %s
+				AND q.company = %s
+				AND q.workflow_state IN (
+					'Approved by Customer',
+					'Quoted to Customer',
+					'Rejected by Customer'
+				)
+				AND q.quotation_type IN (
+					'Customer Quotation - MC',
+					'Customer Quotation - MC - Revised'
+				)
+				AND q.transaction_date BETWEEN %s AND %s
+				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) IS NOT NULL
+				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) != ''
+		""", (sales_user, company, from_date, to_date), as_dict=True)
+
+		# Get Maintenance Contract count
+		w_count = frappe.db.sql("""
+			SELECT COUNT(DISTINCT COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract)) as ct
+			FROM `tabQuotation` q
+			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = %s
+			AND q.company = %s
+			AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
+			AND q.quotation_type IN ('Customer Quotation - MC', 'Customer Quotation - MC - Revised')
+			AND q.transaction_date BETWEEN %s AND %s
+			AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) IS NOT NULL
+			AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) != ''
+		""", (sales_user, company, from_date, to_date), as_dict=True)
+
+		wod_count = w_count[0]["ct"] if w_count else 0
+
+		total_quoted = 0
+		total_approved = 0
+		ddf1 = 0
+		approved_count = 0
+
+		# Process each Maintenance Contract
+		for wod in wod_list:
+			jo = wod["jo"]
+
+			# Get transaction year
+			year_check = frappe.db.sql("""
+				SELECT YEAR(q.transaction_date) as trans_year
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) = %s
+				AND q.transaction_date BETWEEN %s AND %s
+				LIMIT 1
+			""", (sales_user, jo, from_date, to_date), as_dict=True)
+
+			is_2026_or_later = year_check and year_check[0].get("trans_year", 0) >= 2026
+
+			# Get Quoted Amount
+			# if is_2026_or_later:
+			quoted_rows = frappe.db.sql("""
+				SELECT qi.net_amount as amount
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) = %s
+				AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
+				AND q.quotation_type IN ('Customer Quotation - MC','Customer Quotation - MC - Revised')
+				AND q.transaction_date BETWEEN %s AND %s
+			""", (sales_user,jo, from_date, to_date), as_dict=True)
+			if quoted_rows and quoted_rows[0].get("amount"):
+				total_quoted += quoted_rows[0]["amount"] or 0
+
+
+
+
+			# Check if approved
+			rev_check = frappe.db.sql("""
+				SELECT DISTINCT COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) AS jo
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND q.workflow_state IN ('Approved by Customer',"Quoted to Customer","Rejected by Customer")
+				AND q.quotation_type IN ('Customer Quotation - MC','Customer Quotation - MC - Revised')
+				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) = %s
+				AND q.transaction_date BETWEEN %s AND %s
+			""", (sales_user, jo, from_date, to_date), as_dict=True)
+
+			if rev_check:
+				# Get Approved Amount
+				# if is_2026_or_later:
+				approved_rows = frappe.db.sql("""
+					SELECT SUM(qi.net_amount) as amount,
+							q.transaction_date, q.approval_date
+					FROM `tabQuotation` q
+					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+					WHERE q.sales_person = %s
+					AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) = %s
+					AND q.workflow_state = 'Approved by Customer'
+					AND q.quotation_type IN ('Customer Quotation - MC', 'Customer Quotation - MC - Revised')
+					AND q.transaction_date BETWEEN %s AND %s
+					GROUP BY q.name
+				""", (sales_user, jo, from_date, to_date), as_dict=True)
+
+				if approved_rows:
+					for row in approved_rows:
+						if row.get("approval_date") and row.get("transaction_date"):
+							date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
+							ddf1 += date_diff
+							approved_count += 1
+						total_approved += row.get("amount") or 0
+
+		# SOD Section
+		sod_list = frappe.db.sql("""
+			SELECT DISTINCT qi.supply_order_data as sod
+			FROM `tabQuotation` q
+			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = %s
+			AND q.company = %s
+			AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+			AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
+			AND q.transaction_date BETWEEN %s AND %s
+			AND qi.supply_order_data IS NOT NULL
+			AND qi.supply_order_data != ''
+		""", (sales_user, company, from_date, to_date), as_dict=True)
+
+		s_count = frappe.db.sql("""
+			SELECT COUNT(DISTINCT qi.supply_order_data) as sod
+			FROM `tabQuotation` q
+			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+			WHERE q.sales_person = %s
+			AND q.company = %s
+			AND q.workflow_state IN ('Approved By Customer', 'Quoted to Customer', 'Rejected by Customer')
+			AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
+			AND q.transaction_date BETWEEN %s AND %s
+			AND qi.supply_order_data IS NOT NULL
+			AND qi.supply_order_data != ''
+		""", (sales_user, company, from_date, to_date), as_dict=True)
+
+		sod_count = s_count[0]["sod"] if s_count else 0
+
+		total_quoted2 = 0
+		total_approved2 = 0
+		ddf2 = 0
+		approved_count2 = 0
+
+		# Process each SOD
+		for s in sod_list:
+			sod_no = s["sod"]
+
+			# Get transaction year
+			year_check = frappe.db.sql("""
+				SELECT YEAR(q.transaction_date) as trans_year
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND qi.supply_order_data = %s
+				AND q.transaction_date BETWEEN %s AND %s
+				LIMIT 1
+			""", (sales_user, sod_no, from_date, to_date), as_dict=True)
+
+			is_2026_or_later = year_check and year_check[0].get("trans_year", 0) >= 2026
+
+			# Get Quoted Amount
+			# if is_2026_or_later:
+			quoted_rows2 = frappe.db.sql("""
+				SELECT q.name, SUM(qi.net_amount) as net_amount
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND qi.supply_order_data = %s
+				AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
+				AND q.quotation_type IN ('Customer Quotation - Supply')
+				AND q.transaction_date BETWEEN %s AND %s
+				GROUP BY q.name
+			""", (sales_user, sod_no, from_date, to_date), as_dict=True)
+
+			if quoted_rows2:
+				for row in quoted_rows2:
+					total_quoted2 += row.get("net_amount") or 0
+
+			# Check if approved
+			rev_check2 = frappe.db.sql("""
+				SELECT DISTINCT qi.supply_order_data
+				FROM `tabQuotation` q
+				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+				WHERE q.sales_person = %s
+				AND q.workflow_state IN ('Approved by Customer')
+				AND q.quotation_type IN ('Customer Quotation - Supply','Customer Quotation - S - Revised')
+				AND qi.supply_order_data = %s
+				AND q.transaction_date BETWEEN %s AND %s
+			""", (sales_user, sod_no, from_date, to_date), as_dict=True)
+
+			if rev_check2:
+				# Get Approved Amount
+				# if is_2026_or_later:
+				approved_rows2 = frappe.db.sql("""
+					SELECT q.name, SUM(qi.net_amount) as net_amount,
+							q.transaction_date, q.approval_date
+					FROM `tabQuotation` q
+					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
+					WHERE q.sales_person = %s
+					AND qi.supply_order_data = %s
+					AND q.workflow_state = 'Approved by Customer'
+					AND q.quotation_type IN ('Customer Quotation - Supply', 'Customer Quotation - S - Revised')
+					AND q.transaction_date BETWEEN %s AND %s
+					GROUP BY q.name
+				""", (sales_user, sod_no, from_date, to_date), as_dict=True)
+
+				if approved_rows2:
+					for row in approved_rows2:
+						if row.get("approval_date") and row.get("transaction_date"):
+							date_diff = (getdate(row["approval_date"]) - getdate(row["transaction_date"])).days
+							ddf2 += date_diff
+							approved_count2 += 1
+						total_approved2 += row.get("net_amount") or 0
+
+		# Calculate average days
+		wod_hrs = round(ddf1 / approved_count) if approved_count > 0 else 0
+		sod_hrs = round(ddf2 / approved_count2) if approved_count2 > 0 else 0
+
+		return (
+			round(total_quoted or 0),
+			round(total_approved or 0),
+			round(total_quoted2 or 0),
+			round(total_approved2 or 0),
+			wod_hrs,
+			sod_hrs
+		)
+	except Exception as e:
+		frappe.log_error(f"Error in get_monthly_sales for {sales_user}: {str(e)}", "Monthly Sales Error")
+		return 0, 0, 0, 0, 0, 0

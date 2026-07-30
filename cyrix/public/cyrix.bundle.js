@@ -3397,3 +3397,234 @@ frappe.ui.Page = class Page {
 		this.wrapper.trigger("view-change");
 	}
 };
+// Moves the Comments + Activity footer into the right sidebar,
+// collapsed by default, on every DocType form.
+
+$(document).on("form-refresh", function (e, frm) {
+	// give Frappe a tick to finish rendering the footer
+	setTimeout(() => move_activity_to_sidebar(frm), 200);
+});
+//comment and activity
+const SKIP_DOCTYPES = ["User", "Print Format Builder"]; // add any you don't want touched
+
+// $(document).on("form-refresh", function (e, frm) {
+// 	setTimeout(() => setup_activity_button(frm), 200);
+// });
+
+// function setup_activity_button(frm) {
+// 	if (!frm || frm.is_new()) return;
+// 	if (SKIP_DOCTYPES.includes(frm.doctype)) return;
+
+// 	const $footer = frm.footer && frm.footer.wrapper;
+// 	if (!$footer || !$footer.length) return;
+
+// 	$footer.addClass("activity-hidden");
+
+// 	// custom buttons are cleared on refresh, so re-add unless already present
+// 	if (frm.custom_buttons[__("Comments & Activity")]) return;
+
+// 	frm.add_custom_button(__("Comments & Activity"), () => open_activity_dialog(frm));
+// }
+
+// function open_activity_dialog(frm) {
+// 	const $footer = frm.footer.wrapper;
+// 	const $anchor = $('<div class="activity-anchor"></div>');
+// 	$footer.after($anchor);
+
+// 	const d = new frappe.ui.Dialog({
+// 		title: __("Comments & Activity"),
+// 		size: "large",
+// 		on_hide: () => {
+// 			$footer.addClass("activity-hidden");
+// 			$anchor.replaceWith($footer);
+// 		},
+// 	});
+
+// 	d.$body.append($footer.removeClass("activity-hidden"));
+// 	d.show();
+
+// 	hide_view_logs(d.$body);
+// 	// timeline loads lazily, so sweep again shortly after
+// 	setTimeout(() => hide_view_logs(d.$body), 600);
+// }
+
+// // "You viewed this" entries are pure noise — drop them from the list
+// function hide_view_logs($ctx) {
+// 	$ctx.find(".timeline-item").each(function () {
+// 		const text = $(this).find(".timeline-content").text() || "";
+// 		if (/viewed this/i.test(text)) $(this).hide();
+// 	});
+// }
+
+// frappe.dom.set_style(`
+// 	.form-footer.activity-hidden { display: none !important; }
+// 	.modal-dialog .form-footer { padding: 0; border: none; margin: 0; }
+// 	.modal-dialog .form-footer .comment-box .frappe-control { width: 100%; }
+// 	.modal-dialog .new-timeline { max-height: 55vh; overflow-y: auto; }
+// `);
+let $panel, $handle, $anchor;
+let active_frm = null;
+
+$(document).on("form-refresh", function (e, frm) {
+	setTimeout(() => setup_activity_panel(frm), 200);
+});
+
+function setup_activity_panel(frm) {
+	if (!frm || !frm.doc || frm.is_new() || frm.doc.__islocal
+		|| SKIP_DOCTYPES.includes(frm.doctype)) {
+		return hide_handle();
+	}
+
+	const $footer = frm.footer && frm.footer.wrapper;
+	if (!$footer || !$footer.length) return hide_handle();
+
+	// a different doc was opened while the panel was open
+	if (active_frm && active_frm !== frm) close_panel();
+
+	active_frm = frm;
+	$footer.addClass("activity-hidden");
+
+	build_panel();
+	$handle.show();
+}
+
+function build_panel() {
+	if ($panel) return;
+
+	$handle = $(`
+		<div class="activity-handle">
+			<span>${__("Comments & Activity")}</span>
+		</div>
+	`).appendTo("body");
+
+	$panel = $(`
+		<div class="activity-panel">
+			<div class="activity-panel-header">
+				<span>${__("Comments & Activity")}</span>
+				<span class="activity-panel-close">&times;</span>
+			</div>
+			<div class="activity-panel-body"></div>
+		</div>
+	`).appendTo("body");
+
+	$handle.on("click", () => ($panel.hasClass("open") ? close_panel() : open_panel()));
+	$panel.find(".activity-panel-close").on("click", close_panel);
+
+	$(document).on("keydown.activity", (e) => {
+		if (e.key === "Escape" && $panel.hasClass("open")) close_panel();
+	});
+
+	// put the footer back before Frappe tears the form down
+	// on any navigation: stash the footer back, then hide the tab.
+	// form-refresh will re-show it only if we land on a real form.
+	frappe.router.on("change", () => {
+		close_panel();
+		if ($handle) $handle.hide();
+		active_frm = null;
+	});
+}
+
+function open_panel() {
+	if (!active_frm || !active_frm.footer) return;
+
+	const $footer = active_frm.footer.wrapper;
+	$anchor = $('<div class="activity-anchor"></div>');
+	$footer.after($anchor);
+
+	$panel.find(".activity-panel-body").append($footer.removeClass("activity-hidden"));
+	$panel.addClass("open");
+	$handle.addClass("open");
+
+	hide_view_logs($panel);
+	setTimeout(() => hide_view_logs($panel), 600);   // timeline loads lazily
+}
+
+function close_panel() {
+	if (!$panel || !$panel.hasClass("open")) return;
+
+	const $footer = $panel.find(".form-footer");
+	if ($anchor && $anchor.length && $footer.length) {
+		$anchor.replaceWith($footer.addClass("activity-hidden"));
+	}
+	$anchor = null;
+
+	$panel.removeClass("open");
+	$handle.removeClass("open");
+}
+
+function hide_handle() {
+	close_panel();
+	active_frm = null;
+	if ($handle) $handle.hide();
+}
+
+function hide_view_logs($ctx) {
+	$ctx.find(".timeline-item").each(function () {
+		if (/viewed this/i.test($(this).find(".timeline-content").text() || "")) {
+			$(this).hide();
+		}
+	});
+}
+
+frappe.dom.set_style(`
+	.form-footer.activity-hidden { display: none !important; }
+
+	.activity-handle {
+		position: fixed;
+		right: 0;
+		top: 45%;
+		z-index: 1035;
+		display: none;
+		writing-mode: vertical-rl;
+		padding: 14px 7px;
+		background: var(--fg-color);
+		border: 1px solid var(--border-color);
+		border-right: none;
+		border-radius: var(--border-radius) 0 0 var(--border-radius);
+		box-shadow: var(--shadow-base);
+		font-size: var(--text-sm);
+		font-weight: 500;
+		cursor: pointer;
+		user-select: none;
+		transition: right 0.25s ease;
+	}
+	.activity-handle:hover { background: var(--bg-color); }
+	.activity-handle.open { right: 440px; }
+
+	.activity-panel {
+		position: fixed;
+		top: 0;
+		right: -460px;
+		width: 440px;
+		height: 100vh;
+		z-index: 1034;
+		background: var(--fg-color);
+		border-left: 1px solid var(--border-color);
+		box-shadow: -2px 0 12px rgba(0,0,0,0.08);
+		display: flex;
+		flex-direction: column;
+		transition: right 0.25s ease;
+	}
+	.activity-panel.open { right: 0; }
+
+	.activity-panel-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 14px 16px;
+		border-bottom: 1px solid var(--border-color);
+		font-weight: 600;
+	}
+	.activity-panel-close { cursor: pointer; font-size: 22px; line-height: 1; opacity: 0.6; }
+	.activity-panel-close:hover { opacity: 1; }
+
+	.activity-panel-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
+	.activity-panel-body .form-footer { padding: 0; border: none; margin: 0; }
+	.activity-panel-body .comment-box .frappe-control { width: 100%; }
+	.activity-panel-body .new-timeline { padding-left: 0; }
+
+	@media (max-width: 991px) {
+		.activity-panel { width: 100%; right: -100%; }
+		.activity-handle.open { right: 0; }
+	}
+`);

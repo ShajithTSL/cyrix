@@ -42,7 +42,7 @@ from cyrix.custom_py.bulk_import_utils import bulk_get_or_create
 REQUIRED_COLUMNS = ["item_name", "model", "manufacturer", "item_group", "uom", "serial_number"]
 
 ITEM_MODEL_TITLE_FIELD = "model"          # confirmed from child table's fetch_from
-ITEM_MFG_TITLE_FIELD = "manufacturer"     # TODO: confirm against your Item Mfg doctype
+ITEM_MFG_TITLE_FIELD = "mfg"     # TODO: confirm against your Item Mfg doctype
 
 PROGRESS_EVERY = 50
 

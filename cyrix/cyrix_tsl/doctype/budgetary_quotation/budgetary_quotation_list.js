@@ -50,5 +50,11 @@ frappe.listview_settings['Budgetary Quotation'] = {
         else if (doc.status === "Supplier Quoted") {
             return [__("Supplier Quoted"), "green", "status,=,Supplier Quoted"];
         }
+        else if (doc.status === "Vendor Clarification") {
+                return [__("Vendor Clarification"), "red", "status,=,Vendor Clarification"];
+        }
+        else if (doc.status === "Obsolete Model") {
+                return [__("Obsolete Model"), "red", "status,=,Obsolete Model"];
+        }
     },
 };

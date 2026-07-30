@@ -234,7 +234,7 @@
    "fieldname": "report_type",
    "fieldtype": "Select",
    "label": "Report Type",
-   "options": "Service Report\nEvaluation Report"
+   "options": "Service Report\nEvaluation Report\nInstallation Report"
   },
   {
    "default": "0",
@@ -258,8 +258,8 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-12 11:55:31.152981",
- "modified_by": "Administrator",
+ "modified": "2026-07-27 10:56:46.431611",
+ "modified_by": "shajith@tsl-me.com",
  "module": "Cyrix TSL",
  "name": "Technical Report",
  "naming_rule": "By \"Naming Series\" field",

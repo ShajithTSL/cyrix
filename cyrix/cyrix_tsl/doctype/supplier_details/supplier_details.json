@@ -15,7 +15,8 @@
   "supplier",
   "column_break_ipsa",
   "price",
-  "shipment"
+  "shipment",
+  "coo"
  ],
  "fields": [
   {
@@ -75,13 +76,19 @@
    "fieldtype": "Select",
    "label": "Reference Type",
    "options": "Supply Order Data\nBudgetary Quotation"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "coo",
+   "fieldtype": "Data",
+   "label": "COO"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-23 09:47:07.457501",
+ "modified": "2026-07-21 14:13:49.129443",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Supplier Details",

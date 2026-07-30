@@ -20,13 +20,14 @@ warehouse_list = {
 
 def validate_status(self):
 	before = self.get_doc_before_save()
-	if before.docstatus:
-		if before.status != self.status:
-			return True
+	if before:
+		if before.docstatus:
+			if before.status != self.status:
+				return True
+			else:
+				return False
 		else:
-			return False
-	else:
-		return True
+			return True
 
 
 class EvaluationReport(Document):

@@ -306,7 +306,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Board Evaluation\nA-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled\nReplace",
+   "options": "Board Evaluation\nA-Approved\nAP-Available Parts\nC-Comparison\nCC-Comparison Client\nEP-Extra Parts\nIQ-Internally Quoted\nNE-Need Evaluation\nNER-Need Evaluation Return\nNEA-Need Evaluation Approved\nP-Paid\nQ-Quoted\nRNA-Return Not Approved\nRNAC-Return Not Approved Client\nRNF-Return No Fault\nRNFC-Return No Fault Client\nRNP-Return No Parts\nRNPC-Return No Parts Client\nRNR-Return Not Repaired\nRNRC-Return Not Repaired Client\nRS-Repaired and Shipped\nRSC-Repaired and Shipped Client\nRSI-Repaired and Shipped Invoiced\nSP-Searching Parts\nTR-Technician Repair\nUE-Under Evaluation\nUTR-Under Technician Repair\nW-Working\nWP-Waiting Parts\nUnpaid\nPartially Paid\nParts Priced\nPending Internal Approval\nTP-Third Party\nIP-Internal Extra Parts\nC-Cancelled\nReplace\nSupplier Quoted",
    "read_only_depends_on": "eval:frappe.session.user != \"Administrator\""
   },
   {
@@ -795,7 +795,7 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2026-07-11 12:59:50.456330",
+ "modified": "2026-07-30 08:52:40.092118",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

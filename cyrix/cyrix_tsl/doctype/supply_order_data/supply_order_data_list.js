@@ -79,5 +79,11 @@ frappe.listview_settings['Supply Order Data'] = {
         else if (doc.status === "Cancelled") {
                 return [__("Cancelled"), "red", "status,=,Cancelled"];
         }
+        else if (doc.status === "Vendor Calrification") {
+                return [__("Vendor Calrification"), "red", "status,=,Vendor Calrification"];
+        }
+        else if (doc.status === "Obsolete Model") {
+                return [__("Obsolete Model"), "red", "status,=,Obsolete Model"];
+        }
     },
 };

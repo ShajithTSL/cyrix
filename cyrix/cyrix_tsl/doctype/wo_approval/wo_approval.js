@@ -45,6 +45,20 @@ frappe.ui.form.on("WO Approval", {
 			));
 		}
 
+		if (frm.doc.type == "AMC"){
+
+			var print_format ="AMC";
+			var f_name = "AMC"
+			window.open(frappe.urllib.get_full_url("/api/method/frappe.utils.print_format.download_pdf?"
+				+ "doctype=" + encodeURIComponent("WO Approval")
+				+ "&name=" + encodeURIComponent(f_name)
+				+ "&trigger_print=1"
+				+ "&format=" + print_format
+				+ "&no_letterhead=0"
+			));
+		}
+		
+
 
 
 		if (frm.doc.type == "Sales Summary"){

@@ -276,11 +276,11 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nPending Internal Approval\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nReceived\nIn Custom\nDelivered\nPartially Delivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid\nSupplier Quoted\nCancelled"
+   "options": "Inquiry\nParts Priced\nSearching Items\nNot Found\nPending Internal Approval\nInternal Quotation\nQuoted\nApproved\nNot Approved\nOrdered\nShipped\nReceived\nIn Custom\nDelivered\nPartially Delivered\nInvoiced\nPaid\nSupplier Selected\nBid Submitted\nClient Clarification\nAwarded\nLost\nMaterial Production\nIn-Transit\nUnder Inspection\nInvoice Submitted\nPaid\nUnpaid\nPartially Paid\nSupplier Quoted\nCancelled\nVendor Clarification\nObsolete model"
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "eval:(doc.status == \"Not Found\" );",
+   "depends_on": "eval:(doc.status == \"Not Found\" ) || (doc.status == \"Lost\" );",
    "fieldname": "reason",
    "fieldtype": "Small Text",
    "label": "Reason",
@@ -625,6 +625,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fetch_from": "customer.parent_customer",
    "fetch_if_empty": 1,
    "fieldname": "parent_customer",
@@ -713,8 +714,8 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-07 11:51:33.741792",
- "modified_by": "Administrator",
+ "modified": "2026-07-26 10:26:41.097655",
+ "modified_by": "shajith@tsl-me.com",
  "module": "Cyrix TSL",
  "name": "Supply Order Data",
  "naming_rule": "By \"Naming Series\" field",

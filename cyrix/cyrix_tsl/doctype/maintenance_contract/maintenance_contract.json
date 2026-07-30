@@ -356,8 +356,7 @@
    "fieldname": "equipments",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Maintenance Contract Item",
-   "reqd": 1
+   "options": "Maintenance Contract Item"
   }
  ],
  "grid_page_length": 50,
@@ -381,7 +380,7 @@
    "link_fieldname": "maintenance_contract"
   }
  ],
- "modified": "2026-07-16 12:21:52.879770",
+ "modified": "2026-07-22 13:46:51.653873",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Maintenance Contract",

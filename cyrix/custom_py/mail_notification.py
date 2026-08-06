@@ -19,7 +19,7 @@ def purchase_msg_to_info(com,branch,ev,sender):
 			sender = sender,
 			subject="Part sheet Comments",
 			message=""" <b>Dear Lab Coordinator,</b><br>
-            Kindly find the comment for the Evaluation report  <b>%s</b> . Please take action to  <a href="https://erp.tsl-me.com/app/evaluation-report/%s"target="_blank">click here.</a>
+            Kindly find the comment for the Evaluation report  <b>%s</b> . Please take action to  <a href="https://erp.cyrix-tsl.com/app/evaluation-report/%s"target="_blank">click here.</a>
 		   
 			""" %(ev,ev)
 			)

@@ -233,36 +233,69 @@ class EvaluationReport(Document):
 		)
 
 def check_for_shared_docs_on_evaluation(self):
-	jo_doc = frappe.get_doc("Job Order Data",self.job_order_data)
-	tech_user = frappe.db.get_value("Technician ID",jo_doc.technician,"user_email")
-	technicians = [tech_user]
-	if jo_doc.parent_jo:
-		parent_doc = frappe.get_doc("Job Order Data",jo_doc.parent_jo)
-		parent_tech_user = frappe.db.get_value("Technician ID",parent_doc.technician,"user_email")
-		technicians.append(parent_tech_user)
-		for pa_jo in parent_doc.multiple_technicians:
-			if pa_jo.get("email") not in technicians:
-				technicians.append(pa_jo.get("email"))
-	# self.multiple_technicians is a table_multiselect
-	for row in jo_doc.multiple_technicians:
-		if row.get("email") not in technicians:
-			technicians.append(row.get("email"))
+	jo_doc = frappe.get_doc("Job Order Data", self.job_order_data)
 
-	for t_id in technicians:
-		if t_id:
-			doc = frappe.db.exists("DocShare",{
-				"user":t_id,
-				"share_doctype": self.doctype,
-				"share_name": self.name
-			})
-			if not doc:
-				doc = frappe.new_doc("DocShare")
-				doc.user = t_id
-				doc.share_doctype = self.doctype
-				doc.share_name = self.name
-				doc.read = 1
-				doc.write = 1
-				doc.save(ignore_permissions=True)
+	technicians = []
+
+	# Main JO technician
+	tech_user = frappe.db.get_value(
+		"Technician ID", jo_doc.technician, "user_email"
+	)
+	if tech_user:
+		technicians.append(tech_user)
+
+	# Parent JO technicians
+	if jo_doc.parent_jo:
+		parent_doc = frappe.get_doc("Job Order Data", jo_doc.parent_jo)
+
+		parent_tech_user = frappe.db.get_value(
+			"Technician ID", parent_doc.technician, "user_email"
+		)
+		if parent_tech_user and parent_tech_user not in technicians:
+			technicians.append(parent_tech_user)
+
+		for row in parent_doc.multiple_technicians:
+			if row.email and row.email not in technicians:
+				technicians.append(row.email)
+
+	# Current JO additional technicians
+	for row in jo_doc.multiple_technicians:
+		if row.email and row.email not in technicians:
+			technicians.append(row.email)
+
+	# Existing shares
+	existing_shares = frappe.get_all(
+		"DocShare",
+		filters={
+			"share_doctype": self.doctype,
+			"share_name": self.name,
+		},
+		fields=["name", "user"],
+	)
+
+	existing_users = {share.user for share in existing_shares}
+
+	# Add missing shares
+	for user in technicians:
+		if user not in existing_users:
+			doc = frappe.new_doc("DocShare")
+			doc.user = user
+			doc.share_doctype = self.doctype
+			doc.share_name = self.name
+			doc.read = 1
+			doc.write = 1
+			doc.save(ignore_permissions=True)
+
+	# Remove obsolete shares
+	for share in existing_shares:
+		if share.user not in technicians:
+			frappe.delete_doc(
+				"DocShare",
+				share.name,
+				ignore_permissions=True,
+				force=True,
+			)
+
 
 @frappe.whitelist()
 def get_valuation_rate(item, warehouse, qty):

@@ -135,32 +135,71 @@ def update_child_jo_status(self):
 				doc.save(ignore_permissions=True)
 
 def check_for_shared_docs_on_jo(self):
-	tech_user = frappe.db.get_value("Technician ID",self.technician,"user_email")
-	technicians = [tech_user]
-	# self.multiple_technicians is a table_multiselect
-	for row in self.multiple_technicians:
-		if row.get("email") not in technicians:
-			technicians.append(row.get("email"))
+	tech_user = frappe.db.get_value(
+		"Technician ID", self.technician, "user_email"
+	)
 
-	for t_id in technicians:
-		if t_id:
-			doc = frappe.db.exists("DocShare",{
-				"user":t_id,
-				"share_doctype": self.doctype,
-				"share_name": self.name
-			})
-			if not doc:
-				doc = frappe.new_doc("DocShare")
-				doc.user = t_id
-				doc.share_doctype = self.doctype
-				doc.share_name = self.name
-				doc.read = 1
-				doc.write = 1
-				doc.save()
-	eval_list = frappe.get_all("Evaluation Report",{'job_order_data':self.name},"name")
-	for eval in eval_list:
-		eval_doc = frappe.get_doc("Evaluation Report",eval.name)
-		check_for_shared_docs_on_evaluation(self = eval_doc)
+	technicians = []
+
+	if tech_user:
+		technicians.append(tech_user)
+
+	# Additional technicians
+	for row in self.multiple_technicians:
+		if row.email and row.email not in technicians:
+			technicians.append(row.email)
+
+	if self.parent_jo:
+		parent_doc = frappe.get_doc("Job Order Data",self.parent_jo)
+		parent_tech_user = frappe.db.get_value("Technician ID",parent_doc.technician,"user_email")
+		technicians.append(parent_tech_user)
+		for pa_jo in parent_doc.multiple_technicians:
+			if pa_jo.get("email") not in technicians:
+				technicians.append(pa_jo.get("email"))
+
+	# Existing shares
+	existing_shares = frappe.get_all(
+		"DocShare",
+		filters={
+			"share_doctype": self.doctype,
+			"share_name": self.name
+		},
+		fields=["name", "user"]
+	)
+
+	existing_users = [d.user for d in existing_shares]
+
+	# Add missing shares
+	for user in technicians:
+		if user not in existing_users:
+			doc = frappe.new_doc("DocShare")
+			doc.user = user
+			doc.share_doctype = self.doctype
+			doc.share_name = self.name
+			doc.read = 1
+			doc.write = 1
+			doc.save(ignore_permissions=True)
+
+	# Remove shares for users no longer assigned
+	for share in existing_shares:
+		if share.user not in technicians:
+			frappe.delete_doc(
+				"DocShare",
+				share.name,
+				ignore_permissions=True,
+				force=True
+			)
+
+	# Update Evaluation Reports
+	eval_list = frappe.get_all(
+		"Evaluation Report",
+		filters={"job_order_data": self.name},
+		pluck="name"
+	)
+
+	for name in eval_list:
+		eval_doc = frappe.get_doc("Evaluation Report", name)
+		check_for_shared_docs_on_evaluation(eval_doc)
 	
 @frappe.whitelist()
 def create_evaluation_report(doc_no):

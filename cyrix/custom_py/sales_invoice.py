@@ -112,3 +112,13 @@ def update_branch():
             frappe.db.set_value("Purchase Taxes and Charges", row.name, "branch", branches[row.parent], update_modified=False)
 
     frappe.db.commit()
+
+def update_vat_receivable():
+    si_list = frappe.get_all("Sales Taxes and Charges",{'parenttype':"Sales Invoice",'account_head': "1020801 - VAT Receivable 15% - BM","docstatus":1},"parent")
+    for s in si_list:
+        doc = frappe.get_doc("Sales Invoice",s.parent)
+        for s in doc.taxes:
+            s.account_head = "2010504 - VAT Payable 15% - BM"
+        print(s.parent)
+        doc.flags.ignore_mandatory = True
+        doc.save()

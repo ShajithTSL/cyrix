@@ -2825,172 +2825,181 @@ from datetime import datetime
 @frappe.whitelist()
 def get_receivable(customer, from_date, to_date, company):
 
-    data = ''
+	data = ''
 
-    # 🔹 Premium Styling (Enterprise look)
-    data += """
-    <style>
-    .table-receivable {
-        width: 100%;
-        border-collapse: collapse;
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        color: #2c3e50;
-    }
+	# 🔹 Premium Styling (Enterprise look)
+	data += """
+	<style>
+	.table-receivable {
+		width: 100%;
+		border-collapse: collapse;
+		font-family: 'Segoe UI', Tahoma, sans-serif;
+		color: #2c3e50;
+	}
 
-    .table-receivable th {
-        background-color: #1a4d8c !important;
-        color: #ffffff !important;
-        font-size: 12px;
-        font-weight: 600;
-        padding: 10px 8px;
-        text-align: center;
-        border-bottom: 2px solid #163d6b;
-        letter-spacing: 0.3px;
-    }
+	.table-receivable th {
+		background-color: #1a4d8c !important;
+		color: #ffffff !important;
+		font-size: 12px;
+		font-weight: 600;
+		padding: 10px 8px;
+		text-align: center;
+		border-bottom: 2px solid #163d6b;
+		letter-spacing: 0.3px;
+	}
 
-    .table-receivable td {
-        font-size: 11px;
-        padding: 8px 6px;
-        border-bottom: 1px solid #e6e9ef;
-    }
+	.table-receivable td {
+		font-size: 11px;
+		padding: 8px 6px;
+		border-bottom: 1px solid #e6e9ef;
+	}
 
-    .table-receivable tr:nth-child(even) {
-        background-color: #fbfcfe;
-    }
+	.table-receivable tr:nth-child(even) {
+		background-color: #fbfcfe;
+	}
 
-    .table-receivable tr:hover {
-        background-color: #f1f6ff;
-    }
+	.table-receivable tr:hover {
+		background-color: #f1f6ff;
+	}
 
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
-    .bold { font-weight: 600; }
+	.text-center { text-align: center; }
+	.text-right { text-align: right; }
+	.bold { font-weight: 600; }
 
-    .invoice-link {
-        text-decoration: none;
-        color: #1a4d8c;
-        font-weight: 600;
-    }
+	.invoice-link {
+		text-decoration: none;
+		color: #1a4d8c;
+		font-weight: 600;
+	}
 
-    .invoice-link:hover {
-        text-decoration: underline;
-    }
+	.invoice-link:hover {
+		text-decoration: underline;
+	}
 
-    .total-row td {
-        border-top: 2px solid #1a4d8c;
-        background-color: #f4f7fb;
-        font-size: 12px;
-    }
+	.total-row td {
+		border-top: 2px solid #1a4d8c;
+		background-color: #f4f7fb;
+		font-size: 12px;
+	}
 
-    .currency {
-        color: #7f8c8d;
-        font-weight: 500;
-    }
-    </style>
-    """
+	.currency {
+		color: #7f8c8d;
+		font-weight: 500;
+	}
+	</style>
+	"""
 
-    # 🔹 Table Start
-    data += '<table class="table-receivable">'
+	# 🔹 Table Start
+	data += '<table class="table-receivable">'
 
-    # 🔹 Header (INLINE color for PDF safety)
-    data += """
-    <tr>
-        <th style="color:#fff !important;">Due Date</th>
-        <th style="color:#fff !important;">Invoice No</th>
-        <th style="color:#fff !important;">Ref(WOD)</th>
-        <th style="color:#fff !important;">Ref(PO)</th>
-        <th style="color:#fff !important;">Invoiced</th>
-        <th style="color:#fff !important;">Paid</th>
-        <th style="color:#fff !important;">Outstanding</th>
-    </tr>
-    """
+	# 🔹 Header (INLINE color for PDF safety)
+	data += """
+	<tr>
+		<th style="color:#fff !important;">Due Date</th>
+		<th style="color:#fff !important;">Invoice No</th>
+		<th style="color:#fff !important;">Ref(WOD)</th>
+		<th style="color:#fff !important;">Ref(PO)</th>
+		<th style="color:#fff !important;">Invoiced</th>
+		<th style="color:#fff !important;">Paid</th>
+		<th style="color:#fff !important;">Outstanding</th>
+	</tr>
+	"""
 
-    # 🔹 Fetch Data
-    si_list = frappe.get_all(
-        "Sales Invoice",
-        filters={
-            "company": company,
-            "status": ["in", ["Overdue", "Unpaid"]],
-            "customer": customer,
-            "posting_date": ["between", (from_date, to_date)]
-        },
-        fields=["name", "due_date", "grand_total", "outstanding_amount", "po_no"],
-        order_by="posting_date asc"
-    )
+	# 🔹 Fetch Data
+	si_list = frappe.get_all(
+		"Sales Invoice",
+		filters={
+			"company": company,
+			"status": ["in", ["Overdue", "Unpaid"]],
+			"customer": customer,
+			"posting_date": ["between", (from_date, to_date)]
+		},
+		fields=["name", "due_date", "grand_total", "outstanding_amount", "po_no"],
+		order_by="posting_date asc"
+	)
 
-    total_outstanding = 0
+	total_outstanding = 0
 
-    for i in si_list:
+	for i in si_list:
 
-        # Skip return invoices
-        if frappe.db.exists("Sales Invoice", {"return_against": i.name}):
-            continue
+		# Skip return invoices
+		if frappe.db.exists("Sales Invoice", {"return_against": i.name}):
+			continue
 
-        total_outstanding += i.outstanding_amount
+		total_outstanding += i.outstanding_amount
 
-        # 🔹 Date Format
-        formatted_due_date = datetime.strptime(
-            str(i.due_date), "%Y-%m-%d"
-        ).strftime("%d-%m-%Y")
+		# 🔹 Date Format
+		formatted_due_date = datetime.strptime(
+			str(i.due_date), "%Y-%m-%d"
+		).strftime("%d-%m-%Y")
 
-        # 🔹 WOD Fetch
-        jo_data = frappe.db.sql("""
-            SELECT DISTINCT job_order_data AS jo
-            FROM `tabSales Invoice Item`
-            WHERE parent = %s
-        """, (i.name,), as_dict=1)
+		# 🔹 WOD Fetch
+		jo_data = frappe.db.sql("""
+			SELECT DISTINCT job_order_data AS jo
+			FROM `tabSales Invoice Item`
+			WHERE parent = %s
+		""", (i.name,), as_dict=1)
 
-        jods = []
-        for j in jo_data:
-            if j.get("jo"):
-                jods.append(str(j["jo"])[7:])  # trimming prefix
+		jods = []
+		for j in jo_data:
+			if j.get("jo"):
+				jods.append(str(j["jo"])[7:])  # trimming prefix
 
-        jod = ', '.join(jods) if jods else ''
-        po_no = i.po_no or ''
+		jod = ', '.join(jods) if jods else ''
+		po_no = i.po_no or ''
 
-        # 🔹 Amounts
-        gt = "{:,.3f}".format(i.grand_total)
-        paid = "{:,.3f}".format(i.grand_total - i.outstanding_amount)
-        outs = "{:,.3f}".format(i.outstanding_amount)
+		# 🔹 Amounts
+		gt = "{:,.3f}".format(i.grand_total)
+		paid = "{:,.3f}".format(i.grand_total - i.outstanding_amount)
+		outs = "{:,.3f}".format(i.outstanding_amount)
 
-        # 🔹 Default link (avoid undefined variable)
-        link = "#"
+		# 🔹 Default link (avoid undefined variable)
+		link = "#"
 
-        if company == "Cyrix TSL - Kuwait":
-            link = f"https://erp.cyrix-tsl.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name={i.name}&format=INV/KW/V2&no_letterhead=0&letterhead=0"
+		if company == "Cyrix TSL - Kuwait":
+			link = f"https://erp.cyrix-tsl.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name={i.name}&format=INV/KW/V2&no_letterhead=0&letterhead=0"
 
-        elif company == "Company Al-Halloul Faniye Medical":
-            link = f"https://erp.cyrix-tsl.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name={i.name}&format=INV/KSA&no_letterhead=0&letterhead=0"
+		elif company == "Company Al-Halloul Faniye Medical":
+			link = f"https://erp.cyrix-tsl.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name={i.name}&format=INV/KSA&no_letterhead=0&letterhead=0"
 
-        # 🔹 Row
-        data += f"""
-        <tr>
-            <td>{formatted_due_date}</td>
-            <td class="text-center">
-                <a href="{link}" class="invoice-link" target="_blank">{i.name}</a>
-            </td>
-            <td class="text-center">{jod}</td>
-            <td class="text-center">{po_no}</td>
-            <td class="text-right">{gt}</td>
-            <td class="text-right">{paid}</td>
-            <td class="text-right bold">{outs}</td>
-        </tr>
-        """
+		# 🔹 Row
+		data += f"""
+		<tr>
+			<td>{formatted_due_date}</td>
+			<td class="text-center">
+				<a href="{link}" class="invoice-link" target="_blank">{i.name}</a>
+			</td>
+			<td class="text-center">{jod}</td>
+			<td class="text-center">{po_no}</td>
+			<td class="text-right">{gt}</td>
+			<td class="text-right">{paid}</td>
+			<td class="text-right bold">{outs}</td>
+		</tr>
+		"""
 
-    # 🔹 Total Row
-    currency = frappe.get_value("Company", company, "default_currency")
-    total_formatted = "{:,.3f}".format(total_outstanding)
+	# 🔹 Total Row
+	currency = frappe.get_value("Company", company, "default_currency")
+	total_formatted = "{:,.3f}".format(total_outstanding)
 
-    data += f"""
-    <tr class="total-row">
-        <td colspan="6" class="text-right bold">
-            Balance Due <span class="currency">({currency})</span>
-        </td>
-        <td class="text-right bold">{total_formatted}</td>
-    </tr>
-    """
+	data += f"""
+	<tr class="total-row">
+		<td colspan="6" class="text-right bold">
+			Balance Due <span class="currency">({currency})</span>
+		</td>
+		<td class="text-right bold">{total_formatted}</td>
+	</tr>
+	"""
 
-    data += '</table>'
-    data += '<p></p>'
+	data += '</table>'
+	data += '<p></p>'
 
-    return data
+	return data
+
+@frappe.whitelist()
+def get_receivable1():
+	customer = "MEDHEALTH SOLUTIONS TRADING - L.L.C - S.P.C"
+	from_date = "01-07-2026"
+	to_date = "31-07-2026"
+	company = "Cyrix TSL - UAE"
+	si_list = frappe.get_all("Sales Invoice",filters={"company": company,"status": ["in", ["Overdue", "Unpaid"]],"customer": customer,"posting_date": ["between", (from_date, to_date)]},fields=["name", "due_date", "grand_total", "outstanding_amount", "po_no"],order_by="posting_date asc")
+	print(si_list)

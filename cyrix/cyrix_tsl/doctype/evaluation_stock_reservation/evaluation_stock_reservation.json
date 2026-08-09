@@ -1,0 +1,163 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:RES-{YYYY}-{MM}-{#####}",
+ "creation": "2026-08-09 14:31:07.286522",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "evaluation_report",
+  "item_code",
+  "column_break_jssq",
+  "warehouse",
+  "technician",
+  "column_break_uphb",
+  "status",
+  "reserved_qty",
+  "column_break_tdgl",
+  "qty",
+  "released_qty",
+  "section_break_biel",
+  "reservation_date",
+  "released_date",
+  "column_break_full",
+  "child_row_name",
+  "notes",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "evaluation_report",
+   "fieldtype": "Link",
+   "label": "Evaluation Report",
+   "options": "Evaluation Report"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_jssq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "technician",
+   "fieldtype": "Link",
+   "label": "Technician",
+   "options": "Technician ID"
+  },
+  {
+   "fieldname": "column_break_uphb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nReleased\nCancelled"
+  },
+  {
+   "fieldname": "reserved_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Reserved Qty"
+  },
+  {
+   "fieldname": "column_break_tdgl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "fieldname": "released_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Released Qty"
+  },
+  {
+   "fieldname": "section_break_biel",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reservation_date",
+   "fieldtype": "Datetime",
+   "label": "Reservation Date"
+  },
+  {
+   "fieldname": "released_date",
+   "fieldtype": "Datetime",
+   "label": "Released Date"
+  },
+  {
+   "fieldname": "column_break_full",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "child_row_name",
+   "fieldtype": "Read Only",
+   "label": "Child Row Name"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Evaluation Stock Reservation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-08-09 15:04:35.589958",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Evaluation Stock Reservation",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

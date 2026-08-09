@@ -123,6 +123,9 @@ frappe.ui.form.on('Service Call Form', {
     },
 
 	refresh: function(frm) {
+        frm.dashboard.links_area.body.find('.btn-new').each(function(i, el) {
+			$(el).hide();
+		});
 		if(frm.doc.docstatus == 1){
 			frm.add_custom_button(__('Internal Quotation'), function(){
                 frappe.call({

@@ -173,6 +173,9 @@ frappe.ui.form.on("Maintenance Contract", {
 	},
 
 	refresh: function(frm) {
+		frm.dashboard.links_area.body.find('.btn-new').each(function(i, el) {
+			$(el).hide();
+		});
 		frm.trigger("html");
 		$('[data-fieldname="create_schedule"] button').css({'color':'white', 'background':'linear-gradient(135deg, #015ca3 0%,#00adef 100%)'});
 

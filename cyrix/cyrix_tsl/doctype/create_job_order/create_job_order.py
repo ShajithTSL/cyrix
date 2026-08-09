@@ -126,7 +126,7 @@ def create_job_order_data(dict):
 				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Manufacturer for the Received Equipment")
 			if not i.get("uom"):
 				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
-			if not i.get("attach_image") and doc.get("unit_status") == "In Lab":
+			if not i.get("attach_image") and doc.get("unit_status") == "In Lab" and not doc.get("maintenance_contract") and doc.get("unit_type") != "Calibration":
 				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Attach Image for the Item")
 
 			if i.get("ignore") == 1 and not i.get("item_name"):
@@ -262,7 +262,7 @@ def create_job_order_data(dict):
 				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Manufacturer for the Received Equipment")
 			if not i.get("uom"):
 				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Specify Unit of Measurement for the Item")
-			if not i.get("attach_image") and doc.get("unit_status") == "In Lab" and doc.get("unit_type") != "Calibration":
+			if not i.get("attach_image") and doc.get("unit_status") == "In Lab" and not doc.get("maintenance_contract") and doc.get("unit_type") != "Calibration":
 				frappe.throw("<b>Row - "+str(i.get("idx"))+"</b>  Please Attach Image for the Item")
 
 			if i.get("ignore") == 1 and not i.get("item_name") and doc.get("unit_type") != "Calibration":
@@ -486,7 +486,7 @@ def create_stock_entry(i, doc, jo):
 			't_warehouse': doc.repair_warehouse,
 			'item_code':i['item_code'],
 			'item_name':i['item_name'],
-			'description':i['description'],
+			'description':i.get('description',''),
 			'serial_number':i.get('serial_no', ""),
 			'qty':1,
 			'uom':frappe.db.get_value("Item",i['item_code'],'stock_uom') or "Nos",

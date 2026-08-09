@@ -44,6 +44,9 @@ frappe.ui.form.on("Job Order Data", {
 	},
 	
 	refresh(frm) {
+		frm.dashboard.links_area.body.find('.btn-new').each(function(i, el) {
+			$(el).hide();
+		});
 		if(frm.doc.docstatus == 1 ){
 			frm.add_custom_button(__("Technical Report"), function(){
 				frappe.call({

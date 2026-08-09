@@ -238,7 +238,9 @@ frappe.ui.form.on('Quotation', {
         frm.remove_custom_button("Sales Invoice")
     },
     refresh:function(frm){
-
+		frm.dashboard.links_area.body.find('.btn-new').each(function(i, el) {
+			$(el).hide();
+		});
 	    if (frm.doc.docstatus === 1) {
             // frm.add_custom_button(__('Update'), () => {
             //     let d = new frappe.ui.Dialog({

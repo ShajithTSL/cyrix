@@ -104,7 +104,9 @@ frappe.ui.form.on("Evaluation Report", {
 		}
 	},
 	refresh: function(frm){
-
+		frm.dashboard.links_area.body.find('.btn-new').each(function(i, el) {
+			$(el).hide();
+		});
 		frm.add_custom_button(__("Technical Report"), function(){
 			frappe.call({
 				method: "cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.create_technical_report",

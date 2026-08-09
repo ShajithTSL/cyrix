@@ -601,13 +601,42 @@ frappe.ui.form.on('Part Sheet Item', {
 				}
 			})
 		}
+		check_and_show_availability(frm, cdt, cdn);
 		frm.refresh();
 	},
 	qty:function(frm, cdt, cdn){
 		var row = locals[cdt][cdn]
 		if(row.qty && row.part){
 			frm.script_manager.trigger('part',cdt,cdn)
+			check_and_show_availability(frm, cdt, cdn);
 	   	}
+	},
+	from_scrap:function(frm,cdt,cdn){
+		let child = locals[cdt][cdn];
+		if (child.from_scrap == 1){
+			child.parts_availability = "Yes"
+		}
+		else{
+			if (child.part){
+				frm.script_manager.trigger('qty',cdt,cdn)
+			}
+			else {
+				child.parts_availability = "No"
+			}
+		}
+		check_and_show_availability(frm, cdt, cdn);
+		let f = 0;
+		(frm.doc.items || []).forEach(row => {
+			if (
+				["No", "Partial"].includes(row.parts_availability) &&
+				!row.from_scrap
+			) {
+				f = 1;
+			}
+		});
+
+		frm.set_value("parts_availability", f ? "No" : "Yes");
+		frm.refresh_field("items")
 	},
 	create:function(frm,cdt,cdn){
 		let child = locals[cdt][cdn]
@@ -1037,56 +1066,4 @@ function render_image_previews(frm, cdt, cdn) {
 		frappe.model.set_value(cdt, cdn, "attached_images", JSON.stringify(updated));
 		render_image_previews(frm, cdt, cdn);
 	});
-}
-
-function update_missing_image_indicator(frm) {
-	let grid = frm.fields_dict.items && frm.fields_dict.items.grid;
-	if (!grid) return;
-
-	let missing_rows = [];
-	(frm.doc.items || []).forEach((row) => {
-		let images = [];
-		try {
-			images = JSON.parse(row.attached_images || "[]");
-		} catch (e) {
-			images = [];
-		}
-		if (!images.length) {
-			missing_rows.push(row.idx); // Frappe's own 1-based row number
-		}
-	});
-
-	// --- 1. Banner at the top of the form ---
-	frm.dashboard.clear_headline();
-	if (missing_rows.length) {
-		frm.dashboard.set_headline_alert(
-			`<p style = "font-weight:bold;color:red">⚠️ Kindly attach the images inside the Part Sheet table</p>
-			<div class="indicator-pill blue" style="padding:6px 10px;">
-				${missing_rows.length} row(s) missing images: Row ${missing_rows.join(", ")}
-			</div>`
-		);
-	}
-
-	// --- 2. Highlight the affected rows in the grid itself ---
-	inject_highlight_style_once();
-	grid.grid_rows.forEach((grid_row) => {
-		let is_missing = missing_rows.includes(grid_row.doc.idx);
-		grid_row.row && grid_row.row.toggleClass("missing-image-row", is_missing);
-	});
-}
-
-function inject_highlight_style_once() {
-	if (document.getElementById("missing-image-row-style")) return;
-	let style = document.createElement("style");
-	style.id = "missing-image-row-style";
-	style.innerHTML = `
-		.missing-image-row {
-			background-color: rgba(226, 76, 76, 0.16) !important;
-			box-shadow: inset 3px 0 0 0 #e24c4c;
-		}
-		.missing-image-row:hover {
-			background-color: rgba(226, 76, 76, 0.26) !important;
-		}
-	`;
-	document.head.appendChild(style);
 }

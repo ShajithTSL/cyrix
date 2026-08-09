@@ -347,7 +347,8 @@ def download_excel():
         "manufacturer",
         "item_group",
         "uom",
-        "serial_number"
+        "serial_number",
+        "qty"
     ])
 
     output = BytesIO()

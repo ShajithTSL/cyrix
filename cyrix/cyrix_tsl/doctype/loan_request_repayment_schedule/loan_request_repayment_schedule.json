@@ -1,0 +1,112 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "creation": "2026-08-15 08:18:18.834550",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_date",
+  "number_of_days",
+  "principal_amount",
+  "column_break_ypdc",
+  "interest_amount",
+  "total_payment",
+  "balance_loan_amount",
+  "paid_amount",
+  "is_accrued"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "payment_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Payment Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "number_of_days",
+   "fieldtype": "Int",
+   "label": "Number Of Days"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "principal_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Principal Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ypdc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "interest_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Interest Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "total_payment",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Payment",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "balance_loan_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Balance Loan Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Paid Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "default": "0",
+   "fieldname": "is_accrued",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Accrued"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-15 09:14:48.435695",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Loan Request Repayment Schedule",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

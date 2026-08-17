@@ -1,0 +1,28 @@
+/* session_context_dock.css  (Option C)
+ *
+ * Styles the Company/Branch badge inserted into the workspace dock rail by
+ * session_context_dock.js. Builds on the dock's own `.workspace-dock-item`
+ * tile styling (28px, 7px radius, --surface-gray-3) but renders as a circle
+ * in an accent tint so it reads as "identity/context", distinct from the
+ * square workspace-icon tiles above it.
+ */
+
+.workspace-dock .session-context-dock-item {
+	border-radius: 50%;
+	background: var(--surface-blue-2, #e0edff);
+	color: var(--text-blue-6, #2490ef);
+}
+
+.workspace-dock .session-context-dock-item:hover {
+	background: var(--surface-blue-3, #cfe4ff);
+}
+
+.session-context-initials {
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	line-height: 1;
+}
+
+/* the divider inserted alongside the badge uses the dock's existing divider
+ * rules automatically (.workspace-dock-divider) — nothing extra needed. */

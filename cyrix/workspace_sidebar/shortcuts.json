@@ -1,0 +1,91 @@
+{
+ "app": "cyrix",
+ "creation": "2026-08-10 08:31:15.257802",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "for_user": "Administrator",
+ "header_icon": "shortcut",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "list",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Home",
+   "link_to": "Shortcuts",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "list",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Create Job Order",
+   "link_to": "Create Job Order",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "list",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Job Order Data",
+   "link_to": "Job Order Data",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "list",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Create Supply Order",
+   "link_to": "Create Supply Order",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "list",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Supply Order Data",
+   "link_to": "Supply Order Data",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "list",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Maintenance Contract",
+   "link_to": "Maintenance Contract",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-08-10 09:07:22.729030",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "module_onboarding": "Stock Onboarding",
+ "name": "Shortcuts",
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "Shortcuts"
+}

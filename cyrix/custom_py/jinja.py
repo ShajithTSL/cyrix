@@ -81,50 +81,81 @@ def show_address(address_name):
 
 	return html
 
+# @frappe.whitelist()
+# def get_mt(name):
+# 	company = frappe.get_value("Quotation", name, "company")
+
+# 	query = """
+# 		SELECT		
+# 			IFNULL(
+# 				SUM(
+# 					CASE
+# 						WHEN ipd.base_amount = 0 THEN ipd.amount
+# 						ELSE ipd.base_amount
+# 					END
+# 				),
+# 				0
+# 			) AS m_cost
+# 		FROM
+# 			`tabQuotation` q
+# 		LEFT JOIN
+# 			`tabQuotation Item` qi
+# 			ON qi.parent = q.name
+# 		LEFT JOIN
+# 			`tabItem Price Details` ipd
+# 			ON ipd.parent = q.name
+# 			AND ipd.job_order_data = qi.job_order_data
+# 		WHERE
+# 			q.name = %s
+# 		GROUP BY
+# 			qi.job_order_data
+# 		ORDER BY
+# 			qi.job_order_data
+# 	"""
+# 	result = frappe.db.sql(query, (name,), as_dict=True)
+
+# 	# Initialize the total material cost
+# 	total_m_cost = 0
+
+# 	# Process each job_order_data and calculate material cost
+# 	for row in result:
+# 		# Add material cost for each job_order_data to the total
+# 		total_m_cost += row.get("m_cost", 0)
+
+
+# 	# Return the total material cost
+# 	return total_m_cost
+
+
 @frappe.whitelist()
 def get_mt(name):
-	company = frappe.get_value("Quotation", name, "company")
+    query = """
+        SELECT
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN ipd.base_amount = 0 THEN ipd.amount
+                        ELSE ipd.base_amount
+                    END
+                ),
+                0
+            ) AS m_cost
+        FROM `tabQuotation` q
+        LEFT JOIN (
+            SELECT DISTINCT parent, job_order_data
+            FROM `tabQuotation Item`
+            WHERE parent = %s
+        ) qi
+            ON qi.parent = q.name
+        LEFT JOIN `tabItem Price Details` ipd
+            ON ipd.parent = q.name
+            AND ipd.job_order_data = qi.job_order_data
+        WHERE q.name = %s
+    """
 
-	query = """
-		SELECT		
-			IFNULL(
-				SUM(
-					CASE
-						WHEN ipd.base_amount = 0 THEN ipd.amount
-						ELSE ipd.base_amount
-					END
-				),
-				0
-			) AS m_cost
-		FROM
-			`tabQuotation` q
-		LEFT JOIN
-			`tabQuotation Item` qi
-			ON qi.parent = q.name
-		LEFT JOIN
-			`tabItem Price Details` ipd
-			ON ipd.parent = q.name
-			AND ipd.job_order_data = qi.job_order_data
-		WHERE
-			q.name = %s
-		GROUP BY
-			qi.job_order_data
-		ORDER BY
-			qi.job_order_data
-	"""
-	result = frappe.db.sql(query, (name,), as_dict=True)
+    result = frappe.db.sql(query, (name, name), as_dict=True)
 
-	# Initialize the total material cost
-	total_m_cost = 0
-
-	# Process each job_order_data and calculate material cost
-	for row in result:
-		# Add material cost for each job_order_data to the total
-		total_m_cost += row.get("m_cost", 0)
-
-
-	# Return the total material cost
-	return total_m_cost
+    return result[0].get("m_cost", 0) if result else 0
 
 @frappe.whitelist()
 def get_labour(name):
@@ -2198,7 +2229,7 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 	from frappe.utils import get_year_start, nowdate, getdate
 
 	start_date = get_year_start(nowdate())
-	end_date = nowdate()
+	end_date = to_date
 
 	start = getdate(start_date)
 	end = getdate(end_date)
@@ -2527,7 +2558,7 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 					today = datetime.today().date()
 					month_end = frappe.utils.get_last_day(frappe.utils.getdate())
 					if row.from_date and row.to_date:
-						if row.from_date >= datetime(today.year, 1, 1).date() and row.to_date <= month_end:
+						if row.from_date >= datetime(today.year, 1, 1).date() and row.to_date <= to_date:
 
 							monthly_approval_target2 += row.quotation_approval_target or 0
 							monthly_invoice_target2 += row.invoice_target or 0
@@ -2546,7 +2577,7 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 				SELECT SUM(grand_total) as total
 				FROM `tabSales Invoice`
 				WHERE sales_person=%s AND status != "Cancelled"
-				AND posting_date BETWEEN %s AND %s
+				AND posting_date BETWEEN %s AND %s AND docstatus = 1
 			""", (sp["name"], start_date, end_date), as_dict=True)
 			inv2 = inv_result2[0]["total"] or 0 if inv_result2 else 0
 
@@ -2566,6 +2597,23 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 
 			# col2 = col_result2[0]["total"] or 0 if col_result2 else 0
 
+
+			col_result_adv = frappe.db.sql("""
+			SELECT
+				COALESCE(SUM(pe.paid_amount), 0) AS total
+			FROM `tabPayment Entry` pe
+			WHERE pe.posting_date BETWEEN %s AND %s
+				AND pe.docstatus = 1
+				AND pe.payment_type = 'Receive'
+				AND pe.custom_sales_person = %s
+				AND pe.paid_from LIKE '%%Advance from Customer%%'
+				AND NOT EXISTS (
+					SELECT 1
+					FROM `tabPayment Entry Reference` per
+					WHERE per.parent = pe.name
+				)
+			""", (start_date,end_date,sp["name"]), as_dict=True)
+
 			je_result2 = frappe.db.sql("""
 			SELECT
 				COALESCE(SUM(jea.credit_in_account_currency), 0) AS total
@@ -2578,9 +2626,29 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 				AND jea.reference_type = 'Sales Invoice'
 			""", (start_date, end_date, sp["name"]), as_dict=True)
 
-			je_total2 = je_result2[0]["total"] or 0
 
-			col2 = (col_result2[0]["total"] or 0 if col_result2 else 0) + (je_result2[0]["total"] or 0 if je_result2 else 0)
+			je_total2 = je_result2[0]["total"] or 0 
+
+
+			je_result_adv_mon = frappe.db.sql("""
+				SELECT
+					COALESCE(SUM(jea.credit_in_account_currency), 0) AS total
+				FROM `tabJournal Entry Account` jea
+				INNER JOIN `tabJournal Entry` je
+					ON je.name = jea.parent
+				WHERE je.posting_date BETWEEN %s AND %s
+					AND je.docstatus = 1
+					AND jea.custom_sales_person = %s
+					AND jea.account LIKE %s
+			""", (
+				start_date,
+				end_date,
+				sp["name"],
+				"%Advance from Customer%"
+			), as_dict=True)
+
+
+			col2 = (col_result2[0]["total"] or 0 if col_result2 else 0) + (je_result2[0]["total"] or 0 if je_result2 else 0) + (je_result_adv_mon[0]["total"] or 0 if je_result_adv_mon else 0) + (col_result_adv[0]["total"] or 0 if col_result_adv else 0)
 
 			# Get actual values (cumulative - date range)
 			app_result = frappe.db.sql("""
@@ -2595,7 +2663,7 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 				SELECT SUM(grand_total) as total
 				FROM `tabSales Invoice`
 				WHERE sales_person=%s AND status != "Cancelled"
-				AND posting_date BETWEEN %s AND %s
+				AND posting_date BETWEEN %s AND %s AND docstatus = 1
 			""", (sp["name"], from_date, to_date), as_dict=True)
 			inv = inv_result[0]["total"] or 0 if inv_result else 0
 
@@ -2615,6 +2683,22 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 
 			# col = col_result[0]["total"] or 0 if col_result else 0
 
+			col_result_adv_mon = frappe.db.sql("""
+			SELECT
+				COALESCE(SUM(pe.paid_amount), 0) AS total
+			FROM `tabPayment Entry` pe
+			WHERE pe.posting_date BETWEEN %s AND %s
+				AND pe.docstatus = 1
+				AND pe.payment_type = 'Receive'
+				AND pe.custom_sales_person = %s
+				AND pe.paid_from LIKE '%%Advance from Customer%%'
+				AND NOT EXISTS (
+					SELECT 1
+					FROM `tabPayment Entry Reference` per
+					WHERE per.parent = pe.name
+				)
+			""", (from_date,to_date,sp["name"]), as_dict=True)
+
 			je_result = frappe.db.sql("""
 			SELECT
 				COALESCE(SUM(jea.credit_in_account_currency), 0) AS total
@@ -2629,7 +2713,26 @@ def target_master(branch=None, company=None, from_date=None, to_date=None, sales
 
 			je_total = je_result[0]["total"] or 0
 
-			col = (col_result[0]["total"] or 0 if col_result else 0) + (je_result[0]["total"] or 0 if je_result else 0)
+
+
+			je_result_adv = frappe.db.sql("""
+				SELECT
+					COALESCE(SUM(jea.credit_in_account_currency), 0) AS total
+				FROM `tabJournal Entry Account` jea
+				INNER JOIN `tabJournal Entry` je
+					ON je.name = jea.parent
+				WHERE je.posting_date BETWEEN %s AND %s
+					AND je.docstatus = 1
+					AND jea.custom_sales_person = %s
+					AND jea.account LIKE %s
+			""", (
+				from_date,
+				to_date,
+				sp["name"],
+				"%Advance from Customer%"
+			), as_dict=True)
+
+			col = (col_result[0]["total"] or 0 if col_result else 0) + (je_result[0]["total"] or 0 if je_result else 0) + (je_result_adv[0]["total"] or 0 if je_result_adv else 0) + (col_result_adv_mon[0]["total"] or 0 if col_result_adv_mon else 0)
 
 
 			# Calculate percentages (current month range)
@@ -2997,9 +3100,46 @@ def get_receivable(customer, from_date, to_date, company):
 
 @frappe.whitelist()
 def get_receivable1():
-	customer = "MEDHEALTH SOLUTIONS TRADING - L.L.C - S.P.C"
-	from_date = "01-07-2026"
-	to_date = "31-07-2026"
-	company = "Cyrix TSL - UAE"
-	si_list = frappe.get_all("Sales Invoice",filters={"company": company,"status": ["in", ["Overdue", "Unpaid"]],"customer": customer,"posting_date": ["between", (from_date, to_date)]},fields=["name", "due_date", "grand_total", "outstanding_amount", "po_no"],order_by="posting_date asc")
-	print(si_list)
+	name = "IQR-DU26-00095"
+	company = frappe.get_value("Quotation", name, "company")
+
+	query = """
+		SELECT		
+			IFNULL(
+				SUM(
+					CASE
+						WHEN ipd.base_amount = 0 THEN ipd.amount
+						ELSE ipd.base_amount
+					END
+				),
+				0
+			) AS m_cost
+		FROM
+			`tabQuotation` q
+		LEFT JOIN
+			`tabQuotation Item` qi
+			ON qi.parent = q.name
+		LEFT JOIN
+			`tabItem Price Details` ipd
+			ON ipd.parent = q.name
+			AND ipd.job_order_data = qi.job_order_data
+		WHERE
+			q.name = %s
+		GROUP BY
+			qi.job_order_data
+		ORDER BY
+			qi.job_order_data
+	"""
+	result = frappe.db.sql(query, (name,), as_dict=True)
+
+	# Initialize the total material cost
+	total_m_cost = 0
+
+	# Process each job_order_data and calculate material cost
+	for row in result:
+		# Add material cost for each job_order_data to the total
+		total_m_cost += row.get("m_cost", 0)
+
+
+	print(total_m_cost)
+

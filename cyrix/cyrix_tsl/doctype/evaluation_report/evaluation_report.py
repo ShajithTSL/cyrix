@@ -16,7 +16,8 @@ base_url = frappe.utils.get_url()
 warehouse_list = {
 	"Kuwait": "Kuwait - CT-K",
 	"Riyadh":"Riyadh - BM",
-	"Jeddah":"Jeddah - BM"
+	"Jeddah":"Jeddah - BM",
+	"Dubai": "Dubai - CT-UAE",
 }
 
 def validate_status(self):

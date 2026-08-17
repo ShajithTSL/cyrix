@@ -369,6 +369,8 @@ override_whitelisted_methods = {
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_payment_entry_bts",
     "hrms.hr.doctype.leave_application.leave_application.get_number_of_leave_days": "cyrix.hr_py.leave_application.get_number_of_leave_days",
     "hrms.hr.doctype.leave_application.leave_application.get_leave_details": "cyrix.hr_py.leave_application.get_leave_details",
+	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_bank_transactions": "cyrix.custom_py.bank_reconciliation_tool.get_bank_transactions",
+
 }
 
 

@@ -340,7 +340,7 @@ def update_deposit_values_as_positive():
 def get_bank_transactions(bank_account, from_date=None, to_date=None, type=None):
 	# returns bank transactions for a bank account
 	filters = []
-	
+
 	if type:
 		filters.append([type, ">", 0])
 		

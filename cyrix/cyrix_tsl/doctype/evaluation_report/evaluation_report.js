@@ -360,7 +360,7 @@ frappe.ui.form.on("Evaluation Report", {
 	test_method:function(frm){
 
         colour_availability_cells(frm);
-		if (frm.doc.docstatus === 1 && (frappe.user.has_role("Procurement") || frappe.user.has_role("Lab Coordinator") || frappe.session.user === "Administrator")) {
+		if (frm.doc.docstatus === 1 && (frappe.user.has_role("Purchase User") || frappe.session.user === "Administrator")) {
 			
 			frm.add_custom_button(__("Details"), () => { show_stock_details(frm) }, __('Stock'));
 			frm.add_custom_button(__('Reserve Qty'), () => show_reservation_dialog(frm, 'reserve'), __('Stock'));

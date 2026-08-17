@@ -1,0 +1,93 @@
+/* session_context_sidebar.css
+ *
+ * Styles for the session-defaults context chip inserted by
+ * session_context_sidebar.js. Uses the sidebar's own CSS custom properties
+ * (--sidebar-hover-color, --sidebar-border-color, --surface-sidebar) so it
+ * automatically matches light/dark mode and any theme overrides, instead of
+ * hardcoding colors.
+ */
+
+.session-context-chip {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 2px 4px 8px;
+	padding: 6px 8px;
+	border-radius: 8px;
+	border: 1px solid var(--sidebar-border-color);
+	background: var(--surface-sidebar, transparent);
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.session-context-chip:hover,
+.session-context-chip:focus-visible {
+	background: var(--sidebar-hover-color);
+	border-color: var(--dark-border-color, var(--sidebar-border-color));
+	outline: none;
+}
+
+.session-context-chip:focus-visible {
+	box-shadow: 0 0 0 2px var(--primary, #2490ef, 0.3);
+}
+
+.session-context-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 6px;
+	flex-shrink: 0;
+	background: var(--sidebar-hover-color);
+	color: var(--text-muted, #8d99a6);
+}
+
+.session-context-icon svg {
+	width: 13px;
+	height: 13px;
+}
+
+.session-context-text {
+	display: flex;
+	flex-direction: column;
+	line-height: 1.25;
+	flex: 1;
+	min-width: 0;
+}
+
+.session-context-row {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.session-context-row-primary {
+	font-size: 12.5px;
+	font-weight: 600;
+	color: var(--text-color, var(--gray-900));
+}
+
+.session-context-row-secondary {
+	font-size: 11px;
+	color: var(--text-muted, #8d99a6);
+}
+
+.session-context-caret {
+	display: flex;
+	align-items: center;
+	color: var(--text-muted, #8d99a6);
+	flex-shrink: 0;
+}
+
+.session-context-caret svg {
+	width: 11px;
+	height: 11px;
+}
+
+/* Collapsed sidebar: the body sidebar (and this chip with it) is hidden by
+ * core Frappe in favor of the workspace dock/rail — nothing to override
+ * here, this rule just documents that the omission is intentional. */
+body.sidebar-collapsed .session-context-chip {
+	display: none;
+}

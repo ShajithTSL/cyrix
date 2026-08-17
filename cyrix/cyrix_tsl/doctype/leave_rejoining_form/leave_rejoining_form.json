@@ -1,0 +1,234 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "LRJ.####",
+ "creation": "2026-08-13 10:58:48.683550",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "leave_application",
+  "employee_details",
+  "emp_no",
+  "employee_name",
+  "designation",
+  "column_break_3",
+  "department",
+  "date_of_joining",
+  "company",
+  "leave_details_section",
+  "leave_details_column",
+  "from_date",
+  "to_date",
+  "column_break_d3n0k",
+  "leave_balance",
+  "section_break_5",
+  "rejoining_date",
+  "actual_rejoining_date",
+  "column_break_14",
+  "late_days",
+  "leave_type",
+  "leave_application_details_section",
+  "eligible_days",
+  "amended_from",
+  "column_break_etrx",
+  "unpaid_start_date",
+  "unpaid_end_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "leave_application",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Leave Application"
+  },
+  {
+   "fieldname": "employee_details",
+   "fieldtype": "Section Break",
+   "label": "Employee Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "emp_no",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee ID",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "emp_no.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Read Only",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "emp_no.designation",
+   "fieldname": "designation",
+   "fieldtype": "Read Only",
+   "label": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "emp_no.department",
+   "fieldname": "department",
+   "fieldtype": "Read Only",
+   "label": "Department",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "emp_no.date_of_joining",
+   "fieldname": "date_of_joining",
+   "fieldtype": "Read Only",
+   "label": "Date of Joining",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "emp_no.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_details_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "Leave Start Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_d3n0k",
+   "fieldtype": "Column Break",
+   "label": "Leave Balance"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "Leave End Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_balance",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Rejoining Details"
+  },
+  {
+   "bold": 1,
+   "fieldname": "rejoining_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Rejoining Date"
+  },
+  {
+   "fieldname": "actual_rejoining_date",
+   "fieldtype": "Date",
+   "label": "Actual Rejoining Date"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "late_days",
+   "fieldtype": "Int",
+   "label": "Late in days"
+  },
+  {
+   "depends_on": "eval:doc.late_days>0",
+   "fieldname": "leave_type",
+   "fieldtype": "Link",
+   "label": "Leave Type",
+   "options": "Leave Type"
+  },
+  {
+   "depends_on": "eval:doc.leave_type != \"Leave Without Pay\"",
+   "fieldname": "leave_application_details_section",
+   "fieldtype": "Section Break",
+   "label": "Leave Application Details"
+  },
+  {
+   "fieldname": "eligible_days",
+   "fieldtype": "Int",
+   "label": "Eligible Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Leave Rejoining Form",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_etrx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:(doc.late_days > doc.eligible_days) && doc.leave_type != \"Leave Without Pay\"",
+   "fieldname": "unpaid_start_date",
+   "fieldtype": "Date",
+   "label": "Unpaid Start Date",
+   "mandatory_depends_on": "eval:(doc.late_days > doc.eligible_days) && doc.leave_type != \"Leave Without Pay\""
+  },
+  {
+   "depends_on": "eval:(doc.late_days > doc.eligible_days) && doc.leave_type != \"Leave Without Pay\"",
+   "fieldname": "unpaid_end_date",
+   "fieldtype": "Date",
+   "label": "Unpaid End Date",
+   "mandatory_depends_on": "eval:(doc.late_days > doc.eligible_days) && doc.leave_type != \"Leave Without Pay\""
+  },
+  {
+   "fieldname": "leave_details_column",
+   "fieldtype": "Column Break",
+   "label": "Leave Details"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-13 15:34:26.330260",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Leave Rejoining Form",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}

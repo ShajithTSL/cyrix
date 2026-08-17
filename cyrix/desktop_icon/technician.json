@@ -1,0 +1,28 @@
+{
+ "app": "cyrix",
+ "bg_color": "gray",
+ "creation": "2026-08-11 08:51:17.077445",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "Link",
+ "idx": 0,
+ "label": "Technician",
+ "link_to": "C-Tech",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-08-11 10:07:34.349988",
+ "modified_by": "Administrator",
+ "name": "Technician",
+ "owner": "Administrator",
+ "parent_icon": "TSL",
+ "restrict_removal": 0,
+ "roles": [
+  {
+   "role": "Tech User"
+  },
+  {
+   "role": "Tech Manager"
+  }
+ ],
+ "standard": 1
+}

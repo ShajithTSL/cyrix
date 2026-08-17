@@ -226,7 +226,7 @@ def get_data(filters):
 		"""Query for payment entries directly linked to customers (no sales invoice reference)"""
 		sales_person_filter = ""
 		if sales_person:
-			sales_person_filter = f" AND st.sales_person = '{sales_person}'"
+			sales_person_filter = f" AND pe.custom_sales_person = '{sales_person}'"
 
 		cost_center_filter = ""
 		if cost_center:

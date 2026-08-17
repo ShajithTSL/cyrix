@@ -337,6 +337,8 @@ core.get_bootinfo = custom.get_bootinfo
 override_whitelisted_methods = {
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_journal_entry_bts",
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts": "cyrix.custom_py.bank_reconciliation_tool.create_payment_entry_bts",
+	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_bank_transactions": "cyrix.custom_py.bank_reconciliation_tool.get_bank_transactions",
+
 }
 
 

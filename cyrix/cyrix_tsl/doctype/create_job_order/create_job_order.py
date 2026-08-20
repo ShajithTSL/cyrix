@@ -7,7 +7,8 @@ import json
 from datetime import datetime
 from frappe.utils import cint, flt
 class CreateJobOrder(Document):
-	pass
+	def validate(self):
+		frappe.throw("Not Allowed to Save")
 
 naming_series = {
 	"Dammam": {"normal":"JO-D.YY.-", "updated": "SB-JO-D.YY.-"},

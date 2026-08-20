@@ -497,7 +497,7 @@ frappe.ui.form.on('Leave Application Form', {
 
 				const list_html = conflicts
 					.map((c) => {
-						return `<a href="/app/custom-leave-application/${c.name}" target="_blank">${c.name}</a>
+						return `<a href="/app/leave-application-form/${c.name}" target="_blank">${c.name}</a>
 							(${c.status_label}: ${frappe.datetime.str_to_user(c.from_date)} - ${frappe.datetime.str_to_user(c.to_date)})`;
 					})
 					.join(", ");

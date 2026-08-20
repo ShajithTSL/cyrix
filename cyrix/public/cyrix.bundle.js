@@ -1,6 +1,3 @@
-
-import './navbar.html';
-
 frappe.ui.form.States = class FormStates {
 	constructor(opts) {
 		$.extend(this, opts);
@@ -247,7 +244,6 @@ frappe.views.ReportView = class ReportView extends frappe.views.ReportView {
     }
 };
 
-import './navbar.html';
 import DataTable from "frappe-datatable";
 
 // Expose DataTable globally to allow customizations.

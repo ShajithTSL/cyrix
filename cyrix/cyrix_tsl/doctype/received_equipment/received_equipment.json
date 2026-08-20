@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_rename": 1,
  "creation": "2025-08-09 12:35:59.730656",
  "doctype": "DocType",
@@ -153,7 +154,6 @@
    "options": "Item Group"
   },
   {
-   "depends_on": "eval:doc.parent == \"Create Job Order\"",
    "fieldname": "complaint_section",
    "fieldtype": "Section Break",
    "label": "Complaint"
@@ -374,7 +374,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-14 12:35:41.102571",
+ "modified": "2026-08-18 13:54:27.020413",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Received Equipment",

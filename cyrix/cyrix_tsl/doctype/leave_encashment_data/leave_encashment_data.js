@@ -2,39 +2,52 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Leave Encashment Data', {
+	print:function(frm){
+		frm.add_custom_button(__('Print'), function () {
+			var f_name = frm.doc.name
+			var print_format = "Leave Encashment";
+			window.open(frappe.urllib.get_full_url("/api/method/frappe.utils.print_format.download_pdf?"
+				+ "doctype=" + encodeURIComponent(frm.doc.doctype)
+				+ "&name=" + encodeURIComponent(f_name)
+				+ "&trigger_print=1"
+				+ "&format=" + print_format
+				+ "&no_letterhead=0"
+			));
+		})
+	},
 
-    // before_workflow_action: async (frm) => {
-	// 	if(frm.doc.workflow_state == "Draft"){
-	// 		let promise = new Promise((resolve, reject) => {
-	// 			if (frm.selected_workflow_action == "Send to HR") {
-	// 				frappe.call({
-	// 					method: 'tsl.custom_py.email_notification.send_mail_on_leave_encashment',
-	// 					args: {
-	// 						"name": frm.doc.name,
-    //                         "role": "HR"
-	// 					}
-	// 				})
-	// 			}
-	// 			resolve();
-	// 		});
-	// 		await promise.catch(() => frappe.throw());
-	// 	}
-    //     if(frm.doc.workflow_state == "Under HR"){
-	// 		let promise = new Promise((resolve, reject) => {
-	// 			if (frm.selected_workflow_action == "Send to Finance") {
-	// 				frappe.call({
-	// 					method: 'tsl.custom_py.email_notification.send_mail_on_leave_encashment',
-	// 					args: {
-	// 						"name": frm.doc.name,
-    //                         "role": "Finance"
-	// 					}
-	// 				})
-	// 			}
-	// 			resolve();
-	// 		});
-	// 		await promise.catch(() => frappe.throw());
-	// 	}
-	// },
+    before_workflow_action: async (frm) => {
+		if(frm.doc.workflow_state == "Draft"){
+			let promise = new Promise((resolve, reject) => {
+				if (frm.selected_workflow_action == "Send to HR") {
+					frappe.call({
+						method: 'cyrix.custom_py.email_notification.send_mail_on_leave_encashment',
+						args: {
+							"name": frm.doc.name,
+                            "role": "HR"
+						}
+					})
+				}
+				resolve();
+			});
+			await promise.catch(() => frappe.throw());
+		}
+        if(frm.doc.workflow_state == "Under HR"){
+			let promise = new Promise((resolve, reject) => {
+				if (frm.selected_workflow_action == "Send to Finance") {
+					frappe.call({
+						method: 'cyrix.custom_py.email_notification.send_mail_on_leave_encashment',
+						args: {
+							"name": frm.doc.name,
+                            "role": "Finance"
+						}
+					})
+				}
+				resolve();
+			});
+			await promise.catch(() => frappe.throw());
+		}
+	},
 
 	onload: function (frm) {
 		// Ignore cancellation of doctype on cancel all.
@@ -76,6 +89,7 @@ frappe.ui.form.on('Leave Encashment Data', {
 		});
 	},
 	refresh: function (frm) {
+		frm.trigger("print")
 		cur_frm.set_intro("");
 		if (frm.doc.__islocal && !frappe.user_roles.includes("Employee")) {
 			frm.set_intro(__("Fill the form and save it"));

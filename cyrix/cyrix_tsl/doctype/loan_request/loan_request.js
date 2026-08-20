@@ -95,7 +95,7 @@ frappe.ui.form.on("Loan Request", {
 			let promise = new Promise((resolve, reject) => {
 				if (frm.selected_workflow_action == "Send to HR") {
 					frappe.call({
-						method: 'tsl.custom_py.email_notification.send_mail_on_loan_request',
+						method: 'cyrix.custom_py.email_notification.send_mail_on_loan_request',
 						args: {
 							"name": frm.doc.name,
                             "role": "HR"
@@ -122,7 +122,7 @@ frappe.ui.form.on("Loan Request", {
                         return;
                     }
 					frappe.call({
-						method: 'tsl.custom_py.email_notification.send_mail_on_loan_request',
+						method: 'cyrix.custom_py.email_notification.send_mail_on_loan_request',
 						args: {
 							"name": frm.doc.name,
                             "role": "Finance"
@@ -153,7 +153,7 @@ frappe.ui.form.on("Loan Request", {
             });
 
             await frappe.call({
-                method: "tsl.custom_py.email_notification.send_loan_rejection_mail",
+                method: "cyrix.custom_py.email_notification.send_loan_rejection_mail",
                 args: {
                     name: frm.doc.name,
                     rejection_reason: values.reason
@@ -161,10 +161,7 @@ frappe.ui.form.on("Loan Request", {
             });
         }
 	},
-
-    onload: function(frm) {
-        frm.fields_dict["pending_loans"].$wrapper.html('');
-    },
+    
     show_criteria: function (frm){
         if (frappe.user.has_role("HR Manager") || frappe.user.has_role("Accounts Manager") || frappe.user.has_role("HR User") || frappe.user.has_role("Loan Approver") || frappe.user.has_role("System Manager") ) {
             frm.add_custom_button(__("Show Criteria"), function(){
@@ -198,6 +195,7 @@ frappe.ui.form.on("Loan Request", {
     },
     
     employee(frm){
+        frm.trigger("calculate_leaves")
         frm.trigger("set_pending_loans_snapshot");
     },
 
@@ -317,9 +315,38 @@ frappe.ui.form.on("Loan Request", {
 			() => frm.trigger("company"),
 			() => frm.trigger("create_loan_repayment"),
 			() => frm.trigger("loan_pause"),
-            () => frm.trigger("change_repayment_amount")
+            () => frm.trigger("change_repayment_amount"),
+            () => frm.trigger("print_button")
  		])
 	},
+    
+    print_button: function(frm){
+        frm.add_custom_button(__('Loan Request'), function () {
+            var f_name = frm.doc.name
+            var print_format = "Loan Request";
+            window.open(frappe.urllib.get_full_url("/api/method/frappe.utils.print_format.download_pdf?"
+                + "doctype=" + encodeURIComponent(frm.doc.doctype)
+                + "&name=" + encodeURIComponent(f_name)
+                + "&trigger_print=1"
+                + "&format=" + print_format
+                + "&no_letterhead=0"
+            ));
+        },__('Print'));
+        if (frappe.user.has_role("HR Manager") || frappe.user.has_role("Loan Approver") || frappe.user.has_role("System Manager") ) {
+            frm.add_custom_button(__('Loan Evaluation'), function () {
+                var f_name = frm.doc.name
+                var print_format = "Loan Evaluation";
+                window.open(frappe.urllib.get_full_url("/api/method/frappe.utils.print_format.download_pdf?"
+                    + "doctype=" + encodeURIComponent(frm.doc.doctype)
+                    + "&name=" + encodeURIComponent(f_name)
+                    + "&trigger_print=1"
+                    + "&format=" + print_format
+                    + "&no_letterhead=0"
+                ));
+            },__('Print'));
+        }
+    },
+
 	company : function (frm) {
 		frm.set_query("employee", function () {
 			return {
@@ -448,4 +475,89 @@ frappe.ui.form.on("Loan Request", {
             },__("Manage"));
         }
 	},
+
+    onload: function(frm) {
+        frm.fields_dict["pending_loans"].$wrapper.html('');
+        frm.trigger("calculate_leaves")
+    },
+    
+    calculate_leaves: function(frm){
+
+        if (!frm.doc.employee) return;
+
+        frappe.db.get_value("Employee", frm.doc.employee, "ctc").then(r => {
+            if (r.message && r.message.ctc) {
+                frm.ctc_value = flt(r.message.ctc);
+                calculate_leave_pay(frm);
+            }
+        });
+
+        if (!frm.doc.leave_balance || frm.doc.leave_balance === 0) {
+
+            frappe.call({
+                method: "cyrix.cyrix_tsl.doctype.leave_salary.leave_salary.check_balance_leaves",
+                args: {
+                    employee: frm.doc.employee
+                },
+                callback(r) {
+
+                    if (r.message !== undefined && r.message !== null) {
+
+                        // Safe creation date handling
+                        let creation_date = frm.doc.creation
+                            ? new Date(frm.doc.creation)
+                            : new Date();
+
+                        let compare_date = new Date("2026-03-30");
+
+                        // Only after compare date
+                        if (creation_date > compare_date) {
+                            if (r.message > 0){
+                                frm.set_value("leave_balance", flt(r.message));                            
+                            }
+                            else{
+                                frm.set_value("leave_balance", 0);
+                            }
+                            calculate_leave_pay(frm);
+                        }
+                    }
+                }
+            });
+        } else {
+            calculate_leave_pay(frm);
+        }
+
+        function calculate_leave_pay(frm) {
+
+            if (!frm.doc.leave_balance) return;
+
+            if (!frm.ctc_value) return;
+
+            let divisor = 30;
+
+            // Companies with 26 days calculation
+            const company_26_days = [
+                "TSL COMPANY - Kuwait",
+                
+            ];
+
+            // Set divisor
+            if (company_26_days.includes(frm.doc.company)) {
+                divisor = 26;
+            }
+
+            let leave_pay =
+                (flt(frm.ctc_value) / divisor) *
+                flt(frm.doc.leave_balance);
+
+            // Round to 3 decimals
+            leave_pay = Math.round(leave_pay * 1000) / 1000;
+
+            // Set only if empty
+            if (!frm.doc.leave_pay || frm.doc.leave_pay === 0) {
+
+                frm.set_value("leave_pay", leave_pay);
+            }
+        }
+    }
 });

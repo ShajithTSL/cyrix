@@ -148,7 +148,7 @@ def schedule_create_planned_leaves():
 	if not job:
 		sjt = frappe.new_doc("Scheduled Job Type")  
 		sjt.update({
-			"method" : 'tsl.tsl.doctype.planned_leaves.planned_leaves.create_planned_leaves',
+			"method" : 'cyrix.cyrix_tsl.doctype.planned_leaves.planned_leaves.create_planned_leaves',
 			"frequency" : 'Daily',
 		})
 		sjt.save(ignore_permissions=True)

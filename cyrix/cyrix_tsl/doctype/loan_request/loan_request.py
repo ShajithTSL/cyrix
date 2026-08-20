@@ -243,7 +243,8 @@ def update_total_amount_paid(docname):
 	frappe.db.set_value("Loan Request", doc.name, "total_amount_paid", total_amount_paid)
 	frappe.db.set_value("Loan Request", doc.name, "balance_amount", doc.total_payment - total_amount_paid)
 	if total_amount_paid > 0 and total_amount_paid == doc.total_payment:
-		frappe.db.set_value("Loan Request", doc.name, "status", "Loan Settled")
+		frappe.db.set_value("Loan Request", doc.name, "status", "Loan Settled")		
+		frappe.db.set_value("Loan Request", doc.name, "closure_date", today())
 
 @frappe.whitelist()
 def create_loan_repayment(name):

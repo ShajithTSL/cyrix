@@ -7,7 +7,7 @@ frappe.ui.form.on("Full and Final Settlement", {
 			let promise = new Promise((resolve, reject) => {
 				if (frm.selected_workflow_action == "Send to Finance") {
 					frappe.call({
-						method: 'tsl.custom_py.email_notification.send_mail_on_fnf',
+						method: 'cyrix.custom_py.email_notification.send_mail_on_fnf',
 						args: {
 							"name": frm.doc.name
 						}
@@ -37,7 +37,7 @@ frappe.ui.form.on("Full and Final Settlement", {
             });
 
             await frappe.call({
-                method: "tsl.custom_py.email_notification.send_fnf_rejection_mail",
+                method: "cyrix.custom_py.email_notification.send_fnf_rejection_mail",
                 args: {
                     name: frm.doc.name,
                     rejection_reason: values.reason

@@ -208,12 +208,14 @@
    "label": "Approval"
   },
   {
+   "fetch_from": "employee.leave_approver",
    "fieldname": "leave_approver",
    "fieldtype": "Link",
    "label": "Leave Approver",
    "options": "User"
   },
   {
+   "fetch_from": "leave_approver.first_name",
    "fieldname": "leave_approver_name",
    "fieldtype": "Data",
    "label": "Leave Approver Name",
@@ -543,7 +545,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2026-08-16 09:49:31.417583",
+ "modified": "2026-08-17 16:04:52.955114",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Leave Application Form",

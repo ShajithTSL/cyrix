@@ -207,6 +207,7 @@
   {
    "fieldname": "loan_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Loan Amount",
    "non_negative": 1,
    "options": "Company:company:default_currency",
@@ -430,6 +431,7 @@
    "allow_on_submit": 1,
    "fieldname": "total_amount_paid",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Total Amount Paid",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -581,7 +583,7 @@
    "link_fieldname": "reference_no"
   }
  ],
- "modified": "2026-08-15 10:02:10.049483",
+ "modified": "2026-08-18 11:17:47.281817",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Loan Request",

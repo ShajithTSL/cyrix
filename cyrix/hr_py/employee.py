@@ -235,7 +235,7 @@ def get_annual_leave_days(doc,method):
 		as_dict=True
 	)
 
-	doc.monthly_eligible_days = rule.monthly_allocation
+	# doc.monthly_eligible_days = rule.monthly_allocation
 	doc.save()
 
 

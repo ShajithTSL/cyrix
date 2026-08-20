@@ -103,7 +103,7 @@ class LeaveApplicationForm(Document):
 				pass
 		else:
 			try:
-				sendmail(parent_doc, message, subject, sender =  "info@tsl-me.com", recipients = self.user_id, attachments = None, cc = None )
+				sendmail(parent_doc, message, subject, sender =  "no-reply@cyrix-tsl.com", recipients = self.user_id, attachments = None, cc = None )
 				frappe.msgprint(_("Email sent to {0}").format(self.user_id))
 
 			except frappe.OutgoingEmailError:
@@ -372,7 +372,7 @@ def trigger_mail(name,workflow_state = None,email = None,leave_approver = None,h
 			cc = info().get("hr_cc").get(parent_doc.company)
 
 		try:
-			sendmail(parent_doc, message, subject, sender = "no-reply@tsl-me.com", recipients = leave_approver, attachments = None, cc = cc )
+			sendmail(parent_doc, message, subject, sender = "no-reply@cyrix-tsl.com", recipients = leave_approver, attachments = None, cc = cc )
 			frappe.msgprint(_("Email sent to {0}").format(leave_approver))
 
 		except frappe.OutgoingEmailError:
@@ -391,7 +391,7 @@ def trigger_mail(name,workflow_state = None,email = None,leave_approver = None,h
 			cc = info().get("hr_cc").get(parent_doc.company)
 
 		try:
-			sendmail(parent_doc, message, subject, sender = "no-reply@tsl-me.com", recipients = email, attachments = None, cc = cc )
+			sendmail(parent_doc, message, subject, sender = "no-reply@cyrix-tsl.com", recipients = email, attachments = None, cc = cc )
 			frappe.msgprint(_("Email sent to {0}").format(email))
 			
 		except frappe.OutgoingEmailError:
@@ -425,7 +425,7 @@ def trigger_mail_to_hr(name,workflow_state = None,company = None,leave_approver 
 		recipents = info().get("hr_cc").get(company)
 
 	try:
-		sendmail(doc, message, subject, sender = "no-reply@tsl-me.com", recipients = recipents, attachments = None )
+		sendmail(doc, message, subject, sender = "no-reply@cyrix-tsl.com", recipients = recipents, attachments = None )
 		frappe.msgprint(_("Email sent to {0}").format(recipents))
 	except frappe.OutgoingEmailError:
 		pass
@@ -565,7 +565,7 @@ def trigger_mail_on_lap_form():
 		subject = frappe.render_template(email_template.subject, args)
 		message = frappe.render_template(email_template.response, args)
 		try:
-			sendmail(parent_doc, message, subject, sender = "info@tsl-me.com", recipients = "alkouh@tsl-me.com", attachments = None, cc = None )
+			sendmail(parent_doc, message, subject, sender = "no-reply@cyrix-tsl.com", recipients = "alkouh@tsl-me.com", attachments = None, cc = None )
 
 		except frappe.OutgoingEmailError:
 			pass
@@ -575,7 +575,7 @@ def schedule_trigger_mail_on_lap_form():
 	if not job1:
 		sjt1 = frappe.new_doc("Scheduled Job Type")  
 		sjt1.update({
-			"method" : 'tsl.tsl.doctype.leave_application_form.leave_application_form.trigger_mail_on_lap_form',
+			"method" : 'cyrix.cyrix_tsl.doctype.leave_application_form.leave_application_form.trigger_mail_on_lap_form',
 			"frequency" : 'Daily'
 		})
 		sjt1.save(ignore_permissions=True)
@@ -584,7 +584,7 @@ def schedule_trigger_mail_on_lap_form():
 	if not job2:
 		sjt2 = frappe.new_doc("Scheduled Job Type")  
 		sjt2.update({
-			"method" : 'tsl.tsl.doctype.leave_application_form.leave_application_form.create_leave_rejoining',
+			"method" : 'cyrix.cyrix_tsl.doctype.leave_application_form.leave_application_form.create_leave_rejoining',
 			"frequency" : 'Daily'
 		})
 		sjt2.save(ignore_permissions=True)

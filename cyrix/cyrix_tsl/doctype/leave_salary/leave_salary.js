@@ -7,7 +7,7 @@ frappe.ui.form.on('Leave Salary', {
 			let promise = new Promise((resolve, reject) => {
 				if (frm.selected_workflow_action == "Send to Finance") {
 					frappe.call({
-						method: 'tsl.custom_py.email_notification.send_mail_on_leave_salary',
+						method: 'cyrix.custom_py.email_notification.send_mail_on_leave_salary',
 						args: {
 							"name": frm.doc.name
 						}

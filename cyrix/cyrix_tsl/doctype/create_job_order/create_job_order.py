@@ -7,7 +7,8 @@ import json
 from datetime import datetime
 from frappe.utils import cint, flt
 class CreateJobOrder(Document):
-	pass
+	def validate(self):
+		frappe.throw("Not Allowed to Save")
 
 naming_series = {
 	"Dammam": {"normal":"JO-D.YY.-", "updated": "SB-JO-D.YY.-"},
@@ -167,6 +168,7 @@ def create_job_order_data(dict):
 				jo.sec = doc.sec
 				jo.address = doc.address
 				jo.customer_rep = doc.incharge
+				jo.customer_reference_number = doc.customer_reference_number
 				if doc.job_order_data:
 					jo.parent_jo = doc.job_order_data
 				if doc.warranty_date:
@@ -245,6 +247,7 @@ def create_job_order_data(dict):
 		jo.sec = doc.sec
 		jo.address = doc.address
 		jo.customer_rep = doc.incharge
+		jo.customer_reference_number = doc.customer_reference_number
 		if doc.job_order_data:
 			jo.parent_jo = doc.job_order_data
 		if doc.warranty_date:

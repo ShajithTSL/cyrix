@@ -17,22 +17,23 @@ from frappe.utils import (
 
 
 def update_job_order_status(doc,method):
-	if doc.get("job_order_data"):
-		jo = frappe.get_doc("Job Order Data",doc.get("job_order_data"))
-		if jo.status not in ["RSC-Repaired and Shipped Client","RSI-Repaired and Shipped Invoiced"]:
-			if jo.invoice_no and not jo.payment_entry:
-				jo.status = "RSI-Repaired and Shipped Invoiced"
-			elif jo.payment_entry and jo.invoice_no:  
-				jo.status = "P-Paid"
-			elif not jo.payment_entry:
-				jo.status = "RSC-Repaired and Shipped Client"
+	for i in doc.get("items"):
+		if i.get("job_order_data"):
+			jo = frappe.get_doc("Job Order Data",i.get("job_order_data"))
+			if jo.status not in ["RSC-Repaired and Shipped Client","RSI-Repaired and Shipped Invoiced"]:
+				if jo.invoice_no and not jo.payment_entry:
+					jo.status = "RSI-Repaired and Shipped Invoiced"
+				elif jo.payment_entry and jo.invoice_no:  
+					jo.status = "P-Paid"
+				elif not jo.payment_entry:
+					jo.status = "RSC-Repaired and Shipped Client"
 
-		jo.dn_no=doc.name
-		jo.dn_date=doc.posting_date
-		jo.warranty=doc.warranty_months
-		jo.delivery=doc.posting_date
-		jo.expiry_date = add_months(doc.posting_date, doc.warranty_months)
-		jo.save(ignore_permissions = True)
+			jo.dn_no=doc.name
+			jo.dn_date=doc.posting_date
+			jo.warranty=doc.warranty_months
+			jo.delivery=doc.posting_date
+			jo.expiry_date = add_months(doc.posting_date, doc.warranty_months)
+			jo.save(ignore_permissions = True)
 		
 
 def update_supply_order_status(doc, method):
@@ -228,6 +229,34 @@ def get_wod_items_from_quotation(jod):
 			"description":i.description,
 			"mfg":i.mfg,
 			"job_order_data": k,
+			"model_no":i.model_no,
+			"serial_no":i.serial_no,
+			"qty": i.quantity,
+			"sales_person":doc.sales_person,
+			"work_order_data":doc.name,
+			"cost_center":doc.department,
+			"branch":branch,
+			   
+			}))
+
+	return l
+
+
+@frappe.whitelist()
+def get_wod_items_from_sod(sod):
+	sod = json.loads(sod)
+	l=[]
+	for k in list(sod):
+		doc = frappe.get_doc("Supply Order Data",k)
+		branch = doc.branch
+		
+		for i in doc.get("material_list"):
+			l.append(frappe._dict({
+			"item" :i.item_code,
+			"item_name" : i.item_name,
+			"description":i.description,
+			"mfg":i.mfg,
+			"supply_order_data": k,
 			"model_no":i.model_no,
 			"serial_no":i.serial_no,
 			"qty": i.quantity,

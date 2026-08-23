@@ -62,6 +62,7 @@ def update_job_order_data(dict, doc_type, doc_name):
 					if i.get("other"):
 						jo.others = 1
 						jo.specify = i["specify"]
+					jo.unit_status = doc.unit_status
 					jo.save(ignore_permissions = 1)
 					
 					

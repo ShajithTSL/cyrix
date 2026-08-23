@@ -1,18 +1,24 @@
 import frappe
 
 def update_jo_so_status(doc, method):
+    skip_jo_cancellation = doc.get("cancel_job_orders")
+
     for item in doc.get("items"):
         if item.get("job_order_data"):
-            jo = frappe.get_doc("Job Order Data",item.get("job_order_data"))
-            if jo.status != "RSI-Repaired and Shipped Invoiced":
-                if doc.is_return:
-                    jo.status = "C-Cancelled"  # for credit note need to set the status as cancelled
-                else:
-                    jo.status = "RSI-Repaired and Shipped Invoiced"
+            jo = frappe.get_doc("Job Order Data", item.get("job_order_data"))
+
+            if doc.is_return:
+                if not skip_jo_cancellation:
+                    jo.status = "C-Cancelled"
+                    jo.add_comment("Comment", text="Invoice Cancelled by "+ frappe.session.user)
+                # else: user chose "Don't Cancel Job Order" -> leave status as-is
+            else:
+                jo.status = "RSI-Repaired and Shipped Invoiced"
+
             jo.invoiced_value = item.total_amount or item.net_amount
-            jo.invoice_no=doc.name
-            jo.invoice_date=doc.posting_date
-            jo.save(ignore_permissions = True)
+            jo.invoice_no = doc.name
+            jo.invoice_date = doc.posting_date
+            jo.save(ignore_permissions=True)
 
         elif item.get("supply_order_data"):
             so = frappe.get_doc("Supply Order Data",item.get("supply_order_data"))

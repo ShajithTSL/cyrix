@@ -48,6 +48,18 @@ frappe.ui.form.on('Invoice Cancellation', {
 	setup: function(frm){
 		frm.trigger("setup_query")
 	},
+	
+	branch: function(frm){
+		if (frm.doc.branch){
+			frm.set_query("sales_person", function () {
+				return {
+					"filters": {
+						"custom_branch": ["in", [frm.doc.branch,""]]
+					}
+				};
+			});
+		}
+	},
 
 	setup_query: function(frm){
 		const branchMap = frappe.boot.company_branches;

@@ -382,14 +382,6 @@ def fetch_price_from_eval_report(self, method):
 			eval_list.extend(child_eval_list)
 
 	for eval in  eval_list:
-		eval_report_name = frappe.db.exists("Evaluation Report", {"job_order_data": eval})
-		if not eval_report_name:
-			continue
-
-		eval_doc = frappe.get_doc("Evaluation Report", eval_report_name)
-		if not eval_doc:
-			continue
-
 		shipping_costs = frappe.db.sql("""
 			SELECT DISTINCT
 				sq.name,
@@ -400,7 +392,7 @@ def fetch_price_from_eval_report(self, method):
 				ON sq.name = sqi.parent
 			WHERE sq.docstatus = 1
 			AND sqi.job_order_data = %s
-		""", (eval_doc.job_order_data,), as_dict=True)
+		""", (eval), as_dict=True)
 
 		for sq in shipping_costs:
 			try:
@@ -412,49 +404,82 @@ def fetch_price_from_eval_report(self, method):
 					"Quotation Fetch Error"
 				)
 
-		for eval_item in eval_doc.get("items"):
-			# Get full model name
-			eval_item.model = frappe.get_value("Item Model", {"name": eval_item.model}, "model")
+		eval_report_name = frappe.db.exists("Evaluation Report", {"job_order_data": eval})
+		if not eval_report_name:
+			continue
+		
+		list_evaluation = frappe.db.get_list("Evaluation Report", {"job_order_data": eval,"document_active_status":"Yes"},"name")
+		for evaluation in list_evaluation:
 
-			item_source = "TSL Inventory" if eval_item.parts_availability == "Yes" else "Supplier"
-			price = eval_item.price_ea
-			amount = eval_item.total
-			supplier_quotation = ""
-			supplier = ""
+			eval_doc = frappe.get_doc("Evaluation Report", evaluation.name)
+			if not eval_doc:
+				continue
 
-			if eval_item.parts_availability == "No":
-				# Get latest Supplier Quotation for item
-				sq_data = frappe.db.sql("""
-					SELECT sq.supplier, sq.name AS sq, SUM(sq.shipping_cost) AS spc, sq.currency
-					FROM `tabSupplier Quotation` sq
-					INNER JOIN `tabSupplier Quotation Item` sqi ON sq.name = sqi.parent
-					WHERE sq.docstatus = 1 AND sqi.job_order_data = %s AND sqi.item_code = %s
-					ORDER BY sq.modified DESC LIMIT 1
-				""", (eval_doc.job_order_data, eval_item.part), as_dict=True)
+			# shipping_costs = frappe.db.sql("""
+			# 	SELECT DISTINCT
+			# 		sq.name,
+			# 		sq.shipping_cost,
+			# 		sq.currency
+			# 	FROM `tabSupplier Quotation` sq
+			# 	INNER JOIN `tabSupplier Quotation Item` sqi
+			# 		ON sq.name = sqi.parent
+			# 	WHERE sq.docstatus = 1
+			# 	AND sqi.job_order_data = %s
+			# """, (eval_doc.job_order_data,), as_dict=True)
 
-				if sq_data:
-					sq = sq_data[0]
-					supplier_quotation = sq.sq or ""
-					supplier = sq.supplier or ""
-			# Add to item_price_details
-			self.append("item_price_details", {
-				"job_order_data": eval_doc.job_order_data,
-				"item": eval_item.part,
-				"item_source": item_source,
-				"model": eval_item.model,
-				"price": price,
-				"amount": amount,
-				"supplier_quotation": supplier_quotation,
-				"supplier": supplier
-			})
+			# for sq in shipping_costs:
+			# 	try:
+			# 		exchange_rate = get_exchange_rate(sq.currency, self.currency)
+			# 		self.shipping_cost += (sq.shipping_cost or 0) * exchange_rate
+			# 	except Exception as e:
+			# 		frappe.log_error(
+			# 			f"Exchange rate fetch failed: {e}",
+			# 			"Quotation Fetch Error"
+			# 		)
 
-			# Accumulate totals
-			if item_source == "TSL Inventory":
-				tsl_inventory_total += amount
-			elif item_source == "Supplier":
-				supplier_total += amount
-			elif item_source == "Scrap":
-				scrap_total += amount
+			for eval_item in eval_doc.get("items"):
+				# Get full model name
+				eval_item.model = frappe.get_value("Item Model", {"name": eval_item.model}, "model")
+
+				item_source = "TSL Inventory" if eval_item.parts_availability == "Yes" else "Supplier"
+				price = eval_item.price_ea
+				amount = eval_item.total
+				supplier_quotation = ""
+				supplier = ""
+
+				if eval_item.parts_availability == "No":
+					# Get latest Supplier Quotation for item
+					sq_data = frappe.db.sql("""
+						SELECT sq.supplier, sq.name AS sq, SUM(sq.shipping_cost) AS spc, sq.currency
+						FROM `tabSupplier Quotation` sq
+						INNER JOIN `tabSupplier Quotation Item` sqi ON sq.name = sqi.parent
+						WHERE sq.docstatus = 1 AND sqi.job_order_data = %s AND sqi.item_code = %s
+						ORDER BY sq.modified DESC LIMIT 1
+					""", (eval_doc.job_order_data, eval_item.part), as_dict=True)
+
+					if sq_data:
+						sq = sq_data[0]
+						supplier_quotation = sq.sq or ""
+						supplier = sq.supplier or ""
+				# Add to item_price_details
+				self.append("item_price_details", {
+					"job_order_data": eval_doc.job_order_data,
+					"item": eval_item.part,
+					"item_source": item_source,
+					"model": eval_item.model,
+					"price": price,
+					"amount": amount,
+					"supplier_quotation": supplier_quotation,
+					"supplier": supplier
+				})
+
+				# Accumulate totals
+				if item_source == "TSL Inventory":
+					tsl_inventory_total += amount
+				elif item_source == "Supplier":
+					supplier_total += amount
+				elif item_source == "Scrap":
+					scrap_total += amount
 
 	total_price = 0
 	if self.technician_hours_spent:

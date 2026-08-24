@@ -10,6 +10,8 @@
   "type",
   "column_break_pzhg",
   "naming_series",
+  "status",
+  "column_break_mtjn",
   "queue_status",
   "section_break_sshm",
   "customer",
@@ -357,6 +359,18 @@
    "fieldtype": "Table",
    "label": "Items",
    "options": "Maintenance Contract Item"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Submitted",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Submitted\nPending Internal Approval\nInternal Quotation\nQuoted\nApproved\nNot Approved\nInvoiced\nPartially Paid\nPaid\nCancelled"
+  },
+  {
+   "fieldname": "column_break_mtjn",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -380,7 +394,7 @@
    "link_fieldname": "maintenance_contract"
   }
  ],
- "modified": "2026-07-22 13:46:51.653873",
+ "modified": "2026-08-24 15:49:48.647727",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Maintenance Contract",

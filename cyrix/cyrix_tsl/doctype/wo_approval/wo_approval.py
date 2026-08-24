@@ -1079,10 +1079,10 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 	Calculates total quoted and approved amounts per distinct maintenance contract,
 	with correct discount handling. Uses net_amount for 2026 onwards.
 
-	Wherever a Quotation Item's custom_maintenance_contract is referenced, it falls
+	Wherever a Quotation Item's maintenance_contract is referenced, it falls
 	back to the parent Quotation's maintenance_contract whenever
-	custom_maintenance_contract is empty/blank:
-		COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract)
+	maintenance_contract is empty/blank:
+		COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract)
 	"""
 	try:
 		if not sales_user:
@@ -1091,7 +1091,7 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 		# Get distinct Maintenance Contract list (falls back to header-level field when blank)
 		wod_list = frappe.db.sql("""
 			SELECT DISTINCT
-				COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) AS jo
+				COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) AS jo
 			FROM `tabQuotation` q
 			INNER JOIN `tabQuotation Item` qi
 				ON q.name = qi.parent
@@ -1107,13 +1107,13 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 					'Customer Quotation - MC - Revised'
 				)
 				AND q.transaction_date BETWEEN %s AND %s
-				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) IS NOT NULL
-				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) != ''
+				AND COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) IS NOT NULL
+				AND COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) != ''
 		""", (sales_user, company, from_date, to_date), as_dict=True)
 
 		# Get Maintenance Contract count
 		w_count = frappe.db.sql("""
-			SELECT COUNT(DISTINCT COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract)) as ct
+			SELECT COUNT(DISTINCT COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract)) as ct
 			FROM `tabQuotation` q
 			INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
 			WHERE q.sales_person = %s
@@ -1121,8 +1121,8 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 			AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
 			AND q.quotation_type IN ('Customer Quotation - MC', 'Customer Quotation - MC - Revised')
 			AND q.transaction_date BETWEEN %s AND %s
-			AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) IS NOT NULL
-			AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) != ''
+			AND COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) IS NOT NULL
+			AND COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) != ''
 		""", (sales_user, company, from_date, to_date), as_dict=True)
 
 		wod_count = w_count[0]["ct"] if w_count else 0
@@ -1142,7 +1142,7 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 				FROM `tabQuotation` q
 				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
 				WHERE q.sales_person = %s
-				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) = %s
+				AND COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) = %s
 				AND q.transaction_date BETWEEN %s AND %s
 				LIMIT 1
 			""", (sales_user, jo, from_date, to_date), as_dict=True)
@@ -1156,7 +1156,7 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 				FROM `tabQuotation` q
 				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
 				WHERE q.sales_person = %s
-				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) = %s
+				AND COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) = %s
 				AND q.workflow_state IN ('Approved by Customer', 'Quoted to Customer', 'Rejected by Customer')
 				AND q.quotation_type IN ('Customer Quotation - MC','Customer Quotation - MC - Revised')
 				AND q.transaction_date BETWEEN %s AND %s
@@ -1169,13 +1169,13 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 
 			# Check if approved
 			rev_check = frappe.db.sql("""
-				SELECT DISTINCT COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) AS jo
+				SELECT DISTINCT COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) AS jo
 				FROM `tabQuotation` q
 				INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
 				WHERE q.sales_person = %s
 				AND q.workflow_state IN ('Approved by Customer',"Quoted to Customer","Rejected by Customer")
 				AND q.quotation_type IN ('Customer Quotation - MC','Customer Quotation - MC - Revised')
-				AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) = %s
+				AND COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) = %s
 				AND q.transaction_date BETWEEN %s AND %s
 			""", (sales_user, jo, from_date, to_date), as_dict=True)
 
@@ -1188,7 +1188,7 @@ def get_monthly_sales(sales_user, from_date, to_date, company):
 					FROM `tabQuotation` q
 					INNER JOIN `tabQuotation Item` qi ON q.name = qi.parent
 					WHERE q.sales_person = %s
-					AND COALESCE(NULLIF(qi.custom_maintenance_contract, ''), q.maintenance_contract) = %s
+					AND COALESCE(NULLIF(qi.maintenance_contract, ''), q.maintenance_contract) = %s
 					AND q.workflow_state = 'Approved by Customer'
 					AND q.quotation_type IN ('Customer Quotation - MC', 'Customer Quotation - MC - Revised')
 					AND q.transaction_date BETWEEN %s AND %s

@@ -210,13 +210,18 @@ doc_events = {
         "on_submit": [
             "cyrix.custom_py.quotation.update_job_order_status",
             'cyrix.custom_py.quotation.update_service_call_form',
-            'cyrix.custom_py.quotation.update_budgetary_quotation_status'
+            'cyrix.custom_py.quotation.update_budgetary_quotation_status',
+            "cyrix.custom_py.quotation.update_maintenance_contract_status"
 		],
         "on_update_after_submit": [
             "cyrix.custom_py.quotation.on_update_after_submit",
-            "cyrix.custom_py.quotation.update_supply_order_status"
+            "cyrix.custom_py.quotation.update_supply_order_status",
+            "cyrix.custom_py.quotation.update_maintenance_contract_status"
 		],
-		"on_update": "cyrix.custom_py.quotation.update_supply_order_status"
+		"on_update": [
+            "cyrix.custom_py.quotation.update_supply_order_status", 
+            "cyrix.custom_py.quotation.update_maintenance_contract_status"
+		]
 	},
     
 	"Purchase Order": {

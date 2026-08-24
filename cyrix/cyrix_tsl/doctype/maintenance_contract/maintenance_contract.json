@@ -13,6 +13,7 @@
   "status",
   "column_break_mtjn",
   "queue_status",
+  "is_approved",
   "section_break_sshm",
   "customer",
   "address",
@@ -371,6 +372,14 @@
   {
    "fieldname": "column_break_mtjn",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_approved",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Approved"
   }
  ],
  "grid_page_length": 50,
@@ -394,7 +403,7 @@
    "link_fieldname": "maintenance_contract"
   }
  ],
- "modified": "2026-08-24 15:49:48.647727",
+ "modified": "2026-08-24 16:24:06.841559",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Maintenance Contract",

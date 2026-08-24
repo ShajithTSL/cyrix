@@ -222,22 +222,35 @@ def update_budgetary_quotation_status(self, method):
 			doc.save(ignore_permissions=True)
 
 def update_maintenance_contract_status(self, method):
-	for i in self.get("items"):
-		if i.maintenance_contract and self.quotation_type in ["Internal Quotation - BQ","Customer Quotation - BQ","Customer Quotation - BQ - Revised"]:
-			doc = frappe.get_doc("Budgetary Quotation",i.maintenance_contract)
-			if doc.is_approved == 0:
-				if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Management":
-					doc.status = "IQ-Internally Quoted"
-				
-				if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Quoted to Customer":
-					doc.status = "Q-Quoted"
+	mc_status_map = {
+		"Customer Quotation - MC": {
+			"Quoted to Customer": "Quoted",
+			"Approved by Customer": "Approved",
+			"Rejected by Customer": "Not Approved"
+		},
+		"Customer Quotation - MC - Revised": {
+			"Quoted to Customer": "Quoted",
+			"Approved by Customer": "Approved",
+			"Rejected by Customer": "Not Approved"
+		},
+		"Internal Quotation - MC": {
+			"Approved by Management": "Internal Quotation",
+			"Waiting For Approval": "Pending Internal Approval"
+		}
+	}
 
-				if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Approved by Customer":
-					doc.status = "A-Approved"
+	for item in self.items:
+		if not item.maintenance_contract and not self.maintenance_contract:
+			continue
 
-				if frappe.db.get_value(self.doctype, self.name, "workflow_state") == "Rejected by Customer":
-					doc.status = "Rejected"
-			doc.save(ignore_permissions=True)
+		doc = frappe.get_doc("Maintenance Contract", item.maintenance_contract or self.maintenance_contract)
+		status = mc_status_map.get(self.quotation_type, {}).get(self.workflow_state)
+
+		if status:
+			if doc.status not in ["Paid", "Partially Paid", "Invoiced"]:
+				if doc.is_approved == 0:
+					doc.status = status
+				doc.save(ignore_permissions=True)
 
 
 

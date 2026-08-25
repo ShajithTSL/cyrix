@@ -426,3 +426,225 @@ def create_qtn(source):
         })
 
     return new_doc
+
+
+
+
+def update_quote():
+    maintenance_contract = frappe.db.get_list("Maintenance Contract",{"docstatus":1},"name")
+    for mc in maintenance_contract:
+        self = frappe.get_doc("Maintenance Contract",mc.name)
+        rebuild_maintenance_contract_status_history(self)
+
+from datetime import datetime, time
+import frappe
+
+
+
+def normalize_datetime(value):
+    if not value:
+        return None
+
+    if isinstance(value, datetime):
+        return value
+
+    return datetime.combine(value, time.min)
+
+
+
+def rebuild_maintenance_contract_status_history(self):
+
+    events = []
+
+    mc_status_map = {
+        "Customer Quotation - MC": {
+            "Quoted to Customer": "Quoted",
+            "Approved by Customer": "Approved",
+            "Rejected by Customer": "Not Approved"
+        },
+        "Customer Quotation - MC - Revised": {
+            "Quoted to Customer": "Quoted",
+            "Approved by Customer": "Approved",
+            "Rejected by Customer": "Not Approved"
+        },
+        "Internal Quotation - MC": {
+            "Approved by Management": "Internal Quotation",
+            "Waiting For Approval": "Pending Internal Approval"
+        }
+    }
+
+    # ----------------------------------------
+    # Quotations
+    # ----------------------------------------
+
+    quotation_items = frappe.get_all(
+        "Quotation Item",
+        filters={
+            "maintenance_contract": self.name
+        },
+        fields=["parent"]
+    )
+
+    quotation_names = {
+        row.parent for row in quotation_items
+    }
+
+    quotation_docs = frappe.get_all(
+        "Quotation",
+        filters={
+            "maintenance_contract": self.name
+        },
+        fields=["name"]
+    )
+
+    quotation_names.update(
+        row.name for row in quotation_docs
+    )
+
+    for quotation_name in quotation_names:
+
+        quotation = frappe.get_doc(
+            "Quotation",
+            quotation_name
+        )
+
+        status = mc_status_map.get(
+            quotation.quotation_type,
+            {}
+        ).get(
+            quotation.workflow_state
+        )
+
+        if not status:
+            continue
+
+        events.append({
+            "status": status,
+            "date": normalize_datetime(
+                quotation.creation
+            ),
+            "source": quotation.name
+        })
+
+    # ----------------------------------------
+    # Sales Invoices
+    # ----------------------------------------
+
+    invoice_items = frappe.get_all(
+        "Sales Invoice Item",
+        filters={
+            "maintenance_contract": self.name
+        },
+        fields=["parent"]
+    )
+
+    invoice_names = {
+        row.parent for row in invoice_items
+    }
+
+    invoice_docs = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "maintenance_contract": self.name
+        },
+        fields=["name"]
+    )
+
+    invoice_names.update(
+        row.name for row in invoice_docs
+    )
+
+    for invoice_name in invoice_names:
+
+        invoice = frappe.get_doc(
+            "Sales Invoice",
+            invoice_name
+        )
+
+        if invoice.docstatus != 1:
+            continue
+
+        invoice_datetime = frappe.utils.get_datetime(
+            f"{invoice.posting_date} {invoice.posting_time}"
+        )
+
+
+        events.append({
+            "status": "Invoiced",
+            "date": invoice_datetime,
+            "source": invoice.name
+        })
+
+    # ----------------------------------------
+    # Sort
+    # ----------------------------------------
+
+    events = [
+        event for event in events
+        if event["date"]
+    ]
+
+    events.sort(
+        key=lambda x: x["date"]
+    )
+    # ----------------------------------------
+    # Remove consecutive duplicate statuses
+    # ----------------------------------------
+
+    cleaned_events = []
+
+    for event in events:
+
+        if (
+            cleaned_events
+            and cleaned_events[-1]["status"] == event["status"]
+        ):
+            continue
+
+        cleaned_events.append(event)
+
+    print(cleaned_events)
+
+    # ----------------------------------------
+    # Rebuild child table
+    # ----------------------------------------
+
+    self.set("status_duration_details", [])
+
+    for event in cleaned_events:
+        self.append(
+            "status_duration_details",
+            {
+                "status": event["status"],
+                "date": event["date"]
+            }
+        )
+
+
+    # ----------------------------------------
+    # Calculate durations
+    # ----------------------------------------
+
+    for i in range(len(self.status_duration_details) - 1):
+
+        current = self.status_duration_details[i]
+        next_row = self.status_duration_details[i + 1]
+
+        duration = next_row.date - current.date
+
+        total_minutes = int(duration.total_seconds() / 60)
+
+        hours = total_minutes // 60
+        minutes = total_minutes % 60
+
+        current.duration = f"{hours}hrs {minutes}min"
+
+
+    # ----------------------------------------
+    # Update Maintenance Contract status
+    # ----------------------------------------
+
+    if cleaned_events:
+        self.status = cleaned_events[-1]["status"]
+
+    self.save()

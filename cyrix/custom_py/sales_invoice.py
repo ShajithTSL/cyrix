@@ -40,31 +40,22 @@ def update_service_call_form(doc,method):
     if doc.get("service_call_form"):
         frappe.db.set_value("Service Call Form",doc.get("service_call_form"),"sales_invoice",doc.name)
         frappe.db.set_value("Service Call Form",doc.get("service_call_form"),"status","Invoiced")
-        
+
 def update_maintenance_contract_status(doc, method):
     contract_values = {}
-
     for item in doc.get("items") or []:
-        contract_name = (
-            item.get("maintenance_contract")
-            or doc.get("maintenance_contract")
-        )
-
+        contract_name = (item.get("maintenance_contract") or doc.get("maintenance_contract"))
         if not contract_name:
             continue
-
         amount = item.get("total_amount") or item.get("net_amount") or 0
-
         contract_values[contract_name] = (
             contract_values.get(contract_name, 0) + amount
         )
 
     for contract_name, amount in contract_values.items():
         mc = frappe.get_doc("Maintenance Contract", contract_name)
-
         mc.status = "Invoiced"
         mc.invoiced_value = amount
-
         mc.save(ignore_permissions=True)
 
 

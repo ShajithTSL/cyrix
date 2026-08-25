@@ -13,7 +13,9 @@ def get_jo_so_details(references):
                 SELECT DISTINCT 
                     `tabSales Invoice Item`.job_order_data AS job_order_data,
                     `tabSales Invoice Item`.supply_order_data AS supply_order_data,
-                    `tabSales Invoice Item`.budgetary_quotation AS budgetary_quotation
+                    `tabSales Invoice Item`.budgetary_quotation AS budgetary_quotation,
+                    `tabSales Invoice Item`.maintenance_contract AS maintenance_contract
+                    
                 FROM `tabSales Invoice`
                 LEFT JOIN `tabSales Invoice Item` 
                     ON `tabSales Invoice`.name = `tabSales Invoice Item`.parent 
@@ -82,6 +84,28 @@ def get_jo_so_details(references):
                             "reference_name": bq_name,
                             "invoiced_value": bq_doc.invoiced_value or 0,
                             "advance_payment_amount": bq_doc.advance_payment_amount or 0,
+                            "remaining_to_be_paid": remaining,
+                            "paid": paid
+                        })
+
+                mc_name = jo_entry.get("maintenance_contract")
+                if mc_name:
+                    mc_doc = frappe.db.get_value(
+                        "Maintenance Contract", mc_name,
+                        ["invoiced_value", "advance_payment_amount"],
+                        as_dict=True
+                    )
+                    if mc_doc:
+                        remaining = (mc_doc.invoiced_value or 0) - (mc_doc.advance_payment_amount or 0)
+                        paid = 0
+                        if remaining == 0:
+                            paid = 1
+                        
+                        jo_so_info.append({
+                            "reference_type": "Maintenance Contract",
+                            "reference_name": mc_name,
+                            "invoiced_value": mc_doc.invoiced_value or 0,
+                            "advance_payment_amount": mc_doc.advance_payment_amount or 0,
                             "remaining_to_be_paid": remaining,
                             "paid": paid
                         })

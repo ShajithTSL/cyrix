@@ -32,6 +32,7 @@
   "section_break_sszp",
   "items",
   "reference_documents",
+  "status_duration_details",
   "items_tab",
   "equipments",
   "preventive_maintenance_tab",
@@ -55,8 +56,10 @@
   "calls",
   "warranty_tab",
   "quoted_date",
+  "invoiced_value",
   "column_break_jpka",
   "warranty_expiry_date",
+  "advance_payment_amount",
   "connected_docs_tab",
   "html"
  ],
@@ -380,6 +383,27 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Approved"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status_duration_details",
+   "fieldtype": "Table",
+   "label": "Status Duration Details",
+   "options": "Status Duration Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoiced_value",
+   "fieldtype": "Currency",
+   "label": "Invoiced Value",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "advance_payment_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -403,7 +427,7 @@
    "link_fieldname": "maintenance_contract"
   }
  ],
- "modified": "2026-08-24 16:24:06.841559",
+ "modified": "2026-08-25 10:56:01.884847",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Maintenance Contract",

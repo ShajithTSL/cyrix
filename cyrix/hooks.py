@@ -263,7 +263,8 @@ doc_events = {
         "on_submit": [
             "cyrix.custom_py.sales_invoice.update_jo_so_status",
             "cyrix.custom_py.sales_invoice.update_service_call_form",
-            "cyrix.custom_py.sales_invoice.update_invoice_percentage"		
+            "cyrix.custom_py.sales_invoice.update_invoice_percentage",
+            "cyrix.custom_py.sales_invoice.update_maintenance_contract_status"	
 		],
 		"on_cancel": [
 			"cyrix.custom_py.sales_invoice.update_jo_so_status_on_cancel",

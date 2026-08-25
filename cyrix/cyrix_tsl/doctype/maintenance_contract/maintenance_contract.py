@@ -1,45 +1,8 @@
-"""
-Maintenance Contract controller — optimized item/serial creation
-+ optional background submission for large item counts.
-
-Three things changed from the original:
-
-1. `before_submit` no longer does one Item lookup query + one Serial Number
-lookup query PER ROW. It does a small, fixed number of bulk queries up
-front, then resolves every row against in-memory dicts/sets.
-
-2. In the normal case (rows already carry `item_code` from the Item Bulk
-Import tool / item_bulk_import.py), this whole hook is close to a no-op:
-`item_code` is set, so check_for_item skips straight through, and
-model/manufacturer/item_name are already filled in by Frappe's
-fetch_if_empty on save. The per-row creation paths below only run for
-rows that slip through without a pre-resolved item_code — they now
-also correctly create the Item Model / Item Mfg records first, since
-`model`/`manufacturer` are Link fields and must reference existing
-records before an Item can be saved with them.
-
-3. Existing Serial Numbers are activated with a handful of bulk UPDATE
-statements instead of one full `.save()` per row (see
-bulk_import_utils.bulk_activate_serials). Only genuinely new serials
-still go through the normal Document API.
-
-4. A `queue_submit` whitelisted method + `background_submit` function let
-the client kick off the *entire* submit (before_submit included) on an
-RQ worker with a long timeout, instead of running it inside the HTTP
-request. This is a safety net on top of (1)-(3) — even if a batch is
-unusually large, the web request never blocks long enough to time out.
-
-Requires: add a Select field `queue_status` (options: Draft/Queued/
-Submitted/Failed, default Draft) to the Maintenance Contract doctype if
-you want to use the background-submit flow. Not required for the
-before_submit optimization alone.
-
-"""
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from cyrix.custom_py import utils
+from datetime import datetime
 
 from cyrix.custom_py.bulk_import_utils import bulk_get_or_create, bulk_activate_serials
 
@@ -50,12 +13,30 @@ ITEM_MFG_TITLE_FIELD = "mfg"     # TODO: confirm against your Item Mfg doctype
 
 
 class MaintenanceContract(Document):
-
-    # ------------------------------------------------------------------
-    # Submit hook
-    # ------------------------------------------------------------------
-
     def before_submit(self):
+        self.status = "Submitted"
+        now = datetime.now()
+        self.append("status_duration_details",{
+            "status":self.status,
+            "date":now,
+        })
+    
+        if self.status != self.status_duration_details[-1].status:
+            ldate = self.status_duration_details[-1].date
+            now = datetime.now()
+            time_date = str(ldate).split(".")[0]
+            format_data = "%Y-%m-%d %H:%M:%S"
+            date = datetime.strptime(time_date, format_data)
+            duration = now - date
+            duration_in_s = duration.total_seconds()
+            minutes = divmod(duration_in_s, 60)[0]/60
+            data = str(minutes).split(".")[0]+"hrs "+str(minutes).split(".")[1][:2]+"min"
+            self.status_duration_details[-1].duration = data
+            self.append("status_duration_details",{
+                "status":self.status,
+                "date":now,
+            })
+
         items = self.get('items') or []
         if not items:
             return
@@ -71,6 +52,30 @@ class MaintenanceContract(Document):
                 self.check_for_item(i, item_lookup, model_map, mfg_map)
 
         self._activate_serials(items)
+
+    def on_update_after_submit(self):
+        if self.status != self.status_duration_details[-1].status:
+            ldate = self.status_duration_details[-1].date
+            now = datetime.now()
+            time_date = str(ldate).split(".")[0]
+            format_data = "%Y-%m-%d %H:%M:%S"
+            date = datetime.strptime(time_date, format_data)
+            duration = now - date
+            duration_in_s = duration.total_seconds()
+            minutes = divmod(duration_in_s, 60)[0]/60
+            data = str(minutes).split(".")[0]+"hrs "+str(minutes).split(".")[1][:2]+"min"
+            frappe.db.set_value("Status Duration Details",self.status_duration_details[-1].name,"duration",data)
+            self.append("status_duration_details",{
+                "status":self.status,
+                "date":now,
+            })
+            doc = frappe.get_doc("Maintenance Contract",self.name)
+            doc.append("status_duration_details",{
+                "status":self.status,
+                "date":now,
+            })
+            doc.save(ignore_permissions=True)
+
 
     # ------------------------------------------------------------------
     # Bulk lookups (replace the old per-row frappe.db.get_value / exists)

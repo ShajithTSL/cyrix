@@ -2,6 +2,28 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Invoice Request", {
+	company: function(frm){
+		if (frm.doc.company){
+			frm.set_query("branch", function () {
+				return {
+					"filters": {
+						"company": ["in", frm.doc.company]
+					}
+				};
+			});
+		}
+	},
+	branch: function(frm){
+		if (frm.doc.branch){
+			frm.set_query("sales_person", function () {
+				return {
+					"filters": {
+						"custom_branch": ["in", [frm.doc.branch,""]]
+					}
+				};
+			});
+		}
+	},
 	before_workflow_action: async (frm) => {
 		if(frm.doc.workflow_state == "Draft"){
 			let promise = new Promise((resolve, reject) => {

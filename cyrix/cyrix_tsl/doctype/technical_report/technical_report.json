@@ -215,6 +215,7 @@
   {
    "fieldname": "document_type",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Document Type",
    "link_filters": "[[\"DocType\",\"name\",\"in\",[\"Job Order Data\",\"Supply Order Data\",\"Service Call Form\"]]]",
    "options": "DocType"
@@ -222,6 +223,8 @@
   {
    "fieldname": "document_reference",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Document Reference",
    "options": "document_type"
   },
@@ -258,8 +261,8 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-27 10:56:46.431611",
- "modified_by": "shajith@tsl-me.com",
+ "modified": "2026-08-20 15:46:32.112062",
+ "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Technical Report",
  "naming_rule": "By \"Naming Series\" field",

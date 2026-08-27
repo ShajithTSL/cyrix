@@ -1,0 +1,287 @@
+
+<style>
+
+@page {
+    size: A4 portrait;
+    margin: 8mm;
+}
+
+/* Base */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 8px;
+    color: #1f2d3d;
+    background: #ffffff;
+}
+
+/* Title */
+h2, h3 {
+    text-align: center;
+    margin: 5px 0 10px 0;
+    color: #161a25;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Filters */
+.filters {
+    font-size: 8px;
+    margin-bottom: 8px;
+    padding: 5px 8px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* Repeat header on each page */
+thead {
+    display: table-header-group;
+}
+
+/* Header */
+th {
+    background: #1d4ed8;
+    color: #fff;
+    border: 1px solid #1e40af;
+    padding: 4px;
+    font-size: 9px;
+    text-align: center;
+    font-weight: bold;
+    word-break: break-word;
+}
+
+td {
+    border: 1px solid #cbd5e1;
+    padding: 3px;
+    font-size: 9px;
+    vertical-align: middle;
+    word-break: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+.company-header {
+    width: 100%;
+    display: table;
+    margin-bottom: 5px;
+}
+
+.logo-left {
+    display: table-cell;
+    width: 20%;
+    vertical-align: middle;
+    text-align: left;
+}
+
+.logo-left img {
+    max-height: 85px;
+    max-width: 120px;
+}
+
+.report-title {
+    display: table-cell;
+    width: 80%;
+    vertical-align: middle;
+    text-align: center;
+}
+/* Alternate rows */
+tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+/* Total rows */
+.total-row td {
+    background: #09121f;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Status Colors */
+.status-present {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+.status-absent {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+.status-leave {
+    color: #f59e0b;
+    font-weight: bold;
+}
+
+.status-week-off {
+    color: #2563eb;
+    font-weight: bold;
+}
+
+/* Prevent page break inside rows */
+tr {
+    page-break-inside: avoid;
+}
+
+/* Better spacing */
+td,
+th {
+    line-height: 1.2;
+}
+
+</style>
+{% set single_day = filters.from_date == filters.to_date %}
+{% set ns = namespace(last_employee="") %}
+
+{% for row in data %}
+
+{% if single_day %}
+
+    {% if loop.first %}
+
+    <div class="company-header">
+
+     <div class="logo-left">
+       
+            <img src="/files/TSL Logo.png">
+     
+    </div>
+
+
+    <div class="report-title">
+        <h3>
+            Attendance Report
+        
+
+        
+            (<strong>Date:</strong> {{ filters.from_date }})</h3>
+        
+    </div>
+
+</div>
+        <table>
+            <thead>
+                <tr>
+                    {% for c in columns %}
+                        {% if c.fieldname not in ['date',"day",'company','in_device_id','out_device_id','in_location','out_location','permission_start_time','permission_start_time','permission_end_time'] %}
+                            <th>{{ c.label }}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+
+    {% endif %}
+
+{% else %}
+
+    {% if loop.first or row.employee != ns.last_employee %}
+
+        {% if not loop.first %}
+            </tbody>
+        </table>
+        <div style="page-break-before: always;"></div>
+        {% endif %}
+
+        <div class="company-header">
+
+    <div class="logo-left"><img src="/files/cyrix.jpeg"></div>
+
+    <div class="report-title">
+        <h3>Attendance Report</h3>
+    </div>
+
+</div>
+
+        <p>
+            <strong>Employee:</strong> {{ row.employee }}<br>
+            <strong>Employee Name:</strong> {{ row.employee_name }}<br>
+            <strong>From:</strong> {{ frappe.utils.format_date(filters.from_date) }}
+            &nbsp;&nbsp;
+            <strong>To:</strong> {{ frappe.utils.format_date(filters.to_date) }}
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    {% for c in columns %}
+                        {% if c.fieldname not in ["employee","employee_name",'in_device_id','out_device_id',"company","day"] %}
+                            <th>{{ c.label }}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+
+    {% endif %}
+
+{% endif %}
+
+    {% if not single_day %}
+    {% set ns.last_employee = row.employee %}
+{% endif %}
+
+   <tr {% if row.employee_name in ["TOTAL", "GRAND TOTAL"] %}class="total-row"{% endif %}>
+    {% for c in columns %}
+        {% if (single_day and c.fieldname not in ['date',"day",'company','in_device_id','out_device_id','in_location','out_location','permission_start_time','permission_end_time'])
+   or
+   (not single_day and c.fieldname not in ["employee","employee_name",'in_device_id','out_device_id',"company","day"]) %}
+            {% if c.fieldname == "date" %}
+                <td style="width:8%; text-align:center;">
+                    {{ row.get(c.fieldname) if row.get(c.fieldname) not in [None, "", "None"] else "-" }}                </td>
+
+            {% elif c.fieldname in ["in_time","out_time"] %}
+                <td style="width:7%; text-align:center;">
+                  {{ row.get(c.fieldname) if row.get(c.fieldname) not in [None, "", "None"] else "-" }}
+                </td>
+
+            {% elif c.fieldname == "worked_hours" %}
+                <td style="width:9%; text-align:center;">
+                    {{ row.get(c.fieldname, "") }}
+                </td>
+
+            {% elif c.fieldname in ["permission_start_time","permission_end_time"] %}
+                <td style="width:8%; text-align:center;">
+                    {{ row.get(c.fieldname) if row.get(c.fieldname) not in [None, "", "None"] else "-" }}
+                </td>
+
+            {% elif c.fieldname in ["late_by","overtime"] %}
+                <td style="width:7%; text-align:center;">
+                    {{ row.get(c.fieldname) if row.get(c.fieldname) not in [None, "", "None"] else "-" }}
+                </td>
+
+            {% elif c.fieldname == "status" %}
+                <td style="width:12%; text-align:center;">
+                    {{ row.get(c.fieldname) if row.get(c.fieldname) not in [None, "", "None"] else "-" }}
+                </td>
+
+            {% elif c.fieldname == "in_location" %}
+                <td style="width:18%; white-space:normal; word-break:break-word;">
+                    {{ row.get(c.fieldname) if row.get(c.fieldname) not in [None, "", "None"] else "-" }}
+                </td>
+
+            {% elif c.fieldname == "out_location" %}
+                <td style="width:18%; white-space:normal; word-break:break-word;">
+                    {{ row.get(c.fieldname) if row.get(c.fieldname) not in [None, "", "None"] else "-" }}
+                </td>
+
+            {% else %}
+                <td>{{ row.get(c.fieldname) if row.get(c.fieldname) not in [None, "", "None"] else "-" }}</td>
+                {% endif %}
+
+
+        {% endif %}
+    {% endfor %}
+</tr>
+
+    {% if loop.last %}
+            </tbody>
+        </table>
+    {% endif %}
+
+{% endfor %}

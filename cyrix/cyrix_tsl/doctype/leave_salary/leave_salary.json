@@ -1,0 +1,502 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "LSA-.YY.-.#####",
+ "creation": "2026-08-15 10:36:01.588792",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_details_section",
+  "employee",
+  "employee_name",
+  "date_of_joining",
+  "company",
+  "currency",
+  "column_break_4",
+  "leave_application",
+  "passport_number",
+  "department",
+  "designation",
+  "column_break_hdry",
+  "total_gross_pay",
+  "basic",
+  "food",
+  "other_allowance",
+  "column_break_20",
+  "hra_salary",
+  "mobile_allowance",
+  "transport_allowance",
+  "is_leaves_encashed",
+  "skip_earned_salary",
+  "ignore_loan",
+  "loan_exists",
+  "leave_salary_section",
+  "from_date",
+  "to_date",
+  "column_break_kns1j",
+  "no_of_days_worked",
+  "air_fair",
+  "column_break_48",
+  "salary_amount_pay",
+  "total_amount",
+  "s",
+  "leave_start_date",
+  "leave_end_date",
+  "column_break_yr3zr",
+  "no_of_days",
+  "special_holidays",
+  "travel_days",
+  "column_break_zncg4",
+  "deduction_days",
+  "total_salary",
+  "leave_balance",
+  "encashment_details_section",
+  "encashable_days",
+  "column_break_luqd",
+  "encashment_days",
+  "column_break_7dy7",
+  "leave_encashment",
+  "encashment_amount",
+  "others_section",
+  "payment",
+  "deduction",
+  "column_break_8kymf",
+  "payment_reason",
+  "deduction_reason",
+  "net_pay_section",
+  "column_break_nnd7z",
+  "total_released_amount",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.date_of_joining",
+   "fieldname": "date_of_joining",
+   "fieldtype": "Data",
+   "label": "Date of Joining",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "leave_application.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.default_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_application",
+   "fieldtype": "Link",
+   "label": "Leave Application",
+   "options": "Leave Application Form"
+  },
+  {
+   "fetch_from": "employee.passport_number",
+   "fieldname": "passport_number",
+   "fieldtype": "Data",
+   "label": "Passport Number",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department ",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_gross_pay",
+   "fieldtype": "Currency",
+   "label": "Total Gross Pay",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "employee.basic",
+   "fieldname": "basic",
+   "fieldtype": "Currency",
+   "label": "Basic",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "employee.food_allowance",
+   "fieldname": "food",
+   "fieldtype": "Currency",
+   "label": "Food Allowance",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "employee.other_allowances",
+   "fieldname": "other_allowance",
+   "fieldtype": "Currency",
+   "label": "Other Allowance",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.grade != \"Labour\"",
+   "fetch_from": "employee.housing_allowance",
+   "fieldname": "hra_salary",
+   "fieldtype": "Currency",
+   "label": "HRA",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.grade != \"Labour\"",
+   "fetch_from": "employee.mobile_allowance",
+   "fieldname": "mobile_allowance",
+   "fieldtype": "Currency",
+   "label": "Mobile Allowance",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.grade!=\"Factory Staff\"",
+   "fetch_from": "employee.transport_allowance",
+   "fieldname": "transport_allowance",
+   "fieldtype": "Currency",
+   "label": "Transport Allowance",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_leaves_encashed",
+   "fieldtype": "Check",
+   "label": "Encash Leaves"
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_earned_salary",
+   "fieldtype": "Check",
+   "label": "Skip Earned Salary"
+  },
+  {
+   "fieldname": "leave_salary_section",
+   "fieldtype": "Section Break",
+   "label": "Earned Salary"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_kns1j",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_of_days_worked",
+   "fieldtype": "Int",
+   "label": "No of days Worked",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "air_fair",
+   "fieldtype": "Currency",
+   "label": "Air Fair Allowance",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_48",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "salary_amount_pay",
+   "fieldtype": "Currency",
+   "label": "Earned Basic",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Earned Salary",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "s",
+   "fieldtype": "Section Break",
+   "label": "Leave Salary"
+  },
+  {
+   "fieldname": "leave_start_date",
+   "fieldtype": "Date",
+   "label": "Leave Start Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_end_date",
+   "fieldtype": "Date",
+   "label": "Leave End Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_yr3zr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "no_of_days",
+   "fieldtype": "Data",
+   "label": "Leave Days",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.special_holidays && doc.company != \"TSL COMPANY - Kuwait\"",
+   "fieldname": "special_holidays",
+   "fieldtype": "Int",
+   "label": "Special Holidays",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.company == \"TSL COMPANY - Kuwait\"",
+   "fetch_from": "leave_application.travel_days",
+   "fieldname": "travel_days",
+   "fieldtype": "Int",
+   "label": "Travel Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_zncg4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "deduction_days",
+   "fieldtype": "Int",
+   "label": "Deduction Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_salary",
+   "fieldtype": "Currency",
+   "label": "Total Leave Salary",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "leave_balance",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Leave Balance"
+  },
+  {
+   "depends_on": "is_leaves_encashed",
+   "fieldname": "encashment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Encashment Details"
+  },
+  {
+   "fieldname": "encashable_days",
+   "fieldtype": "Float",
+   "label": "Encashable Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_luqd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "encashment_days",
+   "fieldtype": "Float",
+   "label": "Encashment Days"
+  },
+  {
+   "fieldname": "column_break_7dy7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leave_encashment",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Leave Encashment",
+   "options": "Leave Encashment Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "encashment_amount",
+   "fieldtype": "Currency",
+   "label": "Encashment Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "others_section",
+   "fieldtype": "Section Break",
+   "label": "Others"
+  },
+  {
+   "fieldname": "payment",
+   "fieldtype": "Currency",
+   "label": "Payment",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "deduction",
+   "fieldtype": "Currency",
+   "label": "Deduction",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_8kymf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_reason",
+   "fieldtype": "Data",
+   "label": "Payment Reason"
+  },
+  {
+   "fieldname": "deduction_reason",
+   "fieldtype": "Data",
+   "label": "Deduction Reason"
+  },
+  {
+   "fieldname": "net_pay_section",
+   "fieldtype": "Section Break",
+   "label": "Net Pay"
+  },
+  {
+   "fieldname": "column_break_nnd7z",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "total_released_amount",
+   "fieldtype": "Currency",
+   "label": "Total Released Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Leave Salary",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_hdry",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "loan_exists",
+   "fieldname": "ignore_loan",
+   "fieldtype": "Check",
+   "label": "Ignore Loan"
+  },
+  {
+   "default": "0",
+   "fieldname": "loan_exists",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "loan exists"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-16 13:41:40.163132",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Leave Salary",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_views": 1
+}

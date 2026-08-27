@@ -1896,6 +1896,7 @@
               sortable: false,
               focusable: false,
               dropdown: false,
+              sticky: true,
               width: 32
             };
             this.columns.push(cell);
@@ -1903,16 +1904,14 @@
           if (this.options.serialNoColumn && !this.hasColumnById("_rowIndex")) {
             let cell = {
               id: "_rowIndex",
-              content: "",
+              content: this.options.serialNoColumnLabel || "",
               align: "center",
               editable: false,
-              resizable: false,
+              resizable: true,
               focusable: false,
-              dropdown: false
+              dropdown: false,
+              sticky: true
             };
-            if (this.options.data.length > 1e3) {
-              cell.resizable = true;
-            }
             this.columns.push(cell);
           }
         }
@@ -2354,6 +2353,7 @@
           this.bindKeyboardSelection();
           this.bindCopyCellContents();
           this.bindMouseEvents();
+          this.bindWheelEvents();
           this.bindTreeEvents();
         }
         bindFocusCell() {
@@ -2392,6 +2392,7 @@
               $cell = this.getBottomMostCell$(colIndex);
             }
             this.focusCell($cell);
+            sessionStorage.setItem("dt-last-nav-method", "key");
             return true;
           };
           ["left", "right", "up", "down", "tab", "shift+tab"].map((direction) => this.keyboard.on(direction, () => this.focusCellInDirection(direction)));
@@ -2470,6 +2471,11 @@
             this.selectArea($2(e.delegatedTarget));
           };
           $2.on(this.bodyScrollable, "mousemove", ".dt-cell", throttle$1(selectArea, 50));
+        }
+        bindWheelEvents() {
+          $2.on(this.bodyScrollable, "wheel", (e) => {
+            sessionStorage.setItem("dt-last-nav-method", "scroll");
+          });
         }
         bindTreeEvents() {
           $2.on(this.bodyScrollable, "click", ".dt-tree-node__toggle", (e, $toggle) => {
@@ -2568,9 +2574,10 @@
           const $cell = this.getCell$(colIndex, rowIndex);
           if (!$cell)
             return;
+          const skipDOMFocus = sessionStorage.getItem("dt-last-nav-method") !== "key";
           this.focusCell($cell, {
+            skipDOMFocus,
             skipClearSelection: 1,
-            skipDOMFocus: 1,
             skipScrollToCell: 1
           });
         }
@@ -2876,6 +2883,7 @@
             return ret;
           }
           this.focusCell($cell);
+          sessionStorage.setItem("dt-last-nav-method", "key");
           return true;
         }
         getCell$(colIndex, rowIndex) {
@@ -2957,7 +2965,12 @@
             isTotalRow
           });
           const row = this.datamanager.getRow(rowIndex);
+          const column = cell.column || this.datamanager.getColumn(colIndex) || {};
           const isBodyCell = !(isHeader || isFilter || isTotalRow);
+          const isSticky = Boolean(column.sticky);
+          const stickyColumns = this.datamanager.getColumns().filter((col) => col.sticky);
+          const lastStickyColumn = stickyColumns[stickyColumns.length - 1];
+          const isLastStickyColumn = isSticky && lastStickyColumn && lastStickyColumn.colIndex === colIndex;
           const className = [
             "dt-cell",
             "dt-cell--col-" + colIndex,
@@ -2966,7 +2979,10 @@
             isHeader ? "dt-cell--header" : "",
             isHeader ? `dt-cell--header-${colIndex}` : "",
             isFilter ? "dt-cell--filter" : "",
-            isBodyCell && (row && row.meta.isTreeNodeClose) ? "dt-cell--tree-close" : ""
+            isBodyCell && (row && row.meta.isTreeNodeClose) ? "dt-cell--tree-close" : "",
+            isSticky ? "dt-cell--sticky" : "",
+            isSticky && !isBodyCell ? "dt-cell--sticky-top" : "",
+            isLastStickyColumn ? "dt-cell--sticky-last" : ""
           ].join(" ");
           return `
             <div class="${className}" ${dataAttr} tabindex="0">
@@ -3126,7 +3142,7 @@
             $2.off(document, "scroll", deactivateDropdown);
           });
           $2.on(this.$dropdownList, "click", ".dt-dropdown__list-item", (e, $item) => {
-            if (!this._dropdownActiveColIndex)
+            if (this._dropdownActiveColIndex == null)
               return;
             const dropdownItems = this.options.headerDropdown;
             const { index } = $2.data($item);
@@ -3139,6 +3155,8 @@
           function deactivateDropdown(e) {
             _this.hideDropdown();
           }
+          this.stickDropdownIndex = this.options.headerDropdown.findIndex((item) => item.stickyAction === "stick");
+          this.unstickDropdownIndex = this.options.headerDropdown.findIndex((item) => item.stickyAction === "unstick");
           this.hideDropdown();
         }
         openDropdown(e) {
@@ -3154,6 +3172,7 @@
           const $cell = $2.closest(".dt-cell", e.target);
           const { colIndex } = $2.data($cell);
           this._dropdownActiveColIndex = colIndex;
+          this.updateStickyDropdownItems(this.getColumn(colIndex));
         }
         hideDropdown() {
           $2.style(this.$dropdownList, {
@@ -3303,6 +3322,16 @@
           }).then(() => this.instance.unfreeze()).then(() => {
             this.fireEvent("onRemoveColumn", removedCol);
           });
+        }
+        setColumnSticky(colIndex, sticky) {
+          const column = this.getColumn(colIndex);
+          if (!column || column.sticky === sticky) {
+            return;
+          }
+          this.instance.freeze();
+          this.datamanager.updateColumn(colIndex, { sticky });
+          this.refreshHeader();
+          this.rowmanager.refreshRows().then(() => this.instance.unfreeze());
         }
         switchColumn(oldIndex, newIndex) {
           this.instance.freeze();
@@ -3460,6 +3489,23 @@
         }
         toggleDropdownItem(index) {
           $2(".dt-dropdown__list", this.instance.dropdownContainer).children[index].classList.toggle("dt-hidden");
+        }
+        updateStickyDropdownItems(column) {
+          if (!column)
+            return;
+          if (this.stickDropdownIndex === -1 || this.unstickDropdownIndex === -1)
+            return;
+          const stickItem = this.$dropdownList.children[this.stickDropdownIndex];
+          const unstickItem = this.$dropdownList.children[this.unstickDropdownIndex];
+          if (!(stickItem && unstickItem))
+            return;
+          if (column.sticky) {
+            stickItem.classList.add("dt-hidden");
+            unstickItem.classList.remove("dt-hidden");
+          } else {
+            stickItem.classList.remove("dt-hidden");
+            unstickItem.classList.add("dt-hidden");
+          }
         }
       };
       var RowManager = class {
@@ -4155,9 +4201,21 @@
           this.renderFooter();
         }
         render() {
-          const rows = this.datamanager.getRowsForView();
+          const rows = this.getRowsToRender();
           this.renderRows(rows);
           this.instance.setDimensions();
+        }
+        getRowsToRender() {
+          const rows = this.datamanager.getRowsForView();
+          let closedIndent = null;
+          return rows.filter((row) => {
+            const { indent, isTreeNodeClose } = row.meta;
+            if (closedIndent !== null && indent > closedIndent) {
+              return false;
+            }
+            closedIndent = isTreeNodeClose ? indent : null;
+            return true;
+          });
         }
         renderFooter() {
           if (!this.options.showTotalRow)
@@ -4274,18 +4332,21 @@
         }
         bindScrollHeader() {
           this._settingHeaderPosition = false;
+          this.updateStickyTopPositions(0);
           $2.on(this.bodyScrollable, "scroll", (e) => {
             if (this._settingHeaderPosition)
               return;
             this._settingHeaderPosition = true;
             requestAnimationFrame(() => {
-              const left = -e.target.scrollLeft;
+              const scrollLeft = e.target.scrollLeft;
+              const left = -scrollLeft;
               $2.style(this.header, {
                 transform: `translateX(${left}px)`
               });
               $2.style(this.footer, {
                 transform: `translateX(${left}px)`
               });
+              this.updateStickyTopPositions(scrollLeft);
               this._settingHeaderPosition = false;
               if (this.instance.noData) {
                 $2.style($2(".no-data-message"), {
@@ -4361,6 +4422,8 @@
           this.setupColumnWidth();
           this.distributeRemainingWidth();
           this.setColumnStyle();
+          this.setStickyColumnStyle();
+          this.updateStickyTopPositions(this.bodyScrollable.scrollLeft || 0);
           this.setBodyStyle();
         }
         setCellHeight() {
@@ -4488,6 +4551,8 @@
             this.columnmanager.setColumnHeaderWidth(column.colIndex);
             this.columnmanager.setColumnWidth(column.colIndex);
           });
+          this.setStickyColumnStyle();
+          this.updateStickyTopPositions(this.bodyScrollable.scrollLeft || 0);
         }
         setBodyStyle() {
           const bodyWidth = $2.style(this.datatableWrapper, "width");
@@ -4530,6 +4595,46 @@
           if (colIndex < 0)
             return null;
           return $2(`.dt-cell--col-${colIndex}`, this.header);
+        }
+        setStickyColumnStyle() {
+          if (!this.datamanager || !this.datamanager.getColumns)
+            return;
+          const stickySelectors = [];
+          let stickyOffset = 0;
+          let normalOffset = 0;
+          this.datamanager.getColumns().forEach((column) => {
+            const $headerCell = this.getColumnHeaderElement(column.colIndex);
+            const renderedWidth = $headerCell ? $headerCell.offsetWidth : column.width;
+            if (column.sticky) {
+              const selector = `.dt-cell--col-${column.colIndex}.dt-cell--sticky`;
+              const style = {
+                left: `${stickyOffset}px`
+              };
+              column.stickyLeft = stickyOffset;
+              column.stickyScrollTrigger = normalOffset - stickyOffset;
+              column.renderedWidth = renderedWidth;
+              this.setStyle(selector, style);
+              stickySelectors.push(selector);
+              stickyOffset += renderedWidth;
+            }
+            normalOffset += renderedWidth;
+          });
+          const staleSelectors = (this._stickySelectors || []).filter((selector) => !stickySelectors.includes(selector));
+          staleSelectors.forEach((selector) => this.removeStyle(selector));
+          this._stickySelectors = stickySelectors;
+        }
+        updateStickyTopPositions(scrollLeft) {
+          if (!this.datamanager || !this.datamanager.getColumns)
+            return;
+          const stickyColumns = this.datamanager.getColumns().filter((column) => column.sticky);
+          stickyColumns.forEach((column) => {
+            const trigger = Math.max(0, column.stickyScrollTrigger || 0);
+            const compensation = Math.max(0, scrollLeft - trigger);
+            const cells = $2.each(`.dt-cell--col-${column.colIndex}.dt-cell--sticky-top`, this.wrapper) || [];
+            $2.style(cells, {
+              transform: compensation ? `translateX(${compensation}px)` : ""
+            });
+          });
         }
         getRowIndexColumnWidth() {
           const rowCount = this.datamanager.getRowCount();
@@ -4584,7 +4689,11 @@
           });
         }
       };
+      var Freeze = "Freeze";
+      var Unfreeze = "Unfreeze";
       var en = {
+        Freeze,
+        Unfreeze,
         "Sort Ascending": "Sort Ascending",
         "Sort Descending": "Sort Descending",
         "Reset sorting": "Reset sorting",
@@ -4593,7 +4702,11 @@
         "{count} cells copied": { "1": "{count} cell copied", "default": "{count} cells copied" },
         "{count} rows selected": { "1": "{count} row selected", "default": "{count} rows selected" }
       };
+      var Freeze$1 = "Bevriezen";
+      var Unfreeze$1 = "Ontdooien";
       var de = {
+        Freeze: Freeze$1,
+        Unfreeze: Unfreeze$1,
         "Sort Ascending": "Aufsteigend sortieren",
         "Sort Descending": "Absteigend sortieren",
         "Reset sorting": "Sortierung zur\xFCcksetzen",
@@ -4602,7 +4715,11 @@
         "{count} cells copied": { "1": "{count} Zelle kopiert", "default": "{count} Zellen kopiert" },
         "{count} rows selected": { "1": "{count} Zeile ausgew\xE4hlt", "default": "{count} Zeilen ausgew\xE4hlt" }
       };
+      var Freeze$2 = "Geler";
+      var Unfreeze$2 = "D\xE9geler";
       var fr = {
+        Freeze: Freeze$2,
+        Unfreeze: Unfreeze$2,
         "Sort Ascending": "Trier par ordre croissant",
         "Sort Descending": "Trier par ordre d\xE9croissant",
         "Reset sorting": "R\xE9initialiser le tri",
@@ -4611,7 +4728,11 @@
         "{count} cells copied": { "1": "{count} cellule copi\xE9e", "default": "{count} cellules copi\xE9es" },
         "{count} rows selected": { "1": "{count} ligne s\xE9lectionn\xE9e", "default": "{count} lignes s\xE9lectionn\xE9es" }
       };
+      var Freeze$3 = "Congelare";
+      var Unfreeze$3 = "D\xE9geler";
       var it = {
+        Freeze: Freeze$3,
+        Unfreeze: Unfreeze$3,
         "Sort Ascending": "Ordinamento ascendente",
         "Sort Descending": "Ordinamento decrescente",
         "Reset sorting": "Azzeramento ordinamento",
@@ -4832,6 +4953,22 @@
               action: function(column) {
                 this.removeColumn(column.colIndex);
               }
+            },
+            {
+              label: instance.translate("Freeze"),
+              stickyAction: "stick",
+              display: "hidden",
+              action: function(column) {
+                this.setColumnSticky(column.colIndex, true);
+              }
+            },
+            {
+              label: instance.translate("Unfreeze"),
+              stickyAction: "unstick",
+              display: "hidden",
+              action: function(column) {
+                this.setColumnSticky(column.colIndex, false);
+              }
             }
           ],
           events: {
@@ -4859,6 +4996,7 @@
           freezeMessage: "",
           getEditor: null,
           serialNoColumn: true,
+          serialNoColumnLabel: "",
           checkboxColumn: false,
           clusterize: true,
           logs: false,
@@ -5054,6 +5192,9 @@
         removeColumn(colIndex) {
           this.columnmanager.removeColumn(colIndex);
         }
+        setColumnSticky(colIndex, sticky) {
+          this.columnmanager.setColumnSticky(colIndex, sticky);
+        }
         scrollToLastColumn() {
           this.datatableWrapper.scrollLeft = 9999;
         }
@@ -5119,7 +5260,7 @@
       var jsdelivr = "dist/frappe-datatable.min.js";
       var scripts = { "start": "yarn run dev", "build": "rollup -c && NODE_ENV=production rollup -c", "dev": "rollup -c -w", "cy:server": "http-server -p 8989", "cy:open": "cypress open", "cy:run": "cypress run", "test": "start-server-and-test cy:server http://localhost:8989 cy:run", "test-local": "start-server-and-test cy:server http://localhost:8989 cy:open", "travis-deploy-once": "travis-deploy-once", "semantic-release": "semantic-release", "lint": "eslint src", "lint-and-build": "yarn lint && yarn build", "commit": "npx git-cz" };
       var files = ["dist", "src"];
-      var devDependencies = { "autoprefixer": "^9.0.0", "chai": "3.5.0", "cypress": "^9.2.0", "cz-conventional-changelog": "^2.1.0", "deepmerge": "^2.0.1", "eslint": "^5.0.1", "eslint-config-airbnb": "^16.1.0", "eslint-config-airbnb-base": "^12.1.0", "eslint-plugin-import": "^2.11.0", "http-server": "^0.11.1", "mocha": "3.3.0", "postcss-custom-properties": "^7.0.0", "postcss-nested": "^3.0.0", "rollup": "^0.59.4", "rollup-plugin-commonjs": "^8.3.0", "rollup-plugin-eslint": "^4.0.0", "rollup-plugin-json": "^2.3.0", "rollup-plugin-node-resolve": "^3.0.3", "rollup-plugin-postcss": "^1.2.8", "rollup-plugin-uglify-es": "^0.0.1", "semantic-release": "^17.1.1", "start-server-and-test": "^1.4.1", "travis-deploy-once": "^5.0.1" };
+      var devDependencies = { "autoprefixer": "^9.0.0", "chai": "3.5.0", "cypress": "^9.2.0", "cz-conventional-changelog": "^2.1.0", "deepmerge": "^2.0.1", "eslint": "^5.0.1", "eslint-config-airbnb": "^16.1.0", "eslint-config-airbnb-base": "^12.1.0", "eslint-plugin-import": "^2.11.0", "http-server": "^0.11.1", "mocha": "3.3.0", "postcss-custom-properties": "^7.0.0", "postcss-nested": "^3.0.0", "rollup": "^0.59.4", "rollup-plugin-commonjs": "^8.3.0", "rollup-plugin-eslint": "^4.0.0", "rollup-plugin-json": "^2.3.0", "rollup-plugin-node-resolve": "^3.0.3", "rollup-plugin-postcss": "^1.2.8", "rollup-plugin-uglify-es": "^0.0.1", "semantic-release": "^25.0.3", "start-server-and-test": "^1.4.1", "travis-deploy-once": "^5.0.1" };
       var repository = { "type": "git", "url": "https://github.com/frappe/datatable.git" };
       var keywords = ["datatable", "data", "grid", "table"];
       var author = "Faris Ansari";
@@ -5151,317 +5292,6 @@
       module.exports = DataTable2;
     }
   });
-
-  // frappe-html:/home/shajith/cyrix-bench/apps/cyrix/cyrix/public/navbar.html
-  frappe.templates["navbar"] = `<div class="sticky-top">
-	<header class="navbar navbar-expand" role="navigation">
-		<div class="container">
-			<a class="navbar-brand navbar-home" href="/app">
-				<img
-					class="app-logo"
-					src="{{ frappe.boot.app_logo_url }}"
-					alt="{{ __("App Logo") }}"
-				>
-			</a>
-			<ul class="nav navbar-nav d-none d-sm-flex" id="navbar-breadcrumbs"></ul>
-			<div class="collapse navbar-collapse justify-content-end">
-				<form class="form-inline fill-width justify-content-end" role="search" onsubmit="return false;">
-					
-<div class="company-branch-container">
-
-	{% 
-		let company = frappe.defaults.get_default("company");
-		let branch = frappe.defaults.get_default("branch");
-	%}
-
-	<!-- Company Pill -->
-	<button 
-		class="pill company-pill {% if (!company) { %}company-alert{% } %}" 
-		onclick="company_change()"
-		type="button"
-	>
-		<span class="pill-icon">\u{1F3E2}</span>
-		<span class="pill-text">
-			{% if (company) { %}
-				{%= company %}
-			{% } else { %}
-				Select Company
-			{% } %}
-		</span>
-		<span class="pill-arrow">\u25BC</span>
-	</button>
-
-	<!-- Divider -->
-	<span class="pill-divider">|</span>
-
-	<!-- Branch Pill -->
-	{% if (branch) { %}
-	<button 
-		class="pill branch-pill"
-		onclick="company_change()"
-		type="button"
-	>
-		<span class="pill-icon">\u{1F4CD}</span>
-		<span class="pill-text">{%= branch %}</span>
-		<span class="pill-arrow">\u25BC</span>
-	</button>
-	{% } %}
-
-</div>
-					
-					{% if (frappe.boot.read_only) { %}
-						<span class="indicator-pill yellow no-indicator-dot" title="{%= __("Your site is undergoing maintenance or being updated.") %}">
-							{%= __("Read Only Mode") %}
-						</span>
-					{% } %}
-					{% if (frappe.boot.user.impersonated_by) { %}
-						<span class="indicator-pill red no-indicator-dot" title="{%= __("You are impersonating as another user.") %}">
-							{%= __("Impersonating {0}", [frappe.boot.user.name]) %}
-						</span>
-					{% } %}
-					
-					<div class="input-group search-bar text-muted hidden">
-						<input
-							id="navbar-search"
-							type="text"
-							class="form-control"
-							placeholder="{%= __('Search or type a command ({0})', [frappe.utils.is_mac() ? '\u2318 + G' : 'Ctrl + G']) %}"
-							aria-haspopup="true"
-						>
-						<span class="search-icon">
-							<svg class="icon icon-sm"><use href="#icon-search"></use></svg>
-						</span>
-					</div>
-				</form>
-				<ul class="navbar-nav">
-					<li class="nav-item dropdown dropdown-notifications dropdown-mobile hidden">
-						<button
-							class="btn-reset nav-link notifications-icon text-muted"
-							data-toggle="dropdown"
-							aria-haspopup="true"
-							aria-expanded="false"
-						>
-							<span class="notifications-seen">
-								<span class="sr-only">{{ __("No new notifications") }}</span>
-								<svg class="es-icon icon-sm" style="stroke:none;"><use href="#es-line-notifications"></use></svg>
-							</span>
-							<span class="notifications-unseen">
-								<span class="sr-only">{{ __("You have unseen notifications") }}</span>
-								<svg class="es-icon icon-sm"><use href="#es-line-notifications-unseen"></use></svg>
-							</span>
-						</button>
-						<div class="dropdown-menu notifications-list dropdown-menu-right" role="menu">
-							<div class="notification-list-header">
-								<div class="header-items"></div>
-								<div class="header-actions"></div>
-							</div>
-							<div class="notification-list-body">
-								<div class="panel-notifications"></div>
-								<div class="panel-events"></div>
-								<div class="panel-changelog-feed"></div>
-							</div>
-						</div>
-					</li>
-					<li class="nav-item dropdown dropdown-message dropdown-mobile hidden">
-						<button
-							class="btn-reset nav-link notifications-icon text-muted"
-							data-toggle="dropdown"
-							aria-haspopup="true"
-							aria-expanded="true"
-						>
-							<span>
-								<svg class="es-icon icon-sm"><use href="#es-line-chat-alt"></use></svg>
-							</span>
-						</button>
-					</li>
-					<li class="vertical-bar d-none d-sm-block"></li>
-					<li class="nav-item dropdown dropdown-help dropdown-mobile d-none d-lg-block">
-						<button
-							class="btn-reset nav-link"
-							data-toggle="dropdown"
-							aria-controls="toolbar-help"
-							aria-label="{{ __("Help Dropdown") }}"
-						>
-							<span>
-								{{ __("Help") }}
-								<svg class="es-icon icon-xs"><use href="#es-line-down"></use></svg>
-							</span>
-						</button>
-						<div class="dropdown-menu dropdown-menu-right" id="toolbar-help" role="menu">
-							<div id="help-links"></div>
-							<div class="dropdown-divider documentation-links"></div>
-							{% for item in navbar_settings.help_dropdown %}
-								{% if (!item.hidden) { %}
-									{% if (item.route) { %}
-										<a class="dropdown-item" href="{{ item.route }}">
-											{%= __(item.item_label) %}
-										</a>
-									{% } else if (item.action) { %}
-										<button class="btn-reset dropdown-item" onclick="return {{ item.action }}">
-											{%= __(item.item_label) %}
-										</button>
-									{% } else { %}
-										<div class="dropdown-divider"></div>
-									{% } %}
-								{% } %}
-							{% endfor %}
-						</div>
-					</li>
-					<li class="nav-item dropdown dropdown-navbar-user dropdown-mobile">
-						<button
-							class="btn-reset nav-link"
-							data-toggle="dropdown"
-							aria-label="{{ __("User Menu") }}"
-						>
-							{{ avatar }}
-						</button>
-						<div class="dropdown-menu dropdown-menu-right" id="toolbar-user" role="menu">
-							{% for item in navbar_settings.settings_dropdown %}
-								{% var condition = item.condition ? eval(item.condition) : true %}
-								{% if (condition && !item.hidden) { %}
-									{% if (item.route) { %}
-										<a class="dropdown-item" href="{{ item.route }}">
-											{%= __(item.item_label) %}
-										</a>
-									{% } else if (item.action) { %}
-										<button class="btn-reset dropdown-item" onclick="return {{ item.action }}">
-											{%= __(item.item_label) %}
-										</button>
-									{% } else { %}
-										<div class="dropdown-divider"></div>
-									{% } %}
-								{% } %}
-							{% endfor %}
-						</div>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</header>
-
-	{% if !localStorage.getItem("dismissed_announcement_widget") && strip_html(navbar_settings.announcement_widget) != '' %}
-	<div class="announcement-widget form-message p-2 m-0" style="position: relative; z-index: -1; border-radius: 0; background-color: var(--bg-blue);">
-		<div class="container flex justify-between align-center mx-auto">
-			{{ navbar_settings.announcement_widget }}
-			<div class="close-message p-0 mr-2" style="position: relative;">
-			{{ frappe.utils.icon("close") }}
-			</div>
-		</div>
-	</div>
-	{% endif %}
-
-</div>
-<style>
-	.company-branch-container {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-}
-
-/* Common pill style */
-.pill {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 6px 16px;
-	border-radius: 20px;
-	border: none;
-	cursor: pointer;
-	font-size: 13px;
-	font-weight: 600;
-	color: #fff;
-	white-space: nowrap;
-
-	/* \u2705 UPDATED */
-	max-width: 300px;   /* increase limit */
-	min-width: 120px;   /* keeps shape nice */
-}
-
-/* Company pill (blue) */
-.company-pill {
-	background: linear-gradient(135deg, #2f5aa8 0%, #1d3f7a 100%);
-}
-
-/* Branch pill (slightly lighter blue) */
-.branch-pill {
-	background: linear-gradient(135deg, #3a6fd8 0%, #274b9f 100%);
-}
-
-/* Text handling */
-.pill-text {
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-/* Icons */
-.pill-icon {
-	font-size: 14px;
-}
-
-/* Arrow */
-.pill-arrow {
-	font-size: 10px;
-	opacity: 0.8;
-}
-
-/* Divider */
-.pill-divider {
-	color: #999;
-	font-weight: 300;
-}
-
-/* Alert animation */
-.company-alert {
-	background: linear-gradient(135deg, #ff4d4f 0%, #c1121f 100%);
-	animation: pulse 1.2s infinite;
-}
-
-@keyframes pulse {
-	0% { transform: scale(1); }
-	50% { transform: scale(1.05); }
-	100% { transform: scale(1); }
-}
-@media (max-width: 768px) {
-
-	.company-branch-container {
-		gap: 4px;
-	}
-
-	.pill {
-		max-width: 140px;   /* smaller pills */
-		padding: 5px 10px;
-		font-size: 12px;
-	}
-
-	/* Hide divider */
-	.pill-divider {
-		display: none;
-	}
-
-	/* Option 1: Hide branch completely */
-	.branch-pill {
-		display: none;
-	}
-
-	/* Option 2 (alternative): show branch as tiny */
-	
-	.branch-pill {
-		max-width: 100px;
-		font-size: 11px;
-		opacity: 0.85;
-	}
-
-	/* Better truncation */
-	.pill-text {
-		max-width: 90px;
-	}
-}
-</style>
-<script>
-window.company_change = function() {
-	frappe.ui.toolbar.setup_session_defaults();
-}
-<\/script>`;
 
   // ../cyrix/cyrix/public/cyrix.bundle.js
   var import_frappe_datatable = __toESM(require_frappe_datatable_cjs());
@@ -8374,4 +8204,4 @@ window.company_change = function() {
 `);
 })();
 /*! Sortable 1.15.0 - MIT | git://github.com/SortableJS/Sortable.git */
-//# sourceMappingURL=cyrix.bundle.AFQINJFU.js.map
+//# sourceMappingURL=cyrix.bundle.LLOPGNVL.js.map

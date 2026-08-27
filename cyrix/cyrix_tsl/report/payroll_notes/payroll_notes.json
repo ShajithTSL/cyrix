@@ -1,0 +1,64 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2026-08-19 09:35:37.455572",
+ "disable_prepared_report_automation": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "doctype_to_sync": [],
+ "filters": [
+  {
+   "default": "",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "mandatory": 1,
+   "options": "Company",
+   "wildcard_filter": 0
+  },
+  {
+   "default": "",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  },
+  {
+   "default": "",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": null,
+ "modified": "2026-08-19 09:37:28.934900",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Payroll Notes",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT *\nFROM (\n\n    SELECT\n        'Loan' AS `Type`,\n        lr.name AS `Reference`,\n        lr.employee AS `Employee`,\n        lr.employee_name AS `Employee Name`,\n        lr.company AS `Company`,\n        rs.payment_date AS `Date`,\n        rs.total_payment AS `Amount`,\n        'Loan' AS `Component`,\n        NULL AS `Remarks`\n    FROM `tabLoan Request` lr\n    JOIN `tabLoan Request Repayment Schedule` rs\n        ON rs.parent = lr.name\n    WHERE\n        lr.docstatus = 1\n        AND (%(company)s IS NULL OR lr.company = %(company)s)\n        AND (%(from_date)s IS NULL OR rs.payment_date >= %(from_date)s)\n        AND (%(to_date)s IS NULL OR rs.payment_date <= %(to_date)s)\n\n    UNION ALL\n\n    SELECT\n        'Additional Salary' AS `Type`,\n        a.name AS `Reference`,\n        a.employee AS `Employee`,\n        e.employee_name AS `Employee Name`,\n        a.company AS `Company`,\n        a.payroll_date AS `Date`,\n        a.amount AS `Amount`,\n        a.salary_component AS `Component`,\n        a.remarks AS `Remarks`\n    FROM `tabAdditional Salary` a\n    LEFT JOIN `tabEmployee` e\n        ON e.name = a.employee\n    WHERE\n        a.docstatus = 1\n        AND (%(company)s IS NULL OR a.company = %(company)s)\n        AND (%(from_date)s IS NULL OR a.payroll_date >= %(from_date)s)\n        AND (%(to_date)s IS NULL OR a.payroll_date <= %(to_date)s)\n\n) AS combined\n\nORDER BY `Date` DESC;",
+ "ref_doctype": "Additional Salary",
+ "report_name": "Payroll Notes",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "HR User"
+  },
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "Accounts Manager"
+  }
+ ],
+ "snapshot_report": 0,
+ "timeout": 0
+}

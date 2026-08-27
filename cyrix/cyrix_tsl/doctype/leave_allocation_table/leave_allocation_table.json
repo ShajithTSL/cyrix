@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-08-11 16:18:43.470470",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "sick_leave_25",
+  "sick_leave_50",
+  "sick_leave_75",
+  "sick_leave_100",
+  "hajj_leave",
+  "maternity_leave"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "columns": 1,
+   "fieldname": "sick_leave_25",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Sick Leave 25%"
+  },
+  {
+   "columns": 1,
+   "fieldname": "sick_leave_50",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Sick Leave 50%"
+  },
+  {
+   "columns": 1,
+   "fieldname": "sick_leave_75",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Sick Leave 75%"
+  },
+  {
+   "columns": 1,
+   "fieldname": "sick_leave_100",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Sick Leave 100%"
+  },
+  {
+   "columns": 1,
+   "fieldname": "hajj_leave",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hajj Leave"
+  },
+  {
+   "columns": 1,
+   "fieldname": "maternity_leave",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Maternity Leave"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-11 16:18:43.470470",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Leave Allocation Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

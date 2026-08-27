@@ -1,0 +1,40 @@
+{
+ "app": "cyrix",
+ "creation": "2026-08-11 10:03:31.313194",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "aperture",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Supply Order Data",
+   "link_to": "Supply Order Data",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "building",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Job Order da",
+   "link_to": "Job Order Data",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-08-11 10:03:37.933130",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Technical Manager",
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "Technical Manager"
+}

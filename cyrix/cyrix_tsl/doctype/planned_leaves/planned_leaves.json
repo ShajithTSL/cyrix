@@ -1,0 +1,492 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "PL-.YYYY.-.#####",
+ "creation": "2026-08-12 16:31:11.429479",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "reference",
+  "employee",
+  "employee_name",
+  "user_id",
+  "column_break_4",
+  "leave_type",
+  "approver",
+  "no_of_tickets",
+  "company",
+  "department",
+  "leave_balance_section",
+  "balance",
+  "section_break_5",
+  "from_date",
+  "to_date",
+  "half_day",
+  "half_day_date",
+  "total_leave_days",
+  "leave_balance",
+  "leave_projection",
+  "column_break1",
+  "description",
+  "ticket_used",
+  "leave_details_section",
+  "lop_start_date",
+  "leave_start_date",
+  "leave_end_date",
+  "column_break_km8y6",
+  "lop_end_date",
+  "column_break_r7xhs",
+  "lop_days",
+  "column_break_swb7f",
+  "leave_days",
+  "column_break_41ial",
+  "no_of_days",
+  "travel_destination",
+  "from_destination",
+  "travel_date",
+  "column_break_s5rov",
+  "to_destination",
+  "return_date",
+  "contact_details_section",
+  "name1",
+  "column_break_rgdwl",
+  "mobile_no",
+  "column_break_blpae",
+  "relation",
+  "section_break_7",
+  "leave_approver",
+  "leave_approver_name",
+  "follow_via_email",
+  "column_break_18",
+  "posting_date",
+  "status",
+  "sb_other_details",
+  "salary_slip",
+  "color",
+  "column_break_17",
+  "rejoining",
+  "letter_head",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "HR-LAP-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Read Only",
+   "hidden": 1,
+   "label": "Reference"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.user_id",
+   "fieldname": "user_id",
+   "fieldtype": "Link",
+   "label": "User ID",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leave_type",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Leave Type",
+   "options": "Leave Type",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "approver",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Approver"
+  },
+  {
+   "fetch_from": "employee.no_of_tickets",
+   "fieldname": "no_of_tickets",
+   "fieldtype": "Read Only",
+   "label": "No of Tickets"
+  },
+  {
+   "fetch_from": "employee.company",
+   "fetch_if_empty": 1,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_balance_section",
+   "fieldtype": "Section Break",
+   "label": "Leave Balance"
+  },
+  {
+   "fieldname": "balance",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Dates & Reason"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "half_day",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Half Day"
+  },
+  {
+   "depends_on": "eval:doc.half_day && doc.from_date && doc.to_date && (doc.from_date != doc.to_date)",
+   "fieldname": "half_day_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Half Day Date"
+  },
+  {
+   "fieldname": "total_leave_days",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Total Leave Days",
+   "no_copy": 1,
+   "precision": "1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_balance",
+   "fieldtype": "Float",
+   "label": "Leave Balance Before Application",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "leave_projection",
+   "fieldtype": "Check",
+   "label": "Leave Projection"
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break",
+   "print_width": "50%",
+   "width": "50%"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Reason"
+  },
+  {
+   "fieldname": "ticket_used",
+   "fieldtype": "Int",
+   "label": "Ticket Used"
+  },
+  {
+   "fieldname": "leave_details_section",
+   "fieldtype": "Section Break",
+   "label": "Leave Details"
+  },
+  {
+   "depends_on": "eval: doc.total_leave_days > doc.leave_balance",
+   "fieldname": "lop_start_date",
+   "fieldtype": "Date",
+   "label": "Unpaid Start Date",
+   "mandatory_depends_on": "eval: doc.total_leave_days > doc.leave_balance"
+  },
+  {
+   "depends_on": "leave_start_date",
+   "fieldname": "leave_start_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Leave Start Date"
+  },
+  {
+   "depends_on": "leave_end_date",
+   "fieldname": "leave_end_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Leave End Date"
+  },
+  {
+   "fieldname": "column_break_km8y6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.total_leave_days> doc.leave_balance",
+   "fieldname": "lop_end_date",
+   "fieldtype": "Date",
+   "label": "Unpaid End Date",
+   "mandatory_depends_on": "eval: doc.total_leave_days > doc.leave_balance"
+  },
+  {
+   "fieldname": "column_break_r7xhs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lop_days",
+   "fieldtype": "Float",
+   "label": "Unpaid Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_swb7f",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leave_days",
+   "fieldtype": "Float",
+   "label": "Leave Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_41ial",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "no_of_days",
+   "fieldtype": "Float",
+   "label": "No of Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "travel_destination",
+   "fieldtype": "Section Break",
+   "label": "Travel Details"
+  },
+  {
+   "fieldname": "from_destination",
+   "fieldtype": "Data",
+   "label": "From Destination",
+   "translatable": 1
+  },
+  {
+   "fieldname": "travel_date",
+   "fieldtype": "Date",
+   "label": "Travel Date"
+  },
+  {
+   "fieldname": "column_break_s5rov",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_destination",
+   "fieldtype": "Data",
+   "label": "To Destination",
+   "translatable": 1
+  },
+  {
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Return Date"
+  },
+  {
+   "fieldname": "contact_details_section",
+   "fieldtype": "Section Break",
+   "label": "Contact Details"
+  },
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_rgdwl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No"
+  },
+  {
+   "fieldname": "column_break_blpae",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "relation",
+   "fieldtype": "Data",
+   "label": "Relation"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "label": "Approval"
+  },
+  {
+   "fetch_from": "employee.leave_approver",
+   "fetch_if_empty": 1,
+   "fieldname": "leave_approver",
+   "fieldtype": "Link",
+   "label": "Leave Approver",
+   "options": "User"
+  },
+  {
+   "fieldname": "leave_approver_name",
+   "fieldtype": "Data",
+   "label": "Leave Approver Name",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "fieldname": "follow_via_email",
+   "fieldtype": "Check",
+   "label": "Follow via Email",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Open\nApproved\nRejected\nCancelled",
+   "permlevel": 1,
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_other_details",
+   "fieldtype": "Section Break",
+   "label": "Other Details"
+  },
+  {
+   "fieldname": "salary_slip",
+   "fieldtype": "Link",
+   "label": "Salary Slip",
+   "options": "Salary Slip",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "hidden": 1,
+   "label": "Color",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rejoining",
+   "fieldtype": "Read Only",
+   "label": "Rejoining"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Letter Head",
+   "options": "Letter Head",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Planned Leaves",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-12 16:31:38.462373",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Planned Leaves",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

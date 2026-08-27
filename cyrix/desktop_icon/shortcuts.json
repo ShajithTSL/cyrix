@@ -1,0 +1,26 @@
+{
+ "app": "cyrix",
+ "bg_color": "gray",
+ "creation": "2026-08-10 08:31:15.349315",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "shortcut",
+ "icon_type": "Link",
+ "idx": 0,
+ "label": "Shortcuts",
+ "link_to": "Shortcuts",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-08-11 10:07:54.292281",
+ "modified_by": "Administrator",
+ "name": "Shortcuts",
+ "owner": "Administrator",
+ "parent_icon": "TSL",
+ "restrict_removal": 0,
+ "roles": [
+  {
+   "role": "Info"
+  }
+ ],
+ "standard": 1
+}

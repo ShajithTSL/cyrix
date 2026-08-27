@@ -27,8 +27,6 @@ app_license = "mit"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/cyrix/css/cyrix.css"
 app_include_js = [
-    "dock.js",
-    
 	"cyrix.bundle.js"
 ]
 app_include_css = [
@@ -343,9 +341,9 @@ doc_events = {
 }
 
 # Monkey Patch
-from frappe import boot as core
-from cyrix.custom_py import boot as custom
-core.get_bootinfo = custom.get_bootinfo
+# from frappe import boot as core
+# from cyrix.custom_py import boot as custom
+# core.get_bootinfo = custom.get_bootinfo
 
 
 from hrms.hr import utils

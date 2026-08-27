@@ -332,6 +332,7 @@ def update_so_status(self,method):
         frappe.sendmail(
             recipients=[info],
             subject=subject,
+            sender=frappe.session.user,
             message=message
         )
 

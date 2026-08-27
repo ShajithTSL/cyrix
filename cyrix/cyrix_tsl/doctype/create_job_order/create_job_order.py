@@ -62,6 +62,7 @@ def update_job_order_data(dict, doc_type, doc_name):
 					if i.get("other"):
 						jo.others = 1
 						jo.specify = i["specify"]
+					jo.unit_status = doc.unit_status
 					jo.save(ignore_permissions = 1)
 					
 					
@@ -168,6 +169,7 @@ def create_job_order_data(dict):
 				jo.sec = doc.sec
 				jo.address = doc.address
 				jo.customer_rep = doc.incharge
+				jo.customer_reference_number = doc.customer_reference_number
 				if doc.job_order_data:
 					jo.parent_jo = doc.job_order_data
 				if doc.warranty_date:
@@ -246,6 +248,7 @@ def create_job_order_data(dict):
 		jo.sec = doc.sec
 		jo.address = doc.address
 		jo.customer_rep = doc.incharge
+		jo.customer_reference_number = doc.customer_reference_number
 		if doc.job_order_data:
 			jo.parent_jo = doc.job_order_data
 		if doc.warranty_date:

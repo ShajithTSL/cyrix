@@ -7,7 +7,8 @@ import json
 
 
 class CreateSupplyOrder(Document):
-	pass
+	def validate(self):
+		frappe.throw("Not Allowed to Save")
 
 naming_series = {
 	"Dammam": {

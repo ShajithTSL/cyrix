@@ -222,16 +222,21 @@ doc_events = {
 			"cyrix.custom_py.quotation.update_job_order_status",
 			'cyrix.custom_py.quotation.update_budgetary_quotation_status'
 		],
-		"on_submit": [
-			"cyrix.custom_py.quotation.update_job_order_status",
-			'cyrix.custom_py.quotation.update_service_call_form',
-			'cyrix.custom_py.quotation.update_budgetary_quotation_status'
+        "on_submit": [
+            "cyrix.custom_py.quotation.update_job_order_status",
+            'cyrix.custom_py.quotation.update_service_call_form',
+            'cyrix.custom_py.quotation.update_budgetary_quotation_status',
+            "cyrix.custom_py.quotation.update_maintenance_contract_status"
 		],
-		"on_update_after_submit": [
-			"cyrix.custom_py.quotation.on_update_after_submit",
-			"cyrix.custom_py.quotation.update_supply_order_status"
+        "on_update_after_submit": [
+            "cyrix.custom_py.quotation.on_update_after_submit",
+            "cyrix.custom_py.quotation.update_supply_order_status",
+            "cyrix.custom_py.quotation.update_maintenance_contract_status"
 		],
-		"on_update": "cyrix.custom_py.quotation.update_supply_order_status"
+		"on_update": [
+            "cyrix.custom_py.quotation.update_supply_order_status", 
+            "cyrix.custom_py.quotation.update_maintenance_contract_status"
+		]
 	},
 	
 	"Purchase Order": {
@@ -270,10 +275,11 @@ doc_events = {
 	},
 
 	"Sales Invoice": {
-		"on_submit": [
-			"cyrix.custom_py.sales_invoice.update_jo_so_status",
-			"cyrix.custom_py.sales_invoice.update_service_call_form",
-			"cyrix.custom_py.sales_invoice.update_invoice_percentage"		
+        "on_submit": [
+            "cyrix.custom_py.sales_invoice.update_jo_so_status",
+            "cyrix.custom_py.sales_invoice.update_service_call_form",
+            "cyrix.custom_py.sales_invoice.update_invoice_percentage",
+            "cyrix.custom_py.sales_invoice.update_maintenance_contract_status"	
 		],
 		"on_cancel": [
 			"cyrix.custom_py.sales_invoice.update_jo_so_status_on_cancel",

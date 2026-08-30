@@ -34,6 +34,7 @@ def create_rfq(docname):
 	new_doc.custom_replacement_unit = docname
 	# new_doc.job_order_data = docname
 	new_doc.department = doc.department
+	new_doc.status = "Draft"
 	new_doc.items=[]
 	warehouse = ""
 	if new_doc.company == "Cyrix TSL - Kuwait":

@@ -744,6 +744,7 @@ def create_rfq_from_jo(name):
 	rfq.company = doc.company
 	rfq.branch = frappe.db.get_value("Job Order Data",doc.name,"branch")
 	rfq.job_order_data = doc.name
+	rfq.status = "Draft"
 	rfq.cost_center = frappe.db.get_value("Job Order Data",doc.name,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1})
 	# rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2)
 	rfq.maintenance_contract = doc.get("maintenance_contract")

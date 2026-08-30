@@ -833,6 +833,7 @@ def create_rfq(name):
 	rfq.cost_center = frappe.db.get_value("Job Order Data",doc.job_order_data,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1})
 	rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2)
 	rfq.items=[]
+	rfq.status = "Draft"
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
 	for i in doc.get("items"):
 		if i.parts_availability == "No" and i.from_scrap == 0:

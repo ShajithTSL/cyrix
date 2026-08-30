@@ -37,6 +37,8 @@ frappe.ui.form.on("Budgetary Quotation", {
                                 child.item_name = item.item_name || "";
                                 child.qty = item.qty;
                                 child.uom = item.uom || "Nos";
+								child.stock_uom = item.uom || "Nos";
+								child.conversion_factor = 1;
                                 child.warehouse = item.warehouse;
                                 child.budgetary_quotation = item.budgetary_quotation;
                             });

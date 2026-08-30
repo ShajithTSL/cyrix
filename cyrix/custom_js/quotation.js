@@ -580,6 +580,8 @@ frappe.ui.form.on('Quotation', {
                                         // Add other fields as needed
                                         row.qty = j.qty;
                                         row.uom = j.uom;
+                                        row.stock_uom = j.uom;
+                                        row.conversion_factor = 1
                                     });
 
                                     frm.refresh_field("items");
@@ -642,6 +644,8 @@ frappe.ui.form.on('Quotation', {
                                         // Add other fields as needed
                                         row.qty = j.qty;
                                         row.uom = j.uom;
+                                        row.stock_uom = j.uom;
+                                        row.conversion_factor = 1
                                     });
                                     frm.set_value("quotation_type","Internal Quotation - Supply")
                                     frm.set_value("branch",r.message[1])

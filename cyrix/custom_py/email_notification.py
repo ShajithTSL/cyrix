@@ -218,6 +218,9 @@ def send_mail_on_resignation_creation(doc,method):
 
 	sendmail(doc, message, subject, sender = "no-reply@cyrix-tsl.com", recipients = info().get("hr_to").get(doc.company), attachments = None, cc =  info().get("hr_cc").get(doc.company) )
 
+def test():
+	print(get_url_to_form("Leave Application Form","HR-LAP-2026-00001"))
+
 
 #################################################
 ######## Termination Mail Notification ##########

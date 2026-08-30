@@ -1,5 +1,10 @@
-# Copyright (c) 2026, tsl and contributors
-# For license information, please see license.txt
+# Copyright (c) 2026, TSL
+# Cash Flow Drill — shows the exact cash movements behind a Cash Flow (Direct) cell.
+#
+# Reproduces the cash-flow figure precisely: the contra entries on vouchers that
+# TOUCHED CASH, valued as (credit - debit) x sign. The Total row equals the clicked
+# cash-flow cell exactly — which the standard General Ledger cannot do, because GL
+# has no "cash-touching vouchers" filter and nets debit-credit instead.
 
 import json
 

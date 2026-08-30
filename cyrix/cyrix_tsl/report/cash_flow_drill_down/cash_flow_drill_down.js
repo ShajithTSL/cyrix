@@ -1,8 +1,10 @@
-// Copyright (c) 2026, tsl and contributors
-// For license information, please see license.txt
+// Cash Flow Drill — opened in a NEW TAB from the Cash Flow (Direct) report.
+// Filters arrive via the URL query string (?acct_list=...&from_date=...), so this
+// report never depends on frappe.route_options and can't corrupt the main report.
+// acct_list / cost_centers / sign are visible but READ-ONLY (debugging aid).
 
 frappe.query_reports["Cash Flow Drill Down"] = {
-	filters: [
+    filters: [
         { fieldname: "company", label: "Company", fieldtype: "Link", options: "Company" },
         { fieldname: "from_date", label: "From Date", fieldtype: "Date", reqd: 1 },
         { fieldname: "to_date", label: "To Date", fieldtype: "Date", reqd: 1 },

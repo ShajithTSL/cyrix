@@ -11,11 +11,10 @@
  "label": "Shortcuts",
  "link_to": "Shortcuts",
  "link_type": "Workspace Sidebar",
- "modified": "2026-08-11 10:07:54.292281",
+ "modified": "2026-08-28 09:38:23.622712",
  "modified_by": "Administrator",
  "name": "Shortcuts",
  "owner": "Administrator",
- "parent_icon": "TSL",
  "restrict_removal": 0,
  "roles": [
   {

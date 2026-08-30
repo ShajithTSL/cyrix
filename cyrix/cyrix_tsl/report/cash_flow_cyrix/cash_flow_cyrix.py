@@ -23,6 +23,7 @@ CONSOL = "__consol__"
 
 def execute(filters=None):
     filters = frappe._dict(filters or {})
+    normalize_filters(filters)
     frappe.local.report_filters = filters
     validate_filters(filters)
 
@@ -234,6 +235,68 @@ def build_rate_lookup(from_currencies, to_currency):
     return rate
 
 
+def normalize_filters(filters):
+    """Accept BOTH this report's native filter names and the 'Cash Flow Cyrix'
+    filter bar, so either client script drives the same logic.
+      comparison_years -> fiscal_years, period_start/end_date -> from/to_date,
+      cost_center -> cost_centers, consolidate_companies -> consolidate_with_companies,
+      presentation_currency -> currency, remove_decimals -> remove_decimal.
+    A from/to fiscal-year range is expanded into per-year columns too."""
+    def pick(*names):
+        for n in names:
+            v = filters.get(n)
+            if v not in (None, "", []):
+                return v
+        return None
+
+    filters["consolidate_with_companies"] = pick("consolidate_with_companies", "consolidate_companies") or []
+    filters["currency"] = pick("currency", "presentation_currency")
+    filters["cost_centers"] = pick("cost_centers", "cost_center") or []
+    filters["show_growth"] = 1 if pick("show_growth") else 0
+    filters["remove_decimal"] = 1 if pick("remove_decimal", "remove_decimals") else 0
+    filters["periodicity"] = pick("periodicity") or "Yearly"
+
+    # Which mode is the user in? The Cyrix bar sets filter_based_on; if absent,
+    # infer: explicit dates -> Date Range, else Fiscal Year.
+    based_on = filters.get("filter_based_on")
+    fd = pick("from_date", "period_start_date")
+    td = pick("to_date", "period_end_date")
+    comp = pick("fiscal_years", "comparison_years") or []
+    if isinstance(comp, str):
+        comp = [comp]
+    if not based_on:
+        based_on = "Date Range" if (fd and td and not comp) else "Fiscal Year"
+
+    if based_on == "Date Range":
+        # Dates + periodicity drive the columns; ignore ALL fiscal-year fields.
+        filters["fiscal_years"] = []
+        filters["from_date"] = fd
+        filters["to_date"] = td
+    else:
+        # Fiscal Year mode: from/to fiscal-year range + comparison years -> columns.
+        years = []
+        ffy, tfy = filters.get("from_fiscal_year"), filters.get("to_fiscal_year")
+        if ffy or tfy:
+            years += fiscal_years_between(ffy or tfy, tfy or ffy)
+        years += list(comp)
+        filters["fiscal_years"] = list(dict.fromkeys(years))
+        # In fiscal-year mode the date-range fields are irrelevant (no clipping).
+        filters["from_date"] = None
+        filters["to_date"] = None
+
+
+def fiscal_years_between(from_fy, to_fy):
+    a = frappe.db.get_value("Fiscal Year", from_fy, "year_start_date")
+    b = frappe.db.get_value("Fiscal Year", to_fy, "year_start_date")
+    if not a or not b:
+        return [x for x in (from_fy, to_fy) if x]
+    lo, hi = sorted([getdate(a), getdate(b)])
+    names = frappe.get_all("Fiscal Year",
+                           filters={"year_start_date": ["between", [lo, hi]]},
+                           order_by="year_start_date asc", pluck="name")
+    return names or [x for x in (from_fy, to_fy) if x]
+
+
 def build_periods_from_fiscal_years(fy_names, from_date, to_date):
     """One period per selected ERPNext Fiscal Year, using its real start/end dates.
     If both From and To are set, each fiscal year is clipped to that window; a year
@@ -269,7 +332,10 @@ def build_periods(from_date, to_date, periodicity):
     start, end = d(from_date), d(to_date)
     periods, cur = [], start
     while cur <= end:
-        if periodicity == "Monthly":
+        if periodicity == "Weekly":
+            last = cur + timedelta(days=6)
+            label = cur.strftime("%d %b %y")
+        elif periodicity == "Monthly":
             last = date(cur.year, cur.month, calendar.monthrange(cur.year, cur.month)[1])
             label = cur.strftime("%b %Y")
         elif periodicity == "Quarterly":
@@ -277,6 +343,11 @@ def build_periods(from_date, to_date, periodicity):
             lm = q * 3 + 3
             last = date(cur.year, lm, calendar.monthrange(cur.year, lm)[1])
             label = "Q{} {}".format(q + 1, cur.year)
+        elif periodicity == "Half-Yearly":
+            first_half = cur.month <= 6
+            lm = 6 if first_half else 12
+            last = date(cur.year, lm, calendar.monthrange(cur.year, lm)[1])
+            label = ("H1 " if first_half else "H2 ") + str(cur.year)
         else:
             last = date(cur.year, 12, 31)
             label = str(cur.year)

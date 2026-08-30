@@ -29,10 +29,7 @@ app_license = "mit"
 app_include_js = [
 	"cyrix.bundle.js"
 ]
-app_include_css = [
-    "sidebar.css",
-    "dock.css"
-]
+
 
 # include js, css files in header of web template
 # web_include_css = "/assets/cyrix/css/cyrix.css"
@@ -296,7 +293,7 @@ doc_events = {
 		]
 	},
 	"Contact": {
-		"before_save": [
+		"after_insert": [
 			"cyrix.custom_py.contact.before_save"
 		]
 	},
@@ -347,9 +344,9 @@ doc_events = {
 }
 
 # Monkey Patch
-# from frappe import boot as core
-# from cyrix.custom_py import boot as custom
-# core.get_bootinfo = custom.get_bootinfo
+from frappe import boot as core
+from cyrix.custom_py import boot as custom
+core.get_bootinfo = custom.get_bootinfo
 
 
 from hrms.hr import utils
@@ -395,7 +392,8 @@ after_migrate = [
     "cyrix.cyrix_tsl.doctype.planned_leaves.planned_leaves.schedule_create_planned_leaves",
     "cyrix.cyrix_tsl.doctype.resignation_form.resignation_form.schedule_update_employee_status",
     "cyrix.cyrix_tsl.doctype.leave_application_form.leave_application_form.schedule_trigger_mail_on_lap_form",
-    "cyrix.custom_py.email_notification.schedule_email_notifications"
+    "cyrix.custom_py.email_notification.schedule_email_notifications",
+	"cyrix.custom_py.item.remove_item_price_schedule"
 ]
 override_whitelisted_methods = {
     "hrms.hr.doctype.leave_application.leave_application.get_number_of_leave_days": "cyrix.hr_py.leave_application.get_number_of_leave_days",

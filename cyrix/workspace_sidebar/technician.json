@@ -1,19 +1,19 @@
 {
  "app": "cyrix",
- "creation": "2026-08-10 08:31:14.809128",
+ "creation": "2026-08-27 22:09:49.116851",
  "docstatus": 0,
  "doctype": "Workspace Sidebar",
- "for_user": "",
- "header_icon": "support",
+ "header_icon": "",
  "idx": 0,
  "items": [
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "home",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
-   "link_to": "C - Info",
+   "link_to": "C-Tech",
    "link_type": "Workspace",
    "show_arrow": 0,
    "type": "Link"
@@ -21,6 +21,19 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "layout-list",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Job Order Report",
+   "link_to": "Job Order Report",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "clipboard-pen-line",
    "indent": 0,
    "keep_closed": 0,
    "label": "Job Order Data",
@@ -32,9 +45,11 @@
   {
    "child": 0,
    "collapsible": 1,
+   "filters": "[[\"Job Order Data\",\"status\",\"=\",\"UTR-Under Technician Repair\"]]",
+   "icon": "container",
    "indent": 0,
    "keep_closed": 0,
-   "label": "J - Searching Parts",
+   "label": "UTR",
    "link_to": "Job Order Data",
    "link_type": "DocType",
    "show_arrow": 0,
@@ -43,6 +58,19 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "hospital",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "AMC",
+   "link_to": "Maintenance Contract",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "square-check-big",
    "indent": 0,
    "keep_closed": 0,
    "label": "Evaluation Report",
@@ -54,6 +82,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "list-alt",
    "indent": 0,
    "keep_closed": 0,
    "label": "Technical Report",
@@ -65,39 +94,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Create Job Order",
-   "link_to": "Create Job Order",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Maintenance Contract",
-   "link_to": "Maintenance Contract",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Service Call Form",
-   "link_to": "Service Call Form",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
+   "icon": "chart-column-big",
    "indent": 0,
    "keep_closed": 0,
    "label": "Supply Order Data",
@@ -109,10 +106,12 @@
   {
    "child": 0,
    "collapsible": 1,
+   "filters": "[[\"Job Order Data\",\"status\",\"=\",\"UE-Under Evaluation\"]]",
+   "icon": "search-check",
    "indent": 0,
    "keep_closed": 0,
-   "label": "S - Inquiry",
-   "link_to": "Supply Order Data",
+   "label": "UE - Under Evaluation",
+   "link_to": "Job Order Data",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -120,10 +119,12 @@
   {
    "child": 0,
    "collapsible": 1,
+   "filters": "[[\"Job Order Data\",\"status\",\"=\",\"NE-Need Evaluation\"]]",
+   "icon": "scan-search",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Budgetary Quotation",
-   "link_to": "Budgetary Quotation",
+   "label": "J - Need Evaluation",
+   "link_to": "Job Order Data",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -131,10 +132,11 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "organization",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Create Supply Order",
-   "link_to": "Create Supply Order",
+   "label": "Service Call",
+   "link_to": "Service Call Form",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -142,17 +144,8 @@
   {
    "child": 0,
    "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "S - Pending Internal Approval",
-   "link_to": "Supply Order Data",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
+   "filters": "[[\"Job Order Data\",\"status\",\"=\",\"TR-Technician Repair\"]]",
+   "icon": "loader",
    "indent": 0,
    "keep_closed": 0,
    "label": "J - Technician Repair",
@@ -164,28 +157,8 @@
   {
    "child": 0,
    "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Create Budgetary Quotation",
-   "link_to": "Create Budgetary Quotation",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "S - Quoted",
-   "link_to": "Supply Order Data",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
+   "filters": "[[\"Job Order Data\",\"status\",\"=\",\"NER-Need Evaluation Return\"]]",
+   "icon": "repeat-2",
    "indent": 0,
    "keep_closed": 0,
    "label": "J - NER",
@@ -195,11 +168,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-28 09:37:22.265194",
+ "modified": "2026-08-28 17:59:14.950603",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
- "name": "C - Info",
+ "name": "Technician",
  "owner": "Administrator",
  "standard": 1,
- "title": "C - Info"
+ "title": "Technician"
 }

@@ -888,3 +888,14 @@ def create_received_unit(job_order_data, serial_number, attach_image):
 		except Exception as e:
 			frappe.log_error(frappe.get_traceback())
 		pass
+
+
+def test():
+	self = frappe.get_doc("Job Order Data","SB-JO-R26-00017")
+	doc = frappe.new_doc("DocShare")
+	doc.user = "jovyjovyl43796@gmail.com"
+	doc.share_doctype = self.doctype
+	doc.share_name = self.name
+	doc.read = 1
+	doc.write = 1
+	doc.save(ignore_permissions=True)

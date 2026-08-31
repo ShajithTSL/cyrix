@@ -144,7 +144,7 @@ def notify_planned_leaves_failures(failures, current_date):
 	)
 
 def schedule_create_planned_leaves():
-	job = frappe.db.exists('Scheduled Job Type', 'planned_leaves.create_planned_leaves')
+	job = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.cyrix_tsl.doctype.planned_leaves.planned_leaves.create_planned_leaves'})
 	if not job:
 		sjt = frappe.new_doc("Scheduled Job Type")  
 		sjt.update({

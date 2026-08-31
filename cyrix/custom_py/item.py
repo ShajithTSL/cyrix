@@ -19,7 +19,7 @@ def remove_item_price_list():
     frappe.db.commit()
 
 def remove_item_price_schedule():
-    job = frappe.db.exists('Scheduled Job Type', 'cyrix.custom_py.item.remove_item_price_list')
+    job = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.custom_py.item.remove_item_price_list'})
     if not job:
         sjt1 = frappe.new_doc("Scheduled Job Type")  
         sjt1.update({

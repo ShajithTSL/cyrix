@@ -1995,7 +1995,7 @@ def update_reservation_status():
 
 def schedule_update_reservation_status():
 	"""Schedule the status update to run every hour."""
-	job = frappe.db.exists('Scheduled Job Type', 'evaluation_report.update_reservation_status')
+	job = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.update_reservation_status',})
 	if not job:
 		sjt1 = frappe.new_doc("Scheduled Job Type")  
 		sjt1.update({

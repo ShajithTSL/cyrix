@@ -25,8 +25,11 @@
   "department",
   "sales_person",
   "delivery",
+  "return_note_date",
   "status_cap",
   "returned_date",
+  "customer_reference_number",
+  "maintenance_contract",
   "column_break_7",
   "received_date",
   "repair_warehouse",
@@ -35,9 +38,7 @@
   "expiry_date",
   "status",
   "custom_status",
-  "maintenance_contract",
   "type_of_approval",
-  "customer_reference_number",
   "column_break_cwfo",
   "is_approved",
   "unit_type",
@@ -187,6 +188,7 @@
    "allow_on_submit": 1,
    "fieldname": "delivery",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Delivered Date",
    "read_only": 1
   },
@@ -201,6 +203,7 @@
    "allow_on_submit": 1,
    "fieldname": "returned_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Returned Date",
    "read_only": 1
   },
@@ -786,6 +789,14 @@
    "fieldname": "customer_reference_number",
    "fieldtype": "Data",
    "label": "Customer Ref No"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "return_note_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Return Note Date",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -802,7 +813,7 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2026-08-18 13:06:51.230649",
+ "modified": "2026-09-06 10:52:08.398110",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Job Order Data",

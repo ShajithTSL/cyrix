@@ -35,7 +35,8 @@ class ReturnNote(Document):
 				doc.status = "CC-Comparison Client"
 		
 			doc.return_note = self.name
-			doc.returned_date = self.posting_date
+			doc.delivery = self.posting_date
+			doc.return_note_date = self.posting_date
 			doc.save(ignore_permissions = 1)
 	
 	def create_stock_entry(self):

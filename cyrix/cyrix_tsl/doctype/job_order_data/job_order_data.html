@@ -54,6 +54,8 @@
                 <div class="summary-item">
                     <div class="summary-label">Return Note</div>
                     <a href="/app/return-note/{{doc.return_note}}" class="doc-link summary-value">{{doc.return_note}}</a>
+                    <div class="summary-label" style="margin-top:0.5rem;">Returned Date</div>
+                    <div class="summary-value">{{ frappe.datetime.str_to_user(doc.return_note_date)}}</div>
                 </div>
                 {% endif %}
             </div>

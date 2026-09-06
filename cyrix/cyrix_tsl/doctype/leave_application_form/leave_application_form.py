@@ -571,7 +571,7 @@ def trigger_mail_on_lap_form():
 			pass
 
 def schedule_trigger_mail_on_lap_form():
-	job1 = frappe.db.exists('Scheduled Job Type', 'leave_application_form.trigger_mail_on_lap_form')
+	job1 = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.cyrix_tsl.doctype.leave_application_form.leave_application_form.trigger_mail_on_lap_form'})
 	if not job1:
 		sjt1 = frappe.new_doc("Scheduled Job Type")  
 		sjt1.update({
@@ -580,7 +580,7 @@ def schedule_trigger_mail_on_lap_form():
 		})
 		sjt1.save(ignore_permissions=True)
 
-	job2 = frappe.db.exists('Scheduled Job Type', 'leave_application.create_leave_rejoining')
+	job2 = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.cyrix_tsl.doctype.leave_application_form.leave_application_form.create_leave_rejoining'})
 	if not job2:
 		sjt2 = frappe.new_doc("Scheduled Job Type")  
 		sjt2.update({

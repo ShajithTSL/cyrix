@@ -61,7 +61,7 @@ def update_resignation_date():
 
 @frappe.whitelist()
 def schedule_update_employee_status():
-	job = frappe.db.exists('Scheduled Job Type', 'resignation_form.update_employee_status')
+	job = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.cyrix_tsl.doctype.resignation_form.resignation_form.update_employee_status'})
 	if not job:
 		sjt = frappe.new_doc("Scheduled Job Type")  
 		sjt.update({

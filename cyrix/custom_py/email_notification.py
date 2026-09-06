@@ -8,7 +8,7 @@ from datetime import datetime
 
 @frappe.whitelist()
 def schedule_email_notifications():
-	anniversary = frappe.db.exists('Scheduled Job Type', 'email_notification.send_advance_work_anniversary_reminders')
+	anniversary = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.custom_py.email_notification.send_advance_work_anniversary_reminders'})
 	if not anniversary:
 		sjt1 = frappe.new_doc("Scheduled Job Type")  
 		sjt1.update({
@@ -17,7 +17,7 @@ def schedule_email_notifications():
 		})
 		sjt1.save(ignore_permissions=True)
 
-	probation = frappe.db.exists('Scheduled Job Type', 'email_notification.send_probation_reminder')
+	probation = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.custom_py.email_notification.send_probation_reminder'})
 	if not probation:
 		sjt2 = frappe.new_doc("Scheduled Job Type")  
 		sjt2.update({
@@ -26,7 +26,7 @@ def schedule_email_notifications():
 		})
 		sjt2.save(ignore_permissions=True)
 
-	travel_reminder = frappe.db.exists('Scheduled Job Type', 'email_notification.send_travel_reminders')
+	travel_reminder = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.custom_py.email_notification.send_travel_reminders'})
 	if not travel_reminder:
 		sjt3 = frappe.new_doc("Scheduled Job Type")  
 		sjt3.update({
@@ -35,7 +35,7 @@ def schedule_email_notifications():
 		})
 		sjt3.save(ignore_permissions=True)
 
-	relieving = frappe.db.exists('Scheduled Job Type', 'email_notification.reminder_on_relieving')
+	relieving = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.custom_py.email_notification.reminder_on_relieving'})
 	if not relieving:
 		sjt4 = frappe.new_doc("Scheduled Job Type")  
 		sjt4.update({
@@ -44,7 +44,7 @@ def schedule_email_notifications():
 		})
 		sjt4.save(ignore_permissions=True)
 
-	unapproved_leaves = frappe.db.exists('Scheduled Job Type', 'email_notification.unapproved_leaves_reminder')
+	unapproved_leaves = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.custom_py.email_notification.unapproved_leaves_reminder'})
 	if not unapproved_leaves:
 		sjt5 = frappe.new_doc("Scheduled Job Type")  
 		sjt5.update({
@@ -53,7 +53,7 @@ def schedule_email_notifications():
 		})
 		sjt5.save(ignore_permissions=True)
 
-	hr_birthday = frappe.db.exists('Scheduled Job Type', 'birthday_reminder.send_birthday_reminder_hr')
+	hr_birthday = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.custom_py.email_notification.send_birthday_reminder_hr'})
 	if not hr_birthday:
 		sjt6 = frappe.new_doc("Scheduled Job Type")  
 		sjt6.update({
@@ -62,7 +62,7 @@ def schedule_email_notifications():
 		})
 		sjt6.save(ignore_permissions=True)
 
-	birthday = frappe.db.exists('Scheduled Job Type', 'birthday_reminder.send_birthday_reminder')
+	birthday = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.custom_py.email_notification.send_birthday_reminder'})
 	if not birthday:
 		sjt7 = frappe.new_doc("Scheduled Job Type")  
 		sjt7.update({

@@ -556,6 +556,8 @@ function show_customer_dialog_dn(frm) {
 								child.item_name = item.item_name || "";
 								child.qty = item.qty;
 								child.uom = item.uom || "Nos";
+								child.stock_uom = item.uom || "Nos";
+								child.conversion_factor = 1;
 								child.warehouse = item.warehouse;
 								child.job_order_data = item.job_order_data;
 							});

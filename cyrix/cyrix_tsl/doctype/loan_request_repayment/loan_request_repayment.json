@@ -1,0 +1,290 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "autoname": "LR-REP-.####",
+ "creation": "2026-08-15 09:50:48.410227",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "against_loan",
+  "employee",
+  "loan_product",
+  "repayment_type",
+  "loan_restructure",
+  "column_break_3",
+  "company",
+  "posting_date",
+  "salary_slip",
+  "payment_entry",
+  "clearance_date",
+  "rate_of_interest",
+  "days_past_due",
+  "is_term_loan",
+  "payment_details_section",
+  "amount_paid",
+  "column_break_9",
+  "accounting_dimensions_section",
+  "cost_center",
+  "references_section",
+  "reference_number",
+  "column_break_21",
+  "reference_date",
+  "section_break_55wc",
+  "repayment_details",
+  "accounting_details_section",
+  "payment_account",
+  "column_break_36",
+  "loan_account",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "against_loan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Against Loan",
+   "options": "Loan Request",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "against_loan.employee",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "against_loan.loan_product",
+   "fieldname": "loan_product",
+   "fieldtype": "Link",
+   "label": "Loan Product",
+   "options": "Loan Product",
+   "read_only": 1
+  },
+  {
+   "default": "Normal Repayment",
+   "fieldname": "repayment_type",
+   "fieldtype": "Select",
+   "label": "Repayment Type",
+   "options": "Normal Repayment\nInterest Waiver\nPenalty Waiver\nCharges Waiver\nPrincipal Capitalization\nInterest Capitalization\nCharges Capitalization\nPenalty Capitalization\nPrincipal Adjustment\nInterest Adjustment\nInterest Carry Forward"
+  },
+  {
+   "fieldname": "loan_restructure",
+   "fieldtype": "Link",
+   "label": "Loan Restructure",
+   "options": "Loan Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "against_loan.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "salary_slip",
+   "fieldtype": "Data",
+   "label": "Salary Slip",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "label": "Clearance Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "against_loan.rate_of_interest",
+   "fieldname": "rate_of_interest",
+   "fieldtype": "Percent",
+   "hidden": 1,
+   "label": "Rate Of Interest",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "against_loan.days_past_due",
+   "fieldname": "days_past_due",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Days Past Due",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "against_loan.is_term_loan",
+   "fieldname": "is_term_loan",
+   "fieldtype": "Check",
+   "label": "Is Term Loan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Details"
+  },
+  {
+   "bold": 1,
+   "fieldname": "amount_paid",
+   "fieldtype": "Currency",
+   "label": "Amount Paid",
+   "non_negative": 1,
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "references_section",
+   "fieldtype": "Section Break",
+   "label": "Payment References"
+  },
+  {
+   "fieldname": "reference_number",
+   "fieldtype": "Data",
+   "label": "Reference Number"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_date",
+   "fieldtype": "Date",
+   "label": "Reference Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_55wc",
+   "fieldtype": "Section Break",
+   "label": "Repayment Details"
+  },
+  {
+   "fieldname": "repayment_details",
+   "fieldtype": "Table",
+   "label": "Repayment Details",
+   "options": "Loan Request Repayment Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fetch_from": "against_loan.payment_account",
+   "fetch_if_empty": 1,
+   "fieldname": "payment_account",
+   "fieldtype": "Link",
+   "label": "Repayment Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "against_loan.loan_account",
+   "fieldname": "loan_account",
+   "fieldtype": "Link",
+   "label": "Loan Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Request Repayment",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-18 10:43:45.280772",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Loan Request Repayment",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

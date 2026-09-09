@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-08-15 08:17:05.843822",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "pause_from",
+  "pause_upto",
+  "posting_date",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "pause_from",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Pause From",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "pause_upto",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Pause Upto",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "columns": 4,
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Remarks",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-15 09:15:25.867268",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Loan Pause Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-08-11 16:18:02.908316",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "leave_type",
+  "column_break_jwiw",
+  "from_years",
+  "to_years",
+  "column_break_934y",
+  "total_days",
+  "monthly_allocation"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "leave_type",
+   "fieldtype": "Link",
+   "label": "Leave Type",
+   "options": "Leave Type"
+  },
+  {
+   "fieldname": "column_break_jwiw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "description": "Experience in Years",
+   "fieldname": "from_years",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "From (Years of Service)"
+  },
+  {
+   "columns": 2,
+   "description": "Experience in Years",
+   "fieldname": "to_years",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "To (Years of Service)"
+  },
+  {
+   "fieldname": "column_break_934y",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "total_days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Days"
+  },
+  {
+   "columns": 2,
+   "fieldname": "monthly_allocation",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Monthly Allocation"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-29 15:30:12.079129",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Annual Leave Policy",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

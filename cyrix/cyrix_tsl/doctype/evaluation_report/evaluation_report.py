@@ -833,6 +833,7 @@ def create_rfq(name):
 	rfq.cost_center = frappe.db.get_value("Job Order Data",doc.job_order_data,"department") or frappe.db.get_value("Cost Center",{"company":doc.company,"branch":doc.branch,"is_repair":1})
 	rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2)
 	rfq.items=[]
+	rfq.status = "Draft"
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
 	for i in doc.get("items"):
 		if i.parts_availability == "No" and i.from_scrap == 0:
@@ -1994,7 +1995,7 @@ def update_reservation_status():
 
 def schedule_update_reservation_status():
 	"""Schedule the status update to run every hour."""
-	job = frappe.db.exists('Scheduled Job Type', 'evaluation_report.update_reservation_status')
+	job = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.cyrix_tsl.doctype.evaluation_report.evaluation_report.update_reservation_status',})
 	if not job:
 		sjt1 = frappe.new_doc("Scheduled Job Type")  
 		sjt1.update({

@@ -86,6 +86,7 @@ class BudgetaryQuotation(Document):
 		new_doc.company = self.company
 		new_doc.branch = self.branch
 		new_doc.budgetary_quotation = self.name
+		new_doc.status = "Draft"
 		for i in self.items:
 			new_doc.append("items",{
 				"item_code":i.sku,

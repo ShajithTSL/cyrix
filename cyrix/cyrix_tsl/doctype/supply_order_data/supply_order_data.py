@@ -151,6 +151,7 @@ def create_rfq(supply_order_data):
 	rfq.supply_order_data = supply_order_data
 	rfq.schedule_date = add_to_date(rfq.transaction_date,days = 2),
 	rfq.cost_center = doc.department
+	rfq.status = "Draft"
 	rfq.items=[]
 	warehouse = warehouse_based_on_branch_and_company(rfq.company,rfq.branch)
 	for i in doc.get("material_list"):

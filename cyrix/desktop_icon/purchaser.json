@@ -10,15 +10,17 @@
  "label": "Purchaser",
  "link_to": "Purchaser",
  "link_type": "Workspace Sidebar",
- "modified": "2026-08-11 10:17:28.428237",
+ "modified": "2026-08-28 09:38:23.635561",
  "modified_by": "Administrator",
  "name": "Purchaser",
  "owner": "Administrator",
- "parent_icon": "TSL",
  "restrict_removal": 0,
  "roles": [
   {
    "role": "Purchase User"
+  },
+  {
+   "role": "Purchase Manager"
   }
  ],
  "standard": 1

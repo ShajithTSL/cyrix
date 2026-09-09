@@ -1,7 +1,7 @@
 {
  "app": "cyrix",
  "charts": [],
- "content": "[{\"id\":\"VjtbWJOraP\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Shortcuts</span>\",\"col\":12}},{\"id\":\"1RF1bWXh68\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Job Order\",\"col\":3}},{\"id\":\"4G_r1tVleo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Order Data\",\"col\":3}},{\"id\":\"-XAsIt6Wcr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Supply Order\",\"col\":3}},{\"id\":\"jEdO5nxwTB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supply Order Data\",\"col\":3}}]",
+ "content": "[{\"id\":\"VjtbWJOraP\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><i><b>Shortcuts</b></i></span>\",\"col\":12}},{\"id\":\"1RF1bWXh68\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Job Order\",\"col\":3}},{\"id\":\"-XAsIt6Wcr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Supply Order\",\"col\":3}},{\"id\":\"bIg_yHkjx7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Budgetary Quotation\",\"col\":3}},{\"id\":\"S0TOBmq8WB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Call Form\",\"col\":3}},{\"id\":\"4G_r1tVleo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Order Data\",\"col\":3}},{\"id\":\"jEdO5nxwTB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supply Order Data\",\"col\":3}},{\"id\":\"sDFpG8Npuz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Budgetary Quotation\",\"col\":3}},{\"id\":\"vG375ak-jL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Evaluation Report\",\"col\":3}},{\"id\":\"21sAUFQo1-\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Maintenance Contract\",\"col\":3}},{\"id\":\"EhoflmYyrM\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Technical Report\",\"col\":3}},{\"id\":\"_WPQRUbgsO\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><i>Job Order</i></span>\",\"col\":12}},{\"id\":\"5YauV8Zmna\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"J - Searching Parts\",\"col\":3}},{\"id\":\"CXXLJgcbZQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"J - Technician Repair\",\"col\":3}},{\"id\":\"D6rs2U9rOJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"J - NER\",\"col\":3}},{\"id\":\"nMoLohYaer\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><i>Supply Order</i></span>\",\"col\":12}},{\"id\":\"NF7e5kaIG7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"S - Inquiry\",\"col\":3}},{\"id\":\"CfZhtyG9i7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"S - Pending Internal Approval\",\"col\":3}},{\"id\":\"K9vpjKl1yA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"S - Quoted\",\"col\":3}},{\"id\":\"HQRFn01VZX\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b></b></span>\",\"col\":12}},{\"id\":\"i3mmDOddZ7\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"LKWRaHZaw1\",\"type\":\"card\",\"data\":{\"card_name\":\"Transactions\",\"col\":4}},{\"id\":\"MSYbeceNNf\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2025-10-26 11:56:53.856693",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,8 +13,117 @@
  "indicator_color": "red",
  "is_hidden": 0,
  "label": "Shortcuts",
- "links": [],
- "modified": "2025-11-26 14:54:43.720290",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer",
+   "link_count": 0,
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Supplier",
+   "link_count": 0,
+   "link_to": "Supplier",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item",
+   "link_count": 0,
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transactions",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quotation",
+   "link_count": 0,
+   "link_to": "Quotation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Supplier Quotation",
+   "link_count": 0,
+   "link_to": "Supplier Quotation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Request for Quotation",
+   "link_count": 0,
+   "link_to": "Request for Quotation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Job Order Report",
+   "link_count": 0,
+   "link_to": "Job Order Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Supply Order Report",
+   "link_count": 0,
+   "link_to": "Supply Order Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Supply Order Data",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-08-28 18:02:16.515371",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Shortcuts",
@@ -23,7 +132,11 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "Info"
+  }
+ ],
  "sequence_id": 1.0,
  "shortcuts": [
   {
@@ -36,9 +149,40 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "label": "Create Budgetary Quotation",
+   "link_to": "Create Budgetary Quotation",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "S - Inquiry",
+   "link_to": "Supply Order Data",
+   "stats_filter": "[[\"Supply Order Data\",\"status\",\"=\",\"Inquiry\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
    "label": "Job Order Data",
    "link_to": "Job Order Data",
+   "stats_filter": "[[\"Job Order Data\",\"company\",\"=\",frappe.defaults.get_default(\"company\"),false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Evaluation Report",
+   "link_to": "Evaluation Report",
    "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "S - Pending Internal Approval",
+   "link_to": "Supply Order Data",
+   "stats_filter": "[[\"Supply Order Data\",\"status\",\"=\",\"Pending Internal Approval\"]]",
    "type": "DocType"
   },
   {
@@ -51,9 +195,73 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "label": "Budgetary Quotation",
+   "link_to": "Budgetary Quotation",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "S - Quoted",
+   "link_to": "Supply Order Data",
+   "stats_filter": "[[\"Supply Order Data\",\"status\",\"=\",\"Quoted\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
    "label": "Supply Order Data",
    "link_to": "Supply Order Data",
+   "stats_filter": "[[\"Supply Order Data\",\"company\",\"=\",frappe.defaults.get_default(\"company\"),false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Maintenance Contract",
+   "link_to": "Maintenance Contract",
    "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Technical Report",
+   "link_to": "Technical Report",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Service Call Form",
+   "link_to": "Service Call Form",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "J - Searching Parts",
+   "link_to": "Job Order Data",
+   "stats_filter": "[[\"Job Order Data\",\"status\",\"=\",\"SP-Searching Parts\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Yellow",
+   "doc_view": "List",
+   "label": "J - Technician Repair",
+   "link_to": "Job Order Data",
+   "stats_filter": "[[\"Job Order Data\",\"status\",\"=\",\"TR-Technician Repair\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "J - NER",
+   "link_to": "Job Order Data",
+   "stats_filter": "[[\"Job Order Data\",\"status\",\"=\",\"NER-Need Evaluation Return\"]]",
    "type": "DocType"
   }
  ],

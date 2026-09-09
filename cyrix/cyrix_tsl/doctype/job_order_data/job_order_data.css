@@ -4,12 +4,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
         /* Enhanced header with elegant typography and spacing */
         .header {
             margin-bottom: 3rem;

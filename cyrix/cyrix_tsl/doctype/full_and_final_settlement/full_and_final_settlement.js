@@ -89,33 +89,47 @@ frappe.ui.form.on("Full and Final Settlement", {
         }
     },
     refresh(frm) {
-        frm.add_custom_button(__("Print F & F"), function () {
-
-            var f_name = frm.doc.name
-            var print_format = "Full and Final Settlement";
-            window.open(frappe.urllib.get_full_url("/api/method/frappe.utils.print_format.download_pdf?"
-                + "doctype=" + encodeURIComponent("Full and Final Settlement")
-                + "&name=" + encodeURIComponent(f_name)
-                + "&trigger_print=1"
-                + "&format=" + print_format
-                + "&no_letterhead=0"
-            ))
-        });
+        if (frm.doc.company == "Company Al-Halloul Faniye Medical"){
+            frm.add_custom_button(__("Print"), function () {
+                var f_name = frm.doc.name
+                var print_format = "Full and Final Settlement - KSA";
+                window.open(frappe.urllib.get_full_url("/api/method/frappe.utils.print_format.download_pdf?"
+                    + "doctype=" + encodeURIComponent("Full and Final Settlement")
+                    + "&name=" + encodeURIComponent(f_name)
+                    + "&trigger_print=1"
+                    + "&format=" + print_format
+                    + "&no_letterhead=0"
+                ))
+            });
+        }
+        else{
+            frm.add_custom_button(__("Print"), function () {
+                var f_name = frm.doc.name
+                var print_format = "Full and Final Settlement";
+                window.open(frappe.urllib.get_full_url("/api/method/frappe.utils.print_format.download_pdf?"
+                    + "doctype=" + encodeURIComponent("Full and Final Settlement")
+                    + "&name=" + encodeURIComponent(f_name)
+                    + "&trigger_print=1"
+                    + "&format=" + print_format
+                    + "&no_letterhead=0"
+                ))
+            });
+        }
         frm.add_custom_button(__('Create Payment Entry'), function() {
             route_to_payment_entry(frm);
         });
     },
     net_pay(frm){
-        var leave_pay = (frm.doc.leave_payment_amount)
+        var leave_pay = (frm.doc.leave_pay || frm.doc.leave_payment_amount)
         var gra_amount = (frm.doc.gratuity_amount)
         var leave_grat = ((parseFloat(leave_pay) + parseFloat(gra_amount)) + (parseFloat(frm.doc.additions)))
         frm.set_value('leave_gratuity_total', leave_grat)
         if (frm.doc.is_paid == 1) {
-            var net_pay = leave_grat - (frm.doc.loan_other_deduction + frm.doc.air_ticket_deduction)
+            var net_pay = leave_grat - (frm.doc.loan_other_deduction)
             frm.set_value('net_pay', net_pay)
         }
         else {
-            var net_pay = leave_grat + frm.doc.total_salary - (frm.doc.loan_other_deduction + frm.doc.air_ticket_deduction)
+            var net_pay = leave_grat + frm.doc.total_salary - (frm.doc.loan_other_deduction)
             frm.set_value('net_pay', net_pay)
         }
     },
@@ -177,6 +191,7 @@ frappe.ui.form.on("Full and Final Settlement", {
                     parseFloat(frm.doc.earned_hra)+parseFloat(frm.doc.earned_other_allowance)+
                     parseFloat(frm.doc.amount)+parseFloat(frm.doc.transportation) - parseFloat(frm.doc.gosi))
         frm.set_value('total_salary',tott)
+        frm.set_value('daily_salary', (frm.doc.ctc/30).toFixed(2))
     },
     onload(frm){
 		frappe.run_serially([
@@ -287,7 +302,12 @@ frappe.ui.form.on("Full and Final Settlement", {
         frm.trigger("encashed_leaves")
     },
     encashed_leaves(frm) {
-        var cal = ((frm.doc.basic_salary / frm.doc.total_working_days) * frm.doc.encashed_leaves)
+        if(frm.doc.company == "TSL COMPANY - Kuwait"){
+            var cal = ((frm.doc.basic_salary / frm.doc.total_working_days) * frm.doc.encashed_leaves)
+        }
+        else{
+            var cal = ((frm.doc.ctc / 30) * frm.doc.encashed_leaves)
+        }
         frm.set_value('leave_pay', cal.toFixed(2))
         frm.trigger("leaves_calculation")
         frm.trigger("net_pay")

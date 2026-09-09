@@ -21,6 +21,7 @@ app_license = "mit"
 # 	}
 # ]
 
+
 # Includes in <head>
 # ------------------
 
@@ -29,10 +30,7 @@ app_license = "mit"
 app_include_js = [
 	"cyrix.bundle.js"
 ]
-app_include_css = [
-    "sidebar.css",
-    "dock.css"
-]
+
 
 # include js, css files in header of web template
 # web_include_css = "/assets/cyrix/css/cyrix.css"
@@ -58,6 +56,7 @@ doctype_js = {
 	"Request for Quotation" : ["custom_js/request_for_quotation.js"],
 	"Supplier Quotation" : ["custom_js/supplier_quotation.js"],
 	"Company" : ["custom_js/company.js"],
+
 
 	# HR Related customizations
 	"Employee" : ["hr_js/employee.js"],
@@ -222,20 +221,20 @@ doc_events = {
 			"cyrix.custom_py.quotation.update_job_order_status",
 			'cyrix.custom_py.quotation.update_budgetary_quotation_status'
 		],
-        "on_submit": [
-            "cyrix.custom_py.quotation.update_job_order_status",
-            'cyrix.custom_py.quotation.update_service_call_form',
-            'cyrix.custom_py.quotation.update_budgetary_quotation_status',
-            "cyrix.custom_py.quotation.update_maintenance_contract_status"
+		"on_submit": [
+			"cyrix.custom_py.quotation.update_job_order_status",
+			'cyrix.custom_py.quotation.update_service_call_form',
+			'cyrix.custom_py.quotation.update_budgetary_quotation_status',
+			"cyrix.custom_py.quotation.update_maintenance_contract_status"
 		],
-        "on_update_after_submit": [
-            "cyrix.custom_py.quotation.on_update_after_submit",
-            "cyrix.custom_py.quotation.update_supply_order_status",
-            "cyrix.custom_py.quotation.update_maintenance_contract_status"
+		"on_update_after_submit": [
+			"cyrix.custom_py.quotation.on_update_after_submit",
+			"cyrix.custom_py.quotation.update_supply_order_status",
+			"cyrix.custom_py.quotation.update_maintenance_contract_status"
 		],
 		"on_update": [
-            "cyrix.custom_py.quotation.update_supply_order_status", 
-            "cyrix.custom_py.quotation.update_maintenance_contract_status"
+			"cyrix.custom_py.quotation.update_supply_order_status", 
+			"cyrix.custom_py.quotation.update_maintenance_contract_status"
 		]
 	},
 	
@@ -275,16 +274,23 @@ doc_events = {
 	},
 
 	"Sales Invoice": {
-        "on_submit": [
-            "cyrix.custom_py.sales_invoice.update_jo_so_status",
-            "cyrix.custom_py.sales_invoice.update_service_call_form",
-            "cyrix.custom_py.sales_invoice.update_invoice_percentage",
-            "cyrix.custom_py.sales_invoice.update_maintenance_contract_status"	
+		"on_submit": [
+			"cyrix.custom_py.sales_invoice.update_jo_so_status",
+			"cyrix.custom_py.sales_invoice.update_service_call_form",
+			"cyrix.custom_py.sales_invoice.update_invoice_percentage",
+			"cyrix.custom_py.sales_invoice.update_maintenance_contract_status",
+			"cyrix.custom_py.sales_invoice.sync_jo_so_on_si_submit",
 		],
 		"on_cancel": [
-			"cyrix.custom_py.sales_invoice.update_jo_so_status_on_cancel",
-			"cyrix.custom_py.sales_invoice.update_invoice_percentage_on_cancel"			
-		]
+			"cyrix.custom_py.sales_invoice.update_jo_so_status",
+			"cyrix.custom_py.sales_invoice.update_maintenance_contract_status",
+			"cyrix.custom_py.sales_invoice.update_invoice_percentage_on_cancel",		
+			"cyrix.custom_py.sales_invoice.sync_jo_so_on_si_cancel",
+		],   
+	},
+	"Journal Entry": {
+		"on_submit": "cyrix.custom_py.journal_entry.sync_jo_so_on_je_submit",
+		"on_cancel": "cyrix.custom_py.journal_entry.sync_jo_so_on_je_cancel",
 	},
 	
 	"Payment Entry": {
@@ -296,7 +302,7 @@ doc_events = {
 		]
 	},
 	"Contact": {
-		"before_save": [
+		"after_insert": [
 			"cyrix.custom_py.contact.before_save"
 		]
 	},
@@ -346,10 +352,15 @@ doc_events = {
 	},
 }
 
+after_migrate = [
+    "cyrix.custom_py.item.remove_item_price_schedule"
+]
+
+
 # Monkey Patch
-# from frappe import boot as core
-# from cyrix.custom_py import boot as custom
-# core.get_bootinfo = custom.get_bootinfo
+from frappe import boot as core
+from cyrix.custom_py import boot as custom
+core.get_bootinfo = custom.get_bootinfo
 
 
 from hrms.hr import utils
@@ -395,7 +406,9 @@ after_migrate = [
     "cyrix.cyrix_tsl.doctype.planned_leaves.planned_leaves.schedule_create_planned_leaves",
     "cyrix.cyrix_tsl.doctype.resignation_form.resignation_form.schedule_update_employee_status",
     "cyrix.cyrix_tsl.doctype.leave_application_form.leave_application_form.schedule_trigger_mail_on_lap_form",
-    "cyrix.custom_py.email_notification.schedule_email_notifications"
+    "cyrix.custom_py.email_notification.schedule_email_notifications",
+	"cyrix.custom_py.item.remove_item_price_schedule",
+	"cyrix.cyrix_tsl.doctype.official_documents.official_documents.schedule_email_notifications"
 ]
 override_whitelisted_methods = {
     "hrms.hr.doctype.leave_application.leave_application.get_number_of_leave_days": "cyrix.hr_py.leave_application.get_number_of_leave_days",

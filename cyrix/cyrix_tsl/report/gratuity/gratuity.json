@@ -12,7 +12,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": null,
- "modified": "2026-08-15 09:18:06.882120",
+ "modified": "2026-08-31 16:02:39.415340",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Gratuity",
@@ -23,16 +23,10 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Employee"
-  },
-  {
    "role": "HR User"
   },
   {
    "role": "HR Manager"
-  },
-  {
-   "role": "Employee Self Service"
   }
  ],
  "snapshot_report": 0,

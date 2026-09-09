@@ -535,6 +535,8 @@ frappe.ui.form.on("Supply Order Data", {
 											child.item_name = item.item_name || "";
 											child.qty = item.qty;
 											child.uom = item.uom || "Nos";
+											child.stock_uom = item.uom || "Nos";
+											child.conversion_factor = 1;
 											child.warehouse = item.warehouse;
 											child.supply_order_data = item.supply_order_data;
 										});
@@ -622,6 +624,8 @@ frappe.ui.form.on("Supply Order Data", {
 											child.item_name = item.item_name || "";
 											child.qty = item.qty;
 											child.uom = item.uom || "Nos";
+											child.stock_uom = item.uom || "Nos";
+											child.conversion_factor = 1;
 											child.warehouse = item.warehouse;
 											child.supply_order_data = item.supply_order_data;
 										});

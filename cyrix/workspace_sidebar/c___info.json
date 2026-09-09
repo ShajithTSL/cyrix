@@ -3,6 +3,7 @@
  "creation": "2026-08-10 08:31:14.809128",
  "docstatus": 0,
  "doctype": "Workspace Sidebar",
+ "for_user": "",
  "header_icon": "support",
  "idx": 0,
  "items": [
@@ -194,7 +195,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-10 09:21:41.315151",
+ "modified": "2026-08-28 09:37:22.265194",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "C - Info",

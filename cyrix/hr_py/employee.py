@@ -241,7 +241,7 @@ def get_annual_leave_days(doc,method):
 
 @frappe.whitelist()
 def employee_notification_schedule():
-	cid_job = frappe.db.exists('Scheduled Job Type', 'employee.civil_id_expiry')
+	cid_job = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.hr_py.employee.civil_id_expiry'})
 	if not cid_job:
 		cid = frappe.new_doc("Scheduled Job Type")  
 		cid.update({
@@ -250,7 +250,7 @@ def employee_notification_schedule():
 		})
 		cid.save(ignore_permissions=True)
 
-	lic_job = frappe.db.exists('Scheduled Job Type', 'employee.license_expiry_date')
+	lic_job = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.hr_py.employee.license_expiry_date'})
 	if not lic_job:
 		lic = frappe.new_doc("Scheduled Job Type")  
 		lic.update({
@@ -259,7 +259,7 @@ def employee_notification_schedule():
 		})
 		lic.save(ignore_permissions=True)
 
-	daf_job = frappe.db.exists('Scheduled Job Type', 'employee.dafter_expiry_date')
+	daf_job = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.hr_py.employee.dafter_expiry_date'})
 	if not daf_job:
 		daf = frappe.new_doc("Scheduled Job Type")  
 		daf.update({

@@ -50,7 +50,7 @@ def update_leave_allocation():
 			create_annual_leave_allocation(emp.employee) # this will prorate the leaves based on the joining date in the company
 
 def monitor_leave_allocation_job():
-	job_type = "leave_allocation.update_leave_allocation"  # change this to your actual method path
+	job_type = frappe.db.get_value("Scheduled Job Type",{"method":"cyrix.hr_py.leave_allocation.update_leave_allocation"},"name")
 
 	# Get the last Scheduled Job Log for this method
 	log = frappe.db.get_value(
@@ -193,7 +193,7 @@ def allocate_sick_leaves(employee, company, today):
 
 # for schedule job creation, called in after_migrate
 def leave_allocation_schedule():
-	job1 = frappe.db.exists('Scheduled Job Type', 'leave_allocation.update_leave_allocation')
+	job1 = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.hr_py.leave_allocation.update_leave_allocation'})
 	if not job1:
 		sjt1 = frappe.new_doc("Scheduled Job Type")  
 		sjt1.update({
@@ -202,7 +202,7 @@ def leave_allocation_schedule():
 		})
 		sjt1.save(ignore_permissions=True)
 		
-	job2 = frappe.db.exists('Scheduled Job Type', 'leave_allocation.monitor_leave_allocation_job')
+	job2 = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.hr_py.leave_allocation.monitor_leave_allocation_job'})
 	if not job2:
 		sjt2 = frappe.new_doc("Scheduled Job Type")  
 		sjt2.update({
@@ -211,7 +211,7 @@ def leave_allocation_schedule():
 		})
 		sjt2.save(ignore_permissions=True)
 
-	job3 = frappe.db.exists('Scheduled Job Type', 'leave_allocation.allocate_leave_on_new_year')
+	job3 = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.hr_py.leave_allocation.allocate_leave_on_new_year'})
 	if not job3:
 		sjt3 = frappe.new_doc("Scheduled Job Type")  
 		sjt3.update({

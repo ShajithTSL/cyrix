@@ -393,7 +393,8 @@ after_migrate = [
     "cyrix.cyrix_tsl.doctype.resignation_form.resignation_form.schedule_update_employee_status",
     "cyrix.cyrix_tsl.doctype.leave_application_form.leave_application_form.schedule_trigger_mail_on_lap_form",
     "cyrix.custom_py.email_notification.schedule_email_notifications",
-	"cyrix.custom_py.item.remove_item_price_schedule"
+	"cyrix.custom_py.item.remove_item_price_schedule",
+	"cyrix.cyrix_tsl.doctype.official_documents.official_documents.schedule_email_notifications"
 ]
 override_whitelisted_methods = {
     "hrms.hr.doctype.leave_application.leave_application.get_number_of_leave_days": "cyrix.hr_py.leave_application.get_number_of_leave_days",

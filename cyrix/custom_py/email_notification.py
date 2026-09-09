@@ -71,6 +71,15 @@ def schedule_email_notifications():
 		})
 		sjt7.save(ignore_permissions=True)
 
+	passport_expiry = frappe.db.exists('Scheduled Job Type', {"method":"cyrix.custom_py.email_notification.send_passport_expiry_reminders"})
+	if not passport_expiry:
+		sjt = frappe.new_doc("Scheduled Job Type")  
+		sjt.update({
+			"method" : 'cyrix.custom_py.email_notification.send_passport_expiry_reminders',
+			"cron_format" : '0 8 * * *'
+		})
+		sjt.save(ignore_permissions=True)
+
 @frappe.whitelist()
 def sendmail(self, message = None, subject = None, sender = None, recipients = None, attachments = None, cc = None):
 	communication = make_communication(
@@ -818,3 +827,111 @@ def send_birthday_reminder_hr():
 				content=message,
 				send_email=1,
 			)
+
+
+
+#################################################
+######## Passport Expiry Notification ###########
+#################################################
+
+def add_months_clamped(dt, months):
+	"""
+	Add months while keeping the day where possible.
+
+	Examples:
+		31 Jan + 1 month = 28/29 Feb
+		31 Mar + 1 month = 30 Apr
+		31 May + 1 month = 30 Jun
+	"""
+
+	month_index = dt.month - 1 + months
+
+	year = dt.year + month_index // 12
+	month = month_index % 12 + 1
+
+	last_day = monthrange(year, month)[1]
+	day = min(dt.day, last_day)
+
+	return date(year, month, day)
+
+
+def send_passport_expiry_reminders():
+
+	today_date = getdate(today())
+
+	employees = frappe.get_all(
+		"Employee",
+		filters={
+			"valid_upto": ["is", "set"],
+			"status": "Active",
+		},
+		fields=[
+			"name",
+			"employee_name",
+			"employee_number",
+			"department",
+			"branch",
+			"nationality",
+			"passport_number",
+			"valid_upto",
+			"company",
+		],
+	)
+
+	for employee in employees:
+
+		expiry_date = getdate(employee.valid_upto)
+
+		# Don't start before 12 months out, don't send after expiry
+		first_reminder_date = add_months_clamped(expiry_date, -12)
+
+		if today_date < first_reminder_date:
+			continue
+
+		if today_date > expiry_date:
+			continue
+
+		# Check each of the 12 monthly checkpoints directly against the
+		# original expiry_date (not chained off the previous checkpoint),
+		# so a short month (e.g. 30-day June) never permanently drags a
+		# 31-day anchor day down for every checkpoint after it.
+		matched_months_remaining = None
+
+		for months_remaining in range(12, -1, -1):
+			candidate = add_months_clamped(expiry_date, -months_remaining)
+			if candidate == today_date:
+				matched_months_remaining = months_remaining
+				break
+
+		if matched_months_remaining is None:
+			continue
+
+		send_reminder_email(employee, matched_months_remaining)
+
+def send_reminder_email(employee, matched_months_remaining):
+	
+	args = {
+		"employee_name":employee.get("employee_name"),
+		"employee":employee.get("employee_number"),
+		"department": employee.get("department") or '-',
+		"branch": employee.get("branch") or '-',
+		"nationality": employee.get("nationality") or '-',
+		"passport_number": employee.get("passport_number") or '-',
+		"passport_valid_upto": employee.get("valid_upto") or '-',
+		"months_remaining": matched_months_remaining
+	}
+	recipients = info().get("hr_to").get(employee.company)
+
+	email_template = frappe.get_doc("Email Template", "Passport Expiry Reminder")
+	subject = frappe.render_template(email_template.subject, args)
+	message = frappe.render_template(email_template.response, args)
+	doc = frappe.get_doc("Employee",employee.get("employee_number"))
+	try:
+		sendmail(doc, message, subject, sender = "no-reply@tsl-me.com", recipients = recipients, attachments = None)
+	except frappe.OutgoingEmailError:
+		pass
+
+
+
+def update():
+	frappe.db.set_value("Workspace","HR Workspace","public",1)

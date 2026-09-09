@@ -234,6 +234,8 @@ def calculate_gratuity(filters):
 				data.append(row)
 
 		elif emp.company == "Company Al-Halloul Faniye Medical":
+			yos = cstr(diff.years) + ' years, ' + cstr(diff.months) +' months and ' + cstr(diff.days + 1) + ' days'
+			exp_days = diff.days + 1
 			if exp_years < 2:
 				# Termination
 				per = (emp.ctc*0.5)

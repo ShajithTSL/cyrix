@@ -355,6 +355,7 @@
    "label": "is special permission"
   },
   {
+   "depends_on": "is_special_permission",
    "fieldname": "perm_given_by",
    "fieldtype": "Link",
    "label": "Permission Given By",
@@ -545,7 +546,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2026-08-17 16:04:52.955114",
+ "modified": "2026-08-31 15:51:29.636545",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Leave Application Form",

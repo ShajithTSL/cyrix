@@ -56,12 +56,12 @@
   "gosi",
   "total_salary",
   "section_break_13",
+  "employment_duration",
   "leave_balance",
-  "leave_payment_amount",
   "encashed_leaves",
   "column_break_wz27n",
-  "employment_duration",
   "total_worked",
+  "leave_payment_amount",
   "leave_pay",
   "section_break_20",
   "gratuity_days",
@@ -75,7 +75,29 @@
   "net_pay",
   "column_break_56",
   "remark",
-  "amended_from"
+  "amended_from",
+  "section_break_gzbh",
+  "clearance_type",
+  "in_arabic",
+  "column_break_uhqx",
+  "contract_period",
+  "daily_salary",
+  "column_break_uatn",
+  "bonus",
+  "column_break_gzjq",
+  "section_break_qxsm",
+  "prepared_by",
+  "prepared_by_name",
+  "column_break_kdjm",
+  "checked_by",
+  "checked_by_name",
+  "column_break_ysmd",
+  "approved_by",
+  "approved_by_name",
+  "section_break_ujjj",
+  "declaration_in_english",
+  "column_break_ofng",
+  "declaration_arabic"
  ],
  "fields": [
   {
@@ -154,7 +176,7 @@
   {
    "fieldname": "last_day_of_work",
    "fieldtype": "Date",
-   "label": "Date"
+   "label": "Last Date of Work"
   },
   {
    "depends_on": "eval:doc.type == \"Termination\"",
@@ -179,7 +201,7 @@
    "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
-   "label": "Date"
+   "label": "Posting Date"
   },
   {
    "default": "0",
@@ -391,22 +413,22 @@
   {
    "fieldname": "leave_balance",
    "fieldtype": "Float",
-   "label": "Leave Balance",
+   "label": "Eligible Leave Days",
    "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "leave_payment_amount",
    "fieldtype": "Currency",
-   "label": "Leave Payment Amount",
+   "label": "Eligible Leave Payment Amount",
    "options": "currency",
    "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "encashed_leaves",
-   "fieldtype": "Int",
-   "label": "Leaves Encashed"
+   "fieldtype": "Float",
+   "label": "Actual Payable Leave Days"
   },
   {
    "fieldname": "column_break_wz27n",
@@ -428,7 +450,7 @@
    "default": "0",
    "fieldname": "leave_pay",
    "fieldtype": "Currency",
-   "label": "Leave Pay",
+   "label": "Actual Leave Payment Amount",
    "options": "currency",
    "read_only": 1
   },
@@ -512,13 +534,126 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "section_break_gzbh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "clearance_type",
+   "fieldtype": "Data",
+   "label": "Clearance Type"
+  },
+  {
+   "fieldname": "in_arabic",
+   "fieldtype": "Data",
+   "label": "In Arabic"
+  },
+  {
+   "fieldname": "column_break_uhqx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contract_period",
+   "fieldtype": "Data",
+   "label": "Contract Period"
+  },
+  {
+   "fieldname": "daily_salary",
+   "fieldtype": "Float",
+   "label": "Daily Salary"
+  },
+  {
+   "fieldname": "column_break_uatn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bonus",
+   "fieldtype": "Float",
+   "label": "Bonus"
+  },
+  {
+   "fieldname": "prepared_by",
+   "fieldtype": "Link",
+   "label": "Prepared By",
+   "options": "Signature"
+  },
+  {
+   "fieldname": "column_break_gzjq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "checked_by",
+   "fieldtype": "Link",
+   "label": "Checked By",
+   "options": "Signature"
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "Signature"
+  },
+  {
+   "fieldname": "section_break_ujjj",
+   "fieldtype": "Section Break",
+   "label": "Declaration"
+  },
+  {
+   "fieldname": "declaration_in_english",
+   "fieldtype": "Small Text",
+   "label": "Declaration in English"
+  },
+  {
+   "fieldname": "column_break_ofng",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "declaration_arabic",
+   "fieldtype": "Small Text",
+   "label": "Declaration in Arabic"
+  },
+  {
+   "fieldname": "section_break_qxsm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "prepared_by.name_in_arabic",
+   "fetch_if_empty": 1,
+   "fieldname": "prepared_by_name",
+   "fieldtype": "Data",
+   "label": "Prepared By Name"
+  },
+  {
+   "fieldname": "column_break_kdjm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "checked_by.name_in_arabic",
+   "fetch_if_empty": 1,
+   "fieldname": "checked_by_name",
+   "fieldtype": "Data",
+   "label": "Checked By Name",
+   "options": "Signature"
+  },
+  {
+   "fieldname": "column_break_ysmd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "approved_by.name_in_arabic",
+   "fetch_if_empty": 1,
+   "fieldname": "approved_by_name",
+   "fieldtype": "Data",
+   "label": "Approved By Name",
+   "options": "Signature"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-16 15:25:06.348091",
+ "modified": "2026-09-07 10:14:40.144301",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Full and Final Settlement",

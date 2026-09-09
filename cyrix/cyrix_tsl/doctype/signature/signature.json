@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_rename": 1,
  "autoname": "field:user",
  "creation": "2026-06-10 12:09:25.997959",
@@ -9,7 +10,9 @@
   "user",
   "username",
   "image",
-  "company"
+  "company",
+  "column_break_qzdj",
+  "name_in_arabic"
  ],
  "fields": [
   {
@@ -35,13 +38,22 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fieldname": "name_in_arabic",
+   "fieldtype": "Data",
+   "label": "Name in Arabic"
+  },
+  {
+   "fieldname": "column_break_qzdj",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-28 13:02:17.409840",
+ "modified": "2026-09-07 09:00:14.208934",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Signature",

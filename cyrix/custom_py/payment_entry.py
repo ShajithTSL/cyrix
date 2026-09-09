@@ -14,6 +14,8 @@ def get_jo_so_details(references):
                     `tabSales Invoice Item`.job_order_data AS job_order_data,
                     `tabSales Invoice Item`.supply_order_data AS supply_order_data,
                     `tabSales Invoice Item`.budgetary_quotation AS budgetary_quotation,
+
+                    `tabSales Invoice`.maintenance_contract AS parent_maintenance_contract,
                     `tabSales Invoice Item`.maintenance_contract AS maintenance_contract
                     
                 FROM `tabSales Invoice`
@@ -88,7 +90,7 @@ def get_jo_so_details(references):
                             "paid": paid
                         })
 
-                mc_name = jo_entry.get("maintenance_contract")
+                mc_name = jo_entry.get("maintenance_contract") or jo_entry.get("parent_maintenance_contract")
                 if mc_name:
                     mc_doc = frappe.db.get_value(
                         "Maintenance Contract", mc_name,
@@ -111,58 +113,6 @@ def get_jo_so_details(references):
                         })
     return jo_so_info
 
-def update_payment_reference(self, method):
-    if self.payment_type == 'Receive':
-        for row in self.job_order_table:
-            if row.reference_name and row.allocate_amount > 0:
-                # Fetch the Job Order Data document
-                doc = frappe.get_doc(row.reference_type, row.reference_name)
-
-                # Calculate the updated advance payment amount
-                updated_amount = (doc.advance_payment_amount or 0) + row.allocate_amount
-
-                # Determine status based on updated payment
-                if doc.invoiced_value == updated_amount:
-                    doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
-                elif updated_amount == 0:
-                    doc.status = "Unpaid"
-                else:
-                    doc.status = "Partially Paid"
-
-                # Update fields
-                doc.payment_entry = self.name
-                doc.advance_payment_amount = updated_amount
-                doc.advance_paid_date = self.posting_date
-
-                # Save the updated document
-                doc.save(ignore_permissions=True)
-
-
-def update_payment_reference_cancel(self, method):
-    if self.payment_type == 'Receive':
-        for row in self.job_order_table:
-            if row.reference_name and row.allocate_amount > 0:
-                # Fetch the Job Order Data document
-                doc = frappe.get_doc(row.reference_type, row.reference_name)
-
-                # Calculate the updated advance payment amount
-                updated_amount = (doc.advance_payment_amount or 0) - row.allocate_amount
-
-                # Determine status based on updated payment
-                if doc.invoiced_value == updated_amount:
-                    doc.status = "P-Paid" if row.reference_type == "Job Order Data" else "Paid"
-                elif updated_amount == 0:
-                    doc.status = "Unpaid" if row.reference_type == "Job Order Data" else "Invoiced"
-                else:
-                    doc.status = "Partially Paid"
-
-                # Update fields
-                doc.payment_entry = ''
-                doc.advance_payment_amount = updated_amount
-                doc.advance_paid_date = ''
-
-                # Save the updated document
-                doc.save(ignore_permissions=True)
 
 @frappe.whitelist()
 def create_payment(bg):

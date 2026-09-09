@@ -56,6 +56,7 @@ doctype_js = {
 	"Supplier Quotation" : ["custom_js/supplier_quotation.js"],
 	"Company" : ["custom_js/company.js"],
 
+
 	# HR Related customizations
 	"Employee" : ["hr_js/employee.js"],
 	"HR Settings" : ["hr_js/hr_settings.js"],

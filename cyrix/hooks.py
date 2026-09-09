@@ -220,20 +220,20 @@ doc_events = {
 			"cyrix.custom_py.quotation.update_job_order_status",
 			'cyrix.custom_py.quotation.update_budgetary_quotation_status'
 		],
-        "on_submit": [
-            "cyrix.custom_py.quotation.update_job_order_status",
-            'cyrix.custom_py.quotation.update_service_call_form',
-            'cyrix.custom_py.quotation.update_budgetary_quotation_status',
-            "cyrix.custom_py.quotation.update_maintenance_contract_status"
+		"on_submit": [
+			"cyrix.custom_py.quotation.update_job_order_status",
+			'cyrix.custom_py.quotation.update_service_call_form',
+			'cyrix.custom_py.quotation.update_budgetary_quotation_status',
+			"cyrix.custom_py.quotation.update_maintenance_contract_status"
 		],
-        "on_update_after_submit": [
-            "cyrix.custom_py.quotation.on_update_after_submit",
-            "cyrix.custom_py.quotation.update_supply_order_status",
-            "cyrix.custom_py.quotation.update_maintenance_contract_status"
+		"on_update_after_submit": [
+			"cyrix.custom_py.quotation.on_update_after_submit",
+			"cyrix.custom_py.quotation.update_supply_order_status",
+			"cyrix.custom_py.quotation.update_maintenance_contract_status"
 		],
 		"on_update": [
-            "cyrix.custom_py.quotation.update_supply_order_status", 
-            "cyrix.custom_py.quotation.update_maintenance_contract_status"
+			"cyrix.custom_py.quotation.update_supply_order_status", 
+			"cyrix.custom_py.quotation.update_maintenance_contract_status"
 		]
 	},
 	
@@ -273,16 +273,23 @@ doc_events = {
 	},
 
 	"Sales Invoice": {
-        "on_submit": [
-            "cyrix.custom_py.sales_invoice.update_jo_so_status",
-            "cyrix.custom_py.sales_invoice.update_service_call_form",
-            "cyrix.custom_py.sales_invoice.update_invoice_percentage",
-            "cyrix.custom_py.sales_invoice.update_maintenance_contract_status"	
+		"on_submit": [
+			"cyrix.custom_py.sales_invoice.update_jo_so_status",
+			"cyrix.custom_py.sales_invoice.update_service_call_form",
+			"cyrix.custom_py.sales_invoice.update_invoice_percentage",
+			"cyrix.custom_py.sales_invoice.update_maintenance_contract_status",
+			"cyrix.custom_py.sales_invoice.sync_jo_so_on_si_submit",
 		],
 		"on_cancel": [
-			"cyrix.custom_py.sales_invoice.update_jo_so_status_on_cancel",
-			"cyrix.custom_py.sales_invoice.update_invoice_percentage_on_cancel"			
-		]
+			"cyrix.custom_py.sales_invoice.update_jo_so_status",
+			"cyrix.custom_py.sales_invoice.update_maintenance_contract_status",
+			"cyrix.custom_py.sales_invoice.update_invoice_percentage_on_cancel",		
+			"cyrix.custom_py.sales_invoice.sync_jo_so_on_si_cancel",
+		],   
+	},
+	"Journal Entry": {
+		"on_submit": "cyrix.custom_py.journal_entry.sync_jo_so_on_je_submit",
+		"on_cancel": "cyrix.custom_py.journal_entry.sync_jo_so_on_je_cancel",
 	},
 	
 	"Payment Entry": {
@@ -343,6 +350,11 @@ doc_events = {
 		"on_update": "cyrix.cyrix_tsl.doctype.attendance_requests.attendance_requests.check",
 	},
 }
+
+after_migrate = [
+    "cyrix.custom_py.item.remove_item_price_schedule"
+]
+
 
 # Monkey Patch
 from frappe import boot as core

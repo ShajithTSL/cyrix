@@ -4,8 +4,7 @@
  "doctype": "Packed Item",
  "links": [],
  "property_setters": [
-  {
-   "_assign": null,
+  {"_assign": null,
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,

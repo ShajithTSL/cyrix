@@ -470,3 +470,4 @@ def sync_jo_so_on_si_cancel(self, method):
         "Sales Invoice", self.name, "jo_so_sync_log", "",
         update_modified=False,
     )
+    

@@ -9,7 +9,6 @@ from cyrix.custom_py.sales_invoice import (
 	_split_amount_by_invoice_share,
 )
 
-
 def sync_jo_so_on_je_submit(self, method):
 	"""Hook: Journal Entry on_submit"""
 	applied = []

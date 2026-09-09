@@ -1,6 +1,7 @@
 import json
 import frappe
 
+
 @frappe.whitelist()
 def get_jo_so_details(references):
 

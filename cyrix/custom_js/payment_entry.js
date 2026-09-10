@@ -1,4 +1,29 @@
 frappe.ui.form.on("Payment Entry", {
+    paid_amount: function(frm) {
+        frm.trigger("get_job_orders");
+        frm.trigger("get_job_orders");
+    },
+    onload: function(frm) {
+        if(frm.doc.__islocal){
+            frm.trigger("get_job_orders");
+        }
+    },
+
+    get_outstanding_invoices: function (frm) {
+        frappe.run_serially([
+            async () => {
+                await frappe.after_ajax();
+
+                // Wait until References table is populated
+                while (!frm.doc.references || frm.doc.references.length === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            },
+
+            () => frm.trigger("get_job_orders"),
+        ]);
+    },
+
     get_job_orders:function(frm){
         if(frm.doc.docstatus == 0){
             let remaining_paid = frm.doc.paid_amount || 0;

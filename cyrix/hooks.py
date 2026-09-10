@@ -269,7 +269,8 @@ doc_events = {
 		"on_update_after_submit": ["cyrix.custom_py.delivery_note.update_supply_order_status"],
 		"on_cancel": [
 			"cyrix.custom_py.delivery_note.update_so_qty_on_cancel",
-			"cyrix.custom_py.delivery_note.update_bq_qty_on_cancel"
+			"cyrix.custom_py.delivery_note.update_bq_qty_on_cancel",
+			"cyrix.custom_py.delivery_note.update_job_order_status_on_dn_cancel"
 		]
 	},
 
@@ -295,10 +296,10 @@ doc_events = {
 	
 	"Payment Entry": {
 		"on_submit": [
-			"cyrix.custom_py.payment_entry.update_payment_reference"			
+			"cyrix.custom_py.sales_invoice.update_payment_reference"			
 		],
 		"on_cancel": [
-			"cyrix.custom_py.payment_entry.update_payment_reference_cancel"			
+			"cyrix.custom_py.sales_invoice.update_payment_reference_cancel"			
 		]
 	},
 	"Contact": {

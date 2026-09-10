@@ -500,25 +500,109 @@ def fetch_repair_warehouse(company,branch):
 
 	return warehouse
 
+from frappe.utils import flt
+from cyrix.custom_py.sales_invoice import (
+	_get_jo_so_info_for_invoice,
+	_apply_status,
+	_split_amount_by_invoice_share,
+)
+
+def _fetch_journal_entry_payments(reference_type, reference_name):
+	"""
+	Journal Entries never reference a JO/SO/BQ directly - only the Sales
+	Invoice, via a Journal Entry Account row. So: find every submitted
+	invoice that touches this reference (the same lookup _recompute_invoiced_value
+	uses), find submitted Journal Entries that knocked off an amount
+	against any of those invoices, then split each one the same way
+	sync_jo_so_on_je_submit did at the time it was applied - this
+	reproduces exactly what was applied, without needing to parse
+	jo_so_sync_log back out of Journal Entry.
+	"""
+	item_field = {
+		"Job Order Data": "job_order_data",
+		"Supply Order Data": "supply_order_data",
+		"Budgetary Quotation": "budgetary_quotation",
+	}.get(reference_type)
+
+	if not item_field:
+		# Maintenance Contract isn't wired into this report - its
+		# item/parent-level tagging needs a slightly different lookup;
+		# say the word if you need it added here too.
+		return []
+
+	invoice_names = frappe.db.sql_list(f"""
+		SELECT DISTINCT si.name
+		FROM `tabSales Invoice Item` sii
+		INNER JOIN `tabSales Invoice` si ON si.name = sii.parent
+		WHERE si.docstatus = 1 AND sii.{item_field} = %s
+	""", (reference_name,))
+
+	if not invoice_names:
+		return []
+
+	je_rows = frappe.db.sql("""
+		SELECT
+			jea.parent AS journal_entry,
+			jea.reference_name AS sales_invoice,
+			COALESCE(jea.credit_in_account_currency, 0) AS credit,
+			COALESCE(jea.debit_in_account_currency, 0) AS debit,
+			jea.account_currency AS currency,
+			je.posting_date
+		FROM `tabJournal Entry Account` jea
+		INNER JOIN `tabJournal Entry` je ON je.name = jea.parent
+		WHERE je.docstatus = 1
+		  AND jea.reference_type = 'Sales Invoice'
+		  AND jea.reference_name IN %(invoices)s
+	""", {"invoices": invoice_names}, as_dict=True)
+
+	results = []
+	for row in je_rows:
+		knocked_off = flt(row.credit) or flt(row.debit)
+		if knocked_off <= 0:
+			continue
+
+		jo_so_info = _get_jo_so_info_for_invoice(row.sales_invoice)
+		if not jo_so_info:
+			continue
+
+		for info, share_amount in _split_amount_by_invoice_share(jo_so_info, knocked_off):
+			if share_amount <= 0:
+				continue
+			if info["reference_type"] == reference_type and info["reference_name"] == reference_name:
+				results.append(frappe._dict({
+					"payment_entry": row.journal_entry,
+					"amount": share_amount,
+					"posting_date": row.posting_date,
+					"currency": row.currency,
+					"voucher_type": "Journal Entry",
+				}))
+
+	return results
+
 @frappe.whitelist()
 def fetch_payment_details(name):
-	data = frappe.db.sql("""
-		SELECT 
+	payment_entries = frappe.db.sql("""
+		SELECT
 			t.parent AS payment_entry,
 			t.allocate_amount AS amount,
 			p.posting_date,
-			p.paid_to_account_currency AS currency
+			p.paid_to_account_currency AS currency,
+			'Payment Entry' AS voucher_type
 		FROM `tabJob Order table` t
 		JOIN `tabPayment Entry` p
 			ON p.name = t.parent
-		WHERE 
+		WHERE
 			t.parenttype = 'Payment Entry'
 			AND t.reference_type = 'Job Order Data'
 			AND t.reference_name = %s
 			AND p.docstatus = 1
-	""", (name), as_dict=True)
-	return data
+	""", (name,), as_dict=True)
 
+	journal_entries = _fetch_journal_entry_payments("Job Order Data", name)
+
+	data = list(payment_entries) + journal_entries
+	data.sort(key=lambda d: d.get("posting_date") or "")
+	return data
 
 @frappe.whitelist()
 def get_eval_list(job_order_data):

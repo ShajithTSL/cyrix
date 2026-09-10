@@ -269,8 +269,14 @@ def _split_amount_by_invoice_share(jo_so_info, total_amount):
         for info in jo_so_info
     ]
 
-
 def _apply_status(ref_doc, reference_type, updated_amount):
+    if reference_type == "Job Order Data" and ref_doc.get("unit_status") != "With Customer":
+        ref_doc.status = "RSI-Repaired and Shipped Invoiced"
+        return
+    if reference_type == "Supply Order Data" and ref_doc.get("supply_status") != "Delivered":
+        ref_doc.status = "Invoiced"
+        return
+
     if updated_amount <= 0:
         ref_doc.status = "Unpaid" if reference_type in ["Job Order Data", "Supply Order Data"] else "Invoiced"
     elif flt(ref_doc.invoiced_value) == updated_amount:

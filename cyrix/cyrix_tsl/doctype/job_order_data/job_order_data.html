@@ -65,7 +65,7 @@
         <!-- Payment Entries Table -->
         <div class="table-wrapper">
             <div class="table-header">
-                <h2 style="color:rgb(255, 255, 255)">Payment Entries</h2>
+                <h2 style="color:rgb(255, 255, 255)">Payments</h2>
                 <div class="payment-count">{{payment_details.length}} Payments</div>
             </div>
 
@@ -73,7 +73,7 @@
                 <table class="transaction-table">
                     <thead>
                         <tr>
-                            <th>Payment Entry</th>
+                            <th>Reference</th>
                             <th style = "text-align: right">Paid Amount</th>
                             <th>Payment Date</th>
                             <th>Status</th>
@@ -82,7 +82,13 @@
                     <tbody>
                         {% for pay in payment_details %}
                         <tr>
-                            <td><a href="/app/payment-entry/{{pay.payment_entry}}" class="doc-link">{{pay.payment_entry}}</a></td>
+                            <td>
+                                {% if pay.voucher_type == "Journal Entry" %}
+                                <a href="/app/journal-entry/{{pay.payment_entry}}" class="doc-link">{{pay.payment_entry}}</a>
+                                {% else %}
+                                <a href="/app/payment-entry/{{pay.payment_entry}}" class="doc-link">{{pay.payment_entry}}</a>
+                                {% endif %}
+                            </td>
                             <td class="amount"><b>{{pay.currency}} </b>{{pay.amount}}</td>
                             <td class="date">{{frappe.datetime.str_to_user(pay.posting_date)}}</td>
                             <td><span class="status-badge status-submitted">Submitted</span></td>
@@ -93,5 +99,6 @@
             </div>
         </div>
         {% endif %}
+        <br>
     </div>
     <br>

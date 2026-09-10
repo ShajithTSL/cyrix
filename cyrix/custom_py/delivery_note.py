@@ -1,3 +1,4 @@
+from cyrix.custom_py.sales_invoice import _apply_status
 import frappe,json
 from frappe import _
 from frappe.exceptions import ValidationError
@@ -14,27 +15,66 @@ from frappe.utils import (
 	rounded,
 	today,
 )
+def so_apply_status(ref_doc, reference_type, updated_amount):
+	if reference_type == "Job Order Data" and ref_doc.get("unit_status") != "With Customer":
+		status = "RSI-Repaired and Shipped Invoiced"
+		return
+	if reference_type == "Supply Order Data" and ref_doc.get("supply_status") != "Delivered":
+		status = "Invoiced"
+		return
 
+	if updated_amount <= 0:
+		status = "Unpaid" if reference_type in ["Job Order Data", "Supply Order Data"] else "Invoiced"
+	elif flt(ref_doc.invoiced_value) == updated_amount:
+		status = "P-Paid" if reference_type == "Job Order Data" else "Paid"
+	else:
+		status = "Partially Paid"
 
-def update_job_order_status(doc,method):
+	ref_doc.status = status
+	frappe.db.set_value(reference_type, ref_doc.name, "status", status)
+
+def update_job_order_status(doc, method):
 	for i in doc.get("items"):
 		if i.get("job_order_data"):
-			jo = frappe.get_doc("Job Order Data",i.get("job_order_data"))
-			if jo.status not in ["RSC-Repaired and Shipped Client","RSI-Repaired and Shipped Invoiced"]:
-				if jo.invoice_no and not jo.payment_entry:
-					jo.status = "RSI-Repaired and Shipped Invoiced"
-				elif jo.payment_entry and jo.invoice_no:  
-					jo.status = "P-Paid"
-				elif not jo.payment_entry:
-					jo.status = "RSC-Repaired and Shipped Client"
+			jo = frappe.get_doc("Job Order Data", i.get("job_order_data"))
 
-			jo.dn_no=doc.name
-			jo.dn_date=doc.posting_date
-			jo.warranty=doc.warranty_months
-			jo.delivery=doc.posting_date
+			jo.dn_no = doc.name
+			jo.dn_date = doc.posting_date
+			jo.warranty = doc.warranty_months
+			jo.delivery = doc.posting_date
 			jo.expiry_date = add_months(doc.posting_date, doc.warranty_months)
-			jo.save(ignore_permissions = True)
-		
+
+			jo.set_unit_status()
+
+			if jo.invoice_no:
+				_apply_status(jo, "Job Order Data", flt(jo.advance_payment_amount))
+			else:
+				# Delivered but not yet invoiced - nothing to pay against yet.
+				jo.status = "RSC-Repaired and Shipped Client"
+
+			jo.save(ignore_permissions=True)
+
+
+def update_job_order_status_on_dn_cancel(doc, method):
+	for i in doc.get("items"):
+		if i.get("job_order_data"):
+			jo = frappe.get_doc("Job Order Data", i.get("job_order_data"))
+
+			if jo.dn_no != doc.name:
+				continue
+
+			jo.dn_no = None
+			jo.dn_date = None
+			jo.warranty = None
+			jo.delivery = None
+			jo.expiry_date = None
+
+			jo.set_unit_status()
+
+			if jo.invoice_no:
+				_apply_status(jo, "Job Order Data", flt(jo.advance_payment_amount))
+
+			jo.save(ignore_permissions=True)		
 
 def update_supply_order_status(doc, method):
 
@@ -66,8 +106,12 @@ def update_supply_order_status(doc, method):
 			status = "Pending"
 
 		supply_order_doc.status = status
+
 		update_dn_reference(supply_order_doc, doc)
+
 		supply_order_doc.save(ignore_permissions=True)
+
+		# so_apply_status(supply_order_doc, "Supply Order Data", flt(supply_order_doc.advance_payment_amount))
 
 def update_dn_reference(reference_doc, doc):
 	# Prevent duplicate Delivery Note entries
@@ -81,38 +125,6 @@ def update_dn_reference(reference_doc, doc):
 		"warranty_in_months": doc.warranty_months,
 		"warranty_expire_date": add_months(doc.posting_date, doc.warranty_months)
 	})
-
-
-def update_budgetary_quotation_status(doc, method):
-	for i in doc.get("items"):
-		if not i.budgetary_quotation:
-			continue
-		bq_doc = frappe.get_doc("Budgetary Quotation", i.budgetary_quotation)
-		bq_doc.delivered_qty = (bq_doc.delivered_qty or 0) + i.qty
-		found = False
-		for row in bq_doc.items:
-			if row.sku == i.item_code:
-				row.delivered_qty = (row.delivered_qty or 0) + i.qty
-				found = True
-				break
-
-		if not found:
-			frappe.throw(f"Item {i.item_code} not found in BQ Details for {i.budgetary_quotation}")
-		if bq_doc.payment_entry and bq_doc.invoice_no:
-			status = "Paid"
-		elif not bq_doc.payment_entry and not bq_doc.invoice_no:
-			if bq_doc.quantity == bq_doc.delivered_qty:
-				status = "Delivered"
-			else:
-				status = "Partially Delivered"
-		elif bq_doc.invoice_no:
-			status = "Invoiced"
-		else:
-			status = "Pending"
-
-		bq_doc.status = status        
-		update_dn_reference(bq_doc, doc)
-		bq_doc.save(ignore_permissions=True)
 
 
 def update_so_qty_on_cancel(self, method):
@@ -156,14 +168,49 @@ def update_so_qty_on_cancel(self, method):
 			status = "Pending"
 
 		supply_order_doc.status = status
+
 		supply_order_doc.save(ignore_permissions=True)
-		
+
+		# so_apply_status(supply_order_doc, "Supply Order Data", flt(supply_order_doc.advance_payment_amount))
+
 		dn_exists = frappe.db.exists("Delivery Details",{"parenttype":"Supply Order Data","delivery_note":self.name},"name")
 		if dn_exists:
 			frappe.db.delete("Delivery Details", dn_exists)
 			frappe.db.commit()
 
 
+
+
+def update_budgetary_quotation_status(doc, method):
+	for i in doc.get("items"):
+		if not i.budgetary_quotation:
+			continue
+		bq_doc = frappe.get_doc("Budgetary Quotation", i.budgetary_quotation)
+		bq_doc.delivered_qty = (bq_doc.delivered_qty or 0) + i.qty
+		found = False
+		for row in bq_doc.items:
+			if row.sku == i.item_code:
+				row.delivered_qty = (row.delivered_qty or 0) + i.qty
+				found = True
+				break
+
+		if not found:
+			frappe.throw(f"Item {i.item_code} not found in BQ Details for {i.budgetary_quotation}")
+		if bq_doc.payment_entry and bq_doc.invoice_no:
+			status = "Paid"
+		elif not bq_doc.payment_entry and not bq_doc.invoice_no:
+			if bq_doc.quantity == bq_doc.delivered_qty:
+				status = "Delivered"
+			else:
+				status = "Partially Delivered"
+		elif bq_doc.invoice_no:
+			status = "Invoiced"
+		else:
+			status = "Pending"
+
+		bq_doc.status = status        
+		update_dn_reference(bq_doc, doc)
+		bq_doc.save(ignore_permissions=True)
 
 def update_bq_qty_on_cancel(self, method):
 	for i in self.get("items"):
@@ -236,7 +283,7 @@ def get_wod_items_from_quotation(jod):
 			"work_order_data":doc.name,
 			"cost_center":doc.department,
 			"branch":branch,
-			   
+			
 			}))
 
 	return l
@@ -264,7 +311,7 @@ def get_wod_items_from_sod(sod):
 			"work_order_data":doc.name,
 			"cost_center":doc.department,
 			"branch":branch,
-			   
+			
 			}))
 
 	return l

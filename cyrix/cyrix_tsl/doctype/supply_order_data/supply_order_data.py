@@ -7,6 +7,13 @@ from cyrix.custom_py import utils
 from frappe.utils import add_to_date
 from datetime import datetime
 
+from frappe.utils import flt
+from cyrix.custom_py.sales_invoice import (
+	_get_jo_so_info_for_invoice,
+	_apply_status,
+	_split_amount_by_invoice_share,
+)
+
 
 class SupplyOrderData(Document):	
 	def supply_order_status(self, ordered_percentage, received_percentage, delivered_percentage):
@@ -379,29 +386,108 @@ def list_desk():
 	doc.delete()
 	print(list)
 
+def _fetch_journal_entry_payments(reference_type, reference_name):
+	"""
+	Journal Entries never reference a JO/SO/BQ directly - only the Sales
+	Invoice, via a Journal Entry Account row. So: find every submitted
+	invoice that touches this reference (the same lookup _recompute_invoiced_value
+	uses), find submitted Journal Entries that knocked off an amount
+	against any of those invoices, then split each one the same way
+	sync_jo_so_on_je_submit did at the time it was applied - this
+	reproduces exactly what was applied, without needing to parse
+	jo_so_sync_log back out of Journal Entry.
+	"""
+	item_field = {
+		"Job Order Data": "job_order_data",
+		"Supply Order Data": "supply_order_data",
+		"Budgetary Quotation": "budgetary_quotation",
+	}.get(reference_type)
+
+	if not item_field:
+		return []
+
+	invoice_names = frappe.db.sql_list(f"""
+		SELECT DISTINCT si.name
+		FROM `tabSales Invoice Item` sii
+		INNER JOIN `tabSales Invoice` si ON si.name = sii.parent
+		WHERE si.docstatus = 1 AND sii.{item_field} = %s
+	""", (reference_name,))
+
+	if not invoice_names:
+		return []
+
+	je_rows = frappe.db.sql("""
+		SELECT
+			jea.parent AS journal_entry,
+			jea.reference_name AS sales_invoice,
+			COALESCE(jea.credit_in_account_currency, 0) AS credit,
+			COALESCE(jea.debit_in_account_currency, 0) AS debit,
+			jea.account_currency AS currency_code,
+			c.symbol AS currency_symbol,
+			je.posting_date
+		FROM `tabJournal Entry Account` jea
+		INNER JOIN `tabJournal Entry` je ON je.name = jea.parent
+		LEFT JOIN `tabCurrency` c ON c.name = jea.account_currency
+		WHERE je.docstatus = 1
+		  AND jea.reference_type = 'Sales Invoice'
+		  AND jea.reference_name IN %(invoices)s
+	""", {"invoices": invoice_names}, as_dict=True)
+
+	results = []
+	for row in je_rows:
+		knocked_off = flt(row.credit) or flt(row.debit)
+		if knocked_off <= 0:
+			continue
+
+		jo_so_info = _get_jo_so_info_for_invoice(row.sales_invoice)
+		if not jo_so_info:
+			continue
+
+		for info, share_amount in _split_amount_by_invoice_share(jo_so_info, knocked_off):
+			if share_amount <= 0:
+				continue
+			if info["reference_type"] == reference_type and info["reference_name"] == reference_name:
+				results.append(frappe._dict({
+					"payment_entry": row.journal_entry,
+					"amount": share_amount,
+					"posting_date": row.posting_date,
+					"currency": row.currency_code,
+					"currency_symbol": row.currency_symbol,
+					"voucher_type": "Journal Entry",
+				}))
+
+	return results
 
 @frappe.whitelist()
 def fetch_payment_details(name):
 	payment = frappe.db.sql("""
-		SELECT 
+		SELECT
 			t.parent AS payment_entry,
 			t.allocate_amount AS amount,
 			p.posting_date,
-			c.symbol AS currency
+			c.symbol AS currency,
+			'Payment Entry' AS voucher_type
 		FROM `tabJob Order table` t
 		JOIN `tabPayment Entry` p
 			ON p.name = t.parent
 		JOIN `tabCurrency` c
 			ON c.name = p.paid_to_account_currency
-		WHERE 
+		WHERE
 			t.parenttype = 'Payment Entry'
 			AND t.reference_type = 'Supply Order Data'
 			AND t.reference_name = %s
 			AND p.docstatus = 1
-	""", (name), as_dict=True)
+	""", (name,), as_dict=True)
+
+	journal_entries = _fetch_journal_entry_payments("Supply Order Data", name)
+	for je in journal_entries:
+		je["currency"] = je.pop("currency_symbol")
+
+	payment = list(payment) + journal_entries
+	payment.sort(key=lambda d: d.get("posting_date") or "")
 
 	sales_invoice = frappe.db.sql("""
-		SELECT 
+		SELECT
 			DISTINCT(si.parent) AS sales_invoice,
 			s.grand_total as amount,
 			s.outstanding_amount AS outstanding_amount,
@@ -416,6 +502,6 @@ def fetch_payment_details(name):
 		WHERE
 			si.supply_order_data = %s
 		AND s.docstatus = 1
-		""", (name), as_dict=True)
+		""", (name,), as_dict=True)
 
 	return payment, sales_invoice

@@ -7,13 +7,124 @@ frappe.ui.form.on('Sales Invoice', {
     company: function(frm) {
         frm.trigger("hide_section");
     },
+
+    get_advance_payment_details_test: function(frm) {
+
+        if (!frm.doc.name) {
+            return;
+        }
+
+        frappe.call({
+            method: "cyrix.custom_py.advance_popup.set_advances",
+            args: {
+                name: frm.doc.name,
+            },
+
+            callback: function(r) {
+
+                let wrapper = frm.fields_dict.custom_advance_status.$wrapper;
+
+                wrapper.empty();
+
+                if (!r.message || !r.message.length) {
+                    wrapper.html(`
+                        <div style="
+                            padding: 12px;
+                            border: 1px solid #e5e7eb;
+                            border-radius: 6px;
+                            color: #6b7280;
+                            background: #f8f9fa;
+                        ">
+                            ${__("No advance available")}
+                        </div>
+                    `);
+                    return;
+                }
+
+                let currency = frm.doc.currency;
+
+                let total_advance = 0;
+                let total_allocated = 0;
+
+                r.message.forEach(row => {
+                    total_advance += flt(row.advance_amount);
+                });
+
+                let total_available = total_advance;
+
+                let html = `
+                    <div class="custom-advance-card" style="
+                        padding: 1px;
+                        border-radius: 8px;
+                        background: #ffffff;
+                        border: 1px solid #ffffff;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    ">
+                        <div style="
+                            color: #16803c;
+                            font-size: 12px;
+                            margin-bottom: 5px;
+                        ">
+                            ${__("Available Advance")}
+                        </div>
+
+                        <div style="
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #16803c;
+                        ">
+                            ${format_currency(total_available, currency)}
+                        </div>
+
+                        <div style="
+                            font-size: 11px;
+                            font-weight: 500;
+                            color: #101411;
+                            margin-top: 5px;
+                        ">
+                            ${__("Click to Get Advances")}
+                        </div>
+                    </div>
+                `;
+
+                wrapper.html(html);
+
+                // Click HTML → scroll to Advances table
+                wrapper.find(".custom-advance-card").on("click", function() {
+
+                    frm.scroll_to_field("advances");
+
+                    // Optional: highlight the table
+                    let advance_wrapper = frm.fields_dict.advances.$wrapper;
+
+                    advance_wrapper.css({
+                        "transition": "background-color 0.3s",
+                        "background-color": "white"
+                    });
+
+                    frm.trigger("get_advances")
+
+
+                    setTimeout(() => {
+                        advance_wrapper.css("background-color", "");
+                    }, 1500);
+                });
+            }
+        });
+    },
+
     refresh: function(frm) {
         frm.trigger("hide_section");
+        frm.trigger("get_advance_payment_details_test");
     },
     onload: function(frm) {
         frappe.run_serially([
             () => {
                 frm.trigger("hide_section")
+            },
+            () => {
+                frm.trigger("get_advance_payment_details_test");
             },
             () => {
                 if (frm.doc.__custom_items_to_override) {

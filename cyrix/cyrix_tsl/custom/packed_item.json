@@ -4,7 +4,8 @@
  "doctype": "Packed Item",
  "links": [],
  "property_setters": [
-  {"_assign": null,
+  {
+   "_assign": null,
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
@@ -16,7 +17,7 @@
    "field_name": "rate",
    "idx": 0,
    "is_system_generated": 1,
-   "modified": "2026-08-27 11:28:49.314294",
+   "modified": "2026-09-09 12:45:22.644457",
    "modified_by": "Administrator",
    "module": null,
    "name": "Packed Item-rate-read_only",

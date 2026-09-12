@@ -1064,6 +1064,14 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 		target.cost_center = None
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
+	def filter_uninvoiced_items(source_doc):
+		# Include only items where invoiced_qty < qty
+		return (source_doc.invoiced_qty or 0) < source_doc.qty
+
+	def update_uninvoiced_qty(source_doc, target_doc, source_parent):
+		# Adjust qty to be only the uninvoiced portion
+		target_doc.qty = source_doc.qty - (source_doc.invoiced_qty or 0)
+		
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
@@ -1079,9 +1087,12 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 				"field_map": {
 					"name": "qi_reference", # TODO: Overrided line
 				},
-				"postprocess": update_item,
-				"condition": lambda row: not row.is_alternative and select_item(row),
-			},
+				"postprocess": update_item and update_uninvoiced_qty,
+				"condition": lambda row: (
+					not row.is_alternative
+					and select_item(row)
+					and filter_uninvoiced_items(row)
+				),			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 		},

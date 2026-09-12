@@ -427,7 +427,7 @@ frappe.ui.form.on('Quotation', {
             () => frm.trigger("fetch_supply_order_data"),
             () => frm.trigger("create_sales_invoice"),
             () => {
-                if(frm.doc.docstatus == 1 && frm.doc.workflow_state == "Approved by Customer"){
+                if(frm.doc.docstatus == 1 && frm.doc.workflow_state == "Approved by Customer" && frm.doc.invoiced < 100){
 				    frm.add_custom_button(__('Invoice Request'), function(){
                         let allowed_customers = [];
 
@@ -661,7 +661,7 @@ frappe.ui.form.on('Quotation', {
         }    
     },
     create_sales_invoice: function(frm){
-        if(frm.doc.docstatus == 1 && frm.doc.workflow_state == 'Approved by Customer'){
+        if(frm.doc.docstatus == 1 && frm.doc.workflow_state == 'Approved by Customer' && frm.doc.invoiced < 100){
             frm.add_custom_button(__('Sales Invoice'), function(){
                 let allowed_customers = [];
 

@@ -50,7 +50,7 @@ frappe.ui.form.on("Invoice Request", {
             // Custom filter logic
             return {
                 filters: {
-                    'quotation_type': ['in', ['Customer Quotation - Repair','Customer Quotation - R - Revised']],
+                    'quotation_type': ['in', ['Merged Quotation','Customer Quotation - Repair','Customer Quotation - R - Revised']],
 					'workflow_state': ['in', ['Approved by Customer']],
                     
                 }
@@ -62,7 +62,7 @@ frappe.ui.form.on("Invoice Request", {
             // Custom filter logic
             return {
                 filters: {
-                    'quotation_type': ['in', ['Customer Quotation - Supply','Customer Quotation - S - Revised']],
+                    'quotation_type': ['in', ['Merged Quotation','Customer Quotation - Supply','Customer Quotation - S - Revised']],
                     'workflow_state': ['in', ['Approved by Customer']],
                 }
             };
@@ -88,7 +88,7 @@ frappe.ui.form.on('Invoice Creation', {
             let q = r.message;
 
             let valid_types = [
-				'Customer Quotation - Repair','Customer Quotation - R - Revised'
+				'Merged Quotation','Customer Quotation - Repair','Customer Quotation - R - Revised'
             ];
 
             let valid =
@@ -155,7 +155,7 @@ frappe.ui.form.on('SOD IV Creation', {
             let q = r.message;
 
             // Check whether quotation satisfies the Link field filters
-            let valid_types = ['Customer Quotation - Supply','Customer Quotation - S - Revised'];
+            let valid_types = ['Merged Quotation','Customer Quotation - Supply','Customer Quotation - S - Revised'];
 
             let valid =
                 q &&

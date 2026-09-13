@@ -27,13 +27,13 @@ class SupplyOrderData(Document):
 		elif 0 < ordered < 100:
 			supply_status = "Partially Ordered"
 			
-		elif received == 100 and delivered == 100:
-			supply_status = "Delivered"
-
 		elif 0 < delivered < 100:
 			supply_status = "Partially Delivered"
 
-		elif received == 100 and delivered == 0:
+		elif delivered == 100:
+			supply_status = "Delivered"
+
+		elif received >= 100 and delivered == 0:
 			supply_status = "To Deliver"
 
 		elif 0 < received < 100:
@@ -69,8 +69,8 @@ class SupplyOrderData(Document):
 		for i in self.get("material_list"):
 			if i.delivered_quantity:
 				delivered_qty += float(i.delivered_quantity)
-		if self.get("received_quantity") > 0:
-			delivered_percentage = (delivered_qty/self.get("received_quantity"))*100
+		if self.get("quantity") > 0:
+			delivered_percentage = (delivered_qty/self.get("quantity"))*100
 		else:
 			delivered_percentage = 0
 

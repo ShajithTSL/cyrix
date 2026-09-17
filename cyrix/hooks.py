@@ -109,9 +109,9 @@ jinja = {
 		"cyrix.custom_py.jinja.target_master",
 		"cyrix.custom_py.jinja.get_receivable",
 		"cyrix.custom_py.jinja.get_technician_service_report",
-		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.weekly_sales",
-		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.daily_sales",
-		"cyrix.cyrix_tsl.doctype.wo_approval.wo_approval.get_amc",
+		"cyrix.cyrix_tsl.doctype.report_dashboard.report_dashboard.weekly_sales",
+		"cyrix.cyrix_tsl.doctype.report_dashboard.report_dashboard.daily_sales",
+		"cyrix.cyrix_tsl.doctype.report_dashboard.report_dashboard.get_amc",
 
 		"cyrix.hr_py.salary_register.salary_register",
 		"cyrix.hr_py.salary_register.salary_register1",
@@ -372,23 +372,26 @@ utils.get_holidays_for_employee = hr_utils.get_holidays_for_employee
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"cyrix.tasks.all"
-# 	],
-# 	"daily": [
-# 		"cyrix.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"cyrix.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"cyrix.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"cyrix.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"daily": [
+		"cyrix.custom_py.mail_notification.amc",
+	],
+	"daily": [
+        "cyrix.cyrix_tsl.doctype.maintenance_contract.maintenance_contract.send_maintenance_contract_schedule_emails"
+    ]
+	# "all": [
+	# 	"cyrix.tasks.all"
+	# ],
+	# "hourly": [
+	# 	"cyrix.tasks.hourly"
+	# ],
+	# "weekly": [
+	# 	"cyrix.tasks.weekly"
+	# ],
+	# "monthly": [
+	# 	"cyrix.tasks.monthly"
+	# ],
+}
 
 # Testing
 # -------

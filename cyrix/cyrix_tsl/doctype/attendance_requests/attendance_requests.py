@@ -5,12 +5,10 @@ import frappe
 import requests
 from frappe.model.document import Document
 from frappe.utils import nowdate, date_diff, add_years, add_days, today, getdate,get_url_to_form
-from frappe.core.doctype.communication.email import make
 from cyrix.custom_py.boot import get_bootinfo as info
 from frappe import _
-from frappe.core.doctype.communication.email import _make as make_communication
 
-
+from cyrix.custom_py.email_notification import sendmail
 class AttendanceRequests(Document):
 	pass
 
@@ -48,8 +46,6 @@ def check(self,method):
 
 	if self.workflow_state == "Under HR":
 	
-		from frappe.core.doctype.communication.email import make
-
 		subject = "Attendance Request"
 
 		attendance_link = f"https://erp.cyrix-tsl.com/app/attendance-requests/{self.name}"
@@ -199,14 +195,14 @@ def check(self,method):
 
 		
 		# Create Communication
-		make(
-			doctype=self.doctype,
-			name=self.name,
-			subject=subject,
-			content=message,
+		sendmail(
+			self,
+			message,
+			subject,
+			sender = "no-reply@cyrix-tsl.com",
 			recipients=info().get("hr_cc").get(self.company),
-			communication_type="Communication",
-			send_email=1
+			attachments = None, 
+			cc = None
 		)
 
 		frappe.msgprint("Attendance request sent successfully to HR")

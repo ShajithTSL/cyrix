@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestWOApproval(FrappeTestCase):
+class TestReportDashboard(FrappeTestCase):
 	pass

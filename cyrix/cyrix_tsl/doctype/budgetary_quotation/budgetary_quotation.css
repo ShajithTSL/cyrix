@@ -5,10 +5,10 @@
             box-sizing: border-box;
         }
 
-        .container {
+        /* .container {
             max-width: 1200px;
             margin: 0 auto;
-        }
+        } */
 
         /* Enhanced header with elegant typography and spacing */
         .header {

@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 
 
-class WOApproval(Document):
+class ReportDashboard(Document):
 	pass
 
 def weekly_sales(self):

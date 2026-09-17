@@ -862,3 +862,24 @@ def create_leave_rejoining():
 					rejoin.save()
 				except Exception as e:
 					print(f"Error creating rejoining form for {leave.employee}: {e}")
+
+
+
+
+@frappe.whitelist()
+def create_leave_rejoining_test():
+	leave_applications = frappe.db.get_all("Leave Application Form",{"docstatus":1,"name":"HR-LAP-2026-00015"}, ['*'])
+	 
+
+	for leave in leave_applications:
+		if not frappe.db.exists("Leave Rejoining Form", {'leave_application': leave.name, "emp_no": leave.employee}):
+			try:
+				rejoin = frappe.new_doc("Leave Rejoining Form")
+				rejoin.emp_no = leave.employee
+				rejoin.leave_application = leave.name
+				rejoin.from_date = leave.from_date
+				rejoin.to_date = leave.to_date
+				rejoin.rejoining_date = add_days(leave.to_date, 1) 
+				rejoin.save()
+			except Exception as e:
+				print(f"Error creating rejoining form for {leave.employee}: {e}")

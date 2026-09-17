@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_rename": 1,
  "autoname": "C-DL-.YY.-.######",
  "creation": "2026-05-13 14:34:01.285895",
@@ -49,11 +50,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-14 09:11:18.085171",
+ "modified": "2026-09-16 15:19:43.174143",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Document Log",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

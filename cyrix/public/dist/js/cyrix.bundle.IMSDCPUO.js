@@ -87,7 +87,7 @@
   $(document).on("form-refresh", function(e, frm) {
     setTimeout(() => move_activity_to_sidebar(frm), 200);
   });
-  var SKIP_DOCTYPES = ["User", "Print Format Builder", "Evaluation Report"];
+  var SKIP_DOCTYPES = ["User", "Print Format Builder", "Evaluation Report", "Job Order Data", "Supply Order Data"];
   var $panel;
   var $handle;
   var $anchor;
@@ -701,4 +701,4 @@
     });
   })();
 })();
-//# sourceMappingURL=cyrix.bundle.VODYTRTE.js.map
+//# sourceMappingURL=cyrix.bundle.IMSDCPUO.js.map

@@ -3,6 +3,9 @@ from frappe import _
 from frappe.model.document import Document
 from cyrix.custom_py import utils
 from datetime import datetime
+from frappe.utils import getdate, add_days, today
+from html import escape as escape_html
+import json
 
 from cyrix.custom_py.bulk_import_utils import bulk_get_or_create, bulk_activate_serials
 
@@ -426,3 +429,1432 @@ def create_qtn(source):
         })
 
     return new_doc
+
+
+# Maintainance Schedule mail
+
+
+# ============================================================
+# GENERATE SCHEDULE DATA
+# ============================================================
+
+def generate_schedule_data(
+    from_date,
+    to_date,
+    interval,
+    existing_data=None
+):
+    """
+    Generate schedule rows between From Date and To Date.
+
+    Existing descriptions and email flags are preserved
+    for matching schedule dates.
+    """
+
+    if not from_date or not to_date or not interval:
+        return []
+
+    from_date = getdate(from_date)
+    to_date = getdate(to_date)
+
+    try:
+        interval = int(interval)
+    except Exception:
+        return []
+
+    if interval <= 0:
+        return []
+
+    existing_map = {}
+
+    # --------------------------------------------------------
+    # Preserve existing schedule information
+    # --------------------------------------------------------
+
+    if existing_data:
+
+        try:
+
+            for row in existing_data:
+
+                if not isinstance(row, dict):
+                    continue
+
+                schedule_date = row.get("date")
+
+                if not schedule_date:
+                    continue
+
+                try:
+                    schedule_date = getdate(schedule_date)
+                except Exception:
+                    continue
+
+                existing_map[str(schedule_date)] = {
+                    "description": (
+                        row.get("description") or ""
+                    ),
+                    "email_7_days_sent": bool(
+                        row.get(
+                            "email_7_days_sent",
+                            False
+                        )
+                    ),
+                    "email_2_days_sent": bool(
+                        row.get(
+                            "email_2_days_sent",
+                            False
+                        )
+                    ),
+                }
+
+        except Exception:
+            existing_map = {}
+
+    # --------------------------------------------------------
+    # Generate schedule
+    # --------------------------------------------------------
+
+    schedule = []
+
+    current_date = from_date
+
+    while current_date <= to_date:
+
+        date_string = str(current_date)
+
+        old_data = existing_map.get(
+            date_string,
+            {
+                "description": "",
+                "email_7_days_sent": False,
+                "email_2_days_sent": False,
+            }
+        )
+
+        schedule.append(
+            {
+                "date": date_string,
+                "description": (
+                    old_data.get("description") or ""
+                ),
+                "email_7_days_sent": bool(
+                    old_data.get(
+                        "email_7_days_sent",
+                        False
+                    )
+                ),
+                "email_2_days_sent": bool(
+                    old_data.get(
+                        "email_2_days_sent",
+                        False
+                    )
+                ),
+            }
+        )
+
+        current_date = add_days(
+            current_date,
+            interval
+        )
+
+    return schedule
+
+
+# ============================================================
+# BACKFILL ALL MAINTENANCE CONTRACT ITEMS
+# ============================================================
+
+def generate_all_maintenance_contract_schedule_data():
+
+    items = frappe.get_all(
+        "Maintenance Contract Item",
+        fields=[
+            "name",
+            "parent",
+            "from_date",
+            "to_date",
+            "interval",
+            "schedule_data",
+        ],
+        order_by="modified asc",
+    )
+
+    updated = 0
+    skipped = 0
+    errors = []
+
+    for item in items:
+
+        try:
+
+            if (
+                not item.from_date
+                or not item.to_date
+                or not item.interval
+            ):
+                skipped += 1
+                continue
+
+            existing_data = []
+
+            if item.schedule_data:
+
+                try:
+
+                    existing_data = json.loads(
+                        item.schedule_data
+                    )
+
+                    if not isinstance(
+                        existing_data,
+                        list
+                    ):
+                        existing_data = []
+
+                except Exception:
+
+                    existing_data = []
+
+            schedule = generate_schedule_data(
+                item.from_date,
+                item.to_date,
+                item.interval,
+                existing_data,
+            )
+
+            frappe.db.set_value(
+                "Maintenance Contract Item",
+                item.name,
+                "schedule_data",
+                frappe.as_json(schedule),
+                update_modified=False,
+            )
+
+            updated += 1
+
+        except Exception as e:
+
+            errors.append(
+                {
+                    "item": item.name,
+                    "error": str(e),
+                }
+            )
+
+    frappe.db.commit()
+
+    return {
+        "items_checked": len(items),
+        "updated": updated,
+        "skipped": skipped,
+        "errors": errors,
+    }
+
+
+# ============================================================
+# FORMAT DATE
+# ============================================================
+
+def format_schedule_date(value):
+
+    if not value:
+        return ""
+
+    try:
+
+        return getdate(value).strftime(
+            "%d-%b-%Y"
+        )
+
+    except Exception:
+
+        return str(value)
+
+
+# ============================================================
+# GET ITEM DETAILS
+# ============================================================
+
+def get_item_details(item_code):
+
+    if not item_code:
+
+        return {
+            "item_code": "",
+            "item_name": "",
+            "description": "",
+        }
+
+    try:
+
+        item = frappe.db.get_value(
+            "Item",
+            item_code,
+            [
+                "item_code",
+                "item_name",
+                "description",
+            ],
+            as_dict=True,
+        )
+
+        if not item:
+
+            return {
+                "item_code": item_code,
+                "item_name": "",
+                "description": "",
+            }
+
+        return {
+            "item_code": (
+                item.item_code
+                or item_code
+            ),
+            "item_name": (
+                item.item_name
+                or ""
+            ),
+            "description": (
+                item.description
+                or ""
+            ),
+        }
+
+    except Exception:
+
+        return {
+            "item_code": item_code,
+            "item_name": "",
+            "description": "",
+        }
+
+
+# ============================================================
+# GET CUSTOMER SUPPORT AND MANAGER FROM BRANCH
+# ============================================================
+
+def get_branch_email_recipients(branch):
+
+    if not branch:
+        return [], []
+
+    branch_doc = frappe.get_doc(
+        "Branch",
+        branch
+    )
+
+    recipients = []
+    cc = []
+
+    # --------------------------------------------------------
+    # Customer Support -> TO
+    # --------------------------------------------------------
+
+    customer_support = (
+        getattr(
+            branch_doc,
+            "customer_support",
+            None
+        )
+        or ""
+    )
+
+    if customer_support:
+
+        if isinstance(customer_support, str):
+
+            recipients = [
+                email.strip()
+                for email in customer_support.split(",")
+                if email.strip()
+            ]
+
+    # --------------------------------------------------------
+    # Manager -> CC
+    # --------------------------------------------------------
+
+    manager = (
+        getattr(
+            branch_doc,
+            "manager",
+            None
+        )
+        or ""
+    )
+
+    if manager:
+
+        if isinstance(manager, str):
+
+            cc = [
+                email.strip()
+                for email in manager.split(",")
+                if email.strip()
+            ]
+
+    # --------------------------------------------------------
+    # Remove duplicates
+    # --------------------------------------------------------
+
+    recipients = list(
+        dict.fromkeys(recipients)
+    )
+
+    cc = list(
+        dict.fromkeys(cc)
+    )
+
+    # --------------------------------------------------------
+    # Do not keep Manager in TO
+    # --------------------------------------------------------
+
+    cc = [
+        email
+        for email in cc
+        if email not in recipients
+    ]
+
+    return recipients, cc
+
+
+# ============================================================
+# SEND MAINTENANCE SCHEDULE EMAIL
+# ============================================================
+
+def send_schedule_email(
+    contract,
+    item,
+    schedule_row,
+    reminder_type,
+):
+    """
+    Create Communication and send email using
+    Frappe Communication.make functionality.
+
+    Recipients are taken from Company -> info.
+    """
+
+    schedule_date = schedule_row.get(
+        "date"
+    )
+
+    schedule_description = (
+        schedule_row.get(
+            "description"
+        )
+        or ""
+    )
+
+    # --------------------------------------------------------
+    # Get company recipients
+    # --------------------------------------------------------
+
+    recipients, cc = get_branch_email_recipients(
+    contract.branch
+)
+
+    if not recipients:
+
+        frappe.throw(
+            "No Customer Support email found in "
+            f"Branch: {contract.branch}"
+        )
+
+    # --------------------------------------------------------
+    # Customer
+    # --------------------------------------------------------
+
+    customer_name = (
+        getattr(
+            contract,
+            "customer",
+            None
+        )
+        or getattr(
+            contract,
+            "customer",
+            None
+        )
+        or ""
+    )
+
+    # --------------------------------------------------------
+    # Item details
+    # --------------------------------------------------------
+
+    item_code = (
+        getattr(
+            item,
+            "item_code",
+            None
+        )
+        or getattr(
+            item,
+            "item",
+            None
+        )
+        or ""
+    )
+
+    item_name = (
+        getattr(
+            item,
+            "item_name",
+            None
+        )
+        or ""
+    )
+
+    item_description = (
+        getattr(
+            item,
+            "description",
+            None
+        )
+        or ""
+    )
+
+    # --------------------------------------------------------
+    # Item master lookup
+    # --------------------------------------------------------
+
+    item_details = get_item_details(
+        item_code
+    )
+
+    if not item_name:
+
+        item_name = (
+            item_details.get(
+                "item_name"
+            )
+            or ""
+        )
+
+    if not item_description:
+
+        item_description = (
+            item_details.get(
+                "description"
+            )
+            or ""
+        )
+
+    # --------------------------------------------------------
+    # Child item fields
+    # --------------------------------------------------------
+
+    from_date = getattr(
+        item,
+        "from_date",
+        None
+    )
+
+    to_date = getattr(
+        item,
+        "to_date",
+        None
+    )
+
+    interval = getattr(
+        item,
+        "interval",
+        None
+    )
+
+    # --------------------------------------------------------
+    # HTML escape
+    # --------------------------------------------------------
+
+    contract_name_html = escape_html(
+        str(
+            contract.name
+            or ""
+        )
+    )
+
+    customer_html = escape_html(
+        str(
+            customer_name
+            or ""
+        )
+    )
+
+    item_code_html = escape_html(
+        str(
+            item_code
+            or ""
+        )
+    )
+
+    item_name_html = escape_html(
+        str(
+            item_name
+            or ""
+        )
+    )
+
+    item_description_html = escape_html(
+        str(
+            item_description
+            or ""
+        )
+    )
+
+    schedule_description_html = escape_html(
+        str(
+            schedule_description
+            or ""
+        )
+    )
+
+    from_date_html = escape_html(
+        format_schedule_date(
+            from_date
+        )
+    )
+
+    to_date_html = escape_html(
+        format_schedule_date(
+            to_date
+        )
+    )
+
+    schedule_date_html = escape_html(
+        format_schedule_date(
+            schedule_date
+        )
+    )
+
+    interval_html = escape_html(
+        str(
+            interval
+            or ""
+        )
+    )
+
+    reminder_html = escape_html(
+        str(
+            reminder_type
+            or ""
+        )
+    )
+
+    # --------------------------------------------------------
+    # Reminder colors
+    # --------------------------------------------------------
+
+    if reminder_type == "7 Days Before":
+
+        reminder_color = "#2563eb"
+        reminder_background = "#eff6ff"
+
+    else:
+
+        reminder_color = "#dc2626"
+        reminder_background = "#fef2f2"
+
+    # --------------------------------------------------------
+    # Subject
+    # --------------------------------------------------------
+
+    subject = (
+        "Maintenance Schedule Reminder - "
+        f"{contract.name} - "
+        f"{format_schedule_date(schedule_date)}"
+    )
+
+    # --------------------------------------------------------
+    # HTML EMAIL
+    # --------------------------------------------------------
+
+    message = f"""
+    <div style="
+        margin:0;
+        padding:30px 15px;
+        background:#f5f7fa;
+        font-family:Arial,Helvetica,sans-serif;
+        color:#1f2937;
+    ">
+
+        <div style="
+            max-width:850px;
+            margin:0 auto;
+            background:#ffffff;
+            border:1px solid #e5e7eb;
+            border-radius:10px;
+            overflow:hidden;
+        ">
+
+            <!-- HEADER -->
+
+            <div style="
+                background:#1f2937;
+                padding:24px 30px;
+                color:#ffffff;
+            ">
+
+                <div style="
+                    font-size:22px;
+                    font-weight:600;
+                    margin-bottom:6px;
+                ">
+                    Maintenance Schedule Reminder
+                </div>
+
+                <div style="
+                    font-size:13px;
+                    color:#d1d5db;
+                ">
+                    Scheduled maintenance notification
+                </div>
+
+            </div>
+
+
+            <!-- REMINDER -->
+
+            <div style="
+                margin:24px 30px 10px 30px;
+                padding:14px 18px;
+                background:{reminder_background};
+                border-left:4px solid {reminder_color};
+                border-radius:5px;
+                color:{reminder_color};
+                font-size:15px;
+                font-weight:600;
+            ">
+
+                {reminder_html}
+
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+
+                Scheduled Date:
+                {schedule_date_html}
+
+            </div>
+
+
+            <!-- CONTRACT DETAILS -->
+
+            <div style="
+                padding:10px 30px 20px 30px;
+            ">
+
+                <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    style="
+                        border-collapse:collapse;
+                        font-size:14px;
+                    "
+                >
+
+                    <tr>
+
+                        <td style="
+                            width:180px;
+                            padding:9px 0;
+                            color:#6b7280;
+                            font-weight:600;
+                        ">
+                            Maintenance Contract
+                        </td>
+
+                        <td style="
+                            padding:9px 0;
+                            color:#111827;
+                            font-weight:600;
+                        ">
+                            {contract_name_html}
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td style="
+                            padding:9px 0;
+                            color:#6b7280;
+                            font-weight:600;
+                        ">
+                            Customer
+                        </td>
+
+                        <td style="
+                            padding:9px 0;
+                            color:#111827;
+                        ">
+                            {customer_html}
+                        </td>
+
+                    </tr>
+
+                </table>
+
+            </div>
+
+
+            <!-- ITEM DETAILS -->
+
+            <div style="
+                padding:0 30px 25px 30px;
+            ">
+
+                <div style="
+                    font-size:16px;
+                    font-weight:600;
+                    color:#111827;
+                    margin-bottom:12px;
+                ">
+                    Maintenance Item Details
+                </div>
+
+                <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    style="
+                        border-collapse:collapse;
+                        border:1px solid #d1d5db;
+                        font-size:13px;
+                    "
+                >
+
+                    <thead>
+
+                        <tr style="
+                            background:#f3f4f6;
+                        ">
+
+                            <th style="
+                                border:1px solid #d1d5db;
+                                padding:11px 10px;
+                                text-align:left;
+                            ">
+                                Item Code
+                            </th>
+
+                            <th style="
+                                border:1px solid #d1d5db;
+                                padding:11px 10px;
+                                text-align:left;
+                            ">
+                                Item Name
+                            </th>
+
+                            <th style="
+                                border:1px solid #d1d5db;
+                                padding:11px 10px;
+                                text-align:left;
+                            ">
+                                Description
+                            </th>
+
+                            <th style="
+                                border:1px solid #d1d5db;
+                                padding:11px 10px;
+                                text-align:center;
+                            ">
+                                Interval
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+
+                            <td style="
+                                border:1px solid #d1d5db;
+                                padding:12px 10px;
+                                vertical-align:top;
+                            ">
+                                {item_code_html}
+                            </td>
+
+                            <td style="
+                                border:1px solid #d1d5db;
+                                padding:12px 10px;
+                                vertical-align:top;
+                                font-weight:600;
+                            ">
+                                {item_name_html}
+                            </td>
+
+                            <td style="
+                                border:1px solid #d1d5db;
+                                padding:12px 10px;
+                                vertical-align:top;
+                            ">
+                                {item_description_html}
+                            </td>
+
+                            <td style="
+                                border:1px solid #d1d5db;
+                                padding:12px 10px;
+                                text-align:center;
+                                vertical-align:top;
+                            ">
+                                {interval_html} days
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- SCHEDULE DETAILS -->
+
+            <div style="
+                padding:0 30px 25px 30px;
+            ">
+
+                <div style="
+                    font-size:16px;
+                    font-weight:600;
+                    color:#111827;
+                    margin-bottom:12px;
+                ">
+                    Schedule Details
+                </div>
+
+                <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    style="
+                        border-collapse:collapse;
+                        border:1px solid #d1d5db;
+                        font-size:13px;
+                    "
+                >
+
+                    <thead>
+
+                        <tr style="
+                            background:#f3f4f6;
+                        ">
+
+                            <th style="
+                                border:1px solid #d1d5db;
+                                padding:11px 10px;
+                                text-align:left;
+                            ">
+                                From Date
+                            </th>
+
+                            <th style="
+                                border:1px solid #d1d5db;
+                                padding:11px 10px;
+                                text-align:left;
+                            ">
+                                To Date
+                            </th>
+
+                            <th style="
+                                border:1px solid #d1d5db;
+                                padding:11px 10px;
+                                text-align:left;
+                            ">
+                                Schedule Date
+                            </th>
+
+                            <th style="
+                                border:1px solid #d1d5db;
+                                padding:11px 10px;
+                                text-align:left;
+                            ">
+                                Description
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+
+                            <td style="
+                                border:1px solid #d1d5db;
+                                padding:12px 10px;
+                            ">
+                                {from_date_html}
+                            </td>
+
+                            <td style="
+                                border:1px solid #d1d5db;
+                                padding:12px 10px;
+                            ">
+                                {to_date_html}
+                            </td>
+
+                            <td style="
+                                border:1px solid #d1d5db;
+                                padding:12px 10px;
+                                font-weight:600;
+                            ">
+                                {schedule_date_html}
+                            </td>
+
+                            <td style="
+                                border:1px solid #d1d5db;
+                                padding:12px 10px;
+                            ">
+                                {schedule_description_html}
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- NOTICE -->
+
+            <div style="
+                margin:0 30px 25px 30px;
+                padding:16px 18px;
+                background:#f9fafb;
+                border:1px solid #e5e7eb;
+                border-radius:6px;
+                font-size:13px;
+                color:#4b5563;
+                line-height:1.6;
+            ">
+
+                This is an automated maintenance schedule reminder.
+                Please review the above maintenance item and arrange
+                the required service accordingly.
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div style="
+                padding:18px 30px;
+                background:#f9fafb;
+                border-top:1px solid #e5e7eb;
+                font-size:11px;
+                color:#9ca3af;
+                text-align:center;
+            ">
+
+                This email was generated automatically by ERPNext.
+
+            </div>
+
+        </div>
+
+    </div>
+    """
+
+    # --------------------------------------------------------
+    # CREATE COMMUNICATION + SEND
+    # --------------------------------------------------------
+
+    from frappe.core.doctype.communication.email import make
+
+    make(
+        doctype="Maintenance Contract",
+        name=contract.name,
+        subject=subject,
+        content=message,
+        recipients=recipients,
+        cc=cc,
+        communication_type="Communication",
+        send_email=1,
+    )
+    return recipients
+
+
+# ============================================================
+# MAIN EMAIL FUNCTION
+# ============================================================
+
+def send_maintenance_contract_schedule_email():
+
+    today_date = getdate(today())
+    today_string = today_date.strftime(
+        "%Y-%m-%d"
+    )
+
+    contracts_checked = 0
+    items_checked = 0
+    schedule_rows_checked = 0
+
+    seven_day_emails = 0
+    two_day_emails = 0
+
+    skipped_no_schedule = 0
+
+    errors = []
+    debug_matches = []
+
+    # --------------------------------------------------------
+    # Get Contracts
+    # --------------------------------------------------------
+
+    contracts = frappe.get_all(
+        "Maintenance Contract",
+        fields=[
+            "name",
+            "company",
+            "customer",
+            "customer",
+        ],
+        order_by="modified asc",
+    )
+
+    contracts_checked = len(
+        contracts
+    )
+
+    # --------------------------------------------------------
+    # Process Contracts
+    # --------------------------------------------------------
+
+    for contract_data in contracts:
+
+        try:
+
+            contract = frappe.get_doc(
+                "Maintenance Contract",
+                contract_data.name
+            )
+
+            # ------------------------------------------------
+            # Child Items
+            # ------------------------------------------------
+
+            for item in contract.items:
+
+                items_checked += 1
+
+                # --------------------------------------------
+                # No schedule
+                # --------------------------------------------
+
+                if not item.schedule_data:
+
+                    skipped_no_schedule += 1
+                    continue
+
+                # --------------------------------------------
+                # Parse JSON
+                # --------------------------------------------
+
+                try:
+
+                    schedule = json.loads(
+                        item.schedule_data
+                    )
+
+                except Exception as e:
+
+                    errors.append(
+                        {
+                            "contract": contract.name,
+                            "item": item.name,
+                            "error": (
+                                "Invalid schedule_data: "
+                                + str(e)
+                            ),
+                        }
+                    )
+
+                    continue
+
+                if not isinstance(
+                    schedule,
+                    list
+                ):
+
+                    skipped_no_schedule += 1
+                    continue
+
+                # --------------------------------------------
+                # Schedule rows
+                # --------------------------------------------
+
+                for schedule_row in schedule:
+
+                    if not isinstance(
+                        schedule_row,
+                        dict
+                    ):
+                        continue
+
+                    schedule_date = (
+                        schedule_row.get(
+                            "date"
+                        )
+                    )
+
+                    if not schedule_date:
+                        continue
+
+                    schedule_rows_checked += 1
+
+                    # ----------------------------------------
+                    # Date
+                    # ----------------------------------------
+
+                    try:
+
+                        schedule_date_obj = getdate(
+                            schedule_date
+                        )
+
+                    except Exception as e:
+
+                        errors.append(
+                            {
+                                "contract": contract.name,
+                                "item": item.name,
+                                "schedule_date": str(
+                                    schedule_date
+                                ),
+                                "error": (
+                                    "Invalid schedule date: "
+                                    + str(e)
+                                ),
+                            }
+                        )
+
+                        continue
+
+                    schedule_string = (
+                        schedule_date_obj.strftime(
+                            "%Y-%m-%d"
+                        )
+                    )
+
+                    # ----------------------------------------
+                    # Trigger dates
+                    # ----------------------------------------
+
+                    seven_day_date = add_days(
+                        schedule_date_obj,
+                        -7
+                    )
+
+                    two_day_date = add_days(
+                        schedule_date_obj,
+                        -2
+                    )
+
+                    seven_day_string = (
+                        seven_day_date.strftime(
+                            "%Y-%m-%d"
+                        )
+                    )
+
+                    two_day_string = (
+                        two_day_date.strftime(
+                            "%Y-%m-%d"
+                        )
+                    )
+
+                    # ----------------------------------------
+                    # Debug
+                    # ----------------------------------------
+
+                    if (
+                        today_string
+                        == seven_day_string
+                        or
+                        today_string
+                        == two_day_string
+                    ):
+
+                        debug_matches.append(
+                            {
+                                "contract": contract.name,
+                                "item": item.name,
+                                "schedule_date": schedule_string,
+                                "today": today_string,
+                                "seven_day_trigger_date": (
+                                    seven_day_string
+                                ),
+                                "two_day_trigger_date": (
+                                    two_day_string
+                                ),
+                                "email_7_days_sent": bool(
+                                    schedule_row.get(
+                                        "email_7_days_sent",
+                                        False
+                                    )
+                                ),
+                                "email_2_days_sent": bool(
+                                    schedule_row.get(
+                                        "email_2_days_sent",
+                                        False
+                                    )
+                                ),
+                            }
+                        )
+
+                    # ========================================
+                    # 7 DAYS BEFORE
+                    # ========================================
+
+                    if (
+                        today_string
+                        == seven_day_string
+                        and not bool(
+                            schedule_row.get(
+                                "email_7_days_sent",
+                                False
+                            )
+                        )
+                    ):
+
+                        try:
+
+                            send_schedule_email(
+                                contract=contract,
+                                item=item,
+                                schedule_row=schedule_row,
+                                reminder_type="7 Days Before",
+                            )
+
+                            # Only mark as sent
+                            # after successful send
+
+                            schedule_row[
+                                "email_7_days_sent"
+                            ] = True
+
+                            seven_day_emails += 1
+
+                        except Exception as e:
+
+                            errors.append(
+                                {
+                                    "contract": contract.name,
+                                    "item": item.name,
+                                    "schedule_date": schedule_string,
+                                    "reminder": "7 Days Before",
+                                    "error": str(e),
+                                }
+                            )
+
+                    # ========================================
+                    # 2 DAYS BEFORE
+                    # ========================================
+
+                    if (
+                        today_string
+                        == two_day_string
+                        and not bool(
+                            schedule_row.get(
+                                "email_2_days_sent",
+                                False
+                            )
+                        )
+                    ):
+
+                        try:
+
+                            send_schedule_email(
+                                contract=contract,
+                                item=item,
+                                schedule_row=schedule_row,
+                                reminder_type="2 Days Before",
+                            )
+
+                            # Only mark as sent
+                            # after successful send
+
+                            schedule_row[
+                                "email_2_days_sent"
+                            ] = True
+
+                            two_day_emails += 1
+
+                        except Exception as e:
+
+                            errors.append(
+                                {
+                                    "contract": contract.name,
+                                    "item": item.name,
+                                    "schedule_date": schedule_string,
+                                    "reminder": "2 Days Before",
+                                    "error": str(e),
+                                }
+                            )
+
+                # --------------------------------------------
+                # Save updated schedule
+                # --------------------------------------------
+
+                try:
+
+                    frappe.db.set_value(
+                        "Maintenance Contract Item",
+                        item.name,
+                        "schedule_data",
+                        frappe.as_json(
+                            schedule
+                        ),
+                        update_modified=False,
+                    )
+
+                except Exception as e:
+
+                    errors.append(
+                        {
+                            "contract": contract.name,
+                            "item": item.name,
+                            "error": (
+                                "Failed to save schedule_data: "
+                                + str(e)
+                            ),
+                        }
+                    )
+
+        except Exception as e:
+
+            errors.append(
+                {
+                    "contract": contract_data.name,
+                    "error": str(e),
+                }
+            )
+
+    # --------------------------------------------------------
+    # Commit
+    # --------------------------------------------------------
+
+    frappe.db.commit()
+
+    # --------------------------------------------------------
+    # Result
+    # --------------------------------------------------------
+
+    return {
+        "today": today_string,
+        "contracts_checked": contracts_checked,
+        "items_checked": items_checked,
+        "schedule_rows_checked": schedule_rows_checked,
+        "seven_day_emails": seven_day_emails,
+        "two_day_emails": two_day_emails,
+        "skipped_no_schedule": skipped_no_schedule,
+        "errors": errors,
+        "debug_matches": debug_matches,
+    }

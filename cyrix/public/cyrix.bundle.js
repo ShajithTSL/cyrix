@@ -102,7 +102,7 @@ $(document).on("form-refresh", function (e, frm) {
 	setTimeout(() => move_activity_to_sidebar(frm), 200);
 });
 //comment and activity
-const SKIP_DOCTYPES = ["User", "Print Format Builder","Evaluation Report"]; // add any you don't want touched
+const SKIP_DOCTYPES = ["User", "Print Format Builder","Evaluation Report","Job Order Data","Supply Order Data"]; // add any you don't want touched
 
 let $panel, $handle, $anchor;
 let active_frm = null;

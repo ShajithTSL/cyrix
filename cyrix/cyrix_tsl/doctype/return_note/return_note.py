@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-
+from datetime import datetime
 
 class ReturnNote(Document):
 	def on_submit(self):
@@ -35,7 +35,8 @@ class ReturnNote(Document):
 				doc.status = "CC-Comparison Client"
 		
 			doc.return_note = self.name
-			doc.delivery = self.posting_date
+			frappe.log_error("type",type(self.posting_date))
+			doc.delivery = datetime.strptime(str(self.posting_date), "%Y-%m-%d").date()
 			doc.return_note_date = self.posting_date
 			doc.save(ignore_permissions = 1)
 	

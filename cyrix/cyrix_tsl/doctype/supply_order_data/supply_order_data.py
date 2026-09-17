@@ -21,7 +21,10 @@ class SupplyOrderData(Document):
 		received = received_percentage or 0
 		delivered = delivered_percentage or 0
 
-		if ordered == 0 and received == 0:
+		if delivered == 100:
+			supply_status = "Delivered"
+
+		elif ordered == 0 and received == 0:
 			supply_status = "To Order"
 
 		elif 0 < ordered < 100:
@@ -30,8 +33,6 @@ class SupplyOrderData(Document):
 		elif 0 < delivered < 100:
 			supply_status = "Partially Delivered"
 
-		elif delivered == 100:
-			supply_status = "Delivered"
 
 		elif received >= 100 and delivered == 0:
 			supply_status = "To Deliver"

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_rename": 1,
  "creation": "2026-04-01 14:07:01.333150",
  "doctype": "DocType",
@@ -20,7 +21,16 @@
   "manufacturer",
   "qty",
   "jo",
-  "amount"
+  "amount",
+  "type",
+  "section_break_lprw",
+  "from_date",
+  "column_break_tknb",
+  "to_date",
+  "interval",
+  "section_break_zhnw",
+  "schedule",
+  "schedule_data"
  ],
  "fields": [
   {
@@ -127,13 +137,65 @@
    "fieldname": "amount",
    "fieldtype": "Float",
    "label": "Amount"
+  },
+  {
+   "fieldname": "section_break_lprw",
+   "fieldtype": "Section Break",
+   "label": "Maintenance Scheduler"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "column_break_tknb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "In Days",
+   "fieldname": "interval",
+   "fieldtype": "Int",
+   "label": "Interval"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "section_break_zhnw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "schedule",
+   "fieldtype": "HTML",
+   "label": "Schedule"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "schedule_data",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Schedule Data"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nAMC\nCMC\nAMC & CMC"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-08 16:53:49.050392",
+ "modified": "2026-09-14 16:29:41.799617",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Maintenance Contract Item",

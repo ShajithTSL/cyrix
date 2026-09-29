@@ -10,6 +10,18 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "layout-dashboard",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "KW Dashboard",
+   "link_type": "URL",
+   "show_arrow": 0,
+   "type": "Link",
+   "url": "https://erp.cyrix-tsl.com/insights/shared/dashboard/uirjpr7egr"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
    "icon": "\ud83c\udf9e",
    "indent": 0,
    "keep_closed": 0,
@@ -80,8 +92,8 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-28 18:06:56.404553",
- "modified_by": "support@cyrix-tsl.com",
+ "modified": "2026-09-29 13:19:16.821823",
+ "modified_by": "info@cyrix-tsl.com",
  "module": "Cyrix TSL",
  "module_onboarding": "Stock Onboarding",
  "name": "Shortcuts",

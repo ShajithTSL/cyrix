@@ -23,7 +23,6 @@
           (f) => f[1] === "company" && f[3] === default_company
         );
         if (!exists) {
-          this.filter_area.clear(true);
           this.filter_area.add([
             [this.doctype, "company", "=", default_company]
           ]);
@@ -87,7 +86,7 @@
   $(document).on("form-refresh", function(e, frm) {
     setTimeout(() => move_activity_to_sidebar(frm), 200);
   });
-  var SKIP_DOCTYPES = ["User", "Print Format Builder", "Evaluation Report", "Job Order Data", "Supply Order Data"];
+  var SKIP_DOCTYPES = ["User", "Print Format Builder", "Evaluation Report"];
   var $panel;
   var $handle;
   var $anchor;
@@ -700,5 +699,28 @@
       }, 300);
     });
   })();
+  (() => {
+    function hide_kw_dashboard() {
+      const current_user = (frappe.session.user || "").trim().toLowerCase();
+      if (current_user === "info@cyrix-tsl.com") {
+        $(".sidebar-item-label").filter(function() {
+          return $(this).text().trim() === "KW Dashboard";
+        }).each(function() {
+          $(this).closest("a").show();
+        });
+        return;
+      }
+      $(".sidebar-item-label").filter(function() {
+        return $(this).text().trim() === "KW Dashboard";
+      }).each(function() {
+        $(this).closest("a").hide();
+      });
+    }
+    hide_kw_dashboard();
+    new MutationObserver(hide_kw_dashboard).observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  })();
 })();
-//# sourceMappingURL=cyrix.bundle.IMSDCPUO.js.map
+//# sourceMappingURL=cyrix.bundle.VR2U3YU5.js.map

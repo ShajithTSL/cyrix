@@ -61,6 +61,10 @@ def trigger_mail_on_invoice_request(name):
 
 	cc = [self.sales_email,manager]
 
+	finance_cc = info().get("finance_cc").get(self.company)
+	if finance_cc:
+		cc.append(finance_cc[0])
+
 	for quotation in quotations:
 
 		cus = frappe.get_value("Quotation", quotation, "party_name")

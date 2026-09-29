@@ -4,7 +4,8 @@ from frappe.core.doctype.communication.email import _make as make_communication,
 from frappe.utils import nowdate, date_diff, add_years, add_days, today, getdate,get_url_to_form
 from cyrix.custom_py.boot import get_bootinfo as info
 from frappe import _
-from datetime import datetime
+from datetime import date, datetime
+from calendar import monthrange
 
 @frappe.whitelist()
 def schedule_email_notifications():
@@ -693,11 +694,11 @@ def send_birthday_reminder():
 	today_month_day = getdate(today_date).strftime("%m-%d")
 	is_leap_year = calendar.isleap(datetime.now().year)
 	branch_and_mail_id = [
-		{"name": "Jeddah - TSL-SA", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "admin@tsl-me.com","cc":None},
-		{"name": "Dammam - TSL-SA", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "admin@tsl-me.com","cc":None},
-		{"name": "Riyadh - TSL- KSA", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "admin@tsl-me.com","cc":None},
-		{"name": "Dubai - TSL", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "support@cyrix-tsl.com" ,"cc":"hr1@tsl-me.com"},
-		{"name": "Kuwait - TSL", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "hr1@tsl-me.com" ,"cc":"info@cyrix-tsl.com"}
+		{"name": "Jeddah", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "admin@tsl-me.com","cc":None},
+		{"name": "Dammam", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "admin@tsl-me.com","cc":None},
+		{"name": "Riyadh", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "admin@tsl-me.com","cc":None},
+		{"name": "Dubai", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "support@cyrix-tsl.com" ,"cc":"hr1@tsl-me.com"},
+		{"name": "Kuwait", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "hr1@tsl-me.com" ,"cc":"info@cyrix-tsl.com"}
 	]
 	
 	for branch in branch_and_mail_id:
@@ -726,8 +727,6 @@ def send_birthday_reminder():
 		
 		all_today_birthdays.extend(today_birthdays)
 		all_upcoming_birthdays.extend(upcoming_birthdays)
-		print(all_today_birthdays)
-		print(all_upcoming_birthdays)
 	
 		if all_today_birthdays or all_upcoming_birthdays:
 			subject = "Birthday Reminder for the Day"
@@ -767,7 +766,7 @@ def send_birthday_reminder_hr():
 	today_month_day = getdate(today_date).strftime("%m-%d")
 	is_leap_year = calendar.isleap(datetime.now().year)
 	branch_and_mail_id = [
-		{"name": "Dubai - TSL", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "ronish@cyrix-tsl.com"}, #ronish
+		{"name": "Dubai", "sender":"no-reply@cyrix-tsl.com" ,"recipient": "ronish@cyrix-tsl.com"}, #ronish
 	]
 	
 	for branch in branch_and_mail_id:
@@ -856,7 +855,6 @@ def add_months_clamped(dt, months):
 
 
 def send_passport_expiry_reminders():
-
 	today_date = getdate(today())
 
 	employees = frappe.get_all(

@@ -50,7 +50,7 @@ frappe.ui.form.on("Technical Report", {
 
     refresh: function(frm) {        
         frm.trigger("set_query");
-        frm.add_custom_button(__("Print"), function () {
+        frm.add_custom_button(__("Print - Technical Report"), function () {
     
             let f_name = frm.doc.name;
 

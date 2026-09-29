@@ -30,8 +30,8 @@ def create_qtn(source):
 				"item_name":item.item_name,
 				"description":item.description,
 				"qty":item.qty,
-				"uom":frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
-				"stock_uom":frappe.db.get_value("Item", item.item_code, "stock_uom") if item.item_code else item.uom,
+				"uom":"Nos",
+				"stock_uom":"Nos",
 				"conversion_factor":1,
 				"stock_qty":1,
 			})

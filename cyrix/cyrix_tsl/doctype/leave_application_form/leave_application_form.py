@@ -23,7 +23,6 @@ from frappe.utils import (
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
 
-
 from frappe.utils.dateutils import get_from_date_from_timespan, get_period_ending
 from frappe.utils import add_to_date, formatdate, get_link_to_form, getdate, nowdate
 

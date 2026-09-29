@@ -656,6 +656,7 @@ def change_or_create_item(job_order_data, row_name, values):
 		item = frappe.get_doc("Item", old_item)
 		item.model = values.get("model")
 		item.mfg = values.get("mfg")
+		item.item_name = values.get("item_name")
 		item.description = values.get("description")
 		item.save(ignore_permissions=True)
 

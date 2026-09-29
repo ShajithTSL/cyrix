@@ -16,20 +16,17 @@ from frappe.utils import (
 )
 from datetime import datetime
 
-
 @frappe.whitelist()
 def download_custom_payroll_pdf(docname):
     doctype = "Payroll Entry"
-    print_format_name = "Payroll Entry"  # Your existing Jinja-based print format in Frappe UI
+    print_format_name = "Payroll Entry"
 
     doc = frappe.get_doc(doctype, docname)
     print_format = frappe.get_doc("Print Format", print_format_name)
 
-    # Create a Jinja environment
     jenv = get_jenv()
     template = jenv.from_string(print_format.html)
 
-    # Render template with custom print_context
     html = template.render({
         "doc": doc,
         "print_format": print_format_name,
@@ -37,18 +34,36 @@ def download_custom_payroll_pdf(docname):
         "print_context": {}
     })
 
-    # Convert to PDF
+    # Add Print Format CSS
+    css = print_format.css or ""
+
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            {css}
+        </style>
+    </head>
+    <body>
+        {html}
+    </body>
+    </html>
+    """
+
     pdf = get_pdf(html)
 
-    # Save the PDF to File and return public URL
-    _file = frappe.get_doc({
+    file_doc = frappe.get_doc({
         "doctype": "File",
         "file_name": f"{docname}.pdf",
         "is_private": 0,
         "content": pdf
     })
-    _file.save()
-    return _file.file_url
+
+    file_doc.insert(ignore_permissions=True)
+
+    return file_doc.file_url
 
 
 @frappe.whitelist()
@@ -398,9 +413,24 @@ def salary_register1(name, docstatus):
                 value = gross_salary
 
             elif fieldname == "net_pay":
-                value = record.get("net_pay", 0)
+                query = """
+                    SELECT COALESCE(SUM(net_pay), 0)
+                    FROM `tabSalary Slip`
+                    WHERE employee = %s
+                    AND start_date BETWEEN %s AND %s
+                    AND docstatus = %s
+                """
 
-            
+                value = frappe.db.sql(
+                    query,
+                    (
+                        emp,
+                        doc.get("start_date"),
+                        doc.get("end_date"),
+                        docstatus
+                    )
+                )[0][0] or 0
+                        
             
 
             # DATE OF JOINING

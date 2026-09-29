@@ -33,8 +33,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Document Reference",
-   "options": "document_type",
-   "read_only": 1
+   "options": "document_type"
   },
   {
    "fieldname": "section_break_swkn",
@@ -50,7 +49,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-16 15:19:43.174143",
+ "modified": "2026-09-27 12:24:40.336955",
  "modified_by": "Administrator",
  "module": "Cyrix TSL",
  "name": "Document Log",

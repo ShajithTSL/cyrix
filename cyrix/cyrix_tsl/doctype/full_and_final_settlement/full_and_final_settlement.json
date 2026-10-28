@@ -265,7 +265,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.company == \"TSL COMPANY - KSA\"",
+   "depends_on": "eval:doc.company == \"Company Al-Halloul Faniye Medical\"",
    "fetch_from": "employee.gosi_deduction",
    "fieldname": "gosi_deduction",
    "fieldtype": "Currency",

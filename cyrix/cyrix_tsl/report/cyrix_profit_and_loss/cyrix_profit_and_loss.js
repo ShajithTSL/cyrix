@@ -233,7 +233,7 @@ frappe.query_reports["Cyrix Profit and Loss"] = {
 
 // Auto-add filters for every active Accounting Dimension
 // (Department/Branch are already defined above and are skipped server-side)
-erpnext.utils.add_dimensions("Custom Profit and Loss", 10);
+erpnext.utils.add_dimensions("Cyrix Profit and Loss", 10);
 
 // Click-through: open General Ledger filtered to the clicked account,
 // carrying over company, date range and dimension filters

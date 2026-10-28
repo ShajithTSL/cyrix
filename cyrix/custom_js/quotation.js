@@ -500,27 +500,69 @@ frappe.ui.form.on('Quotation', {
 						   "Customer Quotation - Site Visit", "Customer Quotation - SV - Revised",
 						   "Customer Quotation - BQ", "Customer Quotation - BQ - Revised",
 						   "Customer Quotation - MC", "Customer Quotation - MC - Revised"].includes(frm.doc.quotation_type)) {
-                    frm.add_custom_button(__('Approved Internal'),function() {
+                    // frm.add_custom_button(__('Approved Internal'),function() {
+                    //     new frappe.ui.form.MultiSelectDialog({
+                    //         doctype: "Quotation",
+                    //         target: frm,
+                    //         setters: {
+                    //             party_name:frm.doc.party_name,
+                    //             workflow_state:'Approved By Management',
+                    //             company:frm.doc.company
+                    //         },
+                            
+                    //         add_filters_group: 1,
+                    //         action(selections) {
+                    //             frappe.call({
+                    //                 method: "cyrix.custom_py.quotation.get_approved_internal_quote",
+                    //                 args: {
+                    //                     "quotation": selections
+                    //                 },
+                    //                 callback: function(r) {
+                    //                     if(r.message) {
+                    //                         console.log(r.message.items)
+                    //                         frm.set_value("items",r.message.items)
+                    //                     }
+                    //                 }
+                    //             });
+                    //             cur_dialog.hide();
+                    //         }
+                    //     });
+                    // }, __("Get Items From"), "btn-default");
+                    frm.add_custom_button(__('Approved Internal'), function () {
                         new frappe.ui.form.MultiSelectDialog({
                             doctype: "Quotation",
                             target: frm,
+                            size: "extra-large",
                             setters: {
-                                party_name:frm.doc.party_name,
-                                workflow_state:'Approved By Management',
-                                company:frm.doc.company
+                                party_name: frm.doc.party_name,
+                                workflow_state: 'Approved By Management',
+                                company: frm.doc.company
                             },
-                            
                             add_filters_group: 1,
+
+                            // custom query + extra columns
+                            get_query() {
+                                return {
+                                    query: "cyrix.custom_py.quotation.quotation_query",
+                                    filters: {}
+                                };
+                            },
+                            columns: [
+                                "name",
+                                "party_name",
+                                "workflow_state",
+                                "job_order_data",
+                                "supply_order_data",
+                                "maintenance_contract"
+                            ],
+
                             action(selections) {
                                 frappe.call({
                                     method: "cyrix.custom_py.quotation.get_approved_internal_quote",
-                                    args: {
-                                        "quotation": selections
-                                    },
-                                    callback: function(r) {
-                                        if(r.message) {
-                                            console.log(r.message.items)
-                                            frm.set_value("items",r.message.items)
+                                    args: { quotation: selections },
+                                    callback: function (r) {
+                                        if (r.message) {
+                                            frm.set_value("items", r.message.items);
                                         }
                                     }
                                 });

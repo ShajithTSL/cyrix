@@ -190,8 +190,14 @@ frappe.ui.form.on("Full and Final Settlement", {
                     parseFloat(frm.doc.earned_mobile_allowance)+parseFloat(frm.doc.earned_car_allowance)+
                     parseFloat(frm.doc.earned_hra)+parseFloat(frm.doc.earned_other_allowance)+
                     parseFloat(frm.doc.amount)+parseFloat(frm.doc.transportation) - parseFloat(frm.doc.gosi))
+
+        var daily = (parseFloat(frm.doc.basic_salary)+parseFloat(frm.doc.food_allowance)+
+                    parseFloat(frm.doc.mobile_allowance)+parseFloat(frm.doc.car_allowance)+
+                    parseFloat(frm.doc.hra)+parseFloat(frm.doc.other_allowances)+
+                    parseFloat(frm.doc.transportation_pay))
+
         frm.set_value('total_salary',tott)
-        frm.set_value('daily_salary', (frm.doc.ctc/30).toFixed(2))
+        frm.set_value('daily_salary', (daily/30).toFixed(2))
     },
     onload(frm){
 		frappe.run_serially([
@@ -250,7 +256,7 @@ frappe.ui.form.on("Full and Final Settlement", {
                                         method:"cyrix.cyrix_tsl.doctype.full_and_final_settlement.full_and_final_settlement.calculate_leave_payment_amount",
                                         args:{
                                             "company": frm.doc.company,
-                                            "basic":frm.doc.ctc,
+                                            "basic":(frm.doc.ctc+frm.doc.gosi_deduction),
                                             "leave_balance":d.message[3]
                                         },
                                         callback(k){
@@ -306,7 +312,7 @@ frappe.ui.form.on("Full and Final Settlement", {
             var cal = ((frm.doc.basic_salary / frm.doc.total_working_days) * frm.doc.encashed_leaves)
         }
         else{
-            var cal = ((frm.doc.ctc / 30) * frm.doc.encashed_leaves)
+            var cal = (((frm.doc.ctc + frm.doc.gosi_deduction) / 30) * frm.doc.encashed_leaves)
         }
         frm.set_value('leave_pay', cal.toFixed(2))
         frm.trigger("leaves_calculation")

@@ -55,8 +55,8 @@ def trigger_mail_notification():
 				cc = [
 					"yousuf@tsl-me.com"
 				],
-				sender="no-reply@tsl-me.com",
-				reply_to="no-reply@tsl-me.com",
+				sender="no-reply@cyrix-tsl.com",
+				reply_to="no-reply@cyrix-tsl.com",
 				subject = subject,
 				content = message,
 				send_email=1

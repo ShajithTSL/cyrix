@@ -15,11 +15,15 @@ from frappe.utils import (
     getdate,
 )
 from datetime import datetime
+from cyrix.cyrix_tsl.report.salary_register_report.salary_register_report import execute
 
 @frappe.whitelist()
-def download_custom_payroll_pdf(docname):
+def download_custom_payroll_pdf(docname, ceo):
     doctype = "Payroll Entry"
-    print_format_name = "Payroll Entry"
+    if ceo == '1':
+        print_format_name = "Payroll Entry - CEO"  # Your existing Jinja-based print format in Frappe UI
+    else:
+        print_format_name = "Payroll Entry"  # Your existing Jinja-based print format in Frappe UI
 
     doc = frappe.get_doc(doctype, docname)
     print_format = frappe.get_doc("Print Format", print_format_name)
@@ -75,7 +79,6 @@ def salary_register(name,docstatus):
         filters = {'from_date': doc.get("start_date"), 'to_date': doc.get("end_date"), 'currency': 'SAR', 'company': doc.get("company"), 'docstatus': docstatus}
     if doc.get("company") == "Cyrix TSL - UAE":
         filters = {'from_date': doc.get("start_date"), 'to_date': doc.get("end_date"), 'currency': 'AED', 'company': doc.get("company"), 'docstatus': docstatus}
-    from cyrix.cyrix_tsl.report.salary_register_report.salary_register_report import execute
     result = execute(filters)
     headers = result[0]
     records = result[1]
@@ -197,7 +200,6 @@ def salary_register(name,docstatus):
         return ''
 
 @frappe.whitelist()
-
 def salary_register1(name, docstatus):
 
     doc = frappe.get_doc("Payroll Entry", name)
@@ -236,7 +238,6 @@ def salary_register1(name, docstatus):
     # =========================
     # EXECUTE REPORT
     # =========================
-    from cyrix.cyrix_tsl.report.salary_register_report.salary_register_report import execute
     headers, records = execute(filters)
 
     if not records:
@@ -320,7 +321,7 @@ def salary_register1(name, docstatus):
     data += f'<td style="background:#87CEFA;text-align:center" colspan="{len(final_headers)}"><b></b></td>'
     data += '</tr>'
 
-   # =========================
+# =========================
 # COLUMN HEADER ROW
 # =========================
     data += '<tr>'
@@ -368,11 +369,11 @@ def salary_register1(name, docstatus):
     employee_map = {
     d.name: d for d in frappe.db.sql("""
         SELECT name,
-               basic,
-               housing_allowance,
-               food_allowance,
-               transport_allowance,
-               other_allowances
+            basic,
+            housing_allowance,
+            food_allowance,
+            transport_allowance,
+            other_allowances
         FROM `tabEmployee`
     """, as_dict=1)
 }
@@ -473,7 +474,7 @@ def salary_register1(name, docstatus):
                     WHERE ss.employee = %s
                     AND ss.start_date BETWEEN %s AND %s
                     AND sd.salary_component IN ('Other Deductions Staff', 'Other Deductions Due')
-                 
+                
                 """
                 value = frappe.db.sql(query, (emp, doc.get("start_date"), doc.get("end_date")))[0][0] or 0
                 value = int(float(value))
@@ -484,7 +485,7 @@ def salary_register1(name, docstatus):
                 IFNULL(SUM(DISTINCT sd.total_payment), 0) AS loan_payment,
                 IFNULL(SUM(
                     CASE 
-                         WHEN sdet.salary_component IN ('Loan', 'Loan Due')
+                        WHEN sdet.salary_component IN ('Loan', 'Loan Due')
                         THEN sdet.amount ELSE 0 
                     END
                 ), 0) AS salary_loan_amount
@@ -515,7 +516,7 @@ def salary_register1(name, docstatus):
                 totals[fieldname] += value
                 
             data += f'<td>{value or ""}</td>'
-           
+        
 
         data += '</tr>'
     # =========================
@@ -537,7 +538,357 @@ def salary_register1(name, docstatus):
     data += '</tr>'
 
     data += '</table>'
-   
+
+
+    return data
+
+@frappe.whitelist()
+def salary_register_ceo(name, docstatus):
+    
+    doc = frappe.get_doc("Payroll Entry", name)
+
+    # =========================
+    # FILTER BUILDING
+    # =========================
+    if doc.get("company") == "Cyrix TSL - Kuwait":
+        filters = {
+            'from_date': doc.get("start_date"),
+            'to_date': doc.get("end_date"),
+            'currency': 'KWD',
+            'company': doc.get("company"),
+            'docstatus': docstatus
+        }
+
+    elif doc.get("company") in [ "Company Al-Halloul Faniye Medical"]:
+        filters = {
+            'from_date': doc.get("start_date"),
+            'to_date': doc.get("end_date"),
+            'currency': 'SAR',
+            'company': doc.get("company"),
+            'docstatus': docstatus
+        }
+
+    elif doc.get("company") == "Cyrix TSL - UAE":
+        currency = 'AED'
+        filters = {
+            'from_date': doc.get("start_date"),
+            'to_date': doc.get("end_date"),
+            'currency': currency,
+            'company': doc.get("company"),
+            'docstatus': docstatus
+        }
+
+    # =========================
+    # EXECUTE REPORT
+    # =========================
+    headers, records = execute(filters)
+
+    if not records:
+        return ""
+
+    # =========================
+    # FORCE REQUIRED HEADERS
+    # =========================
+    def add_header(fieldname, label):
+        if fieldname not in [h.get("fieldname") for h in headers]:
+            headers.append({
+                "fieldname": fieldname,
+                "label": label,
+                "fieldtype": "Currency"
+            })
+
+    add_header("employee_advance", "Advance")
+    add_header("other_deduction", "Other Deduction")
+    add_header("loan", "Loan")
+
+    # =========================
+    # COLUMN ORDER
+    # =========================
+    details_order = [
+        'employee',
+        'employee_name'
+    ]
+
+    fixed_order = ['basic', 'food', 'housing', 'transport','gross_pay']
+    deduction_order = ['loan','other_deduction','gosi']
+    summary_order = ['overtime','other_allowances']
+    final_order = ['net_pay']
+
+    header_map = {h.get("fieldname"): h for h in headers}
+
+    details_headers = [header_map[f] for f in details_order if f in header_map]
+    fixed_headers = [header_map[f] for f in fixed_order if f in header_map]
+    deduction_headers = [header_map[f] for f in deduction_order if f in header_map]
+    summary_headers = [header_map[f] for f in summary_order if f in header_map]
+    final_headers = [header_map[f] for f in final_order if f in header_map]
+
+    filtered_headers = (
+        details_headers +
+        fixed_headers +
+        deduction_headers +
+        summary_headers +
+        final_headers
+    )
+    totals = {h.get("fieldname"): 0 for h in filtered_headers if h.get("fieldname")}    # =========================
+    # HTML START
+    # =========================
+    data = """
+    <style>
+        table.custom-bordered-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        table.custom-bordered-table, th, td {
+            border: 1px solid #000;
+        }
+        th, td {
+            padding: 3px !important;
+            font-size: 8px;
+        }
+    </style>
+    """
+
+    data += '<table class="custom-bordered-table">'
+
+    # HEADER ROW
+    data += '<tr><td style="background:#C0C0C0;text-align:center"></td>'
+    data += f'<td  style="background:#C0C0C0;text-align:center"  colspan="{len(details_headers)}"><b></b></td>'
+    data += f'<td style="background:#98FB98;text-align:center" colspan="{len(fixed_headers)}"><b>Fixed</b></td>'
+    data += f'<td style="background:#FA8072;text-align:center" colspan="{len(deduction_headers)}"><b>Deductions</b></td>'
+    data += f'<td style="background:#C0C0C0;text-align:center" colspan="{len(summary_headers)}"></td>'
+    data += f'<td style="background:#87CEFA;text-align:center" colspan="{len(final_headers)}"><b></b></td>'
+    data += '</tr>'
+
+# =========================
+# COLUMN HEADER ROW
+# =========================
+    data += '<tr>'
+
+    # row number column
+    data += '<td style="font-weight:bold;text-align:center;background:#C0C0C0">#</td>'
+
+    # details columns
+    data += ''.join(
+        f'<td style="font-weight:bold;text-align:center;background:#C0C0C0">{h.get("label")}</td>'
+        for h in details_headers
+    )
+
+    # earnings columns
+    data += ''.join(
+        f'<td style="font-weight:bold;text-align:center;background:#98FB98">{h.get("label")}</td>'
+        for h in fixed_headers
+    )
+
+    # deduction columns
+    data += ''.join(
+        f'<td style="font-weight:bold;text-align:center;background:#FA8072">{h.get("label")}</td>'
+        for h in deduction_headers
+    )
+
+    # worked days columns
+    data += ''.join(
+        f'<td style="font-weight:bold;text-align:center;background:#C0C0C0">{h.get("label")}</td>'
+        for h in summary_headers
+    )
+
+    # net pay columns
+    data += ''.join(
+        f'<td style="font-weight:bold;text-align:center;background:#87CEFA">{h.get("label")}</td>'
+        for h in final_headers
+    )
+
+    data += '</tr>'
+    # SORT
+    records = sorted(records, key=lambda x: int(x.get('employee') or 0))
+
+    # =========================
+    # ROW DATA (FIXED SOURCES)
+    # =========================
+    employee_map = {
+    d.name: d for d in frappe.db.sql("""
+        SELECT name,
+            basic,
+            housing_allowance,
+            food_allowance,
+            transport_allowance,
+            other_allowances
+        FROM `tabEmployee`
+    """, as_dict=1)
+}
+    for i, record in enumerate(records, 1):
+        data += '<tr>'
+        data += f'<td>{i}</td>'
+
+        emp = record.get("employee")
+
+        for header in filtered_headers:
+            fieldname = header.get("fieldname")
+
+            # FIXED SALARY FROM EMPLOYEE
+            emp_data = employee_map.get(emp) or {}
+            gross_salary = (
+            (emp_data.get("basic") or 0)
+            + (emp_data.get("housing_allowance") or 0)
+            + (emp_data.get("food_allowance") or 0)
+            + (emp_data.get("transport_allowance") or 0)
+            + (emp_data.get("other_allowances") or 0)
+        )
+
+            if fieldname == "basic":
+                value = record.get("base", 0)
+
+            elif fieldname == "housing":
+                value = record.get("housing_allowance", 0)
+
+            elif fieldname == "food":
+                value = record.get("food_allowance", 0)
+
+            elif fieldname == "transport":
+                value = record.get("transport_allowance", 0)
+
+            elif fieldname == "others":
+                value = record.get("other_allowances", 0)
+            elif fieldname == "gross_pay":
+                value = round(gross_salary, 2)
+
+            elif fieldname == "net_pay":
+                value = round(record.get("net_pay", 0), 2)
+
+            
+            
+
+            # DATE OF JOINING
+            elif fieldname == "date_of_joining":
+                doj = frappe.db.get_value("Employee", emp, "date_of_joining")
+
+                value = frappe.utils.formatdate(doj, "dd-MM-yyyy") if doj else ""
+
+            # WORKED DAYS (CORRECT SOURCE)
+            elif fieldname == "worked_days":
+                query = """
+                    SELECT SUM(payment_days)
+                    FROM `tabSalary Slip`
+                    WHERE employee = %s
+                    AND start_date BETWEEN %s AND %s
+                """
+                value = frappe.db.sql(query, (emp, doc.get("start_date"), doc.get("end_date")))[0][0] or 0
+                value = int(float(value))
+                
+
+            # ADVANCE
+            elif fieldname == "employee_advance":
+                query = """
+                    SELECT SUM(sd.amount)
+                    FROM `tabSalary Detail` sd
+                    JOIN `tabSalary Slip` ss ON ss.name = sd.parent
+                    WHERE ss.employee = %s
+                    AND ss.start_date BETWEEN %s AND %s
+                    AND sd.salary_component IN ('Employee Advance', 'Employee Advance Staff')
+                    
+                """
+                value = frappe.db.sql(query, (emp, doc.get("start_date"), doc.get("end_date")))[0][0] or 0
+                value = int(float(value))
+
+            elif fieldname == "gosi":
+                query = """
+                    SELECT SUM(sd.amount)
+                    FROM `tabSalary Detail` sd
+                    JOIN `tabSalary Slip` ss ON ss.name = sd.parent
+                    WHERE ss.employee = %s
+                    AND ss.start_date BETWEEN %s AND %s
+                    AND sd.salary_component IN ('GOSI')
+                    
+                """
+                value = frappe.db.sql(query, (emp, doc.get("start_date"), doc.get("end_date")))[0][0] or 0
+                value = int(float(value))
+
+            elif fieldname == "other_allowances":
+                query = """
+                    SELECT SUM(sd.amount)
+                    FROM `tabSalary Detail` sd
+                    JOIN `tabSalary Slip` ss ON ss.name = sd.parent
+                    WHERE ss.employee = %s
+                    AND ss.start_date BETWEEN %s AND %s
+                    AND sd.salary_component IN ('Other Allowance Staff','Other Allowance Due','Other Allowance Direct Staff')
+                    
+                """
+                value = frappe.db.sql(query, (emp, doc.get("start_date"), doc.get("end_date")))[0][0] or 0
+                value = int(float(value))
+
+            # OTHER DEDUCTION
+            elif fieldname == "other_deduction":
+                query = """
+                    SELECT SUM(sd.amount)
+                    FROM `tabSalary Detail` sd
+                    JOIN `tabSalary Slip` ss ON ss.name = sd.parent
+                    WHERE ss.employee = %s
+                    AND ss.start_date BETWEEN %s AND %s
+                    AND sd.salary_component IN ('Other Deductions Staff', 'Other Deductions Due')
+                
+                """
+                value = frappe.db.sql(query, (emp, doc.get("start_date"), doc.get("end_date")))[0][0] or 0
+                value = int(float(value))
+            # LOAN
+            elif fieldname == "loan":
+                query = """
+                SELECT  
+                IFNULL(SUM(DISTINCT sd.total_payment), 0) AS loan_payment,
+                IFNULL(SUM(
+                    CASE 
+                        WHEN sdet.salary_component IN ('Loan', 'Loan Due')
+                        THEN sdet.amount ELSE 0 
+                    END
+                ), 0) AS salary_loan_amount
+
+            FROM `tabSalary Slip` ss
+
+            LEFT JOIN `tabLoan Details` sd 
+                ON ss.name = sd.parent
+
+            LEFT JOIN `tabSalary Detail` sdet 
+                ON ss.name = sdet.parent
+
+            WHERE ss.employee = %s
+            AND ss.start_date BETWEEN %s AND %s
+        """
+                result = frappe.db.sql(query, (emp, doc.get("start_date"), doc.get("end_date")))
+
+                loan_payment = result[0][0] if result and result[0] else 0
+                salary_loan = result[0][1] if result and result[0] else 0
+
+                # If you want total loan:
+                value = loan_payment + salary_loan
+                
+            # DEFAULT
+            else:
+                value = record.get(fieldname, "")
+            if isinstance(value, (int, float)):
+                totals[fieldname] += value
+                
+            data += f'<td>{value or ""}</td>'
+        
+
+        data += '</tr>'
+    # =========================
+    # TOTAL ROW
+    # =========================
+    data += '<tr style="font-weight:bold;background:#f2f2f2;">'
+    data += '<td>Total</td>'
+
+    for header in filtered_headers:
+        fieldname = header.get("fieldname")
+
+        if fieldname in ['employee', 'employee_name', 'designation', 'department', 'date_of_joining']:
+            data += '<td></td>'
+        else:
+            value = totals.get(fieldname, 0) or 0
+
+            data += f'<td>{float(value):,.2f}</td>'
+
+    data += '</tr>'
+
+    data += '</table>'
+
 
     return data
 
@@ -580,7 +931,6 @@ def make_xlsx(data, skip_columns, sheet_name=None, wb=None, column_widths=None):
         filters = {'from_date': doc.get("start_date"), 'to_date': doc.get("end_date"), 'currency': 'SAR', 'company': doc.get("company"), 'docstatus': docstatus}
     if company == "Cyrix TSL - UAE":
         filters = {'from_date': doc.get("start_date"), 'to_date': doc.get("end_date"), 'currency': 'AED', 'company': doc.get("company"), 'docstatus': docstatus}
-    from cyrix.cyrix_tsl.report.salary_register_report.salary_register_report import execute
     result = execute(filters)
     headers = result[0]
     records = result[1]

@@ -115,6 +115,7 @@ jinja = {
 
 		"cyrix.hr_py.salary_register.salary_register",
 		"cyrix.hr_py.salary_register.salary_register1",
+		"cyrix.hr_py.salary_register.salary_register_ceo",
         "cyrix.cyrix_tsl.doctype.loan_request.loan_request.get_criteria"
 	]
 }
@@ -353,9 +354,6 @@ doc_events = {
 	},
 }
 
-after_migrate = [
-    "cyrix.custom_py.item.remove_item_price_schedule"
-]
 
 
 # Monkey Patch
@@ -407,12 +405,14 @@ after_migrate = [
     "cyrix.hr_py.create_custom_fields.create_custom_fields_payroll_settings",
     "cyrix.hr_py.leave_allocation.leave_allocation_schedule",
     "cyrix.hr_py.employee.employee_notification_schedule",
+	"cyrix.hr_py.qiwa_contract_reminder.schedule_qiwa_reminder",
+	"cyrix.hr_py.iqama_expiry_reminder.schedule_iqama_reminder",
     "cyrix.cyrix_tsl.doctype.planned_leaves.planned_leaves.schedule_create_planned_leaves",
     "cyrix.cyrix_tsl.doctype.resignation_form.resignation_form.schedule_update_employee_status",
     "cyrix.cyrix_tsl.doctype.leave_application_form.leave_application_form.schedule_trigger_mail_on_lap_form",
     "cyrix.custom_py.email_notification.schedule_email_notifications",
 	"cyrix.custom_py.item.remove_item_price_schedule",
-	"cyrix.cyrix_tsl.doctype.official_documents.official_documents.schedule_email_notifications"
+	"cyrix.cyrix_tsl.doctype.official_documents.official_documents.schedule_email_notifications",
 ]
 override_whitelisted_methods = {
     "hrms.hr.doctype.leave_application.leave_application.get_number_of_leave_days": "cyrix.hr_py.leave_application.get_number_of_leave_days",

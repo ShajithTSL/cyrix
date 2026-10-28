@@ -1312,12 +1312,12 @@ def sales_summary(from_date, to_date, company,brnch):
 	branch_map = {
 		"TSL COMPANY - Kuwait": "Kuwait",
 		"TSL COMPANY - UAE": "UAE", 
-		"TSL COMPANY - KSA": "KSA"
+		"Company Al-Halloul Faniye Medical": "KSA"
 	}
 	currency_map = {
 		"TSL COMPANY - Kuwait": "KWD",
 		"TSL COMPANY - UAE": "AED",
-		"TSL COMPANY - KSA": "SAR"
+		"Company Al-Halloul Faniye Medical": "SAR"
 	}
 	
 	# branch = branch_map.get(company, "")
@@ -1388,7 +1388,7 @@ def sales_summary(from_date, to_date, company,brnch):
 			<td style="border-color:#000000;width:9%;background-color:#0e86d4;color:white;"><center><b style="color:white;">SO</b></center></td>	
 		</tr>
 		""",
-		"TSL COMPANY - KSA": """
+		"Company Al-Halloul Faniye Medical": """
 		<tr>
 			<td style="border-color:#000000;width:10%;background-color:#0e86d4;color:white;"><center><b style="color:white;">Salesman</b></center></td>
 			<td style="border-color:#000000;width:10%;background-color:#145da0;color:white;"><center><b style="color:white;">JO(in SAR)</b></center></td>
@@ -1961,7 +1961,7 @@ def weekly_report(company,branch):
 	# if company == "TSL COMPANY - UAE":
 	# 	data += '<td colspan = 1 style="border-color:#000000;"><center><img src = "/files/Flag_of_the_United_Arab_Emirates.svg.jpg" width ="140"></center></td>'
 		
-	# if company == "TSL COMPANY - KSA":
+	# if company == "Company Al-Halloul Faniye Medical":
 	# 	data += '<td colspan = 1 style="border-color:#000000;"><center><img src = "/files/640px-Flag_of_Saudi_Arabia.svg(1).png" width ="140"></center></td>'
 		
 
@@ -3000,7 +3000,7 @@ def get_receivable(customer, from_date, to_date, company):
 	<tr>
 		<th style="color:#fff !important;">Due Date</th>
 		<th style="color:#fff !important;">Invoice No</th>
-		<th style="color:#fff !important;">Ref(WOD)</th>
+		<th style="color:#fff !important;width:30%">Ref(JO)</th>
 		<th style="color:#fff !important;">Ref(PO)</th>
 		<th style="color:#fff !important;">Invoiced</th>
 		<th style="color:#fff !important;">Paid</th>

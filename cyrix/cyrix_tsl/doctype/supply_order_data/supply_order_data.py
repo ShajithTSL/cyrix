@@ -13,6 +13,12 @@ from cyrix.custom_py.sales_invoice import (
 	_apply_status,
 	_split_amount_by_invoice_share,
 )
+def test_supply_status():
+	so_list = frappe.db.get_all("Supply Order Data",{"delivered_quantity":[">",0],"supply_status":["!=","Delivered"]},['name','quantity','delivered_quantity','supply_status'])
+	for so in so_list:
+		if so.get("delivered_quantity") == so.get("quantity"):
+			frappe.db.set_value("Supply Order Data",so.name,"supply_status","Delivered",update_modified = False)
+			print(so)
 
 
 class SupplyOrderData(Document):	

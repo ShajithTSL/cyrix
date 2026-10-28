@@ -19,6 +19,13 @@ frappe.ui.form.on('Payroll Entry', {
                         reqd: 1
                     },
                     {
+                        label: 'CEO',
+                        fieldname: 'ceo',
+                        fieldtype: 'Check',
+                        default: 0,
+                        description: 'Enable this option to download the CEO version of the report',
+                    },
+                    {
                         label: 'Download As',
                         fieldname: 'file_type',
                         fieldtype: 'Select',
@@ -39,6 +46,7 @@ frappe.ui.form.on('Payroll Entry', {
                             method: "cyrix.hr_py.salary_register.download_custom_payroll_pdf",
                             args: {
                                 docname: frm.doc.name,
+                                ceo: values.ceo ? 1 : 0
                             },
                             callback: function(r) {
                                 if (r.message) {

@@ -1,0 +1,65 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-10-15 14:38:10.958452",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "terms",
+  "column_break_udbt",
+  "break_terms",
+  "section_break_pzlt",
+  "description",
+  "bold_description"
+ ],
+ "fields": [
+  {
+   "fieldname": "terms",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Terms"
+  },
+  {
+   "fieldname": "column_break_udbt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "break_terms",
+   "fieldtype": "Int",
+   "label": "Break Terms"
+  },
+  {
+   "fieldname": "section_break_pzlt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "bold_description",
+   "fieldtype": "Check",
+   "label": "Bold Description"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-15 14:38:10.958452",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Terms and Condition",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

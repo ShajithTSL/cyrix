@@ -1,0 +1,135 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-10-12 16:14:28.839772",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "title",
+  "plan_date",
+  "planned_for",
+  "sales_user",
+  "column_break_prcm",
+  "territory",
+  "status",
+  "total_visits",
+  "completed_visits",
+  "section_break_iuze",
+  "items",
+  "section_break_xqmf",
+  "notes"
+ ],
+ "fields": [
+  {
+   "default": "VP-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "VP-.YYYY.-.####"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "read_only": 1
+  },
+  {
+   "fieldname": "plan_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Plan Date",
+   "options": "Today"
+  },
+  {
+   "default": "__user",
+   "fieldname": "planned_for",
+   "fieldtype": "Link",
+   "label": "Planned For",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_prcm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nPlanned\nIn Progress\nCompleted\nCancelled"
+  },
+  {
+   "fieldname": "total_visits",
+   "fieldtype": "Int",
+   "label": "Visits"
+  },
+  {
+   "fieldname": "completed_visits",
+   "fieldtype": "Int",
+   "label": "Visited",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_iuze",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Visits",
+   "options": "Visit Plan Item"
+  },
+  {
+   "fieldname": "section_break_xqmf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "sales_user",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-12 16:48:46.087520",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Visit Plan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -460,3 +460,41 @@ def download_pdf(from_date, to_date, company=None, branch=None, employee=None):
     frappe.local.response.filename = "Attendance Report.pdf"
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "download"
+
+@frappe.whitelist()
+def download_summary_pdf(from_date, to_date, company=None, branch=None, employee=None):
+    
+    filters = {
+        "from_date": from_date,
+        "to_date": to_date,
+        "company": company,
+        "branch": branch,
+        "employee": employee
+    }
+
+    columns, data = execute(filters)
+
+    html = render_template(
+        "cyrix/cyrix_tsl/report/employee_checkin/employee_checkin_summary.html",
+        {
+            "columns": columns,
+            "data": data,
+            "filters": filters,
+        },
+    )
+
+    pdf = get_pdf(html)
+    pdf = get_pdf(
+    html,
+    {
+        "orientation": "Portrait",
+        "page-size": "A4",
+        "margin-top": "10mm",
+        "margin-bottom": "10mm",
+        "margin-left": "5mm",
+        "margin-right": "5mm",
+    },
+)
+    frappe.local.response.filename = "Attendance Report.pdf"
+    frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "download"

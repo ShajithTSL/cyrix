@@ -80,6 +80,15 @@ def schedule_email_notifications():
 			"cron_format" : '0 8 * * *'
 		})
 		sjt.save(ignore_permissions=True)
+	
+	relieving_ksa = frappe.db.exists('Scheduled Job Type', {"method" : 'cyrix.custom_py.email_notification.reminder_on_relieving_ksa'})
+	if not relieving_ksa:
+		sjt = frappe.new_doc("Scheduled Job Type")  
+		sjt.update({
+			"method" : 'cyrix.custom_py.email_notification.reminder_on_relieving_ksa',
+			"frequency" : 'Daily',
+		})
+		sjt.save(ignore_permissions=True)
 
 @frappe.whitelist()
 def sendmail(self, message = None, subject = None, sender = None, recipients = None, attachments = None, cc = None):
@@ -654,7 +663,8 @@ def unapproved_leaves_reminder():
 def reminder_on_relieving():
 	employee_list = frappe.db.get_list("Employee",{
 		"relieving_date":["is","set"],
-		"relieving_date":[">",getdate(today())]
+		"relieving_date":[">",getdate(today())],
+		"company":["not in","Company Al-Halloul Faniye Medical"]
 	},['name','relieving_date'])
 	for employee in employee_list:
 		diff = date_diff(employee.relieving_date, getdate(today()))
@@ -673,6 +683,50 @@ def reminder_on_relieving():
 			}
 
 			email_template = frappe.get_doc("Email Template", "Relieving Reminder")
+			subject = frappe.render_template(email_template.subject, args)
+			message = frappe.render_template(email_template.response, args)
+
+			try:
+				sendmail(
+					emp, 
+					message, 
+					subject, 
+					sender = "no-reply@cyrix-tsl.com", 					
+					recipients=info().get("hr_to").get(emp.company),
+					attachments = None, 
+				)
+			
+			except frappe.OutgoingEmailError:
+				pass
+
+#################################################
+######  Relieving Reminder Mail - ( KSA ) #######
+#################################################
+
+def reminder_on_relieving_ksa():
+	employee_list = frappe.db.get_list("Employee",{
+		"relieving_date":["is","set"],
+		"relieving_date":[">",getdate(today())],
+		"company":["in","Company Al-Halloul Faniye Medical"]
+	},['name','relieving_date'])
+	for employee in employee_list:
+		diff = date_diff(employee.relieving_date, getdate(today()))
+		if diff in [15, 9, 4]:
+			emp = frappe.get_doc("Employee",employee.name)
+			args = {
+				"employee":emp.get("name"),
+				"employee_name":emp.get("employee_name"),
+				"branch": emp.get("branch") or '-',
+				"department": emp.get("department") or '-',
+				"nationality": emp.get("nationality") or '-',
+				"civil_id":emp.get("civil_id_no"),
+				"iqama_expiry":emp.get("civil_id_expiry_date"),
+				"relieving_date":emp.get("relieving_date"),
+				"valid_upto":emp.get("valid_upto"),
+				"no_of_days":diff
+			}
+
+			email_template = frappe.get_doc("Email Template", "Relieving Reminder - Cyrix")
 			subject = frappe.render_template(email_template.subject, args)
 			message = frappe.render_template(email_template.response, args)
 
@@ -925,7 +979,7 @@ def send_reminder_email(employee, matched_months_remaining):
 	message = frappe.render_template(email_template.response, args)
 	doc = frappe.get_doc("Employee",employee.get("employee_number"))
 	try:
-		sendmail(doc, message, subject, sender = "no-reply@tsl-me.com", recipients = recipients, attachments = None)
+		sendmail(doc, message, subject, sender = "no-reply@cyrix-tsl.com", recipients = recipients, attachments = None)
 	except frappe.OutgoingEmailError:
 		pass
 

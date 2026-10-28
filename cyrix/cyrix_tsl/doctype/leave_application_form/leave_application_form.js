@@ -431,7 +431,7 @@ frappe.ui.form.on('Leave Application Form', {
 			await promise.catch(() => frappe.throw());
 		}
 		let promise = new Promise((resolve, reject) => {
-			if(["TSL COMPANY - KSA","LAMAT DURMA"].includes(frm.doc.company)){
+			if(["Company Al-Halloul Faniye Medical"].includes(frm.doc.company)){
 				var hr_mail = "admin@tsl-me.com" 
 			}
 			else{

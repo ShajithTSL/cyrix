@@ -1,0 +1,72 @@
+/* ---------- grouped list ---------- */
+.gv-bar {
+	display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+	padding: 8px 15px; border-bottom: 1px solid var(--border-color);
+	font-size: var(--text-sm, 12px);
+}
+.gv-bar .gv-label, .gv-bar .gv-hint { color: var(--text-muted); }
+.gv-bar .gv-field { width: auto; min-width: 170px; height: 26px; padding: 2px 8px; }
+.gv-bar .gv-spacer { flex: 1; }
+@media (max-width: 768px) { .gv-bar .gv-hint { display: none; } }
+
+.gv-group-head {
+	display: flex; align-items: center; gap: 10px;
+	padding: 10px 15px 8px; cursor: pointer; user-select: none;
+	background: var(--subtle-fg, var(--gray-50)); border-bottom: 1px solid var(--border-color);
+}
+.gv-group-head:hover { background: var(--fg-hover-color, var(--gray-100)); }
+.gv-group-head:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.gv-caret {
+	width: 8px; height: 8px; border-right: 1.5px solid var(--text-muted); border-bottom: 1.5px solid var(--text-muted);
+	transform: rotate(45deg) translate(-2px, -2px); transition: transform .15s;
+}
+.gv-collapsed .gv-caret { transform: rotate(-45deg); }
+.gv-count { color: var(--text-muted); font-size: var(--text-sm, 12px); }
+.gv-add { margin-left: auto; }
+.gv-collapsed > .list-row-container { display: none; }
+
+/* ---------- quick view ---------- */
+.gv-qv .modal-body { padding-top: 8px; }
+.gv-qv-loading { padding: 40px 0; text-align: center; color: var(--text-muted); }
+.gv-qv-head { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+.gv-qv-titles { flex: 1; min-width: 200px; }
+.gv-qv-title { font-size: var(--text-lg, 16px); font-weight: 600; line-height: 1.35; color: var(--heading-color, var(--text-color)); }
+.gv-qv-sub { color: var(--text-muted); font-size: var(--text-sm, 12px); margin-top: 2px; }
+.gv-qv-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.gv-qv-assign { display: inline-flex; gap: 2px; }
+.gv-qv-nav { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: var(--text-sm, 12px); }
+
+.gv-qv-section { margin-top: 16px; }
+.gv-qv-label { font-size: var(--text-sm, 12px); color: var(--text-muted); margin-bottom: 6px; }
+.gv-ro { color: var(--text-light, var(--text-muted)); font-size: var(--text-xs, 11px); }
+
+.gv-steps { display: flex; gap: 4px; flex-wrap: wrap; }
+.gv-step {
+	flex: 1 1 96px; padding: 6px 8px; border-radius: var(--border-radius, 6px);
+	border: 1px solid var(--border-color); background: var(--fg-color); color: var(--text-muted);
+	font-size: var(--text-sm, 12px); font-weight: 500; cursor: pointer; text-align: center;
+}
+.gv-step:hover:not([disabled]) { border-color: var(--gray-500); color: var(--text-color); }
+.gv-step.done { color: var(--text-color); background: var(--subtle-fg, var(--gray-50)); }
+.gv-step.current { border-color: transparent; cursor: default; }
+.gv-step[disabled]:not(.current) { cursor: not-allowed; opacity: .75; }
+
+.gv-kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px 18px; }
+.gv-k { font-size: var(--text-xs, 11px); color: var(--text-muted); }
+.gv-v { font-weight: 500; overflow-wrap: anywhere; }
+.gv-more summary { cursor: pointer; color: var(--text-muted); font-size: var(--text-sm, 12px); margin-bottom: 10px; }
+
+.gv-long { max-height: 110px; overflow: hidden; position: relative; }
+.gv-long.open { max-height: none; }
+.gv-long:not(.open)::after {
+	content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 36px;
+	background: linear-gradient(transparent, var(--modal-bg, var(--fg-color)));
+}
+
+.gv-table-wrap { overflow-x: auto; }
+.gv-table { margin: 0; font-size: var(--text-sm, 12px); }
+
+.gv-activity { list-style: none; margin: 0; padding: 0; }
+.gv-activity li { display: flex; gap: 8px; align-items: center; padding: 5px 0; font-size: var(--text-sm, 12px); color: var(--text-muted); }
+.gv-activity li b { color: var(--text-color); font-weight: 500; }
+.gv-activity .gv-when { margin-left: auto; white-space: nowrap; padding-left: 10px; }

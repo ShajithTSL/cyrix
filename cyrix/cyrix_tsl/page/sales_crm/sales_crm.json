@@ -1,0 +1,20 @@
+{
+ "content": null,
+ "creation": "2026-10-13 20:18:18.033471",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-10-28 15:51:59.281413",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "sales-crm",
+ "owner": "Administrator",
+ "page_name": "sales-crm",
+ "roles": [
+  {}
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0
+}

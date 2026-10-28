@@ -530,9 +530,10 @@ function show_customer_dialog_dn(frm) {
 				},
 				callback: function(r) {
 					if (r.message) {
+						console.log(r.message[0])
 						const dn_data = r.message[0];
 						const items_data = r.message[1];
-
+						
 						if (!Array.isArray(items_data)) {
 							frappe.msgprint("Item data is not in expected format.");
 							return;

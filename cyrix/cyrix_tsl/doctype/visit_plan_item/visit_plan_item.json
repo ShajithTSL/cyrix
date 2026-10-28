@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-10-12 16:35:28.476221",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "visit_time",
+  "party_type",
+  "party",
+  "party_name",
+  "visit_type",
+  "location",
+  "purpose",
+  "column_break_owtf",
+  "status",
+  "outcome",
+  "next_followup_date",
+  "followup_created"
+ ],
+ "fields": [
+  {
+   "fieldname": "visit_time",
+   "fieldtype": "Time",
+   "label": "Time"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Visit For",
+   "options": "CRM Lead\nCRM Deal\nCustomer"
+  },
+  {
+   "columns": 2,
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Name",
+   "options": "party_type"
+  },
+  {
+   "fieldname": "party_name",
+   "fieldtype": "Data",
+   "label": "Party Name"
+  },
+  {
+   "fieldname": "visit_type",
+   "fieldtype": "Select",
+   "label": "Visit Type",
+   "options": "Site Visit\nMeeting\nDemo\nDelivery\nInstallation\nService\nOther"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location"
+  },
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Data",
+   "label": "Purpose"
+  },
+  {
+   "fieldname": "column_break_owtf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Planned\nVisited\nNot Visited\nRescheduled\nCancelled"
+  },
+  {
+   "fieldname": "outcome",
+   "fieldtype": "Small Text",
+   "label": "Outcome"
+  },
+  {
+   "fieldname": "next_followup_date",
+   "fieldtype": "Date",
+   "label": "Next Follow-up"
+  },
+  {
+   "default": "0",
+   "fieldname": "followup_created",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Follow-up Created",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-12 16:41:54.472632",
+ "modified_by": "Administrator",
+ "module": "Cyrix TSL",
+ "name": "Visit Plan Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

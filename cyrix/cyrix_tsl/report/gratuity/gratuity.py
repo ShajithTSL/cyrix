@@ -234,11 +234,12 @@ def calculate_gratuity(filters):
 				data.append(row)
 
 		elif emp.company == "Company Al-Halloul Faniye Medical":
+			ksa_ctc = emp.ctc + emp.gosi_deduction
 			yos = cstr(diff.years) + ' years, ' + cstr(diff.months) +' months and ' + cstr(diff.days + 1) + ' days'
 			exp_days = diff.days + 1
 			if exp_years < 2:
 				# Termination
-				per = (emp.ctc*0.5)
+				per = (ksa_ctc*0.5)
 				for_years = per * exp_years
 				day_month_calc = per/12
 				for_days_months = ((day_month_calc * exp_month) + ((day_month_calc/30) * exp_days))
@@ -250,12 +251,12 @@ def calculate_gratuity(filters):
 				days_months = 15 * ((exp_month/12)+ (exp_days/365))
 				term_days = days_in_year + days_months
 
-				row = [emp.name,emp.employee_name,emp.date_of_joining,yos,emp.company,currency,emp.ctc,round(term_days,2),round(gratuity,2),0,0]
+				row = [emp.name,emp.employee_name,emp.date_of_joining,yos,emp.company,currency,ksa_ctc,round(term_days,2),round(gratuity,2),0,0]
 				data.append(row)
 
 			if(exp_years >= 2 and exp_years < 5):
 				# Termination
-				per = (emp.ctc*0.5)
+				per = (ksa_ctc*0.5)
 				for_years = per * exp_years
 				day_month_calc = per/12
 				for_days_months = ((day_month_calc * exp_month) + ((day_month_calc/30) * exp_days))
@@ -269,7 +270,7 @@ def calculate_gratuity(filters):
 				# Resignation
 				res_days = 0
 				
-				per = emp.ctc * 0.5 * (1/3)
+				per = ksa_ctc * 0.5 * (1/3)
 				for_years = per * exp_years
 				day_month_calc = per/12
 				for_days_months = ((day_month_calc * exp_month) + ((day_month_calc/30) * exp_days))
@@ -280,13 +281,13 @@ def calculate_gratuity(filters):
 				res_days_and_months = 15 * ((exp_month/12)+ (exp_days/365))
 				res_days = (res_add_years + res_days_and_months) * (1/3)
 			
-				row = [emp.name,emp.employee_name,emp.date_of_joining,yos,emp.company,currency,emp.ctc,round(term_days,2),round(gratuity,2),round(res_days,2),round(res_gratuity,2)]
+				row = [emp.name,emp.employee_name,emp.date_of_joining,yos,emp.company,currency,ksa_ctc,round(term_days,2),round(gratuity,2),round(res_days,2),round(res_gratuity,2)]
 				data.append(row)
 
 			elif(exp_years >= 5):
 				# Termination Gratuity
-				per = (emp.ctc)
-				first_five_years = (emp.ctc*0.5)*5
+				per = (ksa_ctc)
+				first_five_years = (ksa_ctc*0.5)*5
 				additional_years = exp_years - 5
 				gratuity_additional_years = per * additional_years
 				day_month_calc = per/12
@@ -301,10 +302,10 @@ def calculate_gratuity(filters):
 
 
 				# Resignation Gratuity
-				res_first_five = emp.ctc * 0.5
+				res_first_five = ksa_ctc * 0.5
 				res = res_first_five * 5
-				res_additional_years = emp.ctc * additional_years
-				day_month_calc = emp.ctc/12
+				res_additional_years = ksa_ctc * additional_years
+				day_month_calc = ksa_ctc/12
 				res_days_months = ((day_month_calc * exp_month) + ((day_month_calc/30) * exp_days))
 
 				# Resignation Days
@@ -317,7 +318,7 @@ def calculate_gratuity(filters):
 					resignation = (res + res_additional_years + res_days_months) * (2/3)
 					res_days = (five_years + res_add_years + res_days_and_months) * (2/3)
 				
-				row = [emp.name,emp.employee_name,emp.date_of_joining,yos,emp.company,currency,emp.ctc,round(term_days,2),round(gratuity,2),round(res_days,2),round(resignation,2)]
+				row = [emp.name,emp.employee_name,emp.date_of_joining,yos,emp.company,currency,ksa_ctc,round(term_days,2),round(gratuity,2),round(res_days,2),round(resignation,2)]
 				data.append(row)
 
 		elif emp.company == "Cyrix TSL - UAE":

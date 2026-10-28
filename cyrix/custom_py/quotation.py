@@ -897,6 +897,47 @@ def get_approved_internal_quote(quotation):
 		"customer": doc.party_name
 	}
 
+REF_FIELDS = ["job_order_data", "supply_order_data", "maintenance_contract"]
+
+@frappe.whitelist()
+def quotation_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+	filters = frappe.parse_json(filters) or {}
+	# drop empty setter values
+	filters = {k: v for k, v in filters.items() if v not in (None, "", [])}
+
+	quotes = frappe.get_list(
+		"Quotation",
+		filters=filters,
+		or_filters={"name": ["like", f"%{txt}%"]} if txt else None,
+		fields=["name", "party_name", "workflow_state", "company"],
+		order_by="modified desc",
+		start=start,
+		page_length=page_len,
+	)
+	if not quotes:
+		return []
+
+	items = frappe.get_all(
+		"Quotation Item",
+		filters={"parenttype": "Quotation", "parent": ["in", [q.name for q in quotes]]},
+		fields=["parent"] + REF_FIELDS,
+		order_by="parent, idx",
+	)
+
+	agg = {}
+	for it in items:
+		d = agg.setdefault(it.parent, {f: [] for f in REF_FIELDS})
+		for f in REF_FIELDS:
+			if it.get(f) and it[f] not in d[f]:
+				d[f].append(it[f])
+
+	for q in quotes:
+		d = agg.get(q.name, {})
+		for f in REF_FIELDS:
+			q[f] = ", ".join(d.get(f, []))
+
+	return quotes
+
 @frappe.whitelist()
 def create_sales_invoice(source, customer):
 	

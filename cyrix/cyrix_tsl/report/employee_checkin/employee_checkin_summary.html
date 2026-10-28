@@ -1,0 +1,1121 @@
+<style>
+
+@page {
+
+    size: A4 landscape;
+
+    margin: 10mm;
+
+}
+
+
+
+body {
+
+    font-family: Arial, sans-serif;
+
+    font-size: 9px;
+
+    color: #1f2937;
+
+}
+
+
+
+.company-header {
+
+    width: 100%;
+
+    display: table;
+
+    margin-bottom: 8px;
+
+    border-bottom: 2px solid #1d4ed8;
+
+    padding-bottom: 6px;
+
+}
+
+
+
+.logo-left {
+
+    display: table-cell;
+
+    width: 20%;
+
+    vertical-align: middle;
+
+}
+
+
+
+.logo-left img {
+
+    max-height: 60px;
+
+    max-width: 110px;
+
+}
+
+
+
+.report-title {
+
+    display: table-cell;
+
+    width: 80%;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+}
+
+
+
+.report-title h2 {
+
+    margin: 0;
+
+    font-size: 18px;
+
+    color: #111827;
+
+}
+
+
+
+.report-subtitle {
+
+    font-size: 10px;
+
+    color: #64748b;
+
+    margin-top: 4px;
+
+}
+
+
+
+.period-box {
+
+    text-align: center;
+
+    margin: 8px 0 12px;
+
+    padding: 7px;
+
+    background: #eff6ff;
+
+    border: 1px solid #bfdbfe;
+
+    font-size: 10px;
+
+}
+
+
+
+.period-box strong {
+
+    color: #1e40af;
+
+}
+
+
+
+.summary-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    table-layout: fixed;
+
+}
+
+
+
+.summary-table thead {
+
+    display: table-header-group;
+
+}
+
+
+
+.summary-table th {
+
+    background: #1d4ed8;
+
+    color: #ffffff;
+
+    border: 1px solid #1e40af;
+
+    padding: 7px 4px;
+
+    font-size: 9px;
+
+    text-align: center;
+
+    font-weight: bold;
+
+}
+
+
+
+.summary-table td {
+
+    border: 1px solid #cbd5e1;
+
+    padding: 6px 4px;
+
+    font-size: 9px;
+
+    vertical-align: middle;
+
+    overflow-wrap: break-word;
+
+}
+
+
+
+.summary-table tbody tr:nth-child(even) {
+
+    background: #f8fafc;
+
+}
+
+
+
+.center {
+
+    text-align: center;
+
+}
+
+
+
+.left {
+
+    text-align: left;
+
+}
+
+
+
+.missing-value {
+
+    color: #dc2626;
+
+    font-weight: bold;
+
+}
+
+
+
+.late-value {
+
+    color: #d97706;
+
+    font-weight: bold;
+
+}
+
+
+
+.absent-value {
+
+    color: #b91c1c;
+
+    font-weight: bold;
+
+}
+
+
+
+.vacation-value {
+
+    color: #2563eb;
+
+    font-weight: bold;
+
+}
+
+
+
+.sick-value {
+
+    color: #7c3aed;
+
+    font-weight: bold;
+
+}
+
+
+
+.total-row td {
+
+    background: #111827 !important;
+
+    color: #ffffff !important;
+
+    font-weight: bold;
+
+    padding: 8px 4px;
+
+}
+
+
+
+tr {
+
+    page-break-inside: avoid;
+
+}
+
+</style>
+
+
+
+
+
+<!-- HEADER -->
+
+
+
+<div class="company-header">
+
+    <div class="logo-left">
+
+        {% if filters.cyrix_employee == "No" %}
+
+            <img src="/files/TSL Logo.png">
+
+        {% else %}
+
+            <img src="/files/cyrix.jpeg">
+
+        {% endif %}
+
+    </div>
+
+
+
+    <div class="report-title">
+
+        <h2>Monthly Attendance Summary</h2>
+
+        <div class="report-subtitle">
+
+            Employee Attendance Summary
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+<!-- REPORT PERIOD -->
+
+
+
+<div class="period-box">
+
+    <strong>Company:</strong>
+
+    {{ filters.company or "All Companies" }}
+
+    &nbsp; | &nbsp;
+
+    <strong>Period:</strong>
+
+    {{ filters.from_date }} to {{ filters.to_date }}
+
+</div>
+
+
+
+
+
+<!-- INITIALIZE EMPLOYEE SUMMARY -->
+
+
+
+{% set employees = {} %}
+
+
+
+{% for row in data %}
+
+    {% if row.employee
+
+        and row.employee_name not in ["TOTAL", "GRAND TOTAL"] %}
+
+
+
+        {% set emp = row.employee %}
+
+
+
+        {% if emp not in employees %}
+
+            {% set _ = employees.update({
+
+                emp: {
+
+                    "employee": row.employee,
+
+                    "employee_name": row.employee_name,
+
+                    "missing_in": 0,
+
+                    "missing_out": 0,
+
+                    "late_minutes": 0,
+
+                    "absent": 0,
+
+                    "vacation": 0,
+
+                    "sick_leave": 0
+
+                }
+
+            }) %}
+
+        {% endif %}
+
+    {% endif %}
+
+{% endfor %}
+
+
+
+
+
+<!-- CALCULATE SUMMARY -->
+
+
+
+{% set company_name =
+
+    (filters.company or "") | string | lower | trim %}
+
+
+
+{% set is_kuwait = "kuwait" in company_name %}
+{% set is_ksa = "KSA" in company_name or "saudi" in company_name or "saudi arabia" in company_name %}
+
+
+
+{% for row in data %}
+
+
+
+    {% if row.employee
+
+        and row.employee_name not in ["TOTAL", "GRAND TOTAL"] %}
+
+
+
+        {% set emp = row.employee %}
+
+
+
+        {% set current_status =
+
+            (row.status or "") | string | lower | trim %}
+
+
+
+
+
+        <!-- Determine day of week from the actual date -->
+        {% set day_name = (row.day or "") | string | lower | trim %}
+
+        {% if row.date %}
+            {% set weekday_number = frappe.utils.getdate(row.date).weekday() %}
+            {% if weekday_number == 0 %}
+                {% set day_name = "monday" %}
+            {% elif weekday_number == 1 %}
+                {% set day_name = "tuesday" %}
+            {% elif weekday_number == 2 %}
+                {% set day_name = "wednesday" %}
+            {% elif weekday_number == 3 %}
+                {% set day_name = "thursday" %}
+            {% elif weekday_number == 4 %}
+                {% set day_name = "friday" %}
+            {% elif weekday_number == 5 %}
+                {% set day_name = "saturday" %}
+            {% elif weekday_number == 6 %}
+                {% set day_name = "sunday" %}
+            {% endif %}
+        {% endif %}
+
+        <!-- Kuwait and KSA exclude Friday and Saturday; UAE excludes Sunday -->
+        {% if is_kuwait or is_ksa %}
+            {% set is_weekend = day_name in ["friday", "saturday"] %}
+        {% else %}
+            {% set is_weekend = day_name == "sunday" %}
+        {% endif %}
+
+
+
+
+
+        <!-- COUNT VACATION DAYS -->
+
+
+
+        {% if current_status in ["vacation", "on vacation"] %}
+
+
+
+            {% set _ = employees[emp].update({
+
+                "vacation": employees[emp].vacation + 1
+
+            }) %}
+
+
+
+
+
+        <!-- COUNT SICK LEAVE DAYS -->
+
+
+
+        {% elif "leave" in current_status %}
+
+
+
+            {% set _ = employees[emp].update({
+
+                "sick_leave": employees[emp].sick_leave + 1
+
+            }) %}
+
+
+
+        {% endif %}
+
+
+
+
+
+        <!-- Exclude holidays, weekly offs and company-specific weekends -->
+
+
+
+        {% if current_status not in [
+
+            "holiday",
+
+            "weekly off",
+
+            "week off",
+
+            "weekly-off",
+
+            "week-off"
+
+        ] and not is_weekend %}
+
+
+
+
+
+            <!-- MISSING IN -->
+
+
+
+            {% if (
+
+                not row.in_time
+
+                or row.in_time in ["", "None", None, "-"]
+
+            ) and current_status != "absent"
+
+                and current_status not in [
+
+                    "vacation",
+
+                    "on vacation",
+
+                    "on leave",
+
+                    "leave"
+
+                ]
+
+                and "leave" not in current_status %}
+
+
+
+                {% set _ = employees[emp].update({
+
+                    "missing_in": employees[emp].missing_in + 1
+
+                }) %}
+
+
+
+            {% endif %}
+
+
+
+
+
+            <!-- MISSING OUT -->
+
+
+
+            {% if (
+
+                not row.out_time
+
+                or row.out_time in ["", "None", None, "-"]
+
+            ) and current_status != "absent"
+
+                and current_status not in [
+
+                    "vacation",
+
+                    "on vacation",
+
+                    "on leave",
+
+                    "leave"
+
+                ]
+
+                and "leave" not in current_status %}
+
+
+
+                {% set _ = employees[emp].update({
+
+                    "missing_out": employees[emp].missing_out + 1
+
+                }) %}
+
+
+
+            {% endif %}
+
+
+
+
+
+            <!-- LATE HOURS -->
+
+
+
+            {% if current_status != "absent"
+
+                and current_status not in [
+
+                    "vacation",
+
+                    "on vacation",
+
+                    "on leave",
+
+                    "leave"
+
+                ]
+
+                and "leave" not in current_status %}
+
+
+
+                {% if row.late_by
+
+                    and row.late_by not in [
+
+                        "", "None", "-", "0", "00:00"
+
+                    ] %}
+
+
+
+                    {% set late_text =
+
+                        row.late_by | string | trim %}
+
+
+
+                    {% if ":" in late_text %}
+
+
+
+                        {% set late_parts = late_text.split(":") %}
+
+
+
+                        {% if late_parts | length >= 2 %}
+
+
+
+                            {% set late_h =
+
+                                late_parts[0] | int %}
+
+
+
+                            {% set late_m =
+
+                                late_parts[1] | int %}
+
+
+
+                            {% set late_total_minutes =
+
+                                late_h * 60 + late_m %}
+
+
+
+                            {% set _ = employees[emp].update({
+
+                                "late_minutes":
+
+                                employees[emp].late_minutes
+
+                                + late_total_minutes
+
+                            }) %}
+
+
+
+                        {% endif %}
+
+
+
+                    {% else %}
+
+
+
+                        {% set late_decimal =
+
+                            late_text | float %}
+
+
+
+                        {% set late_total_minutes =
+
+                            (late_decimal * 60)
+
+                            | round(0, "common") | int %}
+
+
+
+                        {% set _ = employees[emp].update({
+
+                            "late_minutes":
+
+                            employees[emp].late_minutes
+
+                            + late_total_minutes
+
+                        }) %}
+
+
+
+                    {% endif %}
+
+
+
+                {% endif %}
+
+
+
+            {% endif %}
+
+
+
+
+
+            <!-- ABSENT DAYS -->
+
+
+
+            {% if current_status == "absent" %}
+
+
+
+                {% set _ = employees[emp].update({
+
+                    "absent": employees[emp].absent + 1
+
+                }) %}
+
+
+
+            {% endif %}
+
+
+
+        {% endif %}
+
+
+
+    {% endif %}
+
+
+
+{% endfor %}
+
+
+
+
+
+<!-- GRAND TOTAL VARIABLES -->
+
+
+
+{% set ns = namespace(
+
+    missing_in=0,
+
+    missing_out=0,
+
+    late_minutes=0,
+
+    absent=0,
+
+    vacation=0,
+
+    sick_leave=0
+
+) %}
+
+
+
+
+
+<!-- SUMMARY TABLE -->
+
+
+
+<table class="summary-table">
+
+
+
+    <thead>
+
+        <tr>
+
+            <th style="width:16%">Employee ID</th>
+
+            <th style="width:24%">Employee Name</th>
+
+            <th style="width:10%">Missing In</th>
+
+            <th style="width:10%">Missing Out</th>
+
+            <th style="width:12%">Late Hours</th>
+
+            <th style="width:10%">Absent Days</th>
+
+            <th style="width:9%">Vacation Days</th>
+
+            <th style="width:9%">Sick Leave Days</th>
+
+        </tr>
+
+    </thead>
+
+
+
+    <tbody>
+
+
+
+        {% for emp, row in employees.items() %}
+
+
+
+            {% set ns.missing_in =
+
+                ns.missing_in + row.missing_in %}
+
+
+
+            {% set ns.missing_out =
+
+                ns.missing_out + row.missing_out %}
+
+
+
+            {% set ns.late_minutes =
+
+                ns.late_minutes + row.late_minutes %}
+
+
+
+            {% set ns.absent =
+
+                ns.absent + row.absent %}
+
+
+
+            {% set ns.vacation =
+
+                ns.vacation + row.vacation %}
+
+
+
+            {% set ns.sick_leave =
+
+                ns.sick_leave + row.sick_leave %}
+
+
+
+            {% set employee_hours =
+
+                row.late_minutes // 60 %}
+
+
+
+            {% set employee_minutes =
+
+                row.late_minutes % 60 %}
+
+
+
+            <tr>
+
+
+
+                <td class="left">
+
+                    {{ row.employee }}
+
+                </td>
+
+
+
+                <td class="left">
+
+                    {{ row.employee_name }}
+
+                </td>
+
+
+
+
+
+                <td class="center">
+
+                    {% if row.missing_in > 0 %}
+
+                        <span class="missing-value">
+
+                            {{ row.missing_in }}
+
+                        </span>
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+<td class="center">
+
+                    {% if row.missing_out > 0 %}
+
+                        <span class="missing-value">
+
+                            {{ row.missing_out }}
+
+                        </span>
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+                <td class="center">
+
+                    {% if row.late_minutes > 0 %}
+
+                        <span class="late-value">
+
+                            {{ "%02d"|format(employee_hours) }}:{{ "%02d"|format(employee_minutes) }}
+
+                        </span>
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+
+
+                <td class="center">
+
+                    {% if row.absent > 0 %}
+
+                        <span class="absent-value">
+
+                            {{ row.absent }}
+
+                        </span>
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+
+
+                <td class="center">
+
+                    {% if row.vacation > 0 %}
+
+                        <span class="vacation-value">
+
+                            {{ row.vacation }}
+
+                        </span>
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+
+
+                <td class="center">
+
+                    {% if row.sick_leave > 0 %}
+
+                        <span class="sick-value">
+
+                            {{ row.sick_leave }}
+
+                        </span>
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+
+
+            </tr>
+
+
+
+        {% endfor %}
+
+
+
+
+
+        <!-- GRAND TOTAL -->
+
+
+
+        {% set total_hours =
+
+            ns.late_minutes // 60 %}
+
+
+
+        {% set total_minutes =
+
+            ns.late_minutes % 60 %}
+
+
+
+        <tr class="total-row">
+
+
+
+            <td colspan="2" class="center">
+
+                GRAND TOTAL
+
+            </td>
+
+
+
+            <td class="center">
+
+                {{ ns.missing_in }}
+
+            </td>
+
+            <td class="center">
+
+                {{ ns.missing_out }}
+
+            </td>
+
+            <td class="center">
+
+                {{ "%02d"|format(total_hours) }}:{{ "%02d"|format(total_minutes) }}
+
+            </td>
+
+
+
+            <td class="center">
+
+                {{ ns.absent }}
+
+            </td>
+
+
+
+            <td class="center">
+
+                {{ ns.vacation }}
+
+            </td>
+
+
+
+            <td class="center">
+
+                {{ ns.sick_leave }}
+
+            </td>
+
+
+
+        </tr>
+
+
+
+    </tbody>
+
+
+
+</table>

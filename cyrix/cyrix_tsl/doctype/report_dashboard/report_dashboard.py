@@ -561,10 +561,10 @@ def daily_sales(self):
         init_date(person, date)
         all_dates.add(date)
 
-        if "repair" in dept:
+        if "repair" or "- R -" in dept:
             data[person]["PO Count Repair"][date] += row.get("total_count", 0)
             data[person]["PO Repair Amount"][date] += row.get("total_amount", 0)
-        elif "supply" in dept:
+        elif "supply" or "- S -" in dept:
             data[person]["PO Count Supply"][date] += row.get("total_count", 0)
             data[person]["PO Supply Amount"][date] += row.get("total_amount", 0)
 

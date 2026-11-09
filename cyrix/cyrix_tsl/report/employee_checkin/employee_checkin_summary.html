@@ -376,6 +376,8 @@ tr {
 
                     "missing_out": 0,
 
+                    "easytime_in": 0,
+                    "easytime_out": 0,
                     "late_minutes": 0,
 
                     "absent": 0,
@@ -430,6 +432,22 @@ tr {
         {% set current_status =
 
             (row.status or "") | string | lower | trim %}
+
+        <!-- Count EasyTime device punches for each employee -->
+        {% set in_device = (row.in_device_id or "") | string | upper | trim %}
+        {% set out_device = (row.out_device_id or "") | string | upper | trim %}
+
+        {% if in_device == "EASYTIME" %}
+            {% set _ = employees[emp].update({
+                "easytime_in": employees[emp].easytime_in + 1
+            }) %}
+        {% endif %}
+
+        {% if out_device == "EASYTIME" %}
+            {% set _ = employees[emp].update({
+                "easytime_out": employees[emp].easytime_out + 1
+            }) %}
+        {% endif %}
 
 
 
@@ -786,6 +804,8 @@ tr {
 
     missing_out=0,
 
+    easytime_in=0,
+    easytime_out=0,
     late_minutes=0,
 
     absent=0,
@@ -820,6 +840,8 @@ tr {
 
             <th style="width:10%">Missing Out</th>
 
+            <th style="width:8%">EasyTime In</th>
+            <th style="width:8%">EasyTime Out</th>
             <th style="width:12%">Late Hours</th>
 
             <th style="width:10%">Absent Days</th>
@@ -853,6 +875,10 @@ tr {
                 ns.missing_out + row.missing_out %}
 
 
+
+            {% set ns.easytime_in = ns.easytime_in + row.easytime_in %}
+
+            {% set ns.easytime_out = ns.easytime_out + row.easytime_out %}
 
             {% set ns.late_minutes =
 
@@ -948,6 +974,13 @@ tr {
 
                 </td>
 
+                
+                <td class="center">
+                    {% if row.easytime_in > 0 %}{{ row.easytime_in }}{% else %}-{% endif %}
+                </td>
+                <td class="center">
+                    {% if row.easytime_out > 0 %}{{ row.easytime_out }}{% else %}-{% endif %}
+                </td>
                 <td class="center">
 
                     {% if row.late_minutes > 0 %}
@@ -1078,6 +1111,8 @@ tr {
 
             </td>
 
+            <td class="center">{{ ns.easytime_in }}</td>
+            <td class="center">{{ ns.easytime_out }}</td>
             <td class="center">
 
                 {{ "%02d"|format(total_hours) }}:{{ "%02d"|format(total_minutes) }}

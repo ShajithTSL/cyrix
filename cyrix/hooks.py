@@ -56,6 +56,7 @@ doctype_js = {
 	"Request for Quotation" : ["custom_js/request_for_quotation.js"],
 	"Supplier Quotation" : ["custom_js/supplier_quotation.js"],
 	"Company" : ["custom_js/company.js"],
+	"Customer" : ["custom_js/customer.js"],
 
 
 	# HR Related customizations
@@ -116,7 +117,8 @@ jinja = {
 		"cyrix.hr_py.salary_register.salary_register",
 		"cyrix.hr_py.salary_register.salary_register1",
 		"cyrix.hr_py.salary_register.salary_register_ceo",
-        "cyrix.cyrix_tsl.doctype.loan_request.loan_request.get_criteria"
+        "cyrix.cyrix_tsl.doctype.loan_request.loan_request.get_criteria",
+		"cyrix.custom_py.soa.get_complete_customer_receivable",
 	]
 }
 

@@ -1,0 +1,24 @@
+{
+ "app": "cyrix",
+ "bg_color": "gray",
+ "creation": "2026-11-05 16:06:16.528913",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "Link",
+ "idx": 0,
+ "label": "Sales Manager",
+ "link_to": "Sales Manager",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-11-05 16:07:45.151697",
+ "modified_by": "Administrator",
+ "name": "Sales Manager",
+ "owner": "Administrator",
+ "restrict_removal": 0,
+ "roles": [
+  {
+   "role": "Sales Manager"
+  }
+ ],
+ "standard": 1
+}

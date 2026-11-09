@@ -113,7 +113,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "Supply Order Report",
    "link_count": 0,
    "link_to": "Supply Order Report",
@@ -123,8 +123,8 @@
    "type": "Link"
   }
  ],
- "modified": "2026-09-30 09:00:30.835306",
- "modified_by": "Administrator",
+ "modified": "2026-11-09 14:01:19.989714",
+ "modified_by": "shajith@tsl-me.com",
  "module": "Cyrix TSL",
  "name": "Shortcuts",
  "number_cards": [],

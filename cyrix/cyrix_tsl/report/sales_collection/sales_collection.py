@@ -27,9 +27,10 @@ def get_columns(filters):
 		{"fieldname": "payment_entry_date", "label": _("Payment Entry Date"), "fieldtype": "Date", "width": 200},
 		{"fieldname": "payment_entry", "label": _("Payment Entry"), "fieldtype": "Link", "options": "Payment Entry", "width": 200},
 		{"fieldname": "journal_entry", "label": _("Journal Entry"), "fieldtype": "Link", "options": "Journal Entry", "width": 200},
-		{"fieldname": "amount", "label": _("Amount"), "fieldtype": "Currency", "width": 120},
+		{"fieldname": "amount", "label": _("Amount"), "fieldtype": "Currency","options": "currency", "width": 120},
 		{"fieldname": "sales_person", "label": _("Sales Person"), "fieldtype": "Link", "options": "Sales Person", "width": 200},
 		{"fieldname": "department", "label": _("Department"), "fieldtype": "Link", "options": "Cost Center", "width": 200},
+		{"fieldname": "currency", "label": _("Currency"), "fieldtype": "Link","options": "Currency", "hidden": 1}
 	]
 
 def get_data(filters):
@@ -304,7 +305,7 @@ def get_data(filters):
 	# Process the data
 	final_data = []
 	processed_groups = set()
-
+	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
 	for row in raw_data:
 		if row['source_type'] == 'Journal Entry':
 			# Handle Journal Entry rows
@@ -325,7 +326,8 @@ def get_data(filters):
 						"sales_person": row['sales_person'] or "",
 						"department": row['department'] or "",
 						"indent": 0,
-						"is_group": 0
+						"is_group": 0,
+						"currency": company_currency
 					})
 			else:
 				# Journal Entry NOT linked to any Sales Invoice (direct
@@ -345,7 +347,8 @@ def get_data(filters):
 						"sales_person": row['sales_person'] or "",
 						"department": row['department'] or "",
 						"indent": 0,
-						"is_group": 0
+						"is_group": 0,
+						"currency": company_currency
 					})
 		else:
 			# Handle Payment Entry rows
@@ -371,7 +374,8 @@ def get_data(filters):
 							"sales_person": row['sales_person'],
 							"department": "",
 							"indent": 0,
-							"is_group": 1
+							"is_group": 1,
+							"currency": company_currency
 						})
 
 						# Child rows
@@ -388,7 +392,8 @@ def get_data(filters):
 									"amount": "",
 									"sales_person": "",
 									"department": child['department'],
-									"indent": 1
+									"indent": 1,
+									"currency": company_currency
 								})
 					else:
 						# Single row without children
@@ -404,7 +409,8 @@ def get_data(filters):
 							"sales_person": row['sales_person'],
 							"department": "",
 							"indent": 0,
-							"is_group": 0
+							"is_group": 0,
+							"currency": company_currency
 						})
 			elif row['source_type'] == 'Direct Payment':
 				# Direct customer payment
@@ -423,7 +429,8 @@ def get_data(filters):
 						"sales_person": row['sales_person'],
 						"department": "",
 						"indent": 0,
-						"is_group": 1
+						"is_group": 1,
+						"currency": company_currency
 					})
 
 	return final_data

@@ -257,7 +257,7 @@ def update_maintenance_contract_status(self, method):
 def update_quotation_reference(self,method):
 	if self.items:
 		for i in self.items:
-			if self.quotation_type in ["Customer Quotation - Repair","Customer Quotation - R - Revised"]:
+			if self.quotation_type in ["Customer Quotation - Repair","Customer Quotation - R - Revised", "Merged Quotation"]:
 				if i.job_order_data:
 					jo = frappe.get_doc("Job Order Data",i.job_order_data)
 					jo.quotation = self.name
@@ -265,7 +265,7 @@ def update_quotation_reference(self,method):
 						jo.po_no = self.get("purchase_order_no")
 					jo.save(ignore_permissions =1)
 
-			if self.quotation_type in ["Customer Quotation - Supply","Customer Quotation - S - Revised"]:
+			if self.quotation_type in ["Customer Quotation - Supply","Customer Quotation - S - Revised", "Merged Quotation"]:
 				if i.supply_order_data:
 					exists = frappe.db.exists("Supply Order Table",{'parent':i.supply_order_data, 'item_code':i.item_code, 'quantity':i.qty})
 					if exists:
@@ -661,6 +661,7 @@ def fetch_supplier_details(self, method):
 	self.supplier_details = []
 	
 	total_cost = 0
+	shipment_applied = set()
 	for j in self.items:
 		if j.supply_order_data:
 			sup = frappe.db.sql(""" 
@@ -682,7 +683,12 @@ def fetch_supplier_details(self, method):
 				if not cur:
 					frappe.throw("Please set the Default Currency for the Supplier")
 				exr = get_exchange_rate(cur, self.currency)
-				cost = sup[0]["base_total_taxes_and_charges"]
+				# cost = sup[0]["base_total_taxes_and_charges"]
+				if sup[0]["name"] in shipment_applied:
+					cost = 0
+				else:
+					cost = sup[0]["base_total_taxes_and_charges"] or 0
+					shipment_applied.add(sup[0]["name"])
 				total_cost += sup[0]["base_amount"]
 				row = {
 					'reference_type': "Supply Order Data",
@@ -713,7 +719,12 @@ def fetch_supplier_details(self, method):
 			if sup_budgetary:
 				cur = frappe.get_value("Supplier", {"name": sup_budgetary[0]["supplier"]}, ["default_currency"])
 				exr = get_exchange_rate(cur, self.currency)
-				cost = sup_budgetary[0]["base_total_taxes_and_charges"]
+				# cost = sup_budgetary[0]["base_total_taxes_and_charges"]
+				if sup_budgetary[0]["name"] in shipment_applied:
+					cost = 0
+				else:
+					cost = sup_budgetary[0]["base_total_taxes_and_charges"] or 0
+					shipment_applied.add(sup_budgetary[0]["name"])
 				total_cost += sup_budgetary[0]["base_amount"]
 				row = {
 					'reference_type': "Budgetary Quotation",
@@ -1189,3 +1200,23 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 # 	)
 
 # 	return doc.name
+
+
+def update_qn_patch():
+	quotation = "CQR-R26-00108"
+	self = frappe.get_doc("Quotation",quotation)
+	for i in self.items:
+		if i.job_order_data:
+
+			jo = frappe.get_doc("Job Order Data",i.job_order_data)
+			jo.quotation = self.name
+			if self.get("purchase_order_no"):
+				jo.po_no = self.get("purchase_order_no")
+			jo.save(ignore_permissions =1)
+
+		if i.supply_order_data:
+			so = frappe.get_doc("Supply Order Data",i.supply_order_data)
+			so.quotation = self.name
+			if self.get("purchase_order_no"):
+				so.po_no = self.get("purchase_order_no")
+			so.save(ignore_permissions =1)

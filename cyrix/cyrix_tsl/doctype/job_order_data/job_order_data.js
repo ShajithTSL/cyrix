@@ -246,10 +246,12 @@ frappe.ui.form.on("Job Order Data", {
     create_evaluation_report(frm){
         if(frm.doc.docstatus == 1) {
 			frm.add_custom_button(__("Evaluation Report"), function(){
+				
 				if(!frm.doc.technician && !frm.doc.multiple_technicians.length > 0){
 					frappe.msgprint("Select <b>Technician</b> to create Evaluation Report")
 					return
 				}
+
 				frappe.call({
 					method: "cyrix.cyrix_tsl.doctype.job_order_data.job_order_data.create_evaluation_report",
 					args: {
